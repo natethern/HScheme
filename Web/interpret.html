@@ -1,0 +1,21 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<HTML>
+<HEAD>
+	<TITLE>Interpret Scheme</TITLE>
+</HEAD>
+<BODY>
+<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
+<P>Scheme Code:<BR>
+<TEXTAREA NAME="input" ROWS="40" COLS="100">
+</TEXTAREA><BR>
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="full" CHECKED> full
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure"> pure functional only
+<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> allow <TT>call-with-result</TT>
+<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> allow <TT>call-with-current-continuation</TT> (slow)
+<INPUT TYPE="RESET" VALUE="Clear">
+<INPUT TYPE="SUBMIT" VALUE="Interpret">
+</FORM>
+
+</BODY>
+</HTML>

@@ -95,7 +95,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/Interactive.hs	\
 	$(HIER).hs
 
-HC_SRCS		= $(LIB_HC_SRCS) InteractiveMain.hs
+HC_SRCS		= $(LIB_HC_SRCS) InteractiveMain.hs CGIMain.hs
 
 
 # Install
@@ -136,6 +136,11 @@ Doc/index.html: $(LIB_HC_SRCS)
 # Building
 
 build: $(LIBFILE_REL) $(LIBFILE_PROF) $(COMMAND_REL) $(COMMAND_PROF) $(PACKAGEFILE)
+
+cgi: interpret.cgi
+
+interpret.cgi: CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
 
 $(COMMAND_REL): InteractiveMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
@@ -452,4 +457,7 @@ Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Interactive.p_hi
 InteractiveMain.o InteractiveMain.p_o : InteractiveMain.hs
 InteractiveMain.o : Org/Org/Semantic/HScheme.hi
 InteractiveMain.p_o : Org/Org/Semantic/HScheme.p_hi
+CGIMain.o CGIMain.p_o : CGIMain.hs
+CGIMain.o : Org/Org/Semantic/HScheme.hi
+CGIMain.p_o : Org/Org/Semantic/HScheme.p_hi
 # DO NOT DELETE: End of Haskell dependencies

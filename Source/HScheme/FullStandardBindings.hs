@@ -29,10 +29,11 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	fullStdBindings :: (FullScheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
-	fullStdBindings = chainList
+	simpleFullBindings :: (FullScheme m r) =>
+	 Bindings r m -> m (Bindings r m);
+	simpleFullBindings = chainList
 		[
-		monadContStdBindings,
+		simplePureBindings,
 
 		-- 4.1.6 Assignments
 		addMacroBinding "set!"			setBangM,
@@ -47,5 +48,22 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 
 		-- 6.3.5 Strings
 		addProcBinding "string-set!"	stringSetP
+		];
+
+	monadFixFullBindings :: (FullScheme m r,MonadFix m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadFixFullBindings = chainList
+		[
+		simpleFullBindings,
+		monadFixBindings
+		];
+
+	-- this one is closest to R5RS
+	monadContFullBindings :: (FullScheme m r,MonadCont m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadContFullBindings = chainList
+		[
+		simpleFullBindings,
+		monadContBindings
 		];
 	}

@@ -38,8 +38,8 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	loop :: a;
 	loop = loop;
 
-	stdBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	stdBindings = chainList
+	simpleStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	simpleStrictPureBindings = chainList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
 		addBinding		(MkSymbol "<loop>")				loop,									-- test
@@ -148,10 +148,10 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		{
 		};
 
-	monadicStdBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	monadicStdBindings = chainList
+	simplePureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	simplePureBindings = chainList
 		[
-		stdBindings,
+		simpleStrictPureBindings,
 
 		-- 4.2.3 Sequencing
 		addMacroBinding	"begin"								beginM,
@@ -186,12 +186,19 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"call-with-result"					fixP								-- nonstandard
 		];
 
-	monadContStdBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
-	monadContStdBindings = chainList [monadicStdBindings,monadContBindings];
+	monadFixStrictPureBindings :: (Scheme m r,MonadFix m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadFixStrictPureBindings = chainList [simpleStrictPureBindings,monadFixBindings];
 
-	strictPureBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
-	strictPureBindings = chainList [stdBindings,monadFixBindings];
+	monadContStrictPureBindings :: (Scheme m r,MonadCont m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadContStrictPureBindings = chainList [simpleStrictPureBindings,monadContBindings];
 
-	pureBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
-	pureBindings = chainList [monadicStdBindings,monadFixBindings];
+	monadFixPureBindings :: (Scheme m r,MonadFix m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadFixPureBindings = chainList [simplePureBindings,monadFixBindings];
+
+	monadContPureBindings :: (Scheme m r,MonadCont m) =>
+	 Bindings r m -> m (Bindings r m);
+	monadContPureBindings = chainList [simplePureBindings,monadContBindings];
 	}

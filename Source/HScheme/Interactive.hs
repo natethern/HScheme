@@ -152,7 +152,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		{
 		bindings <- chainList
 			[
-			strictPureBindings
+			monadFixStrictPureBindings
 			] emptyBindings;
 		interact Type fsi bindings "Prelude.pure.scm";
 		};
@@ -170,7 +170,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		{
 		bindings <- chainList
 			[
-			pureBindings,
+			monadFixPureBindings,
 			pureSystemBindings (fsiPure fsi)
 			] emptyBindings;
 		interact Type fsi bindings "Prelude.pure.scm";
@@ -189,7 +189,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		{
 		bindings <- chainList
 			[
-			fullStdBindings,
+			monadContFullBindings,
 			fullSystemBindings fsi
 			] emptyBindings;
 		interactWithExit Type fsi bindings "Prelude.full.scm";
