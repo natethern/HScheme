@@ -136,6 +136,30 @@ module SExpParser where
 				nextC;
 				return NilObject;
 				};
+			Just '.' -> do
+				{
+				nextC;
+				mtail <- expressionP;
+				case mtail of
+					{
+					Nothing -> fail "missing tail in dotted pair";
+					Just tail -> do
+						{
+						whitespaceP;
+						mc <- currentC;
+						case mc of
+							{
+							Nothing -> fail "unterminated dotted pair";
+							Just ')' -> do
+								{
+								nextC;
+								return tail;
+								};
+							Just _ -> fail "extra junk in dotted pair";
+							};
+						};
+					};
+				};
 			Just c -> do
 				{
 				mhead <- expressionP;

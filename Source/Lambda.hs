@@ -165,17 +165,7 @@ module Lambda where
 		bindings'' <- matchBindings bindings' tail argt;
 		return bindings'';
 		};
-{--
-	bindArgList :: (Scheme x m r) =>
-	 Object r m -> m (Object r m) -> Procedure r m;
-	bindArgList (SymbolObject f) action a = inScope (flist,makeList args) action;
-	bindArgList NilObject action [] = action;
-	bindArgList NilObject _ (_:_) = fail "";
-	bindArgList (PairObject _ _) _ [] = fail "";
-	bindArgList (PairObject (SymbolObject f1) fr) action (a1:ar) = inScope (f1,a1) (bindArgList fr ar action);
-	bindArgList (PairObject _ _) _ _ = fail "";
-	bindArgList _ _ _ = fail "";
---}
+
 	lambda :: (Scheme x m r) => Object r m -> [Object r m] -> m (Procedure r m);
 	lambda argNames body = do
 		{
@@ -185,8 +175,6 @@ module Lambda where
 			begin bindings' body;
 			});
 		};
-	
---	return (bindArgList argBindings (evaluate expr));
 
 	lambdaS :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
