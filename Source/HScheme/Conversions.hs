@@ -166,6 +166,40 @@ module Org.Org.Semantic.HScheme.Conversions where
 		getConvert (Right b) = getConvert b;
 		};
 
+	instance
+		(
+		Scheme x m r,
+		MonadMaybeA m a (Object r m),
+		MonadMaybeA m b (Object r m)
+		) => MonadMaybeA m (Either a b) (Object r m) where
+		{
+		getMaybeConvert obj = do
+			{
+			ma <- getMaybeConvert obj;
+			case ma of
+				{
+				Just a -> return (return (Left a));
+				Nothing -> do
+					{
+					mb <- getMaybeConvert obj;
+					return (do
+						{
+						b <- mb;
+						return (Right b);
+						});
+					};
+				};
+			};
+		};
+	
+	instance
+		(
+		Scheme x m r,
+		MonadSubtype m (Object r m) a,
+		MonadSubtype m (Object r m) b
+		) =>
+	 MonadSubtype m (Object r m) (Either a b);
+
 	
 	-- NilType
 

@@ -22,14 +22,36 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme
 	(
-	module Org.Org.Semantic.HScheme.SchemeCPS,
-	module Org.Org.Semantic.HScheme.Interactive,
+	module Org.Org.Semantic.HScheme.Object,
+	module Org.Org.Semantic.HScheme.Conversions,
+	module Org.Org.Semantic.HScheme.Evaluate,
+	module Org.Org.Semantic.HScheme.TopLevel,
 	module Org.Org.Semantic.HScheme.SystemInterface,
-	module Org.Org.Semantic.HScheme.IOBindings
+	module Org.Org.Semantic.HScheme.Procedures,
+
+	module Org.Org.Semantic.HScheme.Bindings,
+	module Org.Org.Semantic.HScheme.StandardBindings,
+	module Org.Org.Semantic.HScheme.FMapBindings,
+	module Org.Org.Semantic.HScheme.FullStandardBindings,
+	module Org.Org.Semantic.HScheme.IOBindings,
+
+	module Org.Org.Semantic.HScheme.SchemeCPS,
+	module Org.Org.Semantic.HScheme.Interactive
 	) where
 	{
-	import Org.Org.Semantic.HScheme.IOBindings;
-	import Org.Org.Semantic.HScheme.SystemInterface;
 	import Org.Org.Semantic.HScheme.Interactive;
 	import Org.Org.Semantic.HScheme.SchemeCPS;
+
+	import Org.Org.Semantic.HScheme.IOBindings;
+	import Org.Org.Semantic.HScheme.FullStandardBindings;
+	import Org.Org.Semantic.HScheme.FMapBindings;
+	import Org.Org.Semantic.HScheme.StandardBindings;
+	import Org.Org.Semantic.HScheme.Bindings;
+
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.SystemInterface;
+	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
 	}

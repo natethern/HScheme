@@ -17,12 +17,12 @@
 # along with HScheme; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-GHC = ghc  -package lang  $*
-#  -fno-monomorphism-restriction
-
+PREFIX			= /usr
+IMPORT_DIR		= $(PREFIX)/share/haskell-import
 HC				= ghc
 HCI				= ghci
-HCIMPORTDIRS	= -i. -i/usr/share/haskell-import
+HCPACKAGES		=
+HCIMPORTDIRS	= -i. -i$(IMPORT_DIR)
 HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
 #HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
@@ -33,6 +33,7 @@ HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
 LIBNAME			= HScheme
 LIBFILE			= lib$(LIBNAME).a
+COMMAND			= hscheme.cmd
 
 LIB_HC_SRCS			= \
 	$(HIER)/Numerics.hs	\
@@ -68,7 +69,6 @@ HC_SRCS		= $(LIB_HC_SRCS) InteractiveMain.hs
 
 LIB_OBJS	= $(patsubst %.hs,%.o,$(LIB_HC_SRCS))
 
-COMMAND	=hscheme.cmd
 
 default: build
 
@@ -83,8 +83,6 @@ haskellclean:
 test: $(COMMAND)
 	./$<
 
-PREFIX	=/usr
-IMPORT_DIR	= $(PREFIX)/share/haskell-import
 install:	\
 	$(PREFIX)/lib/$(LIBFILE)	\
 	$(patsubst %.hs,$(IMPORT_DIR)/%.hi,$(LIB_HC_SRCS))	\
@@ -103,7 +101,7 @@ $(PREFIX)/bin/%: %
 
 build: $(LIBFILE) $(COMMAND)
 
-$(COMMAND): InteractiveMain.o $(LIBFILE) /usr/lib/libHBase.a
+$(COMMAND): InteractiveMain.o $(LIBFILE) $(PREFIX)/lib/libHBase.a
 	$(LDH) $(filter %.o,$^) $(filter %.a,$^) $(LDFLAGS) -o $@
 
 doc: Doc/index.html
@@ -272,10 +270,19 @@ Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FullStandardBi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FMapBindings.hi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SystemInterface.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme.hs
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/TopLevel.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SystemInterface.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/StandardBindings.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/FMapBindings.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/FullStandardBindings.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/IOBindings.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SchemeCPS.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Interactive.hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/IOBindings.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
 InteractiveMain.o : Org/Org/Semantic/HScheme.hi

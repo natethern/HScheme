@@ -89,6 +89,11 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		return (handleOutputPort h);
 		};
 
+	ioPureSystemInterface :: (Scheme x m r,LiftedMonad IO m) =>
+	 PureSystemInterface m r;
+	ioPureSystemInterface = MkPureSystemInterface
+	 (loadBindingsWithProcs openInputFile stdOutputPort);
+
 	ioFullSystemInterface :: (Scheme x m r,LiftedMonad IO m) =>
 	 FullSystemInterface m r;
 	ioFullSystemInterface = MkFullSystemInterface
