@@ -38,19 +38,41 @@ module SExpParser where
 	isJust test Nothing = Nothing;
 	isJust test (Just a) = if test a then Just a else Nothing;
 
+	commentP :: (Monad m) => TextParser m ();
+	commentP = do
+		{
+		nextC;
+		mc <- currentC;
+		case mc of
+			{
+			Just c -> if isLineBreak c
+			 then return ()
+			 else commentP;
+			Nothing -> return ();
+			};
+		};
+
 	-- returns whether it chomped some ws
 	whitespaceP :: (Monad m) => TextParser m Bool;
 	whitespaceP = do
 		{
 		mc <- currentC;
-		case isJust isWhitespace mc of
+		case mc of
 			{
-			(Just _) -> do
+			Just ';' -> do
+				{
+				commentP;
+				whitespaceP;
+				return True;
+				};
+			Just c -> if isWhitespace c
+			 then do
 				{
 				nextC;
 				whitespaceP;
 				return True;
-				};
+				}
+			 else return False;
 			Nothing -> return False;
 			};
 		};

@@ -29,7 +29,8 @@ module Unicode
 	isDash,isHyphen,isQuotationMark,isTerminalPunctuation,
 	isOtherMath,isHexDigit,isOtherAlphabetic,isIdeographic,
 	isDiacritic,isExtender,isOtherLowercase,isOtherUppercase,
-	isNoncharacter	
+	isNoncharacter,
+	isLineBreak	
 	) where
 	{
 	import UnicodeData;
@@ -151,4 +152,18 @@ module Unicode
 	
 	isNoncharacter :: Char -> Bool;
 	isNoncharacter = codeIs_Noncharacter_Code_Point . fromEnum;
+	
+	-- Note: this is not defined by Unicode.
+	-- Also, a single line break can be an 0D 0A sequence.
+	isLineBreak :: Char -> Bool;
+	isLineBreak = is . fromEnum where
+		{
+		is 0x000A = True;	-- LINE FEED
+		is 0x000B = True;	-- VERTICAL TABULATION ?
+		is 0x000C = True;	-- FORM FEED
+		is 0x000D = True;	-- CARRIAGE RETURN
+		is 0x2028 = True;	-- LINE SEPARATOR
+		is 0x2029 = True;	-- PARAGRAPH SEPARATOR
+		is _ = False;		
+		};
 	}
