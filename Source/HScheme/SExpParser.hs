@@ -36,19 +36,16 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedParser (Maybe Char) m p
 		) =>
-	 SchemeParser m p;
+	 SchemeParser m p | p -> m;
 
-	instance
-		(
-		Monad m,
-		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedParser (Maybe Char) m p
-		) =>
-	 SchemeParser m p;
+	instance (Monad m) =>
+	 SchemeParser m (RecoverableStreamParser m (Maybe Char));
+	instance (Monad m) =>
+	 SchemeParser m (RecoverableListParser Char m);
 
 	runParser :: (Monad m) =>
 	 InputPort c m -> RecoverableStreamParser m (Maybe c) a -> m a;
-	runParser port parser = runRecoverableStreamParser (ipRead port) parser;
+	runParser port = runRecoverableStreamParser (ipRead port);
 
 	runParserString :: (Monad m) =>
 	 [c] -> RecoverableListParser c m a -> m ([c],a);
@@ -153,7 +150,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listContentsParse ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
 	 p (Object r m);
@@ -176,7 +173,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listParse ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
 	 p (Object r m);
@@ -188,10 +185,46 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		mOrFail "list" (isCharacterParse ')');
 		return list;
 		};
+	
+	vectorContentsParse ::
+		(
+		Scheme m r,?refType :: Type (r ()),
+		SchemeParser m p
+		) =>
+	 p [Object r m];
+	vectorContentsParse = do
+		{
+		optionalWhitespaceParse;
+		 (do
+			{
+			head <- expressionParse;
+			tail <- vectorContentsParse;
+			return (head:tail);
+			}) |||
+		 (return []);
+		};
+
+	byteArrayContentsParse ::
+		(
+		Scheme m r,?refType :: Type (r ()),
+		SchemeParser m p
+		) =>
+	 p [Word8];
+	byteArrayContentsParse = do
+		{
+		optionalWhitespaceParse;
+		 (do
+			{
+			head <- readHexFixedDigits 2;
+			tail <- byteArrayContentsParse;
+			return (head:tail);
+			}) |||
+		 (return []);
+		};
 
 	specialCharParse ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
 	 String -> Symbol -> p (Object r m);
@@ -205,7 +238,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	quotedParse :: 
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
 	 p (Object r m);
@@ -238,8 +271,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	hashLiteralParse ::
 		(
-		Scheme m r,
-		StoppableMonadOrParser String (Maybe Char) p
+		Scheme m r,?refType :: Type (r ()),
+		SchemeParser m p
 		) => 
 	 p (Object r m);
 	hashLiteralParse = do
@@ -256,8 +289,31 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			}) ||| (do
 			{
 			isCharacterParse '\\';
-			c <- mOrFail "# literal" characterConstantParse;
+			c <- mOrFail "character literal" characterConstantParse;
 			return (CharObject c);
+			}) ||| (do
+			{
+			isCharacterParse '(';
+			mOrFail "vector" (do
+				{
+				vector <- vectorContentsParse;
+				optionalWhitespaceParse;
+				isCharacterParse ')';
+				array <- plift (makeSRefArray vector);
+				return (VectorObject array);
+				});
+			}) ||| (do
+			{
+			isCharacterParse 'x';
+			mOrFail "byte array" (do
+				{
+				isCharacterParse '(';
+				bytes <- byteArrayContentsParse;
+				optionalWhitespaceParse;
+				isCharacterParse ')';
+				array <- plift (makeSRefArray bytes);
+				return (ByteArrayObject array);
+				});
 			}));
 		};
 
@@ -313,19 +369,20 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	plift ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
-	 Type (r ()) -> m (Object r m) -> p (Object r m);
-	plift t = parserLift;
+--	 m (Object r m) -> p (Object r m);
+	 m a -> p a;
+	plift = parserLift;
 
-	expressionParse' ::
+	expressionParse ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		SchemeParser m p
 		) =>
-	 Type (r ()) -> p (Object r m);
-	expressionParse' t = do
+	 p (Object r m);
+	expressionParse = do
 		{
 		optionalWhitespaceParse;
 		 (integerParse >>= (return . NumberObject . fromInteger))	|||
@@ -334,17 +391,9 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		 (identifierParse >>= (return . SymbolObject . MkSymbol))	|||
 		 hashLiteralParse		|||
 		 quotedParse			|||
-		 (stringLiteralParse >>= ((plift t) . getConvert . MkSList))	|||
+		 (stringLiteralParse >>= (plift . getConvert . MkSList))	|||
 		 listParse				;
 		};
-
-	expressionParse ::
-		(
-		Scheme m r,
-		SchemeParser m p
-		) =>
-	 p (Object r m);
-	expressionParse = expressionParse' Type;
 
 	expressionOrEndParse ::
 		(
@@ -353,7 +402,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		) =>
 	 p (Maybe (Object r m));
 	expressionOrEndParse =
-		(expressionParse >>= (return . Just)) |||
+		((let {?refType=Type} in expressionParse) >>= (return . Just)) |||
 		(optionalWhitespaceParse >> streamEndParse >> (return Nothing)) |||
 		(unexpectedCharacterError "input");
 
@@ -382,9 +431,9 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return objs;
 		};
 
-	portReadP :: (Scheme m r) =>
-	 Type (r ()) -> (InputPort Char m,()) -> m (Object r m);
-	portReadP Type (port,()) = do
+	portReadP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (InputPort Char m,()) -> m (Object r m);
+	portReadP (port,()) = do
 		{		
 		mobj <- parseFromPort port;
 		case mobj of

@@ -38,17 +38,13 @@ module Org.Org.Semantic.HScheme.Equality where
 		};
 	sameList _ _ _ = return False;
 
-	sameSList	:: (Scheme m r,?refType :: Type (r ())) => 
-	 (a -> b -> m Bool) -> SList a -> SList b -> m Bool;
-	sameSList same (MkSList a) (MkSList b) = sameList same a b;
-
 	sameSRefArray	:: (Scheme m r,?refType :: Type (r ())) => 
 	 (a -> b -> m Bool) -> SRefArray r a -> SRefArray r b -> m Bool;
 	sameSRefArray same arra arrb = do
 		{
-		la <- getConvert arra;
-		lb <- getConvert arrb;
-		sameSList same la lb;
+		la <- getSRefArrayList arra;
+		lb <- getSRefArrayList arrb;
+		sameList same la lb;
 		};
 
 	equal :: (Scheme m r,?refType :: Type (r ())) => 

@@ -88,6 +88,13 @@
 ))
 
 ; 6.6.2 Input
+(define read (lambda rest
+	(case-match rest ()
+		(() (port-read (current-input-port)))
+		((port) (port-read port))
+	)
+))
+
 (define read-char (lambda rest
 	(case-match rest ()
 		(() (port-read-char (current-input-port)))

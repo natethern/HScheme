@@ -630,41 +630,44 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	-- SList Word8
 
-	newtype SList a = MkSList {unSList :: [a]};
-
-	instance (Scheme m r) => MonadIsA m (SList a) (SRefArray r a) where
+	getSRefArrayList :: (Scheme m r) =>
+	 SRefArray r a -> m [a];
+	getSRefArrayList rarray = readRList (toList rarray) where
 		{
-		getConvert rarray = do
+		readRList [] = return [];
+		readRList (r:rs) = do
 			{
-			s <- readRList (toList rarray);
-			return (MkSList s);
-			} where
-			{
-			readRList [] = return [];
-			readRList (r:rs) = do
-				{
-				c <- get r;
-				cs <- readRList rs;
-				return (c:cs);
-				};
+			c <- get r;
+			cs <- readRList rs;
+			return (c:cs);
 			};
 		};
 
+	makeSRefArray :: (Scheme m r) =>
+	 [a] -> m (SRefArray r a);
+	makeSRefArray list = do
+		{
+		rlist <- getRList list;
+		return (fromList rlist);
+		} where
+		{
+		getRList [] = return [];
+		getRList (c:cs) = do
+			{
+			r <- new c;
+			rs <- getRList cs;
+			return (r:rs);
+			};
+		};
+
+	newtype SList a = MkSList {unSList :: [a]};
+
 	instance (Scheme m r) => MonadIsA m (Object r m) (SList Word8) where
 		{
-		getConvert (MkSList s) = do
+		getConvert (MkSList list) = do
 			{
-			rlist <- getRList s;
-			return (ByteArrayObject (fromList rlist));
-			} where
-			{
-			getRList [] = return [];
-			getRList (c:cs) = do
-				{
-				r <- new c;
-				rs <- getRList cs;
-				return (r:rs);
-				};
+			array <- makeSRefArray list;
+			return (ByteArrayObject array);
 			};
 		};
 
@@ -672,8 +675,8 @@ module Org.Org.Semantic.HScheme.Conversions where
 		{
 		getMaybeConvert (ByteArrayObject rarray) = do
 			{
-			slist <- getConvert rarray;
-			return (Just slist);
+			slist <- getSRefArrayList rarray;
+			return (Just (MkSList slist));
 			};
 		getMaybeConvert _ = return Nothing;
 		};
@@ -721,19 +724,10 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance (Scheme m r) => MonadIsA m (Object r m) (SList Char) where
 		{
-		getConvert (MkSList s) = do
+		getConvert (MkSList list) = do
 			{
-			rlist <- getRList s;
-			return (StringObject (fromList rlist));
-			} where
-			{
-			getRList [] = return [];
-			getRList (c:cs) = do
-				{
-				r <- new c;
-				rs <- getRList cs;
-				return (r:rs);
-				};
+			array <- makeSRefArray list;
+			return (StringObject array);
 			};
 		};
 
@@ -741,8 +735,8 @@ module Org.Org.Semantic.HScheme.Conversions where
 		{
 		getMaybeConvert (StringObject rarray) = do
 			{
-			slist <- getConvert rarray;
-			return (Just slist);
+			slist <- getSRefArrayList rarray;
+			return (Just (MkSList slist));
 			};
 		getMaybeConvert _ = return Nothing;
 		};

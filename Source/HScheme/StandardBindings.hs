@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.StandardBindings where
 	{
+	import Org.Org.Semantic.HScheme.SExpParser;
 	import Org.Org.Semantic.HScheme.Syntax;
 	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Lambda;
@@ -175,6 +176,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"close-output-port"				outputPortCloseP,
 
 		-- 6.6.2 Input
+		addProcBinding	"port-read"						portReadP,								-- nonstandard
 		addProcBinding	"port-read-char"				portReadCharP,							-- nonstandard
 		addProcBinding	"port-peek-char"				portPeekCharP,							-- nonstandard
 		addProcBinding	"eof-object?"					isEOFObjectP,

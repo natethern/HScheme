@@ -59,6 +59,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		NumberObject _ -> return a;
 		CharObject _ -> return a;
 		StringObject _ -> return a;
+		ByteArrayObject _ -> return a;
 		VectorObject _ -> return a;
 		_ -> fail "unrecognised expression form";
 		};

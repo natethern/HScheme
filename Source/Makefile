@@ -372,6 +372,8 @@ Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/PortProce
 Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
 Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Syntax.hi
 Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Syntax.p_hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/SExpParser.hi
+Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/SExpParser.p_hi
 Org/Org/Semantic/HScheme/FMapBindings.o Org/Org/Semantic/HScheme/FMapBindings.p_o : Org/Org/Semantic/HScheme/FMapBindings.hs
 Org/Org/Semantic/HScheme/FMapBindings.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/FMapBindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
