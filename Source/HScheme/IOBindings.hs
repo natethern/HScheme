@@ -28,43 +28,30 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	import Org.Org.Semantic.HBase;
 
 	handleInputPort :: Handle -> InputPort Word8 IO;
-	handleInputPort h = MkInputPort
-		{
-		ipRead = handleRead h,
-		ipPeek = handlePeek h,
-		ipReady	= hReady h,
-		ipClose = closeSession h
-		};
+	handleInputPort h = MkCloseable (closeSession h) (handlePeekSource h);
 
 	remonadInputPort :: (Monad m,Monad n) =>
 	 (forall a. m a -> n a) -> InputPort c m -> InputPort c n;
-	remonadInputPort remonad (MkInputPort rd pk rdy cl) = MkInputPort
-	 (remonad rd) (remonad pk) (remonad rdy) (remonad cl);
+	remonadInputPort remonad ip = fmap (remonadPeekSource remonad) (remonadCloseable remonad ip);
 
 	handleOutputPort :: Handle -> OutputPort Word8 IO;
-	handleOutputPort h = MkOutputPort
-		{
-		opWrite = \mc -> case mc of
-			{
-			Nothing -> closeSession h;
-			Just c -> handleWrite h c;
-			},
-		opFlush = hFlush h
-		};
+	handleOutputPort h = MkCloseable (closeSession h) (handleFlushSink h);
 
 	remonadOutputPort :: (Monad m,Monad n) =>
 	 (forall a. m a -> n a) -> OutputPort c m -> OutputPort c n;
-	remonadOutputPort remonad (MkOutputPort w f) = MkOutputPort
-	 (\mc -> remonad (w mc)) (remonad f);
+	remonadOutputPort remonad op = fmap (remonadFlushSink remonad) (remonadCloseable remonad op);
 
-	stdInputPort :: InputPort Word8 IO;
-	stdInputPort = handleInputPort stdin;
+	stdInputPort :: (?stdin :: PeekSource IO Word8) =>
+	 InputPort Word8 IO;
+	stdInputPort = nullCloseable ?stdin;
 
-	stdOutputPort :: OutputPort Word8 IO;
-	stdOutputPort = handleOutputPort stdout;
+	stdOutputPort ::  (?stdout :: FlushSink IO Word8) =>
+	 OutputPort Word8 IO;
+	stdOutputPort = nullCloseable ?stdout;
 
-	stdErrorPort :: OutputPort Word8 IO;
-	stdErrorPort = handleOutputPort stderr;
+	stdErrorPort ::  (?stderr :: FlushSink IO Word8) =>
+	 OutputPort Word8 IO;
+	stdErrorPort = nullCloseable ?stderr;
 
 	openInputFile :: (Monad m) =>
 	 (forall a. IO a -> m a) -> String -> m (InputPort Word8 m);
@@ -100,17 +87,24 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		return (remonadOutputPort remonad (handleOutputPort h));
 		};
 
-	ioPureSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
+	ioPureSystemInterface :: (Scheme m r,?refType :: Type (r ()),?stdout :: FlushSink IO Word8) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdOutputPort));
 
-	ioQuietPureSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
+	ioQuietPureSystemInterface :: (Scheme m r,?refType :: Type (r ()),?stderr :: FlushSink IO Word8) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdErrorPort));
 
-	ioFullSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
+	ioFullSystemInterface ::
+		(
+		Scheme m r,
+		?refType :: Type (r ()),
+		?stdin :: PeekSource IO Word8,
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
 	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m r;
 	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
 		{

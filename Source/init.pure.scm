@@ -15,7 +15,7 @@
 	((case key) <nothing>)
 	((case key (else . exprs)) (begin . exprs))
 	((case key (() . exprs) . rest) (case key . rest))
-	((case key ((datum . data) . exprs) . rest) (if (eqv? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
+	((case key ((datum . data) . exprs) . rest) (if (equal? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
 ))
 
 (define and (syntax-rules ()
@@ -30,8 +30,9 @@
 
 
 ; 4.2.6 Quasiquotation
-(define quasiquote (syntax-rules (unquote)
+(define quasiquote (syntax-rules (unquote unquote-splicing)
 	((quasiquote (unquote a)) a)
+	((quasiquote ((unquote-splicing a) . b)) (append a (quasiquote b)))
 	((quasiquote (a . b)) (cons (quasiquote a) (quasiquote b)))
 	((quasiquote a) (quote a))
 ))

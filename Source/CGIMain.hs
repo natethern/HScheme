@@ -24,6 +24,7 @@ module Main where
 	{
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase.Encoding.URI;
+	import Org.Org.Semantic.HBase.Protocol.CGI;
 	import Org.Org.Semantic.HBase;
 
 	type CPS r = SchemeCPS r (IO ());
@@ -33,6 +34,10 @@ module Main where
 	printError a = putStrLn ("Error: "++ (show a)++"");
 
 	fixPureInterpret ::
+		(
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
 	 String -> IO ();
 	fixPureInterpret source = let {?refType = ioConstType} in do
 		{
@@ -47,6 +52,10 @@ module Main where
 		};
 
 	contPureInterpret ::
+		(
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
 	 String -> CPS IOConst ();
 	contPureInterpret source = let {?refType = ioConstType} in do
 		{
@@ -61,6 +70,10 @@ module Main where
 		};
 
 	fixFullInterpret ::
+		(
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
 	 String -> IO ();
 	fixFullInterpret source = let {?refType = ioRefType} in do
 		{
@@ -75,6 +88,10 @@ module Main where
 		};
 
 	contFullInterpret ::
+		(
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
 	 String -> CPS IORef ();
 	contFullInterpret source = let {?refType = ioRefType} in do
 		{
@@ -100,11 +117,10 @@ module Main where
 	runCPS cps = runContinuationPass (fail . show) return cps;
 
 	main :: IO ();
-	main = catchSingle (do
+	main = ioRunProgram (catchSingle (do
 		{
 		putStrLn "Content-Type: text/plain\n";
-		text <- getHandleContents stdin;
-		params <- exToFail (readParseOrThrow text);
+		params <- cgiGetQueryParameters;
 		source <- case findQueryParameter (encodeLatin1 "input") params of
 			{
 			Just sourceBytes -> return (decodeLatin1 sourceBytes);
@@ -120,5 +136,5 @@ module Main where
 			 else fixPureInterpret source;
 			};
 		})
-		printError;
+		printError);
 	}

@@ -24,7 +24,6 @@ module Main where
 	{
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
-	import System.Environment;
 
 	type CPS r = SchemeCPS r (IO ());
 
@@ -96,9 +95,9 @@ module Main where
 	withRefType t a = let {?refType = t} in a;
 
 	main :: IO ();
-	main = do
+	main = ioRunProgram (do
 		{
-		args <- getArgs;
+		args <- ?getArgs;
 		(mflavour,mwm,paths,files) <- parseArgs args;
 		let
 			{
@@ -158,7 +157,7 @@ module Main where
 					};
 				});
 			};
-		};
+		});
 
 
 {-- for profiling

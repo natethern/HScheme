@@ -24,6 +24,38 @@ module Org.Org.Semantic.HScheme.Port where
 	{
 	import Org.Org.Semantic.HBase;
 
+	type InputPort c m = Closeable m (PeekSource m c);
+	ipClose = clClose;
+	ipRead = psSource . clItem;
+	ipPeek = psPeek . clItem;
+	ipReady = psReady . clItem;
+	ipReadAll :: (Monad m) =>
+	 Closeable m (PeekSource m c) -> m [c];
+	ipReadAll = getPeekSourceContents . clItem;
+
+	type OutputPort c m = Closeable m (FlushSink m c);
+	opClose = clClose;
+	opWrite = fsSink . clItem;
+	opFlush = fsFlush . clItem;
+	opWriteOne :: (Monad m) =>
+	 Closeable m (FlushSink m c) -> c -> m ();
+	opWriteOne = fsSinkOne . clItem;
+	opWriteList :: (Monad m) =>
+	 Closeable m (FlushSink m c) -> [c] -> m ();
+	opWriteList = fsSinkList . clItem;
+	opWriteStr :: (Monad m) =>
+	 Closeable m (FlushSink m c) -> [c] -> m ();
+	opWriteStr = opWriteList;
+
+	opWriteStrLn :: (Monad m) =>
+	 Closeable m (FlushSink m Char) -> [Char] -> m ();
+	opWriteStrLn op s = do
+		{
+		opWriteStr op s;
+		opWriteOne op '\n';
+		};
+
+{--
 	data (Monad m) => InputPort c m = MkInputPort
 		{
 		ipRead	:: m (Maybe c),
@@ -35,44 +67,6 @@ module Org.Org.Semantic.HScheme.Port where
 	ipReadAll :: (Monad m) =>
 	 InputPort c m -> m [c];
 	ipReadAll ip = accumulateSource (ipRead ip);
-
-	referenceInputPort :: (MonadFixedReference m r) =>
-	 r [c] -> InputPort c m;
-	referenceInputPort ref = MkInputPort
-		{
-		ipRead = do
-			{
-			la <- get ref;
-			case la of
-				{
-				[] -> return Nothing;
-				(a:as) -> do
-					{
-					set ref as;
-					return (Just a);
-					};
-				};
-			},
-		ipPeek = do
-			{
-			la <- get ref;
-			case la of
-				{
-				[] -> return Nothing;
-				(a:as) -> return (Just a);
-				};
-			},
-		ipReady = return True,
-		ipClose = return ()
-		};
-
-	refInputPort :: (Monad m) =>
-	 Ref m [c] -> InputPort c m;
-	refInputPort = referenceInputPort;
-
-	stateInputPort :: (Monad m) =>
-	 InputPort c (StateMonad [c] m);
-	stateInputPort = refInputPort stateRef;
 
 	data (Monad m) => OutputPort c m = MkOutputPort
 		{
@@ -103,33 +97,5 @@ module Org.Org.Semantic.HScheme.Port where
 
 	opClose :: (Monad m) => OutputPort c m -> m ();
 	opClose port = opWrite port Nothing;
-
-	-- ends immediately
-	nullInputPort :: (Monad m) => InputPort c m;
-	nullInputPort = MkInputPort
-		{
-		ipRead = return Nothing,
-		ipPeek = return Nothing,
-		ipReady = return True,
-		ipClose = return ()
-		};
-	
-	-- does nothing
-	nullOutputPort :: (Monad m) => OutputPort c m;
-	nullOutputPort = MkOutputPort
-		{
-		opWrite = \_ -> return (),
-		opFlush = return ()
-		};
-	
-	trapEOT :: (Monad m) => m (Maybe Char) -> m (Maybe Char);
-	trapEOT source = do
-		{
-		mc <- source;
-		case mc of
-			{
-			Just '\EOT' -> return Nothing;
-			_ -> return mc;
-			};
-		};
+--}
 	}
