@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.MainProg.Batch
 	(
 	RunnableScheme(..),
-	runProgramBindings,
-	runProgramBindingsWithExit
+	runObjects,
+	runObjectsWithExit
 	) where
 	{
 	import Org.Org.Semantic.HScheme.RunLib;
@@ -48,23 +48,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		 ((Object r m -> m ()) -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ())) ->
 		 cm ();
 		};
-		
-
-{--		
-rsRunInterp outproc mrun interpList interpEat = do
-	{
-	program <- interpList;
-	results <- rsRun (mrun program);
-	sinkList outproc results;
-	return ();
-	}
-
-rsRunInterp outproc mrun interpList interpEat = do
-	{
-	program <- interpEat (rsLift . outproc);
-	rsRun (mrun program);
-	}
---}
 
 	instance
 		(
@@ -81,7 +64,6 @@ rsRunInterp outproc mrun interpList interpEat = do
 			mrun program;
 			}
 		};
-
 
 	instance
 		(
@@ -100,69 +82,47 @@ rsRunInterp outproc mrun interpList interpEat = do
 			}
 		};
 
-
-	readFiles ::
-		(
-		Monad cm,
-		?load :: String -> cm [Object r m]
-		) =>
-	 [String] -> cm [Object r m];
-	readFiles [] = return [];
-	readFiles (name:names) = do
-		{
-		objs1 <- ?load name;
-		objsr <- readFiles names;
-		return (objs1 ++ objsr);
-		};
-
-	runProgram ::
+	evaluateObjects ::
 		(
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?load :: String -> cm [Object r m]
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
-	 [String] ->
+	 [Object r m] ->
 	 cm ();
-	runProgram mrun outproc failproc filenames =
-	 catch (do
-		{
-		objects <- readFiles filenames;
-		
-		rsRunInterp outproc mrun
-		 (interpretTopLevelExpressionsList objects)
-		 (\proc -> interpretTopLevelExpressionsEat proc objects);
-		})
-		failproc;
+	evaluateObjects mrun outproc failproc objects = catch (
+	 rsRunInterp outproc mrun
+	  (interpretTopLevelExpressionsList objects)
+	  (\proc -> interpretTopLevelExpressionsEat proc objects)
+	 ) failproc;
 
-	runProgramBindings ::
+	runObjects ::
 		(
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?load :: String -> cm [Object r m]
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
-	 [String] ->
+	 [Object r m] ->
 	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
-	runProgramBindings outproc failproc filenames bindings =
-	 runProgram mrun outproc failproc filenames where
+	runObjects outproc failproc objects bindings =
+	 evaluateObjects mrun outproc failproc objects where
 		{
 		mrun lm = lm (getBinding bindings);
 		};
 
-	runProgramBindingsWithExit ::
+	runObjectsWithExit ::
 		(
 		RunnableScheme cm m r,
 		MonadCont m,
@@ -170,16 +130,15 @@ rsRunInterp outproc mrun interpList interpEat = do
 		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?load :: String -> cm [Object r m]
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
-	 [String] ->
+	 [Object r m] ->
 	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
-	runProgramBindingsWithExit outproc failproc filenames rootBindings =
-	 runProgram mrun outproc failproc filenames where
+	runObjectsWithExit outproc failproc objects rootBindings =
+	 evaluateObjects mrun outproc failproc objects where
 		{
 		mrun lm = callCC (\exitFunc -> do
 			{

@@ -45,7 +45,7 @@ module Org.Org.Semantic.HScheme.Imperative.IOLoad where
 		return (handleInputPort h);
 		};
 
-	ioLoad ::
+	ioRead ::
 		(
 		Scheme m r,
 		BuildThrow IO (Object r m) r,
@@ -53,5 +53,5 @@ module Org.Org.Semantic.HScheme.Imperative.IOLoad where
 		) =>
 	 [String] -> 
 	 String -> IO [Object r m];
-	ioLoad loadpaths = readWithProcs (openInputFileWithPaths loadpaths);
+	ioRead paths = readWithProcs (openInputFileWithPaths paths);
 	}

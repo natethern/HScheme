@@ -26,33 +26,42 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	loadCommand ::
+	readFiles ::
+		(
+		Monad cm,
+		?read :: String -> cm [Object r m]
+		) =>
+	 [String] -> cm [Object r m];
+	readFiles [] = return [];
+	readFiles (name:names) = do
+		{
+		objs1 <- ?read name;
+		objsr <- readFiles names;
+		return (objs1 ++ objsr);
+		};
+
+	readLoad ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
-		?load :: String -> cm [Object r m],
+		?read :: String -> cm [Object r m],
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 String -> cm (TopLevelObjectCommand r m);
-	loadCommand filename = do
+	readLoad filename = do
 		{
-		readObjects <- ?load filename;
+		readObjects <- ?read filename;
 		beginT readObjects;
 		};
 
 	loadT ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?load :: String -> cm [Object r m],
-		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?objType :: Type (Object r m)
 		) =>
+	 (String -> cm (TopLevelObjectCommand r m)) ->
 	 (SList Char,()) -> cm (TopLevelObjectCommand r m);
-	loadT (MkSList filename,()) = loadCommand filename;
+	loadT load (MkSList filename,()) = load filename;
 	}

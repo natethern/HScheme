@@ -80,19 +80,19 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		addTopLevelMacroBinding	"define"			fullDefineT
 		];
 
-	systemTopLevelBindings ::
+	loadTopLevelBindings ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
-		?load :: String -> cm [Object r m],
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
+	 (String -> cm (TopLevelObjectCommand r m)) ->
 	 SymbolBindings (TopLevelMacro cm r m) ->
 	 SymbolBindings (TopLevelMacro cm r m);
-	systemTopLevelBindings = concatenateList
+	loadTopLevelBindings load = concatenateList
 		[
 		-- 6.6.4 System Interface
-		addTopLevelMacroBinding	"load"	loadT
+		addTopLevelMacroBinding	"load"	(loadT load)
 		];
 	}

@@ -39,7 +39,7 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> IO ();
-	fixPureInterpret source = let {?refType = ioConstType} in do
+	fixPureInterpret source = let {?objType = Type::Type (Object IORef IO)} in do
 		{
 		bindings <- concatenateList
 			[
@@ -57,7 +57,7 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> CPS IOConst ();
-	contPureInterpret source = let {?refType = ioConstType} in do
+	contPureInterpret source = let {?objType = Type::Type (Object IORef (CPS IORef))} in do
 		{
 		bindings <- concatenateList
 			[
@@ -75,7 +75,7 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> IO ();
-	fixFullInterpret source = let {?refType = ioRefType} in do
+	fixFullInterpret source = let {?objType = Type::Type (Object IORef IO)} in do
 		{
 		bindings <- concatenateList
 			[
@@ -93,7 +93,7 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> CPS IORef ();
-	contFullInterpret source = let {?refType = ioRefType} in do
+	contFullInterpret source = let {?objType = Type::Type (Object IORef (CPS IORef))} in do
 		{
 		bindings <- concatenateList
 			[
