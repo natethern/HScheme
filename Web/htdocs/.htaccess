@@ -1,0 +1,2 @@
+Redirect permanent /examples.html	http://hscheme.sourceforge.net/examples.php
+Redirect permanent /interpret.html	http://hscheme.sourceforge.net/interpret.php
