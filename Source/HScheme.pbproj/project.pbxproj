@@ -5,6 +5,30 @@
 	};
 	objectVersion = 38;
 	objects = {
+		AB1182B204DB176200A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = load.scm;
+			refType = 4;
+		};
+		AB1182B304DB177600A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = load.scm.ref;
+			refType = 4;
+		};
+		AB1182B404DB178200A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = load1.scm;
+			refType = 4;
+		};
+		AB1182B504DB178E00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = load2.scm;
+			refType = 4;
+		};
 		AB1F27A104CA87A800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -651,6 +675,10 @@
 				ABAD379B04A403EE00A80103,
 				ABB6927C04A4677500A80103,
 				ABB6927D04A4678C00A80103,
+				AB1182B404DB178200A80103,
+				AB1182B504DB178E00A80103,
+				AB1182B204DB176200A80103,
+				AB1182B304DB177600A80103,
 				ABC9354304B3FD4A00A80103,
 				ABC9354404B4054F00A80103,
 				AB1F27A104CA87A800A80103,

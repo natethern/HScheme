@@ -45,7 +45,6 @@ module Main where
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
 			whichmonad = unJust defaultWhichMonad mwm;
 			flavour = unJust (defaultStdBindings whichmonad) mflavour;
-			allFileNames initFile = optPrepend initfile initFile filenames
 			};
 		if verbose
 		 then verbosity ?stderr whichmonad flavour
@@ -73,8 +72,11 @@ module Main where
 						portBindings,
 						systemPortBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.full.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -88,8 +90,11 @@ module Main where
 						evalBindings (lift . lift),
 						portBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -99,8 +104,11 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				};
 			CPSWhichMonad ->
@@ -123,8 +131,11 @@ module Main where
 						portBindings,
 						systemPortBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.full.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -137,8 +148,11 @@ module Main where
 						evalBindings lift,
 						portBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -148,8 +162,11 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjectsWithExit printResult initCommand objects bindings;
 					});
 				};
 			IOWhichMonad ->
@@ -166,13 +183,17 @@ module Main where
 						[
 						baseBindings,
 						monadFixBindings,
+						monadGuardBindings,
 						evalBindings id,
 						setBindings,
 						portBindings,
 						systemPortBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					runObjects printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.full.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjects printResult initCommand objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -181,11 +202,15 @@ module Main where
 						[
 						baseBindings,
 						monadFixBindings,
+						monadGuardBindings,
 						evalBindings id,
 						portBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjects printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -195,8 +220,11 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjects printResult initCommand objects bindings;
 					});
 				};
 			IdentityWhichMonad ->
@@ -215,8 +243,11 @@ module Main where
 						monadFixBindings,
 						portBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjects printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings -> 
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -226,8 +257,11 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult objects bindings;
+					initCommand <- if initfile
+					 then readLoad "init.pure.scm"
+					 else return nothing;
+					objects <- readFiles filenames;
+					runObjects printResult initCommand objects bindings;
 					});
 				};
 			};

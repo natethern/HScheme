@@ -189,7 +189,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
+	 (Symbol,(Object r m,())) -> cm (TopLevelListCommand r m);
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = MkType} in compileSyntax obj;

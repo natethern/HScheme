@@ -82,7 +82,7 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 (String -> cm (TopLevelObjectCommand r m)) ->
+	 (String -> cm (TopLevelListCommand r m)) ->
 	 TopLevelBindings cm r m;
 	loadTopLevelBindings load = concatenateList
 		[

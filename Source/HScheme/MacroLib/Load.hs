@@ -51,7 +51,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
 		) =>
-	 String -> cm (TopLevelObjectCommand r m);
+	 String -> cm (TopLevelListCommand r m);
 	readLoad filename = do
 		{
 		readObjects <- ?read filename;
@@ -72,7 +72,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		(
 		?objType :: Type (Object r m)
 		) =>
-	 (String -> cm (TopLevelObjectCommand r m)) ->
-	 (SList Char,()) -> cm (TopLevelObjectCommand r m);
+	 (String -> cm (TopLevelListCommand r m)) ->
+	 (SList Char,()) -> cm (TopLevelListCommand r m);
 	loadT load (MkSList filename,()) = load filename;
 	}

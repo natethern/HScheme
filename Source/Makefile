@@ -219,6 +219,8 @@ test-pure:	\
  test/factorial.scm.pure.diff	\
  test/case-match.scm.pure.diff	\
  test/vector.scm.pure.diff	\
+ test/load.scm.pure.diff	\
+ test/load.scm.initpure.diff	\
  test/helloworld.scm.initpure.diff
 
 test-full:	\
@@ -239,6 +241,8 @@ test-full:	\
  test/factorial.scm.full.diff	\
  test/case-match.scm.full.diff	\
  test/vector.scm.full.diff	\
+ test/load.scm.full.diff	\
+ test/load.scm.initfull.diff	\
  test/helloworld.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
 

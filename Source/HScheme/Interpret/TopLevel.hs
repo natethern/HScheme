@@ -22,12 +22,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	(
-	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro(..),TopLevelBinder(..),
+	TopLevelCommand(..),TopLevelListCommand,TopLevelMacro(..),TopLevelBinder(..),
 	remonadTopLevelMacro,
 	begin,
 	assembleTopLevelExpression,assembleTopLevelExpressions,
 	assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList,
-	assembleTopLevelObjectCommand
+	assembleTopLevelListCommand
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
@@ -42,13 +42,44 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		tleSyntaxes :: [(Symbol,Syntax r (Object r m))]
 		};
 
-	type TopLevelObjectCommand r m = TopLevelCommand r m (m [Object r m]);
+	expressionCommand :: SchemeExpression r m a -> TopLevelCommand r m a;
+	expressionCommand expr = MkTopLevelCommand expr [] [];
+
+	instance HasReturn (TopLevelCommand r m) where
+		{
+		return a = expressionCommand (return a);
+		};
+
+	instance Functor (TopLevelCommand r m) where
+		{
+		fmap ab (MkTopLevelCommand expr binds syntax) = MkTopLevelCommand (fmap ab expr) binds syntax;
+		};
+
+	instance FunctorApply (TopLevelCommand r m) where
+		{
+		fApply (MkTopLevelCommand ab binds1 syntax1) (MkTopLevelCommand a binds2 syntax2) = 
+		 MkTopLevelCommand (fApply ab a) (binds1 ++ binds2) (syntax1 ++ syntax2);
+
+		fPassTo (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand ab binds2 syntax2) = 
+		 MkTopLevelCommand (fPassTo a ab) (binds1 ++ binds2) (syntax1 ++ syntax2);
+
+		fSeq (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand b binds2 syntax2) = 
+		 MkTopLevelCommand (fSeq a b) (binds1 ++ binds2) (syntax1 ++ syntax2);
+		};
+
+	type TopLevelListCommand r m = TopLevelCommand r m (m [Object r m]);
+
+	instance (HasReturn m) =>
+	 HasNothing (TopLevelListCommand r m) where
+		{
+		nothing = return (return nothing);
+		};
 
 	newtype TopLevelMacro cm r m = MkTopLevelMacro (
 		(
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
 		) =>
-	 [Object r m] -> cm (TopLevelObjectCommand r m));
+	 [Object r m] -> cm (TopLevelListCommand r m));
 
 	remonadTopLevelMacro :: (forall a. cm1 a -> cm2 a) -> TopLevelMacro cm1 r m -> TopLevelMacro cm2 r m;
 	remonadTopLevelMacro map (MkTopLevelMacro tlm) = MkTopLevelMacro (map . tlm);
@@ -56,7 +87,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	newtype TopLevelBinder r m = MkTopLevelBinder
 	 {unTopLevelBinder :: forall a. [(Symbol,ObjectSchemeExpression r m)] -> SchemeExpression r m (m a) -> SchemeExpression r m (m a)};
 
-	assembleTopLevelObjectCommand ::
+	assembleTopLevelListCommand ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
@@ -65,8 +96,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 Object r m -> cm (TopLevelObjectCommand r m);
-	assembleTopLevelObjectCommand obj = do
+	 Object r m -> cm (TopLevelListCommand r m);
+	assembleTopLevelListCommand obj = do
 		{
 		mpair <- fromObject obj;
 		case mpair of
@@ -83,7 +114,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		compileExprTopLevel = do
 			{
 			expr <- assembleExpression obj;
-			return (MkTopLevelCommand expr [] []);
+			return (expressionCommand expr);
 			};
 		};
 
@@ -99,8 +130,31 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 Object r m -> cm (ListSchemeExpression r m);
 	assembleTopLevelExpression obj = do
 		{
-		MkTopLevelCommand expr _ _ <- assembleTopLevelObjectCommand obj;
+		MkTopLevelCommand expr _ _ <- assembleTopLevelListCommand obj;
 		return expr;
+		};
+
+	beginCommand ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		) =>
+	 a ->
+	 (m [Object r m] -> a) ->
+	 (m [Object r m] -> a -> a) ->
+	 TopLevelListCommand r m ->
+	 [Object r m] ->
+	 cm (TopLevelCommand r m a);
+	beginCommand none one conn command1 objs = do
+		{
+		commandr <- let
+		 {?syntacticbindings = newBindings ?syntacticbindings (tleSyntaxes command1)} in
+		 begin none one conn objs;
+		return (liftF2 conn command1 commandr);
 		};
 
 	begin ::
@@ -117,19 +171,16 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 (m [Object r m] -> a -> a) ->
 	 [Object r m] ->
 	 cm (TopLevelCommand r m a);
-	begin none one conn [] = return (MkTopLevelCommand (return none) [] []);
+	begin none one conn [] = return (return none);
 	begin none one conn [obj] = do
 		{
-		(MkTopLevelCommand expr binds syntax) <- assembleTopLevelObjectCommand obj;
-		return (MkTopLevelCommand (fmap one expr) binds syntax);
+		command <- assembleTopLevelListCommand obj;
+		return (fmap one command);
 		};
 	begin none one conn (obj:objs) = do
 		{
-		(MkTopLevelCommand expr1 binds1 syntax1) <- assembleTopLevelObjectCommand obj;
-		(MkTopLevelCommand exprr bindsr syntaxr) <- let
-		 {?syntacticbindings = newBindings ?syntacticbindings syntax1} in
-		 begin none one conn objs;
-		return (MkTopLevelCommand (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
+		command <- assembleTopLevelListCommand obj;
+		beginCommand none one conn command objs;
 		};
 
 	assembleTopLevelExpressions ::
@@ -145,11 +196,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 m a -> 
 	 (m [Object r m] -> m a) ->
 	 (m [Object r m] -> m a -> m a) ->
+	 TopLevelListCommand r m ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m a));
-	assembleTopLevelExpressions none one conn objs = do
+	assembleTopLevelExpressions none one conn command objs = do
 		{
-		MkTopLevelCommand expr binds _ <- begin none one conn objs;
+		MkTopLevelCommand expr binds _ <- beginCommand none one conn command objs;
 		return (unTopLevelBinder ?binder binds expr);
 		};
 
@@ -163,6 +215,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
+	 TopLevelListCommand r m ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m [Object r m]));
 	assembleTopLevelExpressionsList = assembleTopLevelExpressions
@@ -186,6 +239,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 (Object r m -> m ()) ->
+	 TopLevelListCommand r m ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m ()));
 	assembleTopLevelExpressionsEat eat = assembleTopLevelExpressions

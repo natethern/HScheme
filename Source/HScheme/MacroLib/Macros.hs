@@ -230,7 +230,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		) =>
 	 [Object r m] ->
 	 cm (ListSchemeExpression r m);
-	bodyM = assembleTopLevelExpressions (return []) id (>>);
+	bodyM = assembleTopLevelExpressions (return []) id (>>) nothing;
 
 	bodyListM ::
 		(
@@ -244,12 +244,12 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		) =>
 	 [Object r m] ->
 	 cm (ListSchemeExpression r m);
-	bodyListM obj = fmap (fmap (\mlist -> do
+	bodyListM objs = fmap (fmap (\mlist -> do
 		{
 		list <- mlist;
 		object <- getObject list;
 		return [object];
-		})) (assembleTopLevelExpressionsList obj);
+		})) (assembleTopLevelExpressionsList nothing objs);
 
 	bodyValuesM ::
 		(
@@ -263,7 +263,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		) =>
 	 [Object r m] ->
 	 cm (ListSchemeExpression r m);
-	bodyValuesM = assembleTopLevelExpressionsList;
+	bodyValuesM = assembleTopLevelExpressionsList nothing;
 
 
 	-- 4.2.4 Iteration
@@ -312,7 +312,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 cm (TopLevelObjectCommand r m);
+	 cm (TopLevelListCommand r m);
 	beginT = begin (return []) id (>>);
 
 
@@ -323,7 +323,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Symbol -> ObjectSchemeExpression r m -> TopLevelObjectCommand r m;
+	 Symbol -> ObjectSchemeExpression r m -> TopLevelListCommand r m;
 	pureDefine sym valExpr = MkTopLevelCommand (return (return [])) [(sym,valExpr)] [];
 
 	fullDefine ::
@@ -331,7 +331,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		FullScheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Symbol -> ObjectSchemeExpression r m-> TopLevelObjectCommand r m;
+	 Symbol -> ObjectSchemeExpression r m-> TopLevelListCommand r m;
 	fullDefine sym valExpr = MkTopLevelCommand 
 	 (liftF2 (\loc mval -> do
 		{
@@ -352,8 +352,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 (Symbol -> ObjectSchemeExpression r m -> TopLevelObjectCommand r m) -> 
-	 Either (Symbol,(Object r m,())) ((Symbol,Object r m),[Object r m]) -> cm (TopLevelObjectCommand r m);
+	 (Symbol -> ObjectSchemeExpression r m -> TopLevelListCommand r m) -> 
+	 Either (Symbol,(Object r m,())) ((Symbol,Object r m),[Object r m]) -> cm (TopLevelListCommand r m);
 	defineT define (Left (sym,(valObj,()))) = do
 		{
 		valExpr <- assembleSingleExpression valObj;

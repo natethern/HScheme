@@ -66,7 +66,7 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 		) =>
 	 (Object r m -> IO ()) ->
 	 MacroBindings IO r m ->
-	 ((?syntacticbindings :: Bindings Symbol (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
+	 ((?syntacticbindings :: SymbolBindings (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
 	 ((?macrobindings :: Symbol -> Maybe (Macro IO r m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r m)) => LocationBindings IO r m) ->
 	 String ->
 	 String ->
@@ -75,9 +75,9 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 	 mutualBind macroBindings tlBindings (do
 		{
 		bindings <- runBindings emptyBindings;
-		initObjects <- readFiles [initfilename];
+		initCommand <- readLoad initfilename;
 		progObjects <- parseAllFromString source;
-		runObjects outproc (initObjects ++ progObjects) bindings;
+		runObjects outproc initCommand progObjects bindings;
 		});
 
 	cgiRunProgram ::

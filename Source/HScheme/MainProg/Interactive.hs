@@ -56,7 +56,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),[Object r m]);
 	runObjectInEnvironment env obj =  do
 		{
-		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelObjectCommand obj;
+		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelListCommand obj;
 		runTopLevelInEnvironment env tlCommand;
 		};
 
@@ -176,7 +176,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
-	 [TopLevelObjectCommand r m] ->
+	 [TopLevelListCommand r m] ->
 	 m ();
 	interact bindings commands =
 	 catch (do
@@ -202,7 +202,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
-	 [TopLevelObjectCommand r m] ->
+	 [TopLevelListCommand r m] ->
 	 m ();
 	interactWithExit rootBindings commands = callCC (\exitFunc -> do
 		{
