@@ -163,7 +163,6 @@ Org/Org/Semantic/HScheme/SExpChars.o : /usr/share/haskell-import/Org/Org/Semanti
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpParser.hs
 Org/Org/Semantic/HScheme/SExpParser.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpChars.hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/InputPortParser.hi
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Port.hi
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Conversions.hi

@@ -52,7 +52,8 @@ module Org.Org.Semantic.HScheme.Interactive where
 	interactiveLoop t fsi bindings = do
 		{
 		let {input = trapEOT (fsiCurrentInputPort fsi);};
-		mbindings' <- catchSingle (catchBottom (do {
+		mbindings' <- catchSingle (catchBottom (do
+			{
 			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
 			opFlush (fsiCurrentOutputPort fsi);
 			mobject <- portRead input;
@@ -69,7 +70,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 			)
 			(\error -> do
 			{
-			runParser input restOfLineParser;
+			runParser input restOfLineParse;
 			reportError t (fsiCurrentErrorPort fsi) error;
 			return (Just bindings);
 			});
@@ -139,6 +140,6 @@ module Org.Org.Semantic.HScheme.Interactive where
 			fullStdBindings,
 			fullSystemBindings fsi
 			] emptyBindings;
-		interact Type fsi bindings  "Prelude.full.scm";
+		interact Type fsi bindings "Prelude.full.scm";
 		};
 	}

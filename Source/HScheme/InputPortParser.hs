@@ -48,8 +48,8 @@ module Org.Org.Semantic.HScheme.InputPortParser where
 	mlift :: (Monad m) => m a -> Parser c m a;
 	mlift = lift;
 
-	runParser :: (Monad m) => InputPort c m -> Parser c m a -> m a;
-	runParser source (MkParser parser) = parser source;
+--	runParser :: (Monad m) => InputPort c m -> Parser c m a -> m a;
+--	runParser source (MkParser parser) = parser source;
 
 	currentC :: (Monad m) => Parser c m (Maybe c);
 	currentC = MkParser ipPeek;
