@@ -24,8 +24,8 @@ HC				= ghc
 HCI				= ghci
 HCPACKAGES		= -package data
 HCIMPORTDIRS	= -i. -i../../HBase/Source/Basic/ -i../../HBase/Source/Category/ -i../../HBase/Source/Mathematics/ -i../../HBase/Source/Text/ -i../../HBase/Source/Imperative/ -i../../HBase/Source/Interface/
-HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
-#HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances
+#HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
+HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
 LDH				= $(HC) -pgml$(CC) $(HCPACKAGES)
 LDFLAGS			=
@@ -57,8 +57,6 @@ HC_SRCS			= \
 	IOBindings.hs	\
 	\
 	SchemeCPS.hs	\
-	Pure.hs	\
-	Full.hs	\
 	Interactive.hs	\
 	InteractiveMain.hs
 
@@ -215,12 +213,6 @@ SchemeCPS.o : ../../HBase/Source/Interface//HBase.hi
 SchemeCPS.o : Object.hi
 SchemeCPS.o : ../../HBase/Source/Category//ContinuationPassing.hi
 SchemeCPS.o : Conversions.hi
-Pure.o : Pure.hs
-Pure.o : ../../HBase/Source/Interface//HBase.hi
-Pure.o : Object.hi
-Full.o : Full.hs
-Full.o : ../../HBase/Source/Category//MonadReference.hi
-Full.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : ../../HBase/Source/Interface//HBase.hi
 Interactive.o : Port.hi
@@ -236,8 +228,6 @@ Interactive.o : FMapBindings.hi
 Interactive.o : SystemInterface.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : ../../HBase/Source/Interface//HBase.hi
-InteractiveMain.o : Pure.hi
-InteractiveMain.o : Full.hi
 InteractiveMain.o : SchemeCPS.hi
 InteractiveMain.o : Interactive.hi
 InteractiveMain.o : SystemInterface.hi

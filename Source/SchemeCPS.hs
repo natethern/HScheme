@@ -72,19 +72,27 @@ module SchemeCPS where
 
 	instance
 		(
-		MonadReference m r
+		MonadGettableReference m r
 		) =>
-	 MonadReference (SchemeCPS r (m p)) r where
+	 MonadGettableReference (SchemeCPS r (m p)) r where
 		{
 		get r = call ((get :: r a -> m a) r);
+		};
+
+	instance
+		(
+		MonadSettableReference m r
+		) =>
+	 MonadSettableReference (SchemeCPS r (m p)) r where
+		{
 		set r v = call ((set :: r a -> a -> m ()) r v);
 		};
 
 	instance
 		(
-		MonadCreatableReference m r
+		MonadCreatable m r
 		) =>
-	 MonadCreatableReference (SchemeCPS r (m p)) r where
+	 MonadCreatable (SchemeCPS r (m p)) r where
 		{
 		newReference a = call ((newReference :: a -> m (r a)) a);
 		};

@@ -81,19 +81,24 @@ module Interactive where
 			};
 		};
 
-	pureInteract :: (Scheme x m r,
-		MonadBottom m,IsA x Exception
+	interact ::
+		(
+		Scheme x m r,
+		MonadBottom m,
+		IsA x Exception
 		) =>
-	 Type (r ()) -> FullSystemInterface m r -> m ();
-	pureInteract t fsi = callCC (\exitFunc -> do
+	 Type (r ()) ->
+	 FullSystemInterface m r ->
+	 Bindings r m ->
+	 String ->
+	 m ();
+	interact t fsi rootBindings filename = callCC (\exitFunc -> do
 		{
 		bindings <- chainList
 			[
-			addProcBinding "exit" (exitFuncProc exitFunc),
-			monadicStdBindings,
-			pureSystemBindings (fsiPure fsi)
-			] emptyBindings;
-		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
+			addProcBinding "exit" (exitFuncProc exitFunc)
+			] rootBindings;
+		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings filename)
 			(\error -> do
 			{
 			reportError t (fsiCurrentErrorPort fsi) error;
@@ -103,25 +108,37 @@ module Interactive where
 		interactiveLoop t fsi bindings';
 		});
 
-	fullInteract :: (FullScheme x m r,
-		MonadBottom m,IsA x Exception
+	pureInteract ::
+		(
+		Scheme x m r,
+		MonadBottom m,
+		IsA x Exception
 		) =>
-	 Type (r ()) -> FullSystemInterface m r -> m ();
-	fullInteract t fsi = callCC (\exitFunc -> do
+	 FullSystemInterface m r -> m ();
+	pureInteract fsi = do
 		{
 		bindings <- chainList
 			[
-		 	addProcBinding "exit" (exitFuncProc exitFunc),
+			monadicStdBindings,
+			pureSystemBindings (fsiPure fsi)
+			] emptyBindings;
+		interact Type fsi bindings  "Prelude.pure.scm";
+		};
+
+	fullInteract ::
+		(
+		FullScheme x m r,
+		MonadBottom m,
+		IsA x Exception
+		) =>
+	 FullSystemInterface m r -> m ();
+	fullInteract fsi = do
+		{
+		bindings <- chainList
+			[
 			fullStdBindings,
 			fullSystemBindings fsi
-		 	] emptyBindings;
-		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings "Prelude.full.scm")
-			(\error -> do
-			{
-			reportError t (fsiCurrentErrorPort fsi) error;
-			exitFunc ();
-			return undefined;
-			});
-		interactiveLoop t fsi bindings';
-		});
+			] emptyBindings;
+		interact Type fsi bindings  "Prelude.full.scm";
+		};
 	}

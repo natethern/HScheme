@@ -26,11 +26,30 @@ module Object where
 	import Numerics;
 	import HBase;
 	
+	class
+		(
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) => Location m r;
+	
+	instance
+		(
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) => Location m r;
+	
+	newLocation :: (Location m r) => a -> m (r a);
+	newLocation = newReference;
+	getLocation :: (Location m r) => r a -> m a;
+	getLocation = get;
+{--	
 	class Location m r where
 		{
 		newLocation		:: forall a. a -> m (r a);
 		getLocation		:: forall a. r a -> m a;
 		};
+--}
+	
 	
 	class
 		(
@@ -52,13 +71,35 @@ module Object where
 		) =>
 	 Scheme x m r;
 	
+	class
+		(
+		Location m r,
+		MonadFullReference m r,
+		MonadEqualReference m r
+		) =>
+	 SettableLocation m r;
+	
+	instance
+		(
+		Location m r,
+		MonadFullReference m r,
+		MonadEqualReference m r
+		) =>
+	 SettableLocation m r;
+
+	sameLocation :: (SettableLocation m r) => r a -> r a -> m Bool;
+	sameLocation = getEqualReference;
+	setLocation :: (SettableLocation m r) => r a -> a -> m ();
+	setLocation = set;
+	
+{--	
 	class (Location m r) =>
 	 SettableLocation m r where
 		{
 		sameLocation	:: forall a. r a -> r a -> m Bool;
 		setLocation		:: forall a. r a -> a -> m ();
 		};
-	
+--}
 	class (Scheme x m r,SettableLocation m r) =>
 	 FullScheme x m r;
 	

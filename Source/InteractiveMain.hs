@@ -26,16 +26,37 @@ module Main where
 	import SystemInterface;
 	import Interactive;
 	import SchemeCPS;
-	import Full;
-	import Pure;
 	import HBase;
-	import IORef;
 
-	type M = SchemeCPS IORef (IO ());
+	type M r = SchemeCPS r (IO ());
+
+	type Interact r = FullSystemInterface (M r) r -> (M r) ();
+
+	instance MonadCreatable IO Constant where
+		{
+		newReference a = return (MkConstant a);
+		};
+
+	instance MonadGettableReference IO Constant where
+		{
+		get (MkConstant a) = return a;
+		};
+
+	full :: Bool;
+	full = True;
+
+	doInteract :: 
+		(
+		MonadGettableReference IO r,
+		MonadCreatable IO r
+		) =>
+	 (FullSystemInterface (M r) r -> (M r) ()) -> IO ();
+	doInteract interact = doMonadContinuationPass
+	 (\_ -> return "error in catch code!")
+	 (interact ioFullSystemInterface);
 
 	main :: IO ();
-	main = doMonadContinuationPass
-		(\_ -> return "error in catch code!")
---		((pureInteract :: Type (PureLocation ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);
-		((fullInteract :: Type (IORef ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);
+	main = if full
+	 then doInteract (pureInteract :: Interact Constant)
+	 else doInteract (fullInteract :: Interact IORef);
 	}
