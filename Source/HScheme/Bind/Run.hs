@@ -339,6 +339,20 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"call-with-current-continuation"	callCCP
 		];
 
+	monadGuardBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadGuard m,
+		?objType :: Type (Object r m)
+		) =>
+	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	monadGuardBindings = concatenateList
+		[
+		-- 6.4 Control Features
+		addProcBinding	"dynamic-wind"					dynamicWindP
+		];
+
 	monadFixBindings ::
 		(
 		Build cm r,

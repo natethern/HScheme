@@ -40,6 +40,12 @@
 			path = Binder.hs;
 			refType = 4;
 		};
+		AB6A465604BFA6B500A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = SchemeGCPS.hs;
+			refType = 4;
+		};
 		AB734B5804BB8F7F00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -293,6 +299,7 @@
 				ABAD376204A403EE00A80103,
 				ABAD376304A403EE00A80103,
 				ABAD376104A403EE00A80103,
+				AB6A465604BFA6B500A80103,
 				ABAD376404A403EE00A80103,
 			);
 			isa = PBXGroup;

@@ -26,6 +26,7 @@ module Main where
 	import Org.Org.Semantic.HBase;
 
 	type CPS r = SchemeCPS r (IO ());
+	type GCPS r = SchemeGCPS r (IO ());
 
 	type IdentityConst = Constant Identity;
 
@@ -38,19 +39,25 @@ module Main where
 		show StrictPureStdBindings = "strict pure";
 		};
 
-	data SchemeWhichMonad = IdentityWhichMonad | IOWhichMonad | CPSWhichMonad;
+	data SchemeWhichMonad = IdentityWhichMonad | IOWhichMonad | CPSWhichMonad | GCPSWhichMonad;
 
 	instance Show SchemeWhichMonad where
 		{
 		show IdentityWhichMonad = "pure";
 		show IOWhichMonad = "IO";
 		show CPSWhichMonad = "CPS IO";
+		show GCPSWhichMonad = "GCPS IO";
 		};
 
 	parseArgs :: (Monad m) =>
 	 [String] -> m (Maybe SchemeStdBindings,Maybe SchemeWhichMonad,[String],Bool,[String],Bool);
 	parseArgs [] = return (Nothing,Nothing,[],True,[],False);
 	parseArgs ("-":files) = return (Nothing,Nothing,[],True,files,False);
+	parseArgs ("--mgcps":args) = do
+		{
+		(f,_,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,Just GCPSWhichMonad,paths,initfile,files,verbose);
+		};
 	parseArgs ("--mcps":args) = do
 		{
 		(f,_,paths,initfile,files,verbose) <- parseArgs args;
@@ -135,7 +142,7 @@ module Main where
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
-			whichmonad = unJust CPSWhichMonad mwm;
+			whichmonad = unJust GCPSWhichMonad mwm;
 			flavour = unJust (case whichmonad of
 				{
 				IdentityWhichMonad -> PureStdBindings;
@@ -153,6 +160,35 @@ module Main where
 		 else return ();
 		case whichmonad of
 			{
+			GCPSWhichMonad ->
+			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead loadpaths} in
+			 case flavour of
+				{
+				FullStdBindings ->
+				 let {?system = ioSystem (lift . lift)} in
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.full.scm");
+					runObjectsWithExit printResult objects bindings;
+					}));
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					runObjectsWithExit printResult objects bindings;
+					}));
+				StrictPureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					runObjectsWithExit printResult objects bindings;
+					}));
+				};
 			CPSWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
@@ -192,14 +228,14 @@ module Main where
 				 let {?system = ioSystem id} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjects printResult objects bindings;
 					}));
 				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- monadFixPureBindings emptyBindings;
+					bindings <- (monadFixPureBindings ++ monadGuardBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					}));

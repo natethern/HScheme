@@ -35,7 +35,7 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	isProcedureP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isProcedureP (obj,()) = isProcedure obj;
-	
+
 	callCCP ::
 		(
 		Scheme m r,
@@ -49,7 +49,17 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	  	(resultArg,()) <- convertFromObjects args;
 	  	cont resultArg;
 	  	})]);
-	
+
+	dynamicWindP ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m),
+		MonadGuard m
+		) =>
+	 (Procedure (Object r m) m,(Procedure (Object r m) m,(Procedure (Object r m) m,()))) ->
+	 m (Object r m);
+	dynamicWindP (before,(proc,(after,()))) = bracket (before [] >> return ()) (after [] >> return ()) (proc []);
+
 	fixP ::
 		(
 		?objType :: Type obj,

@@ -99,10 +99,10 @@
 	(car (list-tail x k))
 ))
 
-(define member (lambda (item lst)
+(define member (lambda (key lst)
 	(if (null? lst) #f
-		(if (equal? item (car lst)) lst
-			(member item (cdr lst))
+		(if (equal? key (car lst)) lst
+			(member key (cdr lst))
 		)
 	)
 ))

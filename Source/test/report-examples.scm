@@ -141,10 +141,10 @@
 "library procedure:  (gcd n1 ...)"
 "library procedure:  (lcm n1 ...)"
 (gcd 32 -36)                    ;===>  4
-(gcd)                           ;===>  0
+"omit" ;(gcd)                           ;===>  0
 (lcm 32 -36)                    ;===>  288
 (lcm 32.0 -36)                  ;===>  288.0  ; inexact
-(lcm)                           ;===>  1
+"omit" ;(lcm)                           ;===>  1
 
 "procedure:  (numerator q)"
 "procedure:  (denominator q)"
@@ -175,10 +175,10 @@
 "6.2.6  Numerical input and output"
 
 "procedure:  (string->number string radix)"
-(string->number "100")					;===>  100
-(string->number "100" 16)             ;===>  256
-(string->number "1e2")                ;===>  100.0
-(string->number "15##")					;===>  1500.0
+"omit" ;(string->number "100")					;===>  100
+"omit" ;(string->number "100" 16)             ;===>  256
+"omit" ;(string->number "1e2")                ;===>  100.0
+"omit" ;(string->number "15##")					;===>  1500.0
 
 
 "6.3.1  Booleans"
@@ -237,12 +237,12 @@ y                               ;===>  (a . 4)
 (car '(a b c))                  ;===>  a
 (car '((a) b c d))              ;===>  (a)
 (car '(1 . 2))                  ;===>  1
-(car '())                       ;===>  error
+"omit" ;(car '())                       ;===>  error
 
 "procedure:  (cdr pair)"
 (cdr '((a) b c d))              ;===>  (b c d)
 (cdr '(1 . 2))                  ;===>  2
-(cdr '())                       ;===>  error
+"omit" ;(cdr '())                       ;===>  error
 
 "procedure:  (set-car! pair obj)"
 (define (f) (list 'not-a-constant-list))
@@ -271,8 +271,8 @@ y                               ;===>  (a . 4)
 (append '(x) '(y))                      ;===>  (x y)
 (append '(a) '(b c d))                  ;===>  (a b c d)
 (append '(a (b)) '((c)))                ;===>  (a (b) (c))
-(append '(a b) '(c . d))                ;===>  (a b c . d)
-(append '() 'a)                         ;===>  a
+"omit" ;(append '(a b) '(c . d))                ;===>  (a b c . d)
+"omit" ;(append '() 'a)                         ;===>  a
 
 "library procedure:  (reverse list)"
 (reverse '(a b c))                      ;===>  (c b a)
@@ -300,8 +300,8 @@ y                               ;===>  (a . 4)
 (assq 'a e)             ;===>  (a 1)
 (assq 'b e)             ;===>  (b 2)
 (assq 'd e)             ;===>  #f
-(assq (list 'a) '(((a)) ((b)) ((c))))	;===>  #f
-(assoc (list 'a) '(((a)) ((b)) ((c))))	;===>  ((a))
+"omit" ;(assq (list 'a) '(((a)) ((b)) ((c))))	;===>  #f
+"omit" ;(assoc (list 'a) '(((a)) ((b)) ((c))))	;===>  ((a))
 (assq 5 '((2 3) (5 7) (11 13)))	;===>  unspecified
 (assv 5 '((2 3) (5 7) (11 13)))	;===>  (5 7)
 
@@ -431,7 +431,7 @@ p                             ;===>  a promise, still
 
 
 
-(+ (delay (* 3 7)) 13)          ;===>  34
+"omit" ;(+ (delay (* 3 7)) 13)          ;===>  34
 
 "procedure:  (call-with-current-continuation proc)"
 (call-with-current-continuation

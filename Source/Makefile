@@ -134,6 +134,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/Imperative/SchemeIdentity.hs	\
 	$(HIER)/Imperative/SchemeIO.hs	\
 	$(HIER)/Imperative/SchemeCPS.hs	\
+	$(HIER)/Imperative/SchemeGCPS.hs	\
 	$(HIER)/Imperative.hs	\
 	\
 	$(HIER).hs
@@ -882,6 +883,13 @@ Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : ./Org/Org/Semantic/HScheme/C
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o : ./Org/Org/Semantic/HScheme/MainProg.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.q_o : ./Org/Org/Semantic/HScheme/MainProg.q_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : ./Org/Org/Semantic/HScheme/MainProg.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.o Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.q_o Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.hs
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.o : ./Org/Org/Semantic/HScheme/MainProg.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.q_o : ./Org/Org/Semantic/HScheme/MainProg.q_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.p_o : ./Org/Org/Semantic/HScheme/MainProg.p_hi
 Org/Org/Semantic/HScheme/Imperative.o Org/Org/Semantic/HScheme/Imperative.q_o Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative.hs
 Org/Org/Semantic/HScheme/Imperative.o : ./Org/Org/Semantic/HScheme/Imperative/IOSystem.hi
 Org/Org/Semantic/HScheme/Imperative.q_o : ./Org/Org/Semantic/HScheme/Imperative/IOSystem.q_hi
@@ -898,6 +906,9 @@ Org/Org/Semantic/HScheme/Imperative.p_o : ./Org/Org/Semantic/HScheme/Imperative/
 Org/Org/Semantic/HScheme/Imperative.o : ./Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hi
 Org/Org/Semantic/HScheme/Imperative.q_o : ./Org/Org/Semantic/HScheme/Imperative/SchemeCPS.q_hi
 Org/Org/Semantic/HScheme/Imperative.p_o : ./Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_hi
+Org/Org/Semantic/HScheme/Imperative.o : ./Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.hi
+Org/Org/Semantic/HScheme/Imperative.q_o : ./Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.q_hi
+Org/Org/Semantic/HScheme/Imperative.p_o : ./Org/Org/Semantic/HScheme/Imperative/SchemeGCPS.p_hi
 Org/Org/Semantic/HScheme.o Org/Org/Semantic/HScheme.q_o Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme.hs
 Org/Org/Semantic/HScheme.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi

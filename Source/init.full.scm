@@ -42,16 +42,16 @@
 ; 6.3.2 Pairs and Lists
 (define memq (lambda (key lst)
 	(if (null? lst) #f
-		(if (eq? item (car lst)) lst
-			(memq item (cdr lst))
+		(if (eq? key (car lst)) lst
+			(memq key (cdr lst))
 		)
 	)
 ))
 
-(define memv (lambda (item lst)
+(define memv (lambda (key lst)
 	(if (null? lst) #f
-		(if (eqv? item (car lst)) lst
-			(memv item (cdr lst))
+		(if (eqv? key (car lst)) lst
+			(memv key (cdr lst))
 		)
 	)
 ))
