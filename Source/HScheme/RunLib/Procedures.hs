@@ -329,6 +329,9 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		};
 
 	charToString :: Char -> String;
+	charToString ' ' = "#\\space";
+	charToString '\t' = "#\\tab";
+	charToString '\n' = "#\\newline";
 	charToString c | (ordFromStart c) >= 0x10000 = "#\\U"++(showFixedHex True 6 (ordFromStart c));
 	charToString c | (ordFromStart c) > 126 = "#\\u"++(showFixedHex True 4 (ordFromStart c));
 	charToString c | (ordFromStart c) < 32 = "#\\u"++(showFixedHex True 4 (ordFromStart c));

@@ -1,0 +1,33 @@
+3
+4
+#t
+#f
+#\C
+#\D
+#\uABCD
+#\U10AB1C
+#\space
+#\space
+#\space
+#\tab
+#\tab
+#\tab
+#\newline
+#\newline
+#\newline
+#x(12 34 AB 0D F2)
+"hello"
+"poq\uABCDrqs\uABCDe\U1045DF"
+"x x"
+"x\tx\tx"
+"x\nx\nx"
+"x\\x"
+a
+(quote a)
+(quasiquote a)
+(unquote a)
+(unquote-splicing a)
+a
+abcde
+pqr
+xyz

@@ -153,6 +153,7 @@ test/%.scm.out: test/%.scm bin/$(COMMAND_REL)
 	time bin/$(COMMAND_REL) --noinit $< > $@
 
 test-full: \
+ test/constants.scm.diff \
  test/helloworld.scm.diff \
  test/several.scm.diff \
  test/syntax.scm.diff \
