@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Evaluate where
 	{
+	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
@@ -32,6 +33,22 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	isNil NilObject = True;
 	isNil _ = True;
 
+	getSymbolBinding ::
+		(
+		Scheme m r,
+		?bindings :: Bindings r m
+		) =>
+	 Symbol -> m (ObjLocation r m);
+	getSymbolBinding sym = case (getBinding ?bindings sym) of
+		{
+		Just loc -> return loc;
+		Nothing -> throwArgError "unbound-symbol" (tt ?bindings [SymbolObject sym]);
+		} where
+		{
+		tt :: Bindings r m -> [Object r m] -> [Object r m];
+		tt _ a = a;
+		};
+
 	evaluate ::
 		(
 		Scheme m r,
@@ -39,10 +56,10 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		) =>
 	 Object r m -> m (Object r m);
 
-	evaluate (SymbolObject a) = case (getBinding ?bindings a) of
+	evaluate (SymbolObject sym) = do
 		{
-		Just loc -> get loc;
-		Nothing -> fail ((unSymbol a)++" not defined");
+		loc <- getSymbolBinding sym;
+		get loc;
 		};
 
 	evaluate (PairObject head tail) = do
@@ -61,7 +78,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		StringObject _ -> return a;
 		ByteArrayObject _ -> return a;
 		VectorObject _ -> return a;
-		_ -> fail "unrecognised expression form";
+		_ -> throwArgError "cant-evaluate-form" [a];
 		};
 
 	evaluateP ::
@@ -88,7 +105,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		de <- evalList d;
 		return (ae:de);
 		};
-	evalList _ = fail "procedure args not a list";
+	evalList obj = throwArgError "bad-procedure-call-form" [obj];
 
 	macroToList ::
 		(
@@ -104,7 +121,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		de <- macroToList d;
 		return (a:de);
 		};
-	macroToList _ = fail "macro args not a list";
+	macroToList obj = throwArgError "bad-macro-call-form" [obj];
 
 	applyEval ::
 		(
@@ -128,7 +145,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 --		args <- macroToList arglist;
 		f ?bindings arglist;
 		};
-	applyEval _ _ = fail "wrong type to apply";
+	applyEval obj _ = throwArgError "bad-apply-form" [obj];
 
 	currentEnvironmentP ::
 		(

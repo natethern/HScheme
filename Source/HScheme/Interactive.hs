@@ -28,6 +28,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 	import Org.Org.Semantic.HScheme.SExpParser;
 	import Org.Org.Semantic.HScheme.StandardBindings;
 	import Org.Org.Semantic.HScheme.Bindings;
+	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Procedures;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
@@ -35,11 +36,12 @@ module Org.Org.Semantic.HScheme.Interactive where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	reportError :: (Scheme m r,Show x) =>
-	 Type (r ()) -> OutputPort Char m -> x -> m ();
-	reportError t errPort error = do
+	reportError :: (Scheme m r,?refType :: Type (r ())) =>
+	 OutputPort Word8 m -> Object r m -> m ();
+	reportError errPort error = do
 		{
-		opWriteStrLn errPort ("error: "++(show error));
+		text <- toString error;
+		opWriteList errPort (encodeUTF8 ("error: "++text++"\n"));
 		opFlush errPort;
 		};
 
@@ -47,18 +49,18 @@ module Org.Org.Semantic.HScheme.Interactive where
 		(
 		Scheme m r,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m,
+		?refType :: Type (r ())
 		) =>
-	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
-	interactiveLoop t fsi bindings = do
+	 FullSystemInterface m r -> Bindings r m -> m ();
+	interactiveLoop fsi bindings = do
 		{
-		let {input = trapEOT (fsiCurrentInputPort fsi);};
-		mbindings' <- catchSingle (catchBottom (do
+		let {input = trapEOT (parseUTF8Char (ipRead (fsiCurrentInputPort fsi)));};
+		mbindings' <- catch (catchBottom (do
 			{
-			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
+			opWriteList (fsiCurrentOutputPort fsi) (encodeUTF8 "hscheme> ");
 			opFlush (fsiCurrentOutputPort fsi);
-			mobject <- parseFromPort input;
+			mobject <- parseFromCharSource input;
 			case mobject of
 				{
 				Nothing -> return Nothing;
@@ -71,20 +73,21 @@ module Org.Org.Semantic.HScheme.Interactive where
 			}) (\ex -> do
 				{
 				runParser input restOfLineParse;
-				reportError t (fsiCurrentErrorPort fsi) ex;
+				errObj <- getConvert (MkSymbol "failure",MkSList (show ex));
+				reportError (fsiCurrentErrorPort fsi) errObj;
 				return (Just bindings);
 				})
 			)
 			(\error -> do
 			{
 			runParser input restOfLineParse;
-			reportError t (fsiCurrentErrorPort fsi) error;
+			reportError (fsiCurrentErrorPort fsi) error;
 			return (Just bindings);
 			});
 
 		case mbindings' of
 			{
-			Just bindings' -> interactiveLoop t fsi bindings';
+			Just bindings' -> interactiveLoop fsi bindings';
 			Nothing -> return ();
 			};
 		};
@@ -93,22 +96,21 @@ module Org.Org.Semantic.HScheme.Interactive where
 		(
 		Scheme m r,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m,
+		?refType :: Type (r ())
 		) =>
-	 Type (r ()) ->
 	 FullSystemInterface m r ->
 	 Bindings r m ->
 	 String ->
 	 m ();
-	interact t fsi bindings filename = catchSingle (do
+	interact fsi bindings filename = catch (do
 		{
 		bindings' <- psiLoadBindings (fsiPure fsi) bindings filename;
-		interactiveLoop t fsi bindings';
+		interactiveLoop fsi bindings';
 		})
 		(\error -> do
 		{
-		reportError t (fsiCurrentErrorPort fsi) error;
+		reportError (fsiCurrentErrorPort fsi) error;
 		});
 
 	interactWithExit ::
@@ -116,27 +118,26 @@ module Org.Org.Semantic.HScheme.Interactive where
 		Scheme m r,
 		MonadCont m,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m,
+		?refType :: Type (r ())
 		) =>
-	 Type (r ()) ->
 	 FullSystemInterface m r ->
 	 Bindings r m ->
 	 String ->
 	 m ();
-	interactWithExit t fsi rootBindings filename = callCC (\exitFunc -> do
+	interactWithExit fsi rootBindings filename = callCC (\exitFunc -> do
 		{
 		bindings <- chainList
 			[
 			addProcBinding "exit" (exitFuncProc exitFunc)
 			] rootBindings;
-		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings filename)
+		bindings' <- catch (psiLoadBindings (fsiPure fsi) bindings filename)
 			(\error -> do
 			{
-			reportError t (fsiCurrentErrorPort fsi) error;
+			reportError (fsiCurrentErrorPort fsi) error;
 			exitFunc ();
 			});
-		interactiveLoop t fsi bindings';
+		interactiveLoop fsi bindings';
 		});
 
 	strictPureInteract ::
@@ -144,8 +145,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		Scheme m r,
 		MonadFix m,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m
 		) =>
 	 FullSystemInterface m r -> m ();
 	strictPureInteract fsi = do
@@ -154,7 +154,8 @@ module Org.Org.Semantic.HScheme.Interactive where
 			[
 			monadFixStrictPureBindings
 			] emptyBindings;
-		interact Type fsi bindings "init.pure.scm";
+		let {?refType = Type} in
+		 interact fsi bindings "init.pure.scm";
 		};
 
 	pureInteract ::
@@ -162,8 +163,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		Scheme m r,
 		MonadFix m,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m
 		) =>
 	 FullSystemInterface m r -> m ();
 	pureInteract fsi = do
@@ -173,7 +173,8 @@ module Org.Org.Semantic.HScheme.Interactive where
 			monadFixPureBindings,
 			pureSystemBindings (fsiPure fsi)
 			] emptyBindings;
-		interact Type fsi bindings "init.pure.scm";
+		let {?refType = Type} in
+		 interact fsi bindings "init.pure.scm";
 		};
 
 	fullInteract ::
@@ -181,8 +182,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 		FullScheme m r,
 		MonadCont m,
 		MonadBottom m,
-		MonadSingleException x m,
-		Show x
+		MonadException (Object r m) m
 		) =>
 	 FullSystemInterface m r -> m ();
 	fullInteract fsi = do
@@ -192,6 +192,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 			monadContFullBindings,
 			fullSystemBindings fsi
 			] emptyBindings;
-		interactWithExit Type fsi bindings "init.full.scm";
+		let {?refType = Type} in
+		 interactWithExit fsi bindings "init.full.scm";
 		};
 	}

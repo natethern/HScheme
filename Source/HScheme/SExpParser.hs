@@ -44,10 +44,10 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 SchemeParser m (RecoverableListParser Char m);
 
 	runParser :: (Monad m) =>
-	 InputPort c m -> RecoverableStreamParser m (Maybe c) a -> m a;
-	runParser port = runRecoverableStreamParser (ipRead port);
+	 m t -> RecoverableStreamParser m t a -> m a;
+	runParser = runRecoverableStreamParser;
 
-	runParserString :: (Monad m) =>
+	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
 	 [c] -> RecoverableListParser c m a -> m ([c],a);
 	runParserString text parser = do
 		{
@@ -55,7 +55,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		case mr of
 			{
 			Just r -> return r;
-			Nothing -> fail "no parse";
+			Nothing -> throwSimpleError "no-parse";
 			};
 		};
 
@@ -414,15 +414,19 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 p [Object r m];
 	expressionsParse = accumulateSource expressionOrEndParse;
 
-	parseFromPort :: (Scheme m r) =>
-	 InputPort Char m -> m (Maybe (Object r m));
-	parseFromPort port = runParser port expressionOrEndParse;
+	parseFromCharSource :: (Scheme m r,?refType :: Type (r ())) =>
+	 m (Maybe Char) -> m (Maybe (Object r m));
+	parseFromCharSource source = runParser source expressionOrEndParse;
 
-	parseFromString :: (Scheme m r) =>
+	parseFromPort :: (Scheme m r,?refType :: Type (r ())) =>
+	 InputPort Word8 m -> m (Maybe (Object r m));
+	parseFromPort port = parseFromCharSource (parseUTF8Char (ipRead port));
+
+	parseFromString :: (Scheme m r,?refType :: Type (r ())) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
 
-	parseAllFromString :: (Scheme m r) =>
+	parseAllFromString :: (Scheme m r,?refType :: Type (r ())) =>
 	 String ->
 	 m [Object r m];
 	parseAllFromString text = do	
@@ -432,7 +436,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		};
 
 	portReadP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (InputPort Char m,()) -> m (Object r m);
+	 (InputPort Word8 m,()) -> m (Object r m);
 	portReadP (port,()) = do
 		{		
 		mobj <- parseFromPort port;

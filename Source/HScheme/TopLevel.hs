@@ -34,7 +34,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 
 	pureSetLoc :: (Scheme m r) =>
 	 ObjLocation r m -> Object r m -> m ();
-	pureSetLoc _ _ = fail "can't redefine symbol";
+	pureSetLoc _ newdef = throwArgError "cant-redefine" [newdef];
 
 	fullSetLoc :: (FullScheme m r) =>
 	 ObjLocation r m -> Object r m -> m ();
@@ -43,7 +43,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	-- 5.2 Definitions
 	defineT :: (Scheme m r) =>
 	 (ObjLocation r m -> Object r m -> m ()) ->
-	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,ArgNoneType);
+	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,NullObjType);
 	defineT setLoc bindings (h,t) = case h of
 		{
 		SymbolObject name -> case t of
@@ -62,23 +62,23 @@ module Org.Org.Semantic.HScheme.TopLevel
 							Nothing -> do
 								{
 								loc <- new result;
-							 	return (newBinding bindings name loc,MkArgNoneType);
+							 	return (newBinding bindings name loc,MkNullObjType);
 							 	};
 							Just loc -> do
 								{
 								setLoc loc result;
-							 	return (bindings,MkArgNoneType);
+							 	return (bindings,MkNullObjType);
 								};
 							};
 						};
-					_ -> fail "bad define form (too many arguments)";
+					_ -> throwArgError "too-many-args-in-define" [tt];
 					};
 				};
-			NilObject -> fail "bad define form (only one argument)";
-			_ -> fail "bad define form (dotted pair)";
+			NilObject -> typedThrowSimpleError (getObjectRType t) "too-few-args-in-define";
+			_ -> typedThrowSimpleError (getObjectRType t) "dotted-pair-define";
 			};
-		PairObject _ _ -> fail "this define form NYI";
-		_ -> fail "bad define form (wrong type for label)";
+		PairObject _ _ -> typedThrowSimpleError (getObjectRType h) "nyi-define";
+		_ -> typedThrowSimpleError (getObjectRType h) "bad-name-type-define";
 		};
 	
 	topLevelApplyEval ::

@@ -119,7 +119,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"char-number"					(charFuncP getNumber),					-- nonstandard
 		addProcBinding	"char-decimal-digit"			(charFuncP getDecimalDigit),			-- nonstandard
 		addProcBinding	"char->integer"					(charFuncP ordFromStart),
-		addProcBinding	"integer->char"					(\(i,()) -> return (failingUnJust (nthFromStart i) :: Char)),
+		addProcBinding	"integer->char"					integerToCharP,
 
 		-- 6.3.5 Strings
 		addProcBinding	"string?"						isStringP,
@@ -140,6 +140,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		-- Encoding (all nonstandard)
 		addProcBinding	"encode-utf8"					(encodeP encodeUTF8),
 		addProcBinding	"decode-utf8"					(decodeP decodeUTF8),
+		addProcBinding	"parse-utf8"					parseUTF8P,
 		addProcBinding	"encode-latin1"					(encodeP encodeLatin1),
 		addProcBinding	"decode-latin1"					(decodeP (return . decodeLatin1)),
 
@@ -148,6 +149,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"apply"							applyP,
 		addProcBinding	"values"						valuesP,
 		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
+		addProcBinding	"throw"							throwP,									-- nonstandard
 
 		-- 6.5 Eval
 		addProcBinding	"eval"							evaluateP,
@@ -183,13 +185,13 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 		-- 6.6.2 Input
 		addProcBinding	"port-read"						portReadP,								-- nonstandard
-		addProcBinding	"port-read-char"				portReadCharP,							-- nonstandard
-		addProcBinding	"port-peek-char"				portPeekCharP,							-- nonstandard
+		addProcBinding	"port-read-byte"				portReadByteP,							-- nonstandard
+		addProcBinding	"port-peek-byte"				portPeekByteP,							-- nonstandard
 		addProcBinding	"eof-object?"					isEOFObjectP,
-		addProcBinding	"port-char-ready?"				portCharReadyP,							-- nonstandard
+		addProcBinding	"port-byte-ready?"				portByteReadyP,							-- nonstandard
 
 		-- 6.6.3 Output
-		addProcBinding	"port-write-char"				portWriteCharP							-- nonstandard
+		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
 		];
 
 	simplePureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);

@@ -35,6 +35,26 @@ module Main where
 		show (ObjError ex) = "Scheme object error";
 		};
 
+	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
+	 MonadThrow (Object r IO) IO where
+		{
+		throw obj = do
+			{
+			text <- toString obj;
+			fail text;
+			};
+		};
+
+	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
+	 MonadException (Object r IO) IO where
+		{
+		catch foo cc = catchSingle foo (\ex -> do
+			{
+			obj <- getConvert (MkSymbol "failure",MkSList (show ex));
+			cc obj;
+			});
+		};
+
 	type Interact m r = FullSystemInterface m r -> m ();
 
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
@@ -95,7 +115,8 @@ module Main where
 	cpsInteract :: 
 		(
 		MonadGettableReference IO r,
-		MonadCreatable IO r
+		MonadCreatable IO r,
+		?refType :: Type (r ())
 		) =>
 	 [String] -> (Interact (CPS r) r) -> IO ();
 	cpsInteract loadpaths interact = runContinuationPass
@@ -120,9 +141,9 @@ module Main where
 			}) mwm};
 		case flavour of
 			{
-			FullFlavour -> cpsInteract loadpaths (fullInteract :: Interact (CPS IORef) IORef);
-			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
-			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
+			FullFlavour -> let {?refType = Type} in cpsInteract loadpaths (fullInteract :: Interact (CPS IORef) IORef);
+			PureFlavour -> let {?refType = Type} in (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
+			StrictPureFlavour -> let {?refType = Type} in (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
 			};
 		};
 

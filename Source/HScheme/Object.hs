@@ -29,14 +29,16 @@ module Org.Org.Semantic.HScheme.Object where
 	class
 		(
 		MonadCreatable m r,
-		MonadGettableReference m r
+		MonadGettableReference m r,
+		MonadThrow (Object r m) m
 		) =>
 	 Scheme m r;
 
 	instance
 		(
 		MonadCreatable m r,
-		MonadGettableReference m r
+		MonadGettableReference m r,
+		MonadThrow (Object r m) m
 		) =>
 	 Scheme m r;
 
@@ -101,8 +103,8 @@ module Org.Org.Semantic.HScheme.Object where
 	 ValuesObject		[Object r m]						|
 	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
 	 VectorObject		(SRefArray r (Object r m))			|
-	 InputPortObject 	(InputPort Char m)					|
-	 OutputPortObject 	(OutputPort Char m)					|
+	 InputPortObject 	(InputPort Word8 m)					|
+	 OutputPortObject 	(OutputPort Word8 m)				|
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
 	 SyntaxObject		(Syntax r m)						|
@@ -118,6 +120,16 @@ module Org.Org.Semantic.HScheme.Object where
 	isNullObject :: Object r m -> Bool;
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
+
+	typedThrowObject :: (Scheme m r) =>
+	 Type (r ()) -> Object r m -> m a;
+	typedThrowObject _ = throw;
+
+	getObjectRType :: Object r m -> Type (r ());
+	getObjectRType _ = Type;
+
+	getObjectsRType :: [Object r m] -> Type (r ());
+	getObjectsRType _ = Type;
 
 	cons :: (Scheme m r) =>
 	 Object r m -> Object r m -> m (Object r m);

@@ -34,19 +34,7 @@ module Org.Org.Semantic.HScheme.Port where
 
 	ipReadAll :: (Monad m) =>
 	 InputPort c m -> m [c];
-	ipReadAll ip = do
-		{
-		mc <- ipRead ip;
-		case mc of
-			{
-			Nothing -> return [];
-			Just c -> do
-				{
-				s <- ipReadAll ip;
-				return (c:s);
-				};
-			};
-		};
+	ipReadAll ip = accumulateSource (ipRead ip);
 
 	referenceInputPort :: (MonadFixedReference m r) =>
 	 r [c] -> InputPort c m;
@@ -134,16 +122,14 @@ module Org.Org.Semantic.HScheme.Port where
 		opFlush = return ()
 		};
 	
-	nothingEOT :: (Monad m) => Maybe Char -> m (Maybe Char);
-	nothingEOT (Just '\EOT') = return Nothing;
-	nothingEOT x = return x;
-	
-	trapEOT :: (Monad m) => InputPort Char m -> InputPort Char m;
-	trapEOT port = MkInputPort
+	trapEOT :: (Monad m) => m (Maybe Char) -> m (Maybe Char);
+	trapEOT source = do
 		{
-		ipRead = (ipRead port) >>= nothingEOT,
-		ipPeek = (ipPeek port) >>= nothingEOT,
-		ipReady = ipReady port,
-		ipClose = ipClose port
+		mc <- source;
+		case mc of
+			{
+			Just '\EOT' -> return Nothing;
+			_ -> return mc;
+			};
 		};
 	}

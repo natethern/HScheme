@@ -150,7 +150,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		Scheme m r
 		) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
-	caseMatch (arg,(literals,[])) = fail "no match";
+	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
 	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
 		{
 		msubs <- matchBinding literals pattern arg;
@@ -175,7 +175,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
 	syntaxRulesM (literals,rules) = return (\args -> let
 		{
-		transform [] = fail "can't match args";
+		transform [] = throwSimpleError "no-match";
 		transform (((_,pattern),(template,())):rs) = do
 			{
 			msubs <- matchBindings literals pattern args;

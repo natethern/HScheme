@@ -87,41 +87,54 @@
 	)
 ))
 
+
 ; 6.6.2 Input
+(define optional-input-port (lambda (rest)
+	(case-match rest ()
+		(() (current-input-port))
+		((port) port)
+	)
+))
+
 (define read (lambda rest
-	(case-match rest ()
-		(() (port-read (current-input-port)))
-		((port) (port-read port))
-	)
+	(port-read (optional-input-port rest))
 ))
 
-(define read-char (lambda rest
-	(case-match rest ()
-		(() (port-read-char (current-input-port)))
-		((port) (port-read-char port))
-	)
+(define read-byte (lambda rest
+	(port-read-byte (optional-input-port rest))
 ))
 
-(define peek-char (lambda rest
-	(case-match rest ()
-		(() (port-peek-char (current-input-port)))
-		((port) (port-peek-char port))
-	)
+(define read-char-latin1 (lambda rest
+	(port-read-char-latin1  (optional-input-port rest))
 ))
+
+(define read-char-utf8 (lambda rest
+	(port-read-char-utf8  (optional-input-port rest))
+))
+
+(define peek-char-latin1 (lambda rest
+	(port-peek-char-latin1  (optional-input-port rest))
+))
+
+(define read-char read-char-latin1)
+
+(define peek-char peek-char-latin1)
 
 (define char-ready? (lambda rest
+	(port-char-ready?  (optional-input-port rest))
+))
+
+
+; 6.6.3 Output
+(define optional-output-port (lambda (rest)
 	(case-match rest ()
-		(() (port-char-ready? (current-input-port)))
-		((port) (port-char-ready? port))
+		(() (current-output-port))
+		((port) port)
 	)
 ))
 
-; 6.6.3 Output
 (define write-char (lambda (c . rest)
-	(case-match rest ()
-		(() (port-write-char c (current-input-port)))
-		((port) (port-write-char c port))
-	)
+	(port-write-char c  (optional-output-port rest))
 ))
 
 (define newline (lambda rest

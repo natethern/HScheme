@@ -39,19 +39,19 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 	isOutputPortP (_,()) = return False;
 
 	inputPortCloseP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (InputPort Char m,()) -> m ArgNoneType;
+	 (InputPort Word8 m,()) -> m NullObjType;
 	inputPortCloseP (port,()) = do
 		{
 		ipClose port;
-		return MkArgNoneType;
+		return MkNullObjType;
 		};
 
 	outputPortCloseP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (OutputPort Char m,()) -> m ArgNoneType;
+	 (OutputPort Word8 m,()) -> m NullObjType;
 	outputPortCloseP (port,()) = do
 		{
 		opClose port;
-		return MkArgNoneType;
+		return MkNullObjType;
 		};
 
 	-- 6.6.2 Input
@@ -62,40 +62,71 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 	 (Object r m,()) -> m Bool;
 	isEOFObjectP (obj,()) = return (isNullObject obj);
 	
-	portReadCharP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (InputPort Char m,()) -> m (Either ArgNoneType Char);
-	portReadCharP (port,()) = do
+	portReadByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
+	portReadByteP (port,()) = do
 		{
 		mc <- ipRead port;
 		return (case mc of
 			{
-			Nothing -> Left MkArgNoneType;	-- null object, which also happens to be eof object
+			Nothing -> Left MkNullObjType;	-- null object, which also happens to be eof object
 			Just c -> Right c;
 			});
 		};
 	
-	portPeekCharP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (InputPort Char m,()) -> m (Either ArgNoneType Char);
-	portPeekCharP (port,()) = do
+	portPeekByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
+	portPeekByteP (port,()) = do
 		{
 		mc <- ipPeek port;
 		return (case mc of
 			{
-			Nothing -> Left MkArgNoneType;	-- null object, which also happens to be eof object
+			Nothing -> Left MkNullObjType;	-- null object, which also happens to be eof object
 			Just c -> Right c;
 			});
 		};
 	
-	portCharReadyP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (InputPort Char m,()) -> m Bool;
-	portCharReadyP (port,()) = ipReady port;
+	portByteReadyP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (InputPort Word8 m,()) -> m Bool;
+	portByteReadyP (port,()) = ipReady port;
 
 	-- 6.6.3 Output
-	portWriteCharP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Char,(OutputPort Char m,())) -> m ArgNoneType;
-	portWriteCharP (c,(port,())) = do
+	portWriteByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Word8,(OutputPort Word8 m,())) -> m NullObjType;
+	portWriteByteP (c,(port,())) = do
 		{
 		opWriteOne port c;
-		return MkArgNoneType;
+		return MkNullObjType;
+		};
+
+	-- conversion
+	handleUTF8Error :: (Scheme m r,?refType :: Type (r ())) =>
+	 UTF8Error -> m a;
+	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
+
+	parseUTF8Char :: (Scheme m r,?refType :: Type (r ())) =>
+	 m (Maybe Word8) -> m (Maybe Char);
+	parseUTF8Char source = runExceptionMonad handleUTF8Error (parseUTF8 source);
+
+	parseUTF8P :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
+	 (Procedure r m,()) -> m (Either NullObjType Char);
+	parseUTF8P (source,()) = do
+		{
+		mc <- parseUTF8Char (do
+			{
+			obj <- source ?bindings [];
+			meb <- getMaybeConvert obj;
+			case meb of
+				{
+				Just (Right b) -> return (Just (b :: Word8));
+				Just (Left MkNullObjType) -> return Nothing;
+				Nothing -> throwSimpleError "wrong-type";
+				};
+			});
+		return (case mc of
+			{
+			Just c -> Right c;
+			Nothing -> Left MkNullObjType;
+			});
 		};
 	}

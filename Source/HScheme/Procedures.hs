@@ -116,6 +116,13 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (Char -> a) -> (Char,()) -> m a;
 	charFuncP f (c,()) = return (f c);
 
+	integerToCharP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Integer,()) -> m Char;
+	integerToCharP (i,()) = case nthFromStart i of
+		{
+		Just c -> return c;
+		Nothing -> throwSchemeError "out-of-range-for-char" [i];
+		};
 
 	-- 6.3.5 Strings
 	isStringP :: (Scheme m r,?refType :: Type (r ())) =>
@@ -164,9 +171,10 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (SRefArray r Char,()) -> m Int;
 	stringLengthP (s,()) = return (length s);
 
-	getArrayRef :: (Monad m) => Integer -> ArrayList a -> m a;
-	getArrayRef i _ | i < 0 = fail "array out of range";
-	getArrayRef i arr | i >= convertFromInt (length arr) = fail "array out of range";
+	getArrayRef :: (Scheme m r,?refType :: Type (r ())) =>
+	 Integer -> ArrayList a -> m a;
+	getArrayRef i _ | i < 0 = throwSimpleError "out-of-range";
+	getArrayRef i arr | i >= convertFromInt (length arr) = throwSimpleError "out-of-range";
 	getArrayRef i arr = return (arr !! (convertToInt i));
 
 	stringRefP :: (Scheme m r,?refType :: Type (r ())) =>
@@ -262,6 +270,19 @@ module Org.Org.Semantic.HScheme.Procedures where
 	valuesToListP (ValuesObject list,()) = return list;
 	valuesToListP (obj,()) = return [obj];
 
+	throwP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Object r m,[Object r m]) -> m (Object r m);
+	throwP (obj,objs) = do
+		{
+		errorObj <- getConvert (obj:objs);
+		typedThrowObject ?refType errorObj;
+		};
+
+{--
+	catchM :: (Scheme m r,MonadException (Object r m) m,?refType :: Type (r ())) =>
+	 (Procedure r m,()) -> m (Object r m);
+	catchM = catch;
+--}
 
 	-- Misc
 	printList :: (Scheme m r) =>

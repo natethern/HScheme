@@ -35,7 +35,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 		Scheme m r
 		) =>
 	 Bindings r m -> [Object r m] -> m (Object r m);
-	begin bindings [] = fail "not enough arguments";
+	begin bindings objs@[] = typedThrowSimpleError (getObjectsRType objs) "too-few-ags-in-begin";
 	begin bindings [obj] = do
 		{
 		(_,result) <- topLevelEvaluate bindings obj;

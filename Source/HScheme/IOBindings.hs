@@ -26,31 +26,14 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
-	import IO;
 
-	handleInputPort :: Handle -> InputPort Char IO;
+	handleInputPort :: Handle -> InputPort Word8 IO;
 	handleInputPort h = MkInputPort
 		{
-		ipRead = do
-			{
-			eof <- hIsEOF h;
-			if (eof) then return Nothing else do
-				{
-				c <- hGetChar h;
-				return (Just c);
-				};
-			},
-		ipPeek = do
-			{
-			eof <- hIsEOF h;
-			if (eof) then return Nothing else do
-				{
-				c <- hLookAhead h;
-				return (Just c);
-				};
-			},
+		ipRead = handleRead h,
+		ipPeek = handlePeek h,
 		ipReady	= hReady h,
-		ipClose = hClose h
+		ipClose = closeSession h
 		};
 
 	remonadInputPort :: (Monad m,Monad n) =>
@@ -58,13 +41,13 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	remonadInputPort remonad (MkInputPort rd pk rdy cl) = MkInputPort
 	 (remonad rd) (remonad pk) (remonad rdy) (remonad cl);
 
-	handleOutputPort :: Handle -> OutputPort Char IO;
+	handleOutputPort :: Handle -> OutputPort Word8 IO;
 	handleOutputPort h = MkOutputPort
 		{
 		opWrite = \mc -> case mc of
 			{
-			Nothing -> hClose h;
-			Just c -> hPutChar h c;
+			Nothing -> closeSession h;
+			Just c -> handleWrite h c;
 			},
 		opFlush = hFlush h
 		};
@@ -74,20 +57,20 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	remonadOutputPort remonad (MkOutputPort w f) = MkOutputPort
 	 (\mc -> remonad (w mc)) (remonad f);
 
-	stdInputPort :: InputPort Char IO;
+	stdInputPort :: InputPort Word8 IO;
 	stdInputPort = handleInputPort stdin;
 
-	stdOutputPort :: OutputPort Char IO;
+	stdOutputPort :: OutputPort Word8 IO;
 	stdOutputPort = handleOutputPort stdout;
 
-	stdErrorPort :: OutputPort Char IO;
+	stdErrorPort :: OutputPort Word8 IO;
 	stdErrorPort = handleOutputPort stderr;
 
 	openInputFile :: (Monad m) =>
-	 (forall a. IO a -> m a) -> String -> m (InputPort Char m);
+	 (forall a. IO a -> m a) -> String -> m (InputPort Word8 m);
 	openInputFile remonad name = do
 		{
-		h <- remonad (openFile name ReadMode);
+		h <- remonad (openFileRead name);
 		return (remonadInputPort remonad (handleInputPort h));
 		};
 
@@ -98,11 +81,11 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	openFileReadWithPaths :: [String] -> String -> IO Handle;
 	openFileReadWithPaths [] name = fail ("file "++(show name)++" not found in paths");
 	openFileReadWithPaths (path:paths) name = catchSingle
-		(openFile (nameInPath path name) ReadMode)
+		(openFileRead (nameInPath path name))
 		(\_ -> openFileReadWithPaths paths name);
 
 	openInputFileWithPaths :: (Monad m) =>
-	 (forall a. IO a -> m a) -> [String] -> String -> m (InputPort Char m);
+	 (forall a. IO a -> m a) -> [String] -> String -> m (InputPort Word8 m);
 	openInputFileWithPaths remonad paths name = do
 		{
 		h <- remonad (openFileReadWithPaths paths name);
@@ -110,24 +93,24 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		};
 
 	openOutputFile :: (Monad m) =>
-	 (forall a. IO a -> m a) -> String -> m (OutputPort Char m);
+	 (forall a. IO a -> m a) -> String -> m (OutputPort Word8 m);
 	openOutputFile remonad name = do
 		{
-		h <- remonad (openFile name WriteMode);
+		h <- remonad (openFileReadWrite name);
 		return (remonadOutputPort remonad (handleOutputPort h));
 		};
 
-	ioPureSystemInterface :: (Scheme m r,Monad m) =>
+	ioPureSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdOutputPort));
 
-	ioQuietPureSystemInterface :: (Scheme m r,Monad m) =>
+	ioQuietPureSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdErrorPort));
 
-	ioFullSystemInterface :: (Scheme m r,Monad m) =>
+	ioFullSystemInterface :: (Scheme m r,?refType :: Type (r ())) =>
 	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m r;
 	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
 		{

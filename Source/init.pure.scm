@@ -208,6 +208,14 @@
 	<nothing>
 ))
 
+(define catch (syntax-rules () ((catch foo catchclause)
+	(call-with-current-continuation (lambda (cont)
+		(let ((throw (lambda (ex) (cont (catchclause ex)))))
+			foo
+		)
+	))
+)))
+
 
 ;
 (define null-environment (let ((env (current-environment)))

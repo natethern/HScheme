@@ -35,6 +35,25 @@ module Org.Org.Semantic.HScheme.SchemeCPS where
 		ExceptionError Exception		|
 		ObjError (SchemeCPSObject r p)	;
 
+	instance MonadThrow (SchemeCPSObject r p) (SchemeCPS r p) where
+		{
+		throw = throw . ObjError;
+		};
+
+	instance
+		(
+		MonadCreatable (SchemeCPS r p) r,
+		MonadGettableReference (SchemeCPS r p) r
+		) =>
+	 MonadException (SchemeCPSObject r p) (SchemeCPS r p) where
+		{
+		catch foo cc = catchSingle foo (\ex -> do
+			{
+			obj <- getConvert ex;
+			cc obj;
+			});
+		};
+
 	instance
 		(
 		MonadCreatable (SchemeCPS r p) r,
@@ -53,8 +72,8 @@ module Org.Org.Semantic.HScheme.SchemeCPS where
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
-		getConvert (ExceptionError x) = getConvert (MkSList (show x));
-		getConvert (StringError s) = getConvert (MkSList s);
+		getConvert (ExceptionError x) = getConvert (MkSymbol "failure",MkSList (show x));
+		getConvert (StringError s) = getConvert (MkSymbol "failure",MkSList s);
 		};
 
 	instance MaybeA (SchemeCPSError r p) String where

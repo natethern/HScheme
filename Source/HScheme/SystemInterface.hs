@@ -24,6 +24,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	{
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Procedures;
 	import Org.Org.Semantic.HScheme.SExpParser;
 	import Org.Org.Semantic.HScheme.Conversions;
@@ -39,11 +40,11 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	data FullSystemInterface m r = MkFullSystemInterface
 		{
 		fsiPure					:: PureSystemInterface m r,
-		fsiCurrentInputPort		:: InputPort Char m,
-		fsiCurrentOutputPort	:: OutputPort Char m,
-		fsiCurrentErrorPort		:: OutputPort Char m,
-		fsiOpenInputFile		:: String -> m (InputPort Char m),
-		fsiOpenOutputFile		:: String -> m (OutputPort Char m)
+		fsiCurrentInputPort		:: InputPort Word8 m,
+		fsiCurrentOutputPort	:: OutputPort Word8 m,
+		fsiCurrentErrorPort		:: OutputPort Word8 m,
+		fsiOpenInputFile		:: String -> m (InputPort Word8 m),
+		fsiOpenOutputFile		:: String -> m (OutputPort Word8 m)
 		};
 
 	doEval :: (Scheme m r) =>
@@ -56,17 +57,17 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		};
 
 	printResult :: (Scheme m r) =>
-	 OutputPort Char m -> Object r m -> m ();
+	 OutputPort Word8 m -> Object r m -> m ();
 	printResult output obj = if (isNullObject obj)
 	 then (return ())
 	 else do
 		{
 		str <- toString obj;
-		opWriteStrLn output str;
+		opWriteList output (encodeUTF8 (str ++ "\n"));
 		};
 
 	printeval :: (Scheme m r) =>
-	 OutputPort Char m -> Bindings r m -> Object r m -> m (Bindings r m);
+	 OutputPort Word8 m -> Bindings r m -> Object r m -> m (Bindings r m);
 	printeval output bindings obj = doEval (printResult output) bindings obj;
 
 	evalObjects :: (Scheme m r) =>
@@ -81,7 +82,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		evalObjects foo bindings' objs;
 		};
 
-	parseEvalFromString :: (Scheme m r) =>
+	parseEvalFromString :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m -> m ()) ->
 	 Bindings r m ->
 	 String ->
@@ -92,10 +93,10 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		evalObjects foo bindings objs;
 		};
 
-	parseEvalFromPortByLine :: (Scheme m r) =>
+	parseEvalFromPortByLine :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m -> m ()) ->
 	 Bindings r m ->
-	 InputPort Char m ->
+	 InputPort Word8 m ->
 	 m (Bindings r m);
 	parseEvalFromPortByLine foo bindings input = do	
 		{
@@ -111,20 +112,20 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 			};
 		};
 
-	parseEvalFromPortBulk :: (Scheme m r) =>
+	parseEvalFromPortBulk :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m -> m ()) ->
 	 Bindings r m ->
-	 InputPort Char m ->
+	 InputPort Word8 m ->
 	 m (Bindings r m);
 	parseEvalFromPortBulk foo bindings input = do	
 		{
-		text <- ipReadAll input;
+		text <- accumulateSource (parseUTF8Char (ipRead input));
 		parseEvalFromString foo bindings text;
 		};
 
-	loadBindingsWithProcs :: (Scheme m r) =>
-	 (String -> m (InputPort Char m)) ->
-	 OutputPort Char m ->
+	loadBindingsWithProcs :: (Scheme m r,?refType :: Type (r ())) =>
+	 (String -> m (InputPort Word8 m)) ->
+	 OutputPort Word8 m ->
 	 Bindings r m -> String -> m (Bindings r m);
 	loadBindingsWithProcs oif output bindings name = do
 		{
@@ -136,36 +137,36 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	loadT :: (Scheme m r) =>
 	 PureSystemInterface m r ->
-	 Bindings r m -> (SList Char,()) -> m (Bindings r m,ArgNoneType);
+	 Bindings r m -> (SList Char,()) -> m (Bindings r m,NullObjType);
 	loadT psi bindings (MkSList filename,()) = do
 		{
 		bindings' <- psiLoadBindings psi bindings filename;
-		return (bindings',MkArgNoneType);
+		return (bindings',MkNullObjType);
 		};
 
 	currentInputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 () -> m (InputPort Char m);
+	 () -> m (InputPort Word8 m);
 	currentInputPortP fsi () = return (fsiCurrentInputPort fsi);
 
 	currentOutputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 () -> m (OutputPort Char m);
+	 () -> m (OutputPort Word8 m);
 	currentOutputPortP fsi () = return (fsiCurrentOutputPort fsi);
 
 	currentErrorPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 () -> m (OutputPort Char m);
+	 () -> m (OutputPort Word8 m);
 	currentErrorPortP fsi () = return (fsiCurrentErrorPort fsi);
 
 	openInputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 (SList Char,()) -> m (InputPort Char m);
+	 (SList Char,()) -> m (InputPort Word8 m);
 	openInputFileP fsi (MkSList name,()) = fsiOpenInputFile fsi name;
 
 	openOutputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 (SList Char,()) -> m (OutputPort Char m);
+	 (SList Char,()) -> m (OutputPort Word8 m);
 	openOutputFileP fsi (MkSList name,()) = fsiOpenOutputFile fsi name;
 
 	pureSystemBindings :: (Scheme m r) =>

@@ -27,6 +27,30 @@ module Org.Org.Semantic.HScheme.Conversions where
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
+	typedThrowSchemeError :: (Scheme m r,MonadIsA m (Object r m) rest) =>
+	 Type (r ()) -> String -> rest -> m a;
+	typedThrowSchemeError t name rest = do
+		{
+		errorObj <- getConvert (MkSymbol name,rest);
+		typedThrowObject t errorObj;
+		};
+
+	typedThrowSimpleError :: (Scheme m r) =>
+	 Type (r ()) -> String -> m a;
+	typedThrowSimpleError t name = typedThrowSchemeError t name ([] :: [NullObjType]);
+
+	throwArgError :: (Scheme m r) =>
+	 String -> [Object r m] -> m a;
+	throwArgError name objs = typedThrowSchemeError (getObjectsRType objs) name objs;
+
+	throwSchemeError :: (Scheme m r,MonadIsA m (Object r m) rest,?refType :: Type (r ())) =>
+	 String -> rest -> m a;
+	throwSchemeError = typedThrowSchemeError ?refType;
+
+	throwSimpleError :: (Scheme m r,?refType :: Type (r ())) =>
+	 String -> m a;
+	throwSimpleError = typedThrowSimpleError ?refType;
+
 	class (Scheme m r) => ArgumentList m r a where
 		{
 		convertFromObjects :: [Object r m] -> m a;
@@ -35,17 +59,18 @@ module Org.Org.Semantic.HScheme.Conversions where
 	instance (Scheme m r) => ArgumentList m r () where
 		{
 		convertFromObjects [] = return ();
-		convertFromObjects (_:_) = fail "too many arguments";
+		convertFromObjects (_:_) = typedThrowSimpleError (Type :: Type (r ())) "too-many-args";
 		};
-	
-	convertFromObject :: (MonadMaybeA m to from) => from -> m to;
+
+	convertFromObject :: (Scheme m r,MonadMaybeA m to (Object r m)) =>
+	 (Object r m) -> m to;
 	convertFromObject from = do
 		{
 		mto <- getMaybeConvert from;
 		case mto of
 			{
 			Just to -> return to;
-			Nothing -> fail "wrong type for object";
+			Nothing -> throwArgError "wrong-type-arg" [from];
 			};
 		};
 
@@ -56,7 +81,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 		) =>
 	 ArgumentList m r (a,b) where
 		{
-		convertFromObjects [] = fail "too few arguments";
+		convertFromObjects [] = typedThrowSimpleError (Type :: Type (r ())) "too-few-args";
 		convertFromObjects (obj:objs) = do
 			{
 			a <- convertFromObject obj;
@@ -78,7 +103,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 			a <- convertFromObject obj;
 			return (Just a);
 			};
-		convertFromObjects _ = fail "too few arguments";
+		convertFromObjects _ = typedThrowSimpleError (Type :: Type (r ())) "too-many-args";
 		};
 
 	instance
@@ -143,16 +168,24 @@ module Org.Org.Semantic.HScheme.Conversions where
 		};
 
 	
-	-- ArgNoneType
+	-- NullObjType
 
-	data ArgNoneType = MkArgNoneType;
+	data NullObjType = MkNullObjType;
 
-	instance (Scheme m r) => MonadIsA m (Object r m) ArgNoneType where
+	instance (Scheme m r) => MonadIsA m (Object r m) NullObjType where
 		{
-		getConvert MkArgNoneType = return nullObject;
+		getConvert MkNullObjType = return nullObject;
 		};
 
+	instance (Scheme m r) => MonadMaybeA m NullObjType (Object r m) where
+		{
+		getMaybeConvert obj | isNullObject obj = return (Just MkNullObjType);
+		getMaybeConvert _ = return Nothing;
+		};
 	
+	instance (Scheme m r) => MonadSubtype m (Object r m) NullObjType;
+
+
 	-- Either
 
 	instance
@@ -564,34 +597,34 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	-- InputPort
 
-	instance (Scheme m r) => MonadIsA m (Object r m) (InputPort Char m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (InputPort Word8 m) where
 		{
 		getConvert = return . InputPortObject;
 		};
 
-	instance (Scheme m r) => MonadMaybeA m (InputPort Char m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (InputPort Word8 m) (Object r m) where
 		{
 		getMaybeConvert (InputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme m r) => MonadSubtype m (Object r m) (InputPort Char m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (InputPort Word8 m);
 
 	
 	-- OutputPort
 
-	instance (Scheme m r) => MonadIsA m (Object r m) (OutputPort Char m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (OutputPort Word8 m) where
 		{
 		getConvert = return . OutputPortObject;
 		};
 
-	instance (Scheme m r) => MonadMaybeA m (OutputPort Char m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (OutputPort Word8 m) (Object r m) where
 		{
 		getMaybeConvert (OutputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme m r) => MonadSubtype m (Object r m) (OutputPort Char m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (OutputPort Word8 m);
 
 
 	-- SRefArray r Word8
@@ -700,7 +733,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	instance (Scheme m r) => MonadSubtype m (Object r m) (SRefArray r Char);
 
 
-	-- SRefList r Word8
+	-- SRefList r Char
 
 	type StringRefType r = SRefList r Char;
 
