@@ -31,6 +31,14 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	import Org.Org.Semantic.HBase;
 
 
+	lift2 ::
+		(
+		LiftedMonad m m1,
+		LiftedMonad m1 m2
+		) =>
+	 m a -> m2 a;
+	lift2 = lift . lift;
+
 	runParser :: (Monad m) =>
 	 InputPort c m -> RecoverableStreamParser m (Maybe c) a -> m a;
 	runParser port parser = runRecoverableStreamParser (ipRead port) parser;
@@ -127,7 +135,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 p (Object r m);
 	listContentsParse = do
@@ -142,7 +151,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			{
 			head <- expressionParse;
 			tail <- listContentsParse;
-			lift (cons head tail);
+			lift2 (cons head tail);
 			}) |||
 		 (return NilObject);
 		};
@@ -151,7 +160,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 p (Object r m);
 	listParse = do
@@ -167,22 +177,24 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 String -> Symbol -> p (Object r m);
 	specialCharParse s symbol = do
 		{
 		isStringParse s;
 		h2 <- mOrFail (s++"-form") expressionParse;
-		tail <- lift (cons h2 NilObject);
-		lift (cons (SymbolObject symbol) tail);
+		tail <- lift2 (cons h2 NilObject);
+		lift2 (cons (SymbolObject symbol) tail);
 		};
 
 	quotedParse :: 
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 p (Object r m);
 	quotedParse =
@@ -248,16 +260,18 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		MonadOrParser (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 Type (r ()) -> m (Object r m) -> p (Object r m);
-	plift t = lift;
+	plift t = lift2;
 
 	expressionParse' ::
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 Type (r ()) -> p (Object r m);
 	expressionParse' t = do
@@ -277,7 +291,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 p (Object r m);
 	expressionParse = expressionParse' Type;
@@ -286,7 +301,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(
 		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedMonad m p
+		LiftedMonad m m',
+		LiftedMonad m' p
 		) =>
 	 p (Maybe (Object r m));
 	expressionOrEndParse =

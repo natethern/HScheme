@@ -30,16 +30,6 @@ module Main where
 
 	type Interact r = FullSystemInterface (M r) r -> (M r) ();
 
-	instance MonadCreatable IO Constant where
-		{
-		new a = return (MkConstant a);
-		};
-
-	instance MonadGettableReference IO Constant where
-		{
-		get (MkConstant a) = return a;
-		};
-
 	getFull :: IO Bool;
 	getFull = return True;
 {--
