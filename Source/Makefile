@@ -176,6 +176,7 @@ Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/TopLevel.h
 Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Bindings.hi
 Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Procedures.hs
 Org/Org/Semantic/HScheme/Procedures.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Numerics.hi
 Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Conversions.hi
 Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
@@ -242,6 +243,7 @@ Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
 Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
 Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/FullStandardBindings.hs
+Org/Org/Semantic/HScheme/FullStandardBindings.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
 Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Bindings.hi
 Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/StandardBindings.hi
@@ -270,6 +272,8 @@ Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FullStandardBi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FMapBindings.hi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SystemInterface.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme.hs
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Port.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Conversions.hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Evaluate.hi

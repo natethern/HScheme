@@ -37,4 +37,13 @@ module Org.Org.Semantic.HScheme.Numerics where
 	
 	isExactN :: Number -> Bool;
 	isExactN = const True;
+
+	showRational :: Rational -> String;
+	showRational r | (denominator r ==1) = show (numerator r);
+	showRational r = (show (numerator r)) ++"%"++ (show (denominator r));
+
+	showNumber :: Number -> String;
+	showNumber (r :+ i) | i == zero = showRational r;
+	showNumber (r :+ i) | r == zero = (showRational i) ++ "i";
+	showNumber (r :+ i) = (showRational r) ++ "+" ++ (showRational i) ++ "i";
 	}

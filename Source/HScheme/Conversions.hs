@@ -27,12 +27,12 @@ module Org.Org.Semantic.HScheme.Conversions where
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
-	class (Scheme x m r) => ArgumentList x m r a where
+	class (Scheme m r) => ArgumentList m r a where
 		{
 		convertFromObjects :: [Object r m] -> m a;
 		};
 
-	instance (Scheme x m r) => ArgumentList x m r () where
+	instance (Scheme m r) => ArgumentList m r () where
 		{
 		convertFromObjects [] = return ();
 		convertFromObjects (_:_) = fail "too many arguments";
@@ -52,9 +52,9 @@ module Org.Org.Semantic.HScheme.Conversions where
 	instance
 		(
 		MonadMaybeA m a (Object r m),
-		ArgumentList x m r b
+		ArgumentList m r b
 		) =>
-	 ArgumentList x m r (a,b) where
+	 ArgumentList m r (a,b) where
 		{
 		convertFromObjects [] = fail "too few arguments";
 		convertFromObjects (obj:objs) = do
@@ -67,10 +67,10 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m a (Object r m)
 		) =>
-	 ArgumentList x m r (Maybe a) where
+	 ArgumentList m r (Maybe a) where
 		{
 		convertFromObjects [] = return Nothing;
 		convertFromObjects [obj] = do
@@ -83,10 +83,10 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m a (Object r m)
 		) =>
-	 ArgumentList x m r [a] where
+	 ArgumentList m r [a] where
 		{
 		convertFromObjects [] = return [];
 		convertFromObjects (obj:objs) = do
@@ -99,7 +99,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	convertToProcedure ::
 		(
-		ArgumentList x m r args,
+		ArgumentList m r args,
 		MonadIsA m (Object r m) ret
 		) =>
 	 ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
@@ -113,7 +113,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	convertToMacro ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m args (Object r m),
 		MonadIsA m (Object r m) ret
 		) =>
@@ -128,7 +128,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	convertToTopLevelMacro ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m args (Object r m),
 		MonadIsA m (Object r m) ret
 		) =>
@@ -147,7 +147,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	data ArgNoneType = MkArgNoneType;
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) ArgNoneType where
+	instance (Scheme m r) => MonadIsA m (Object r m) ArgNoneType where
 		{
 		getConvert MkArgNoneType = return nullObject;
 		};
@@ -157,7 +157,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadIsA m (Object r m) a,
 		MonadIsA m (Object r m) b
 		) => MonadIsA m (Object r m) (Either a b) where
@@ -168,7 +168,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m a (Object r m),
 		MonadMaybeA m b (Object r m)
 		) => MonadMaybeA m (Either a b) (Object r m) where
@@ -194,7 +194,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadSubtype m (Object r m) a,
 		MonadSubtype m (Object r m) b
 		) =>
@@ -205,25 +205,25 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	type NilType = ();
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) NilType where
+	instance (Scheme m r) => MonadIsA m (Object r m) NilType where
 		{
 		getConvert () = return NilObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m NilType (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m NilType (Object r m) where
 		{
 		getMaybeConvert NilObject = return (Just ());
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) NilType;
+	instance (Scheme m r) => MonadSubtype m (Object r m) NilType;
 
 	
 	-- Maybe a
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadIsA m (Object r m) a
 		) =>
 	 MonadIsA m (Object r m) (Maybe a) where
@@ -234,7 +234,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m a (Object r m)
 		) =>
 	 MonadMaybeA m (Maybe a) (Object r m) where
@@ -254,7 +254,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadSubtype m (Object r m) a
 		) =>
 	 MonadSubtype m (Object r m) (Maybe a);
@@ -264,7 +264,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadIsA m (Object r m) a
 		) =>
 	 MonadIsA m (Object r m) [a] where
@@ -275,7 +275,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m a (Object r m)
 		) =>
 	 MonadMaybeA m [a] (Object r m) where
@@ -295,7 +295,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadSubtype m (Object r m) a
 		) =>
 	 MonadSubtype m (Object r m) [a];
@@ -307,7 +307,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadIsA m (Object r m) ah,
 		MonadIsA m (Object r m) at
 		) =>
@@ -332,7 +332,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 --}
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m ah (Object r m),
 		MonadMaybeA m at (Object r m)
 		) =>
@@ -356,7 +356,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadSubtype m (Object r m) ah,
 		MonadSubtype m (Object r m) at
 		) =>
@@ -365,27 +365,27 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	-- Object
 
-	instance (Scheme x m r) => MonadMaybeA m (Object r m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (Object r m) (Object r m) where
 		{
 		getMaybeConvert = return . Just;
 		};
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (Object r m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (Object r m) where
 		{
 		getConvert = return;
 		};
 
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (Object r m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (Object r m);
 
 	
 	-- Bool
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Bool where
+	instance (Scheme m r) => MonadIsA m (Object r m) Bool where
 		{
 		getConvert = return . BooleanObject;
 		};
 
-	instance (Scheme x m r) => MonadIsA m Bool (Object r m) where
+	instance (Scheme m r) => MonadIsA m Bool (Object r m) where
 		{
 		getConvert (BooleanObject a) = return a;
 		
@@ -393,7 +393,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 		getConvert _ = return True;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Bool (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Bool (Object r m) where
 		{
 		getMaybeConvert obj = do
 			{
@@ -402,49 +402,49 @@ module Org.Org.Semantic.HScheme.Conversions where
 			};
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Bool;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Bool;
 
 	
 	-- Char
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Char where
+	instance (Scheme m r) => MonadIsA m (Object r m) Char where
 		{
 		getConvert = return . CharObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Char (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Char (Object r m) where
 		{
 		getMaybeConvert (CharObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Char;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Char;
 
 	
 	-- Number
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Number where
+	instance (Scheme m r) => MonadIsA m (Object r m) Number where
 		{
 		getConvert = return . NumberObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Number (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Number (Object r m) where
 		{
 		getMaybeConvert (NumberObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Number;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Number;
 
 
 	-- Integer
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Integer where
+	instance (Scheme m r) => MonadIsA m (Object r m) Integer where
 		{
 		getConvert i = getConvert (convert i :: Number);
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Integer (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Integer (Object r m) where
 		{
 		getMaybeConvert obj = do
 			{
@@ -457,17 +457,17 @@ module Org.Org.Semantic.HScheme.Conversions where
 			};
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Integer;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Integer;
 
 
 	-- Rational
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Rational where
+	instance (Scheme m r) => MonadIsA m (Object r m) Rational where
 		{
 		getConvert i = getConvert (convert i :: Number);
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Rational (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Rational (Object r m) where
 		{
 		getMaybeConvert obj = do
 			{
@@ -480,78 +480,78 @@ module Org.Org.Semantic.HScheme.Conversions where
 			};
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Rational;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Rational;
 
 	
 	-- Symbol
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) Symbol where
+	instance (Scheme m r) => MonadIsA m (Object r m) Symbol where
 		{
 		getConvert = return . SymbolObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m Symbol (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m Symbol (Object r m) where
 		{
 		getMaybeConvert (SymbolObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) Symbol;
+	instance (Scheme m r) => MonadSubtype m (Object r m) Symbol;
 
 	
 	-- Bindings
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (Bindings r m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (Bindings r m) where
 		{
 		getConvert = return . BindingsObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (Bindings r m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (Bindings r m) (Object r m) where
 		{
 		getMaybeConvert (BindingsObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (Bindings r m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (Bindings r m);
 
 	
 	-- InputPort
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (InputPort Char m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (InputPort Char m) where
 		{
 		getConvert = return . InputPortObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (InputPort Char m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (InputPort Char m) (Object r m) where
 		{
 		getMaybeConvert (InputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (InputPort Char m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (InputPort Char m);
 
 	
 	-- OutputPort
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (OutputPort Char m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (OutputPort Char m) where
 		{
 		getConvert = return . OutputPortObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (OutputPort Char m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (OutputPort Char m) (Object r m) where
 		{
 		getMaybeConvert (OutputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (OutputPort Char m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (OutputPort Char m);
 
 
 	-- StringType
 
 	newtype StringType = MkStringType String;
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) StringType where
+	instance (Scheme m r) => MonadIsA m (Object r m) StringType where
 		{
 		getConvert (MkStringType s) = do
 			{
@@ -569,7 +569,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 			};
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m StringType (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m StringType (Object r m) where
 		{
 		getMaybeConvert (StringObject rlist) = do
 			{
@@ -588,55 +588,55 @@ module Org.Org.Semantic.HScheme.Conversions where
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) StringType;
+	instance (Scheme m r) => MonadSubtype m (Object r m) StringType;
 
 
 	-- StringRefType
 
 	newtype StringRefType r = MkStringRefType [r Char];
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (StringRefType r) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (StringRefType r) where
 		{
 		getConvert (MkStringRefType rs) = return (StringObject rs);
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (StringRefType r) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (StringRefType r) (Object r m) where
 		{
 		getMaybeConvert (StringObject rs) = return (Just (MkStringRefType rs));
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (StringRefType r);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (StringRefType r);
 
 	
 	-- Procedure
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (Procedure r m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (Procedure r m) where
 		{
 		getConvert = return . ProcedureObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (Procedure r m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (Procedure r m) (Object r m) where
 		{
 		getMaybeConvert (ProcedureObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (Procedure r m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (Procedure r m);
 
 	
 	-- Syntax
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (Syntax r m) where
+	instance (Scheme m r) => MonadIsA m (Object r m) (Syntax r m) where
 		{
 		getConvert = return . SyntaxObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (Syntax r m) (Object r m) where
+	instance (Scheme m r) => MonadMaybeA m (Syntax r m) (Object r m) where
 		{
 		getMaybeConvert (SyntaxObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (Syntax r m);
+	instance (Scheme m r) => MonadSubtype m (Object r m) (Syntax r m);
 	}

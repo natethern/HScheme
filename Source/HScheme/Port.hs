@@ -32,6 +32,44 @@ module Org.Org.Semantic.HScheme.Port where
 		ipClose	:: m ()
 		};
 
+	referenceInputPort :: (MonadFixedReference m r) =>
+	 r [c] -> InputPort c m;
+	referenceInputPort ref = MkInputPort
+		{
+		ipRead = do
+			{
+			la <- get ref;
+			case la of
+				{
+				[] -> return Nothing;
+				(a:as) -> do
+					{
+					set ref as;
+					return (Just a);
+					};
+				};
+			},
+		ipPeek = do
+			{
+			la <- get ref;
+			case la of
+				{
+				[] -> return Nothing;
+				(a:as) -> return (Just a);
+				};
+			},
+		ipReady = return True,
+		ipClose = return ()
+		};
+
+	refInputPort :: (Monad m) =>
+	 Ref m [c] -> InputPort c m;
+	refInputPort = referenceInputPort;
+
+	stateInputPort :: (Monad m) =>
+	 InputPort c (StateMonad [c] m);
+	stateInputPort = refInputPort stateRef;
+
 	data (Monad m) => OutputPort c m = MkOutputPort
 		{
 		opWrite	:: Maybe c -> m (),
@@ -49,10 +87,13 @@ module Org.Org.Semantic.HScheme.Port where
 		opWriteList port cs;
 		};
 
+	opWriteStr :: (Monad m) => OutputPort Char m -> String -> m ();
+	opWriteStr = opWriteList;
+
 	opWriteStrLn :: (Monad m) => OutputPort Char m -> String -> m ();
 	opWriteStrLn port s = do
 		{
-		opWriteList port s;
+		opWriteStr port s;
 		opWriteOne port '\n';
 		};
 

@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	-- 4.1.6 Assignments
 	setBang ::
 		(
-		FullScheme x m r,
+		FullScheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Symbol -> Object r m -> m ();
@@ -42,7 +42,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	
 	setBangM ::
 		(
-		FullScheme x m r,
+		FullScheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Symbol,(Object r m,())) -> m ArgNoneType;
@@ -54,7 +54,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		};
 
 	-- 6.3.2 Pairs and Lists
-	setCarP ::  (FullScheme x m r) =>
+	setCarP ::  (FullScheme m r) =>
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
 	setCarP Type ((PairObject carLoc _),(obj,())) = do
 		{
@@ -63,7 +63,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		};	
 	setCarP Type (_,(obj,())) = fail "not a pair";	
 
-	setCdrP ::  (FullScheme x m r) =>
+	setCdrP ::  (FullScheme m r) =>
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
 	setCdrP Type ((PairObject _ cdrLoc),(obj,())) = do
 		{
@@ -79,7 +79,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	getListRef _ [] = fail "array out of range";
 	getListRef i (_:as) = getListRef (i - 1) as;
 
-	stringSetP :: (FullScheme x m r) =>
+	stringSetP :: (FullScheme m r) =>
 	 Type (r ()) -> (StringRefType r,(Integer,(Char,()))) -> m ArgNoneType;
 	stringSetP Type (MkStringRefType rs,(i,(c,()))) = do
 		{

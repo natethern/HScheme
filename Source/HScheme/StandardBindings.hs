@@ -38,7 +38,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	loop :: a;
 	loop = loop;
 
-	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
+	stdBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
@@ -147,7 +147,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		{
 		};
 
-	monadicStdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
+	monadicStdBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
 	monadicStdBindings = chainList
 		[
 		stdBindings,

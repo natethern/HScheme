@@ -34,7 +34,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	-- 5.2 Definitions
 	defineT ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,ArgNoneType);
 	defineT bindings (h,t) = do
@@ -71,7 +71,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	
 	topLevelApplyEval ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m,Object r m);
 	topLevelApplyEval bindings (TopLevelMacroObject f) arglist = do
@@ -86,7 +86,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 
 	topLevelEvaluate ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 TopLevelMacro r m;
 	
@@ -111,7 +111,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 {--
 	topLevelEvaluateList ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [Object r m] -> m (Bindings r m);
 	

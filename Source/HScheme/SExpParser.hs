@@ -125,7 +125,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listContentsParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -149,7 +149,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -165,7 +165,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	specialCharParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -180,7 +180,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	quotedParse :: 
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -193,7 +193,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	hashLiteralParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p
 		) => 
 	 p (Object r m);
@@ -246,7 +246,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	plift ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadOrParser (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -255,7 +255,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	expressionParse' ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -275,7 +275,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	expressionParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -284,7 +284,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	expressionOrEndParse ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
@@ -294,11 +294,11 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(optionalWhitespaceParse >> streamEndParse >> (return Nothing)) |||
 		(unexpectedCharacterError "input");
 
-	portRead :: (Scheme x m r) =>
+	portRead :: (Scheme m r) =>
 	 InputPort Char m -> m (Maybe (Object r m));
 	portRead port = runParser port expressionOrEndParse;
 
-	portReadP :: (Scheme x m r) =>
+	portReadP :: (Scheme m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m (Object r m);
 	portReadP Type (port,()) = do
 		{		

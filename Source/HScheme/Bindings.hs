@@ -28,7 +28,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addBinding ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Symbol -> Object r m -> Bindings r m -> m (Bindings r m);
 	addBinding name obj b = do
@@ -39,7 +39,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addProcBinding ::
 		(
-		ArgumentList x m r args,
+		ArgumentList m r args,
 		MonadIsA m (Object r m) ret
 		) =>
 	 String ->
@@ -53,7 +53,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addMacroBinding ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m args (Object r m),
 		MonadIsA m (Object r m) ret
 		) =>
@@ -68,7 +68,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addTopLevelMacroBinding ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadMaybeA m args (Object r m),
 		MonadIsA m (Object r m) ret
 		) =>

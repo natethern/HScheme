@@ -22,6 +22,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme
 	(
+	module Org.Org.Semantic.HScheme.Numerics,
+	module Org.Org.Semantic.HScheme.Port,
+
 	module Org.Org.Semantic.HScheme.Object,
 	module Org.Org.Semantic.HScheme.Conversions,
 	module Org.Org.Semantic.HScheme.Evaluate,
@@ -54,4 +57,7 @@ module Org.Org.Semantic.HScheme
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
+
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HScheme.Numerics;
 	}

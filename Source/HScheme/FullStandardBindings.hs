@@ -27,8 +27,9 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	import Org.Org.Semantic.HScheme.StandardBindings;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 
-	fullStdBindings :: (FullScheme x m r) => Bindings r m -> m (Bindings r m);
+	fullStdBindings :: (FullScheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
 	fullStdBindings = chainList
 		[
 		monadicStdBindings,

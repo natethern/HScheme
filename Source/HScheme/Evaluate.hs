@@ -31,7 +31,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 
 	evaluate ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Object r m -> m (Object r m);
@@ -62,7 +62,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	
 	evaluateP ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
@@ -71,7 +71,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	
 	evalList ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Object r m -> m [Object r m];
@@ -88,7 +88,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	
 	macroToList ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Object r m -> m [Object r m];
@@ -104,7 +104,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	
 	applyEval ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Object r m -> Object r m -> m (Object r m);

@@ -27,61 +27,61 @@ module Org.Org.Semantic.HScheme.NumericProcedures where
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
-	isNumberP :: (Scheme x m r) =>
+	isNumberP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isNumberP Type (NumberObject _,()) = return True;
 	isNumberP Type (_,()) = return False;
 
-	isExactP :: (Scheme x m r) =>
+	isExactP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isExactP Type (NumberObject n,()) = return (isExactN n);
 	isExactP Type (_,()) = return False;
 
-	isInexactP :: (Scheme x m r) =>
+	isInexactP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isInexactP Type (NumberObject n,()) = return (not (isExactN n));
 	isInexactP Type (_,()) = return False;
 
-	realPartP :: (Scheme x m r) =>
+	realPartP :: (Scheme m r) =>
 	 Type (r ()) -> (Number,()) -> m Number;
 	realPartP Type (n,()) = return ((realPart n) :+ 0);
 
-	imagPartP :: (Scheme x m r) =>
+	imagPartP :: (Scheme m r) =>
 	 Type (r ()) -> (Number,()) -> m Number;
 	imagPartP Type (n,()) = return ((imagPart n) :+ 0);
 
-	isZeroP :: (Scheme x m r) =>
+	isZeroP :: (Scheme m r) =>
 	 Type (r ()) -> (Number,()) -> m Bool;
 	isZeroP Type (n,()) = return (n == 0);
 
-	unaryP :: (Scheme x m r) =>
+	unaryP :: (Scheme m r) =>
 	 (Number -> Number) ->
 	 Type (r ()) -> (Number,()) -> m Number;
 	unaryP op Type (a,()) = return (op a);
 
-	binaryP :: (Scheme x m r) =>
+	binaryP :: (Scheme m r) =>
 	 (Number -> Number -> Number) ->
 	 Type (r ()) -> (Number,(Number,())) -> m Number;
 	binaryP op Type (a,(b,())) = return (op a b);
 
-	foldingLP :: (Scheme x m r) =>
+	foldingLP :: (Scheme m r) =>
 	 (a -> Number -> a) ->
 	 a ->
 	 Type (r ()) -> [Number] -> m a;
 	foldingLP op a Type ns = return (foldl op a ns);
 
-	inverterFoldingLP :: (Scheme x m r) =>
+	inverterFoldingLP :: (Scheme m r) =>
 	 (Number -> Number -> Number) ->
 	 Number ->
 	 Type (r ()) -> (Number,[Number]) -> m Number;
 	inverterFoldingLP op a Type (n,[]) = return (op a n);
 	inverterFoldingLP op _ Type (n,ns) = return (foldl op n ns);
 	
-	subtractP :: (Scheme x m r) =>
+	subtractP :: (Scheme m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
 	subtractP = inverterFoldingLP (-) 0;
 {--	
-	divideP :: (Scheme x m r) =>
+	divideP :: (Scheme m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
 	divideP = inverterFoldingLP (/) 1;
 --}	}

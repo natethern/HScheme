@@ -35,18 +35,20 @@ module Org.Org.Semantic.HScheme.Interactive where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	reportError :: (Scheme x m r) =>
+	reportError :: (Scheme m r,Show x) =>
 	 Type (r ()) -> OutputPort Char m -> x -> m ();
 	reportError t errPort error = do
 		{
-		errObj <- getConvert error;
-		(MkStringType errText) <- toStringP t (errObj,());
-		opWriteStrLn errPort ("error: "++errText);
+		opWriteStrLn errPort ("error: "++(show error));
 		opFlush errPort;
 		};
 
-	interactiveLoop :: (Scheme x m r,
-		MonadBottom m,IsA x Exception
+	interactiveLoop ::
+		(
+		Scheme m r,
+		MonadBottom m,
+		MonadSingleException x m,
+		Show x
 		) =>
 	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
 	interactiveLoop t fsi bindings = do
@@ -66,7 +68,12 @@ module Org.Org.Semantic.HScheme.Interactive where
 					return (Just bindings');
 					};
 				};
-			}) (\ex -> throwSingle (convert ex))
+			}) (\ex -> do
+				{
+				runParser input restOfLineParse;
+				reportError t (fsiCurrentErrorPort fsi) ex;
+				return (Just bindings);
+				})
 			)
 			(\error -> do
 			{
@@ -84,9 +91,11 @@ module Org.Org.Semantic.HScheme.Interactive where
 
 	interact ::
 		(
-		Scheme x m r,
+		Scheme m r,
+		MonadCont m,
 		MonadBottom m,
-		IsA x Exception
+		MonadSingleException x m,
+		Show x
 		) =>
 	 Type (r ()) ->
 	 FullSystemInterface m r ->
@@ -110,9 +119,10 @@ module Org.Org.Semantic.HScheme.Interactive where
 
 	safePureInteract ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadBottom m,
-		IsA x Exception
+		MonadSingleException x m,
+		Show x
 		) =>
 	 FullSystemInterface m r -> m ();
 	safePureInteract fsi = do
@@ -121,14 +131,29 @@ module Org.Org.Semantic.HScheme.Interactive where
 			[
 			stdBindings
 			] emptyBindings;
-		interact Type fsi bindings  "Prelude.pure.scm";
+		catchSingle (do
+			{
+			bindings' <- psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm";
+			interactiveLoop t fsi bindings';
+			})
+			(\error -> do
+			{
+			reportError t (fsiCurrentErrorPort fsi) error;
+			});
+		} where
+		{
+		foo :: FullSystemInterface m r -> Type (r ());
+		foo _ =Type;
+		t = foo fsi
 		};
 
 	pureInteract ::
 		(
-		Scheme x m r,
+		Scheme m r,
+		MonadCont m,
 		MonadBottom m,
-		IsA x Exception
+		MonadSingleException x m,
+		Show x
 		) =>
 	 FullSystemInterface m r -> m ();
 	pureInteract fsi = do
@@ -143,9 +168,11 @@ module Org.Org.Semantic.HScheme.Interactive where
 
 	fullInteract ::
 		(
-		FullScheme x m r,
+		FullScheme m r,
+		MonadCont m,
 		MonadBottom m,
-		IsA x Exception
+		MonadSingleException x m,
+		Show x
 		) =>
 	 FullSystemInterface m r -> m ();
 	fullInteract fsi = do

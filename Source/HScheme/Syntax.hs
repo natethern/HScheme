@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	addBindings ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 [Binding r m] -> Bindings r m -> m (Bindings r m);
 	addBindings [] bindings = return bindings;
@@ -42,7 +42,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		addBindings binds bindings';
 		};
 
-	substitute :: (Scheme x m r) =>
+	substitute :: (Scheme m r) =>
 	 [Binding r m] -> Object r m -> m (Object r m);
 	substitute [] x = return x;
 	substitute subs (PairObject hloc tloc) = do
@@ -69,7 +69,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 else substitute subs (SymbolObject name);
 	substitute _ x = return x;
 
-	matchBinding :: (Scheme x m r) =>
+	matchBinding :: (Scheme m r) =>
 	 [Symbol] -> Object r m -> Object r m -> m (Maybe [Binding r m]);
 	matchBinding literals NilObject NilObject = return (Just []);
 	matchBinding literals NilObject _ = return Nothing;
@@ -105,7 +105,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 else return (Just [MkBinding name args]);
 	matchBinding literals _ _ = return Nothing;
 	
-	matchBindings :: (Scheme x m r) =>
+	matchBindings :: (Scheme m r) =>
 	 [Symbol] -> Object r m -> [Object r m] -> m (Maybe [Binding r m]);
 	matchBindings literals NilObject [] = return (Just []);
 	matchBindings literals (PairObject phl ptl) (a1:as) = do
@@ -139,7 +139,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	caseMatch ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
 	caseMatch (arg,(literals,[])) = fail "no match";
@@ -155,7 +155,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	caseMatchM ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
@@ -167,7 +167,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		let {?bindings = bindings;} in evaluate expr;
 		};
 
-	syntaxRulesM :: (Scheme x m r) =>
+	syntaxRulesM :: (Scheme m r) =>
 	 Type (r ()) -> ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
 	syntaxRulesM Type (literals,rules) = do
 		{

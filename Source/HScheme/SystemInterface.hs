@@ -46,27 +46,35 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		fsiOpenOutputFile		:: String -> m (OutputPort Char m)
 		};
 
-	printeval :: (Scheme x m r) =>
-	 OutputPort Char m -> Bindings r m -> Object r m -> m (Bindings r m);
-	printeval output bindings obj = do
+	doEval :: (Scheme m r) =>
+	 (Object r m -> m ()) -> Bindings r m -> Object r m -> m (Bindings r m);
+	doEval foo bindings obj = do
 		{
 		(bindings',result) <- topLevelEvaluate bindings obj;
-		if (isNullObject result)
-		 then (return ())
-		 else do
-			{
-			str <- toString result;
-			opWriteStrLn output str;
-			};
+		foo result;
 		return bindings';	
 		};
 
-	readLoad :: (Scheme x m r) =>
+	printResult :: (Scheme m r) =>
+	 OutputPort Char m -> Object r m -> m ();
+	printResult output obj = if (isNullObject obj)
+	 then (return ())
+	 else do
+		{
+		str <- toString obj;
+		opWriteStrLn output str;
+		};
+
+	printeval :: (Scheme m r) =>
+	 OutputPort Char m -> Bindings r m -> Object r m -> m (Bindings r m);
+	printeval output bindings obj = doEval (printResult output) bindings obj;
+
+	readLoad :: (Scheme m r) =>
+	 (Object r m -> m ()) ->
 	 Bindings r m ->
 	 InputPort Char m ->
-	 OutputPort Char m ->
 	 m (Bindings r m);
-	readLoad bindings input output = do	
+	readLoad foo bindings input = do	
 		{
 		mobject <- portRead input;
 		case mobject of
@@ -74,25 +82,25 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 			Nothing -> return bindings;
 			Just obj -> do
 				{
-				bindings' <- printeval output bindings obj;
-				readLoad bindings' input output;
+				bindings' <- doEval foo bindings obj;
+				readLoad foo bindings' input;
 				};
 			};
 		};
 
-	loadBindingsWithProcs :: (Scheme x m r) =>
+	loadBindingsWithProcs :: (Scheme m r) =>
 	 (String -> m (InputPort Char m)) ->
 	 OutputPort Char m ->
 	 Bindings r m -> String -> m (Bindings r m);
 	loadBindingsWithProcs oif output bindings name = do
 		{
 		input <- oif name;
-		bindings' <- readLoad bindings input output;
+		bindings' <- readLoad (printResult output) bindings input;
 		ipClose input;
 		return bindings';
 		};
 
-	loadT :: (Scheme x m r) =>
+	loadT :: (Scheme m r) =>
 	 PureSystemInterface m r ->
 	 Bindings r m -> (StringType,()) -> m (Bindings r m,ArgNoneType);
 	loadT psi bindings (MkStringType filename,()) = do
@@ -101,32 +109,32 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		return (bindings',MkArgNoneType);
 		};
 
-	currentInputPortP :: (Scheme x m r) =>
+	currentInputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
 	 Type (r ()) -> () -> m (InputPort Char m);
 	currentInputPortP fsi Type () = return (fsiCurrentInputPort fsi);
 
-	currentOutputPortP :: (Scheme x m r) =>
+	currentOutputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
 	 Type (r ()) -> () -> m (OutputPort Char m);
 	currentOutputPortP fsi Type () = return (fsiCurrentOutputPort fsi);
 
-	currentErrorPortP :: (Scheme x m r) =>
+	currentErrorPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
 	 Type (r ()) -> () -> m (OutputPort Char m);
 	currentErrorPortP fsi Type () = return (fsiCurrentErrorPort fsi);
 
-	openInputFileP :: (Scheme x m r) =>
+	openInputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
 	 Type (r ()) -> (StringType,()) -> m (InputPort Char m);
 	openInputFileP fsi Type (MkStringType name,()) = fsiOpenInputFile fsi name;
 
-	openOutputFileP :: (Scheme x m r) =>
+	openOutputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
 	 Type (r ()) -> (StringType,()) -> m (OutputPort Char m);
 	openOutputFileP fsi Type (MkStringType name,()) = fsiOpenOutputFile fsi name;
 
-	pureSystemBindings :: (Scheme x m r) =>
+	pureSystemBindings :: (Scheme m r) =>
 	 PureSystemInterface m r -> Bindings r m -> m (Bindings r m);
 	pureSystemBindings psi = chainList
 		[
@@ -134,7 +142,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		addTopLevelMacroBinding	"load"	(loadT psi)
 		];
 
-	fullSystemBindings :: (Scheme x m r) =>
+	fullSystemBindings :: (Scheme m r) =>
 	 FullSystemInterface m r -> Bindings r m -> m (Bindings r m);
 	fullSystemBindings fsi = chainList
 		[

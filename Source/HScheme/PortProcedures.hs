@@ -28,17 +28,17 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 	import Org.Org.Semantic.HBase;
 
 	-- 6.6.1 Ports
-	isInputPortP :: (Scheme x m r) =>
+	isInputPortP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isInputPortP Type (InputPortObject _,()) = return True;
 	isInputPortP Type (_,()) = return False;
 
-	isOutputPortP :: (Scheme x m r) =>
+	isOutputPortP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isOutputPortP Type (OutputPortObject _,()) = return True;
 	isOutputPortP Type (_,()) = return False;
 
-	inputPortCloseP :: (Scheme x m r) =>
+	inputPortCloseP :: (Scheme m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m ArgNoneType;
 	inputPortCloseP Type (port,()) = do
 		{
@@ -46,7 +46,7 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		return MkArgNoneType;
 		};
 
-	outputPortCloseP :: (Scheme x m r) =>
+	outputPortCloseP :: (Scheme m r) =>
 	 Type (r ()) -> (OutputPort Char m,()) -> m ArgNoneType;
 	outputPortCloseP Type (port,()) = do
 		{
@@ -55,14 +55,14 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		};
 
 	-- 6.6.2 Input
-	eofObject :: (Scheme x m r) => Object r m;
+	eofObject :: (Scheme m r) => Object r m;
 	eofObject = nullObject;
 
-	isEOFObjectP :: (Scheme x m r) =>
+	isEOFObjectP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isEOFObjectP Type (obj,()) = return (isNullObject obj);
 	
-	portReadCharP :: (Scheme x m r) =>
+	portReadCharP :: (Scheme m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m (Either ArgNoneType Char);
 	portReadCharP Type (port,()) = do
 		{
@@ -74,7 +74,7 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 			});
 		};
 	
-	portPeekCharP :: (Scheme x m r) =>
+	portPeekCharP :: (Scheme m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m (Either ArgNoneType Char);
 	portPeekCharP Type (port,()) = do
 		{
@@ -86,12 +86,12 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 			});
 		};
 	
-	portCharReadyP :: (Scheme x m r) =>
+	portCharReadyP :: (Scheme m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m Bool;
 	portCharReadyP Type (port,()) = ipReady port;
 
 	-- 6.6.3 Output
-	portWriteCharP :: (Scheme x m r) =>
+	portWriteCharP :: (Scheme m r) =>
 	 Type (r ()) -> (Char,(OutputPort Char m,())) -> m ArgNoneType;
 	portWriteCharP Type (c,(port,())) = do
 		{

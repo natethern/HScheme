@@ -25,21 +25,22 @@ module Org.Org.Semantic.HScheme.Procedures where
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
 	-- 4.1.2 Literal Expressions
-	quote :: (Scheme x m r) =>
+	quote :: (Scheme m r) =>
 	 Object r m -> m (Object r m);
 	quote = return;
 
-	quoteM :: (Scheme x m r) =>
+	quoteM :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m (Object r m);
 	quoteM Type (q,()) = quote q;
 	
 	-- 4.1.5 Conditionals
 	ifM ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,(Object r m,Maybe (Object r m))) -> m (Object r m);
@@ -57,73 +58,73 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 
 	-- 6.3.1 Booleans
-	notP :: (Scheme x m r) =>
+	notP :: (Scheme m r) =>
 	 Type (r ()) -> (Bool,()) -> m Bool;
 	notP Type (b,()) = return (not b);
 
-	isBooleanP :: (Scheme x m r) =>
+	isBooleanP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isBooleanP Type (BooleanObject _,()) = return True;
 	isBooleanP Type (_,()) = return False;
 
 	-- 6.3.2 Pairs and Lists
-	isPairP :: (Scheme x m r) =>
+	isPairP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isPairP Type (PairObject _ _,()) = return True;
 	isPairP Type (_,()) = return False;
 
-	consP :: (Scheme x m r) =>
+	consP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m (Object r m);
 	consP Type (h,(t,())) = cons h t;
 
-	carP :: (Scheme x m r) =>
+	carP :: (Scheme m r) =>
 	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
 	carP Type ((h,_),()) = return h;
 
-	cdrP :: (Scheme x m r) =>
+	cdrP :: (Scheme m r) =>
 	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
 	cdrP Type ((_,t),()) = return t;
 
-	isNilP :: (Scheme x m r) =>
+	isNilP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isNilP Type (NilObject,()) = return True;
 	isNilP Type (_,()) = return False;
 
-	listP ::  (Scheme x m r) =>
+	listP ::  (Scheme m r) =>
 	 Type (r ()) -> [Object r m] -> m [Object r m];
 	listP Type list = return list;
 
-	appendP ::  (Scheme x m r) =>
+	appendP ::  (Scheme m r) =>
 	 Type (r ()) -> [[Object r m]] -> m [Object r m];
 	appendP Type listlist = return (concatenateList listlist);
 
 	-- 6.3.3 Symbols
-	isSymbolP :: (Scheme x m r) =>
+	isSymbolP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isSymbolP Type (SymbolObject _,()) = return True;
 	isSymbolP Type (_,()) = return False;
 
-	makeSymbolP :: (Scheme x m r) =>
+	makeSymbolP :: (Scheme m r) =>
 	 Type (r ()) -> (StringType,()) -> m Symbol;
 	makeSymbolP Type (MkStringType s,()) = return (MkSymbol s);
 
 	-- 6.3.4 Characters
-	charTestP :: (Scheme x m r) =>
+	charTestP :: (Scheme m r) =>
 	 (Char -> Bool) -> Type (r ()) -> (Object r m,()) -> m Bool;
 	charTestP f Type (CharObject c,()) = return (f c);
 	charTestP f Type (_,()) = return False;
 
-	charFuncP :: (Scheme x m r) =>
+	charFuncP :: (Scheme m r) =>
 	 (Char -> a) -> Type (r ()) -> (Char,()) -> m a;
 	charFuncP f Type (c,()) = return (f c);
 
 	-- 6.3.5 Strings
-	isStringP :: (Scheme x m r) =>
+	isStringP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isStringP Type (StringObject _,()) = return True;
 	isStringP Type (_,()) = return False;
 
-	makeRefList :: (Scheme x m r) =>
+	makeRefList :: (Scheme m r) =>
 	 Integer -> a -> m [r a];
 	makeRefList 0 _ = return [];
 	makeRefList i c = do
@@ -133,7 +134,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (first:rest);
 		};
 
-	makeStringP :: (Scheme x m r) =>
+	makeStringP :: (Scheme m r) =>
 	 Type (r ()) -> (Integer,Maybe Char) -> m (StringRefType r);
 	makeStringP Type (i,Nothing) = do
 		{
@@ -156,7 +157,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (first:rest);
 		};
 
-	stringP :: (Scheme x m r) =>
+	stringP :: (Scheme m r) =>
 	 Type (r ()) -> [Char] -> m (StringRefType r);
 	stringP Type cs = do	
 		{
@@ -164,7 +165,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (MkStringRefType rs);
 		};
 
-	stringLengthP :: (Scheme x m r) =>
+	stringLengthP :: (Scheme m r) =>
 	 Type (r ()) -> (StringRefType r,()) -> m Integer;
 	stringLengthP Type (MkStringRefType rs,()) = return (length rs);
 
@@ -174,7 +175,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	getListRef _ [] = fail "array out of range";
 	getListRef i (_:as) = getListRef (i - 1) as;
 
-	stringRefP :: (Scheme x m r) =>
+	stringRefP :: (Scheme m r) =>
 	 Type (r ()) -> (StringRefType r,(Integer,())) -> m Char;
 	stringRefP Type (MkStringRefType rs,(i,())) = do
 		{
@@ -183,15 +184,15 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 
 	-- 6.4 Control Features
-	applyP :: (Scheme x m r,?bindings :: Bindings r m) =>
+	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
 	applyP Type (proc,(args,())) = proc ?bindings args;
 	
-	valuesP :: (Scheme x m r) =>
+	valuesP :: (Scheme m r) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);
 	valuesP Type = return . mkValuesObject;
 	
-	valuesToListP :: (Scheme x m r) =>
+	valuesToListP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m [Object r m];
 	valuesToListP Type (ValuesObject list,()) = return list;
 	valuesToListP Type (obj,()) = return [obj];
@@ -199,13 +200,13 @@ module Org.Org.Semantic.HScheme.Procedures where
 	-- 6.5 Eval
 	currentEnvironmentP ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> () -> m (Bindings r m);
 	currentEnvironmentP Type () = return ?bindings;
 	
-	printList :: (Scheme x m r) =>
+	printList :: (Scheme m r) =>
 	 ObjLocation r m -> ObjLocation r m -> m String;
 	printList hl tl = do
 		{
@@ -228,7 +229,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 			};
 		};
 	
-	printValues :: (Scheme x m r) =>
+	printValues :: (Scheme m r) =>
 	 [Object r m] -> m String;
 	printValues [] = return "";
 	printValues [a] = toString a;
@@ -239,7 +240,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (f++" "++r);
 		};
 	
-	printVector :: (Scheme x m r) =>
+	printVector :: (Scheme m r) =>
 	 [ObjLocation r m] -> m String;
 	printVector [] = return "";
 	printVector [ar] = do
@@ -276,8 +277,15 @@ module Org.Org.Semantic.HScheme.Procedures where
 	escapeChar '\\' = "\\\\";
 	escapeChar '\"' = "\\\"";
 	escapeChar c = [c];
+
+	schemeQuote :: String -> String;
+	schemeQuote s = "\"" ++ (schemeQuote' s) ++ "\"" where
+		{
+		schemeQuote' [] = [];
+		schemeQuote' (c:cs) = (escapeChar c) ++ (schemeQuote' cs)
+		};
 	
-	printString :: (Scheme x m r) =>
+	printString :: (Scheme m r) =>
 	 [r Char] -> m String;
 	printString [] = return "";
 	printString (cr:cs) = do
@@ -287,13 +295,13 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return ((escapeChar c)++r);
 		};	
 	
-	toString :: (Scheme x m r) =>
+	toString :: (Scheme m r) =>
 	 Object r m -> m String;
 	toString NilObject				= return "()";
 	toString (BooleanObject True)	= return "#t";
 	toString (BooleanObject False)	= return "#f";
 	toString (SymbolObject s)		= return (show s);
-	toString (NumberObject n)		= return (show n);
+	toString (NumberObject n)		= return (showNumber n);
 	toString (CharObject c)			= return (charToString c);
 	toString (StringObject s)		= do
 		{
@@ -324,7 +332,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	toString (SyntaxObject _)		= return "#<syntax>";
 	toString (BindingsObject _)		= return "#<environment>";
 
-	toStringP :: (Scheme x m r) =>
+	toStringP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m StringType;
 	toStringP Type (o,()) = do
 		{

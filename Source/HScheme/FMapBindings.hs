@@ -25,10 +25,10 @@ module Org.Org.Semantic.HScheme.FMapBindings where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	emptyBindings :: (Scheme x m r) => Bindings r m;
+	emptyBindings :: (Scheme m r) => Bindings r m;
 	emptyBindings = toBindings empty where
 		{
-		toBindings :: (Scheme x m r) =>
+		toBindings :: (Scheme m r) =>
 		 FiniteMap Symbol (ObjLocation r m) -> Bindings r m;
 		toBindings map = MkBindings
 			{

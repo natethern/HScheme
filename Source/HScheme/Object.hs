@@ -28,41 +28,33 @@ module Org.Org.Semantic.HScheme.Object where
 
 	class
 		(
-		MonadCont m,
-		MonadIsA m x (Object r m),
-		MonadIsA m (Object r m) x,
-		MonadSingleException x m,
 		MonadCreatable m r,
 		MonadGettableReference m r
 		) =>
-	 Scheme x m r;
+	 Scheme m r;
 
 	instance
 		(
-		MonadCont m,
-		MonadIsA m x (Object r m),
-		MonadIsA m (Object r m) x,
-		MonadSingleException x m,
 		MonadCreatable m r,
 		MonadGettableReference m r
 		) =>
-	 Scheme x m r;
+	 Scheme m r;
 
 	class
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadFullReference m r,
 		MonadEqualReference m r
 		) =>
-	 FullScheme x m r;
+	 FullScheme m r;
 
 	instance
 		(
-		Scheme x m r,
+		Scheme m r,
 		MonadFullReference m r,
 		MonadEqualReference m r
 		) =>
-	 FullScheme x m r;
+	 FullScheme m r;
 
 	type ObjLocation r m = r (Object r m);
 
@@ -79,7 +71,7 @@ module Org.Org.Semantic.HScheme.Object where
 		getBinding :: Symbol -> Maybe (ObjLocation r m)
 		};
 
-	newObjBinding :: (Scheme x m r) => 
+	newObjBinding :: (Scheme m r) => 
 	 Bindings r m -> Symbol -> Object r m -> m (ObjLocation r m,Bindings r m);
 	newObjBinding bindings sym obj = do
 		{
@@ -124,7 +116,7 @@ module Org.Org.Semantic.HScheme.Object where
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
 
-	cons :: (Scheme x m r) =>
+	cons :: (Scheme m r) =>
 	 Object r m -> Object r m -> m (Object r m);
 	cons head tail = do
 		{

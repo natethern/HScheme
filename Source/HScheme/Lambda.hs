@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	-- 4.2.3 Sequencing
 	begin ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [Object r m] -> m (Object r m);
 	begin bindings [] = fail "not enough arguments";
@@ -49,7 +49,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 
 	beginM ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);
@@ -58,7 +58,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	-- 4.2.2 Binding Constructs
 	accrueBindings ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [(Symbol,(Object r m,()))] -> m (Bindings r m);
 	accrueBindings original s = foo original s where
@@ -74,7 +74,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 
 	accrueBindingsStar ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [(Symbol,(Object r m,()))] -> m (Bindings r m);
 	accrueBindingsStar bindings [] = return bindings;
@@ -87,7 +87,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	letf ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [(Symbol,(Object r m,()))] -> [Object r m] -> m (Object r m);
 	letf bindings newbinds body = do
@@ -98,7 +98,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	letStar ::
 		(
-		Scheme x m r
+		Scheme m r
 		) =>
 	 Bindings r m -> [(Symbol,(Object r m,()))] -> [Object r m] -> m (Object r m);
 	letStar bindings newbinds body = do
@@ -109,7 +109,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	letM ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
@@ -117,14 +117,14 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	letStarM ::
 		(
-		Scheme x m r,
+		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
 	letStarM Type (newbinds,body) = letStar ?bindings newbinds body;
 
 	-- 4.1.4 Procedures
-	matchBinding :: (Scheme x m r) =>
+	matchBinding :: (Scheme m r) =>
 	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m);
 	matchBinding bindings (SymbolObject name) arg = do
 		{
@@ -146,7 +146,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 		return bindings'';
 		};
 
-	matchBindings :: (Scheme x m r) =>
+	matchBindings :: (Scheme m r) =>
 	 Bindings r m -> Object r m -> [Object r m] -> m (Bindings r m);
 	matchBindings bindings (SymbolObject name) args = do
 		{
@@ -169,7 +169,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 		return bindings'';
 		};
 
-	lambda :: (Scheme x m r) => Object r m -> [Object r m] -> m (Procedure r m);
+	lambda :: (Scheme m r) => Object r m -> [Object r m] -> m (Procedure r m);
 	lambda argNames body = do
 		{
 		return (\bindings args -> do
@@ -179,23 +179,24 @@ module Org.Org.Semantic.HScheme.Lambda where
 			});
 		};
 
-	lambdaM :: (Scheme x m r) =>
+	lambdaM :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
 	lambdaM Type (argBindings,body) = lambda argBindings body;
 
 	-- 6.4 Control Features
-	isProcedure :: (Scheme x m r) =>
+	isProcedure :: (Scheme m r) =>
 	 Object r m -> m Bool;
 	isProcedure (ProcedureObject _) = return True;
 	isProcedure _ = return False;
 
-	isProcedureP :: (Scheme x m r) =>
+	isProcedureP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isProcedureP Type (obj,()) = isProcedure obj;
 	
 	callCCP ::
 		(
-		Scheme x m r,
+		Scheme m r,
+		MonadCont m,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);

@@ -25,7 +25,8 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
-	type M r = SchemeCPS r (IO ());
+--	type M r = SchemeCPS r (IO ());
+	type M (r :: * -> *) = IO;
 
 	type Interact r = FullSystemInterface (M r) r -> (M r) ();
 
@@ -41,7 +42,7 @@ module Main where
 
 	getFull :: IO Bool;
 	getFull = return True;
-
+{--
 	doInteract :: 
 		(
 		MonadGettableReference IO r,
@@ -52,14 +53,17 @@ module Main where
 	 (\_ -> fail "error in catch code!")
 	 return
 	 (interact ioFullSystemInterface);
+--}
+
 
 	main :: IO ();
 	main = do
 		{
-		full <- getFull;
-		if full
-		 then doInteract (fullInteract :: Interact IORef)
+--		full <- getFull;
+--		if full
+--		 then doInteract (fullInteract :: Interact IORef)
 --		 else doInteract (pureInteract :: Interact Constant);
-		 else doInteract (safePureInteract :: Interact Constant);
+--		 else
+		   (safePureInteract :: Interact Constant) ioFullSystemInterface;
 		};
 	}
