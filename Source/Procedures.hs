@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Procedures where
 	{
+	import Evaluate;
 	import Conversions;
 	import Object;
 	import Subtype;
@@ -63,6 +64,25 @@ module Procedures where
 		appconv ...
 		};
 --}	
+	
+	ifS ::
+		(
+		Scheme x m r,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> (Object r m,(Object r m,Maybe (Object r m))) -> m (Object r m);
+	ifS Type (cond,(thenClause,mElseClause)) = do
+		{
+		isObj <- evaluate cond;
+		is <- getConvert isObj;
+		if is
+		 then evaluate thenClause
+		 else case mElseClause of
+			{
+			Nothing -> return nullObject;
+			Just elseClause -> evaluate elseClause;
+			};
+		};
 	
 	printList :: (Scheme x m r) =>
 	 ObjLocation r m -> ObjLocation r m -> m String;

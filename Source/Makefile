@@ -166,6 +166,7 @@ Procedures.o : Common/Type.hi
 Procedures.o : Common/Subtype.hi
 Procedures.o : Object.hi
 Procedures.o : Conversions.hi
+Procedures.o : Evaluate.hi
 Lambda.o : Lambda.hs
 Lambda.o : Common/Type.hi
 Lambda.o : Common/Subtype.hi

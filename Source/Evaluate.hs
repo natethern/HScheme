@@ -173,8 +173,6 @@ module Evaluate where
 		) =>
 	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
 	
--- Bad define placement
-	
 	defineEvaluate bindings a = do
 		{
 		case a of

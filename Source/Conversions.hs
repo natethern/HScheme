@@ -321,10 +321,21 @@ module Conversions where
 		getConvert = return . BooleanObject;
 		};
 
+	instance (Scheme x m r) => MonadIsA m Bool (Object r m) where
+		{
+		getConvert (BooleanObject a) = return a;
+		
+		-- everything apart from #f is True
+		getConvert _ = return True;
+		};
+
 	instance (Scheme x m r) => MonadMaybeA m Bool (Object r m) where
 		{
-		getMaybeConvert (BooleanObject a) = return (Just a);
-		getMaybeConvert _ = return Nothing;
+		getMaybeConvert obj = do
+			{
+			result <- getConvert obj;
+			return (Just result);
+			};
 		};
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) Bool;

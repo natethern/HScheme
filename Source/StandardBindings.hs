@@ -40,6 +40,7 @@ module StandardBindings where
 		addProcBinding	"cons"	consS,
 		addProcBinding	"list"	listS,
 		addProcBinding	"to-string"	toStringS,
+		addMacroBinding	"if"	ifS,
 		addMacroBinding	"quote"	quoteS,
 		addProcBinding	"values"	valuesS,
 		addProcBinding	"current-environment"	currentEnvironmentS,
