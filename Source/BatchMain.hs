@@ -167,86 +167,74 @@ module Main where
 			fsSinkList ?stderr (encodeUTF8 ("bindings: " ++ (show flavour) ++ "\n\n"));
 			}
 		 else return ();
-		case flavour of
+		case whichmonad of
 			{
-			FullStdBindings -> case whichmonad of
+			CPSWhichMonad ->
+			 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?load = ioLoad loadpaths} in
+			 case flavour of
 				{
-				CPSWhichMonad ->
-				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
+				FullStdBindings ->
 				 let {?system = ioSystem lift} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
-					bindings <- (monadContFullBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
 					runProgramBindingsWithExit printResult reportError (allFileNames "init.full.scm") bindings;
 					}));
-				IOWhichMonad ->
-				 let {?objType = Type::Type (Object IORef IO)} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
+					{
+					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
+					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
+					}));
+				StrictPureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
+					{
+					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
+					}));
+				};
+			IOWhichMonad ->
+			 let {?objType = Type::Type (Object IORef IO)} in
+			 let {?binder = setBinder} in
+			 let {?load = ioLoad loadpaths} in
+			 case flavour of
+				{
+				FullStdBindings ->
 				 let {?system = ioSystem id} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.full.scm") bindings;
 					}));
-				IdentityWhichMonad -> fail "can't use pure monad with full bindings";
-				};
-			PureStdBindings -> case whichmonad of
-				{
-				CPSWhichMonad ->
-				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
-					{
-					bindings <- monadContPureBindings emptyBindings;
-					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
-					}));
-				IOWhichMonad ->
-				 let {?objType = Type::Type (Object IORef IO)} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
+				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadFixPureBindings emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
-				IdentityWhichMonad ->
-				 let {?objType = Type::Type (Object IdentityConst Identity)} in
-				 let {?binder = recursiveBinder} in
-				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
-					{
-					bindings <- monadFixPureBindings emptyBindings;
-					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
-					}));
-				};
-			StrictPureStdBindings -> case whichmonad of
-				{
-				CPSWhichMonad ->
-				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
-					{
-					bindings <- monadContStrictPureBindings emptyBindings;
-					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
-					}));
-				IOWhichMonad ->
-				 let {?objType = Type::Type (Object IORef IO)} in
-				 let {?binder = setBinder} in
-				 let {?load = ioLoad loadpaths} in
+				StrictPureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
-				IdentityWhichMonad ->
-				 let {?objType = Type::Type (Object IdentityConst Identity)} in
-				 let {?binder = recursiveBinder} in
-				 let {?load = ioLoad loadpaths} in
+				};
+			IdentityWhichMonad ->
+			 let {?objType = Type::Type (Object IdentityConst Identity)} in
+			 let {?binder = recursiveBinder} in
+			 let {?load = ioLoad loadpaths} in
+			 case flavour of
+				{
+				FullStdBindings -> fail "can't use pure monad with full bindings";
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
+					{
+					bindings <- monadFixPureBindings emptyBindings;
+					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
+					}));
+				StrictPureStdBindings -> 
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
