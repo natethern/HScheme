@@ -22,50 +22,70 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.RunLib.Control where
 	{
-	import Org.Org.Semantic.HScheme.RunLib.ArgumentList;
+	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	-- 6.4 Control Features
-	isProcedure :: (Scheme m r) =>
-	 Object r m -> m Bool;
-	isProcedure (ProcedureObject _) = return True;
-	isProcedure _ = return False;
+	isProcedure ::
+		(
+		ObjectSubtype r obj (Procedure obj m),
+		Build m r
+		) =>
+	 Type (Procedure obj m) -> obj -> m Bool;
+	isProcedure = getObjectIs;
 
-	isProcedureP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isProcedureP (obj,()) = isProcedure obj;
+	isProcedureP ::
+		(
+		ObjectSubtype r obj (Procedure obj m),
+		Build m r,
+		?objType :: Type obj
+		) =>
+	 (obj,()) -> m Bool;
+	isProcedureP (obj,()) = isProcedure MkType obj;
 
-	applyPL :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,([Object r m],())) -> m [Object r m];
+	applyPL :: (?objType :: Type obj) =>
+	 (Procedure obj m,([obj],())) -> m [obj];
 	applyPL (proc,(args,())) = proc args;
+
+	procedureObject ::
+		(
+		ObjectSubtype r obj (Procedure obj m),
+		Build m r
+		) =>
+	 Procedure obj m -> m obj;
+	procedureObject = getObject;
 
 	callCCPL ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m),
+		ObjectSubtype r obj (Procedure obj m),
+		Build m r,
+		?objType :: Type obj,
 		MonadCont m
 		) =>
-	 (Procedure (Object r m) m,()) -> m [Object r m];
-	callCCPL (proc,()) = callCC (\cont -> proc [ProcedureObject cont]);
+	 (Procedure obj m,()) -> m [obj];
+	callCCPL (proc,()) = callCC (\cont -> do
+		{
+		contObj <- procedureObject cont;
+		proc [contObj];
+		});
 
 	dynamicWindPL ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m),
+		?objType :: Type obj,
 		MonadGuard m
 		) =>
-	 (Procedure (Object r m) m,(Procedure (Object r m) m,(Procedure (Object r m) m,()))) ->
-	 m [Object r m];
+	 (Procedure obj m,(Procedure obj m,(Procedure obj m,()))) ->
+	 m [obj];
 	dynamicWindPL (before,(proc,(after,()))) = bracket (before [] >> return ()) (after [] >> return ()) (proc []);
 
 	fixPL ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m),
+		InterpretObject m r obj,
+		?objType :: Type obj,
 		MonadFix m
 		) =>
-	 (Procedure (Object r m) m,()) -> m [Object r m];
+	 (Procedure obj m,()) -> m [obj];
 	fixPL (proc,()) = do
 		{
 		obj <- mfix (\obj -> do
@@ -76,24 +96,24 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 		return [obj];
 		};
 
-	valuesPL :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 [Object r m] -> m [Object r m];
+	valuesPL :: (Monad m,?objType :: Type obj) =>
+	 [obj] -> m [obj];
 	valuesPL = return;
 
 	callWithValuesPL ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Monad m,
+		?objType :: Type obj
 		) =>
-	 (Procedure (Object r m) m,(Procedure (Object r m) m,())) -> m [Object r m];
+	 (Procedure obj m,(Procedure obj m,())) -> m [obj];
 	callWithValuesPL (producer,(consumer,())) = do
 		{
 		vals <- producer [];
 		consumer vals;
 		};
 
-	lastResortThrowP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m (Object r m);
+	lastResortThrowP :: (MonadThrow obj m,?objType :: Type obj) =>
+	 (obj,()) -> m obj;
 	lastResortThrowP (obj,()) = lastResortThrowObject obj;
 
 {--

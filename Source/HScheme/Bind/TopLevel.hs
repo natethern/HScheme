@@ -30,11 +30,14 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	commonTopLevelBindings ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		MapObjects r obj,
+		AssembleError cm obj,
+		SyntaxError cm obj,
+		Build cm r,
+		?objType :: Type obj
 		) =>
-	 TopLevelBindings cm r m;
+	 TopLevelBindings cm r obj m;
 	commonTopLevelBindings = concatenateList
 		[
 		-- 4.2.3 Sequencing
@@ -46,12 +49,15 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	pureTopLevelBindings ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?binder :: TopLevelBinder r m,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		MapObjects r obj,
+		AssembleError cm obj,
+		SyntaxError cm obj,
+		Build cm r,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
 		) =>
-	 TopLevelBindings cm r m;
+	 TopLevelBindings cm r obj m;
 	pureTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -62,12 +68,16 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	fullTopLevelBindings ::
 		(
-		BuildThrow cm (Object r m) r,
-		FullScheme m r,
-		?binder :: TopLevelBinder r m,
-		?objType :: Type (Object r m)
+		FullBuild m r,
+		InterpretObject m r obj,
+		MapObjects r obj,
+		AssembleError cm obj,
+		SyntaxError cm obj,
+		Build cm r,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
 		) =>
-	 TopLevelBindings cm r m;
+	 TopLevelBindings cm r obj m;
 	fullTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -78,12 +88,14 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	loadTopLevelBindings ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Build cm r,
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		ObjectSubtype r obj (SList Char),
+		?objType :: Type obj
 		) =>
-	 (String -> cm (TopLevelListCommand r m)) ->
-	 TopLevelBindings cm r m;
+	 (String -> cm (TopLevelListCommand r obj m)) ->
+	 TopLevelBindings cm r obj m;
 	loadTopLevelBindings load = concatenateList
 		[
 		-- 6.6.4 System Interface

@@ -30,13 +30,16 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	macroBindings ::
 		(
-		BuildThrow cm (Object r m) r,
+		IsA Bool obj,
+		PatternError m obj,
+		AssembleError cm obj,
+		Build cm r,
 		MonadFix m,
-		Scheme m r,
-		?binder :: TopLevelBinder r m,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
 		) =>
-	 MacroBindings cm r m;
+	 MacroBindings cm r obj m;
 	macroBindings = concatenateList
 		[
 		-- 4.1.2 Literal Expressions
@@ -60,15 +63,33 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		addMacroBinding	"case-match"		caseMatchM		-- nonstandard
 		];
 
+{-
+	completeMacroBindings ::
+		(
+		BuildThrow cm obj r,
+		MonadFix m,
+--		Scheme m r,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
+		) =>
+	 MacroBindings cm r obj m;
+	completeMacroBindings = concatenateList
+		[
+		];
+-}
+
 	pureMacroBindings ::
 		(
-		BuildThrow cm (Object r m) r,
+		IsA Bool obj,
+		PatternError m obj,
+		AssembleError cm obj,
+		Build cm r,
 		MonadFix m,
-		Scheme m r,
-		?binder :: TopLevelBinder r m,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
 		) =>
-	 MacroBindings cm r m;
+	 MacroBindings cm r obj m;
 	pureMacroBindings = concatenateList
 		[
 		macroBindings,
@@ -83,13 +104,17 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	fullMacroBindings ::
 		(
-		BuildThrow cm (Object r m) r,
+		IsA Bool obj,
+		PatternError m obj,
+		AssembleError cm obj,
+		Build cm r,
 		MonadFix m,
-		FullScheme m r,
-		?binder :: TopLevelBinder r m,
-		?objType :: Type (Object r m)
+		FullBuild m r,
+		InterpretObject m r obj,
+		?binder :: TopLevelBinder r obj m,
+		?objType :: Type obj
 		) =>
-	 MacroBindings cm r m;
+	 MacroBindings cm r obj m;
 	fullMacroBindings = concatenateList
 		[
 		pureMacroBindings,

@@ -25,48 +25,62 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	import Org.Org.Semantic.HScheme.Core.Binding;
 	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
-	import Org.Org.Semantic.HScheme.Core.Port;
-	import Org.Org.Semantic.HScheme.Core.Numerics;
 	import Org.Org.Semantic.HBase;
 
 	type SymbolBindings = Bindings Symbol;
 
-	newtype Syntax r obj = MkSyntax (forall m. (BuildThrow m obj r,?objType :: Type obj) => Type (r ()) -> [obj] -> m obj);
-
-	data Environment r obj = MkEnvironment
-		{
-		envSyn :: SymbolBindings (Syntax r obj),
-		envLoc :: SymbolBindings (r obj)
-		};
-
-	type Procedure obj m = [obj] -> m [obj];
-
 	type SRefArray r a = ArrayList (r a);
 
-	data Object r m =
-	 NilObject												|
-	 BooleanObject		Bool								|
-	 SymbolObject		Symbol								|
-	 NumberObject		Number								|
-	 CharObject			Char								|
-	 ByteArrayObject	(SRefArray r Word8)					|
-	 StringObject		(SRefArray r Char)					|
-	 VoidObject												|
-	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
-	 VectorObject		(SRefArray r (Object r m))			|
-	 InputPortObject 	(InputPort Word8 m)					|
-	 OutputPortObject 	(OutputPort Word8 m)				|
-	 ProcedureObject	(Procedure (Object r m) m)			|
-	 EnvironmentObject	(Environment r (Object r m))		;
+	newtype SRefList r a = MkSRefList {unSRefList :: [r a]};
 
-	type ObjLocation r m = r (Object r m);
+	sameList :: (a -> b -> Bool) -> [a] -> [b] -> Bool;
+	sameList _ [] [] = True;
+	sameList same (a:as) (b:bs) | same a b = sameList same as bs;
+	sameList _ _ _ = False;
 
-	instance SchemeObject ref (Object ref m) where
+	msameList :: (Monad m) => 
+	 (a -> b -> m Bool) -> [a] -> [b] -> m Bool;
+	msameList _ [] [] = return True;
+	msameList same (a:as) (b:bs) = do
 		{
-		objectCell NilObject = Just Nothing;
-		objectCell (PairObject hr tr) = Just (Just (hr,tr));
-		objectCell _ = Nothing;
-		pairObject = PairObject;
-		nilObject = NilObject;
+		s <- same a b;
+		if s then (msameList same as bs) else (return False);
+		};
+	msameList _ _ _ = return False;
+
+	getSRefArrayList :: (Build cm r) =>
+	 SRefArray r a -> cm [a];
+	getSRefArrayList rarray = for get (toList rarray);
+
+	makeSRefArray :: (Build cm r) =>
+	 [a] -> cm (SRefArray r a);
+	makeSRefArray list = fmap fromList (for new list);
+
+	sameSRefArray :: (Build m r) => 
+	 (a -> b -> m Bool) -> SRefArray r a -> SRefArray r b -> m Bool;
+	sameSRefArray same arra arrb = do
+		{
+		la <- getSRefArrayList arra;
+		lb <- getSRefArrayList arrb;
+		msameList same la lb;
+		};
+
+	newtype SList a = MkSList {unSList :: [a]};
+
+	data VoidObjType = MkVoidObjType;
+
+	class Eq1 r where
+		{
+		eq1 :: forall a. (Eq a) => r a -> r a -> Bool;
+		};
+
+	instance Eq1 (Constant m) where
+		{
+		eq1 = (==);
+		};
+
+	instance Eq1 IORef where
+		{
+		eq1 = (==);
 		};
 	}

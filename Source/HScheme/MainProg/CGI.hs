@@ -31,12 +31,12 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase;
 
-	paramsBindings :: (Build cm r,Scheme m r) =>
-	 ([Word8] -> Bool) -> QueryParameters -> LocationBindings cm r m;
+	paramsBindings :: (ObjectSubtype r obj (SList Word8),Build cm r) =>
+	 ([Word8] -> Bool) -> QueryParameters -> RefBindings cm r obj;
 	paramsBindings match (MkQueryParameters list) = concatenateList (fmap paramBinding list) where
 		{
-		paramBinding :: (Build cm r,Scheme m r) =>
-		 ([Word8],[Word8]) -> LocationBindings cm r m;
+		paramBinding :: (ObjectSubtype r obj (SList Word8),Build cm r) =>
+		 ([Word8],[Word8]) -> RefBindings cm r obj;
 		paramBinding (name,value) | match name = \b -> do
 			{
 			valueObj <- getObject (MkSList value);
@@ -59,15 +59,19 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 
 	runSchemeProgram ::
 		(
-		RunnableScheme IO m r,
-		?objType :: Type (Object r m),
-		?read :: String -> IO [Object r m],
-		?binder :: TopLevelBinder r m
+		ParseObject r obj,
+		ParserError IO obj,
+		InterpretObject m r obj,
+		AssembleError IO obj,
+		RunnableScheme IO m r obj,
+		?objType :: Type obj,
+		?read :: String -> IO [obj],
+		?binder :: TopLevelBinder r obj m
 		) =>
-	 (Object r m -> IO ()) ->
-	 MacroBindings IO r m ->
-	 ((?syntacticbindings :: SymbolBindings (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
-	 ((?macrobindings :: Symbol -> Maybe (Macro IO r m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r m)) => LocationBindings IO r m) ->
+	 (obj -> IO ()) ->
+	 MacroBindings IO r obj m ->
+	 ((?syntacticbindings :: SymbolBindings (Syntax r obj)) => TopLevelBindings IO r obj m) ->
+	 ((?macrobindings :: Symbol -> Maybe (Macro IO r obj m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r obj m)) => RefBindings IO r obj) ->
 	 String ->
 	 String ->
 	 IO ();

@@ -22,19 +22,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 	{
+	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	-- 6.6.1 Ports
-	isInputPortP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isInputPortP (InputPortObject _,()) = return True;
-	isInputPortP (_,()) = return False;
 
-	isOutputPortP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isOutputPortP (OutputPortObject _,()) = return True;
-	isOutputPortP (_,()) = return False;
+	isInputPortP :: (Build m r,ObjectSubtype r obj (InputPort Word8 m),?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isInputPortP (obj,()) :: m Bool = getObjectIs (MkType :: Type (InputPort Word8 m)) obj;
+
+	isOutputPortP :: (Build m r,ObjectSubtype r obj (OutputPort Word8 m),?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isOutputPortP (obj,()) :: m Bool = getObjectIs (MkType :: Type (OutputPort Word8 m)) obj;
 
 	inputPortClosePN :: (Monad m) =>
 	 (InputPort Word8 m,()) -> m ();
@@ -45,12 +45,11 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 	outputPortClosePN (port,()) = opClose port;
 
 	-- 6.6.2 Input
-	isEOFObjectP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isEOFObjectP (VoidObject,()) = return True;
-	isEOFObjectP (_,()) = return False;
+	isEOFObjectP :: (Build m r,ObjectSubtype r obj VoidObjType,?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isEOFObjectP (obj,()) = getObjectIs (MkType :: Type VoidObjType) obj;
 	
-	portReadByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	portReadByteP :: (Monad m) =>
 	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
 	portReadByteP (port,()) = do
 		{
@@ -62,7 +61,7 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 			});
 		};
 	
-	portPeekByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	portPeekByteP :: (Monad m) =>
 	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
 	portPeekByteP (port,()) = do
 		{
@@ -74,44 +73,16 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 			});
 		};
 	
-	portByteReadyP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	portByteReadyP :: (Monad m) =>
 	 (InputPort Word8 m,()) -> m Bool;
 	portByteReadyP (port,()) = ipReady port;
 
 	-- 6.6.3 Output
-	portWriteByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	portWriteByteP :: (Monad m) =>
 	 (Word8,(OutputPort Word8 m,())) -> m VoidObjType;
 	portWriteByteP (c,(port,())) = do
 		{
 		opWriteOne port c;
 		return MkVoidObjType;
-		};
-
-	-- conversion
-	parseUTF8P :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,()) -> m (Either VoidObjType Char);
-	parseUTF8P (source,()) = do
-		{
-		mc <- parseUTF8Char (do
-			{
-			objs <- source [];
-			obj <- singleValue objs;
-			meb <- fromObject obj;
-			case meb of
-				{
-				SuccessResult (Right b) -> return (Just (b :: Word8));
-				SuccessResult (Left MkVoidObjType) -> return Nothing;
-				ExceptionResult mm -> do
-					{
-					mmObj <- getConvert mm;
-					throwArgError "wrong-type" [mmObj];
-					};
-				};
-			});
-		return (case mc of
-			{
-			Just c -> Right c;
-			Nothing -> Left MkVoidObjType;
-			});
 		};
 	}

@@ -32,12 +32,13 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	runTopLevelInEnvironment ::
 		(
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
+		FullBuild m r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 Environment r (Object r m) -> TopLevelCommand r m (m a) -> m (Environment r (Object r m),a);
+	 Environment r obj -> TopLevelCommand r obj m (m a) -> m (Environment r obj,a);
 	runTopLevelInEnvironment
 	 (MkEnvironment synbindings runbindings) (MkTopLevelCommand expr newbinds newsyntaxes) = do
 		{
@@ -48,12 +49,14 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	runObjectInEnvironment ::
 		(
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
+		FullBuild m r,
+		AssembleError m obj,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),[Object r m]);
+	 Environment r obj -> obj -> m (Environment r obj,[obj]);
 	runObjectInEnvironment env obj =  do
 		{
 		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelListCommand obj;
@@ -70,11 +73,11 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	printResult ::
 		(
-		Build cm r,
-		?objType :: Type (Object r m),
+		ToString cm obj,
+		?objType :: Type obj,
 		?system :: System cm
 		) =>
-	 [Object r m] -> cm ();
+	 [obj] -> cm ();
 	printResult [] = return ();
 	printResult (obj:objs) =  do
 		{
@@ -85,11 +88,11 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	reportError ::
 		(
-		Build cm r,
-		?objType :: Type (Object r m),
+		ToString cm obj,
+		?objType :: Type obj,
 		?system :: System cm
 		) =>
-	 Object r m -> cm ();
+	 obj -> cm ();
 	reportError errObj = do
 		{
 		text <- toString errObj;
@@ -98,15 +101,20 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	interactiveLoop ::
 		(
-		FullScheme m r,
+		ToString m obj,
+		AssembleError m obj,
+		InterpretObject m r obj,
+		ParserError m obj,
+		ParseObject r obj,
+		FullBuild m r,
 		MonadBottom m,
-		MonadException (Object r m) m,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
+		MonadException obj m,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>
-	 Environment r (Object r m) -> m ();
+	 Environment r obj -> m ();
 	interactiveLoop environment = do
 		{
 		let
@@ -130,7 +138,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 				};
 			}) (\ex -> do
 				{
-				runParser input restOfLineParse;
+				parseRestOfLine input;
 				errObj <- getObject (MkSymbol "failure",MkSList (show ex));
 				reportError errObj;
 				return (Just environment);
@@ -138,7 +146,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 			)
 			(\errObj -> do
 			{
-			runParser input restOfLineParse;
+			parseRestOfLine input;
 			reportError errObj;
 			return (Just environment);
 			});
@@ -152,12 +160,13 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	envProc ::
 		(
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
+		InterpretObject m r obj,
+		FullBuild m r,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 TopLevelCommand r m (m a) -> Environment r (Object r m) -> m (Environment r (Object r m));
+	 TopLevelCommand r obj m (m a) -> Environment r obj -> m (Environment r obj);
 	envProc command env = do
 		{
 		(env',_) <- runTopLevelInEnvironment env command;
@@ -166,17 +175,22 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	interact ::
 		(
-		FullScheme m r,
+		AssembleError m obj,
+		ParserError m obj,
+		ParseObject r obj,
+		ToString m obj,
+		InterpretObject m r obj,
+		FullBuild m r,
 		MonadBottom m,
-		MonadException (Object r m) m,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
+		MonadException obj m,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>
-	 SymbolBindings (ObjLocation r m) ->
-	 [TopLevelListCommand r m] ->
+	 SymbolBindings (r obj) ->
+	 [TopLevelListCommand r obj m] ->
 	 m ();
 	interact bindings commands =
 	 catch (do
@@ -191,18 +205,23 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 
 	interactWithExit ::
 		(
-		FullScheme m r,
+		AssembleError m obj,
+		ParserError m obj,
+		ParseObject r obj,
+		ToString m obj,
+		InterpretObject m r obj,
+		FullBuild m r,
 		MonadCont m,
 		MonadBottom m,
-		MonadException (Object r m) m,
-		?objType :: Type (Object r m),
-		?macrobindings :: Symbol -> Maybe (Macro m r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
+		MonadException obj m,
+		?objType :: Type obj,
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>
-	 SymbolBindings (ObjLocation r m) ->
-	 [TopLevelListCommand r m] ->
+	 SymbolBindings (r obj) ->
+	 [TopLevelListCommand r obj m] ->
 	 m ();
 	interactWithExit rootBindings commands = callCC (\exitFunc -> do
 		{

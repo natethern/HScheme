@@ -27,18 +27,41 @@ module Org.Org.Semantic.HScheme.RunLib.FullProcedures where
 	import Org.Org.Semantic.HBase;
 
 	-- 6.3.2 Pairs and Lists
-	setCarPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,(Object r m,())) -> m ();
-	setCarPN ((PairObject carLoc _),(obj,_)) = set carLoc obj;
-	setCarPN (p,(obj,_)) = throwArgError "wrong-type-arg" [p];
-
-	setCdrPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,(Object r m,())) -> m ();
-	setCdrPN ((PairObject _ cdrLoc),(obj,_)) = set cdrLoc obj;
-	setCdrPN (p,(obj,())) = throwArgError "wrong-type-arg" [p];
+	setCarPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
+	 (obj,(obj,())) -> m ();
+	setCarPN (pair,(val,_)) = case objectCell pair of
+		{
+		Just (Just (ref,_)) -> set ref val;
+		_ -> throwMismatchError (MkMismatch PairTypeExpected pair);
+		};
+	
+	setCdrPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
+	 (obj,(obj,())) -> m ();
+	setCdrPN (pair,(val,_)) = case objectCell pair of
+		{
+		Just (Just (_,ref)) -> set ref val;
+		_ -> throwMismatchError (MkMismatch PairTypeExpected pair);
+		};
 
 	-- 6.3.5 Strings
-	arraySetPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	arraySetPN ::
+		(
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
 	 (SRefArray r a,(Integer,(a,()))) -> m ();
 	arraySetPN (arr,(i,(a,_))) = do
 		{
@@ -46,21 +69,44 @@ module Org.Org.Semantic.HScheme.RunLib.FullProcedures where
 		set r a;
 		};
 
-	stringSetPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	stringSetPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
 	 (SRefArray r Char,(Integer,(Char,()))) -> m ();
 	stringSetPN = arraySetPN;
 
 	-- 6.3.5 Strings
-	byteArraySetPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	byteArraySetPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
 	 (SRefArray r Word8,(Integer,(Word8,()))) -> m ();
 	byteArraySetPN = arraySetPN;
 
 	-- 6.3.6 Vectors
-	vectorSetPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
-	 (SRefArray r (Object r m),(Integer,(Object r m,()))) -> m ();
+	vectorSetPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		RunError m obj,
+		?objType :: Type obj
+		) =>
+	 (SRefArray r obj,(Integer,(obj,()))) -> m ();
 	vectorSetPN = arraySetPN;
 
-	vectorFillPN :: (FullScheme m r,?objType :: Type (Object r m)) =>
-	 (SRefArray r (Object r m),(Object r m,())) -> m ();
+	vectorFillPN ::
+		(
+		ListObject r obj,
+		FullBuild m r,
+		?objType :: Type obj
+		) =>
+	 (SRefArray r obj,(obj,())) -> m ();
 	vectorFillPN (arr,(obj,_)) = forDo (\r -> set r obj) (toList arr);
 	}

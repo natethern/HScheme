@@ -22,10 +22,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.Scheme where
 	{
-	import Org.Org.Semantic.HScheme.Core.Object;
-	import Org.Org.Semantic.HScheme.Core.Build;
-	import Org.Org.Semantic.HBase;
-
+--	import Org.Org.Semantic.HScheme.Core.Object;
+--	import Org.Org.Semantic.HScheme.Core.Build;
+--	import Org.Org.Semantic.HBase;
+{-
 	class (BuildThrow m (Object r m) r) =>
 	 Scheme m r;
 
@@ -35,16 +35,15 @@ module Org.Org.Semantic.HScheme.Core.Scheme where
 	class
 		(
 		Scheme m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
+		FullBuild m r
 		) =>
 	 FullScheme m r;
 
 	instance
 		(
 		Scheme m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
+		FullBuild m r
 		) =>
 	 FullScheme m r;
+-}
 	}

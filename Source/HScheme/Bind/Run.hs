@@ -34,41 +34,41 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	loop :: a;
 	loop = loop;
 
-	foldingLP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	foldingLP :: (Monad m) =>
 	 (a -> b -> a) ->
 	 a ->
 	 [b] -> m a;
 	foldingLP op a ns = return (foldl op a ns);
 
-	foldingLP1 :: (Scheme m r,?objType :: Type (Object r m)) =>
+	foldingLP1 :: (Monad m) =>
 	 (a -> b -> a) ->
 	 (a,[b]) -> m a;
 	foldingLP1 op (a,ns) = foldingLP op a ns;
 
-	unaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	unaryP :: (Monad m) =>
 	 (a -> x) -> (a,()) -> m x;
 	unaryP f (a,()) = return (f a);
 
-	objPropertyP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m -> m Bool) -> (Object r m,()) -> m Bool;
+	objPropertyP :: (Monad m,?objType :: Type obj) =>
+	 (obj -> m Bool) -> (obj,()) -> m Bool;
 	objPropertyP f (a,()) = f a;
 
-	binaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	binaryP :: (Monad m) =>
 	 (a -> b -> x) -> (a,(b,())) -> m x;
 	binaryP f (a,(b,())) = return (f a b);
 
-	listaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	listaryP :: (Monad m) =>
 	 ([a] -> x) -> [a] -> m x;
 	listaryP f l = return (f l);
 
-	pairCheckP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	pairCheckP :: (Monad m) =>
 	 (a -> a -> Bool) ->
 	 [a] -> m Bool;
 	pairCheckP op [] = return True;
 	pairCheckP op [x] = return True;
 	pairCheckP op (x:r@(y:_)) = if (op x y) then pairCheckP op r else return False;
 
-	unaryNumberP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	unaryNumberP :: (Monad m) =>
 	 (Number -> Number) ->
 	 (Number,()) -> m Number;
 	unaryNumberP = unaryP;
@@ -76,15 +76,38 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	switchArgs :: (a -> b -> c) -> (b -> a -> c);
 	switchArgs foo b a = foo a b;
 
+
 	baseBindings ::
 		(
-		Build cm r,
-		Scheme m r
+		HasBooleanType obj,
+		ObjectSubtype r obj Bool,
+		ObjectSubtype r obj Number,
+		ObjectSubtype r obj EIReal,
+		ObjectSubtype r obj Rational,
+		ObjectSubtype r obj Int,
+		ObjectSubtype r obj Integer,
+		ObjectSubtype r obj Word8,
+		ObjectSubtype r obj (SList Word8),
+		ObjectSubtype r obj (SRefList r Word8),
+		ObjectSubtype r obj (SRefArray r Word8),
+		ObjectSubtype r obj Char,
+		ObjectSubtype r obj (SList Char),
+		ObjectSubtype r obj (SRefList r Char),
+		ObjectSubtype r obj (SRefArray r Char),
+		ObjectSubtype r obj (SList obj),
+		ObjectSubtype r obj (SRefArray r obj),
+		ObjectSubtype r obj VoidObjType,
+		ParseObject r obj,
+		ParserError m obj,
+		Equal m obj,
+		ToString m obj,
+		InterpretObject m r obj,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	baseBindings = concatenateList
 		[
-		addLocationBinding		(MkSymbol "<nothing>")			VoidObject,								-- nonstandard
+--		addLocationBinding		(MkSymbol "<nothing>")			VoidObject,								-- nonstandard
 		addLocationBinding		(MkSymbol "<loop>")				loop,									-- test
 		addLocationBinding		(MkSymbol "<undefined>")		undefined,								-- test
 
@@ -267,10 +290,10 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcLBinding	"apply"							applyPL,
 		addProcLBinding	"values"						valuesPL,
 		addProcLBinding	"call-with-values"				callWithValuesPL,
-		addProcBinding	"throw"							lastResortThrowP,						-- nonstandard
+--		addProcBinding	"raise"							lastResortThrowP,						-- nonstandard
 
 		-- 6.5 Eval
---		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
+-- ?		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
 
 		-- Misc
 		addProcBinding	"to-string"						toStringP								-- nonstandard
@@ -278,11 +301,11 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	monadContBindings ::
 		(
-		Build cm r,
-		Scheme m r,
-		MonadCont m
+		InterpretObject m r obj,
+		MonadCont m,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -291,11 +314,11 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	monadGuardBindings ::
 		(
-		Build cm r,
-		Scheme m r,
-		MonadGuard m
+		InterpretObject m r obj,
+		MonadGuard m,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	monadGuardBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -304,11 +327,11 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	monadFixBindings ::
 		(
-		Build cm r,
-		Scheme m r,
-		MonadFix m
+		InterpretObject m r obj,
+		MonadFix m,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -317,13 +340,16 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	evalBindings ::
 		(
+		ObjectSubtype r obj (Environment r obj),
+		MonadThrow obj m,
+		AssembleError m obj,
+		InterpretObject m r obj,
 		Build cm r,
-		Scheme m r,
-		?macrobindings :: Symbol -> Maybe (Macro im r m),
-        ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r m)
+		?macrobindings :: Symbol -> Maybe (Macro im r obj m),
+        ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r obj m)
 		) =>
 	 (forall a. im a -> m a) ->
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	evalBindings remonad = concatenateList
 		[
 		-- 6.5 Eval
@@ -332,10 +358,17 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	portBindings ::
 		(
-		Build cm r,
-		Scheme m r
+		ObjectSubtype r obj Bool,
+		ObjectSubtype r obj Word8,
+		ObjectSubtype r obj (InputPort Word8 m),
+		ObjectSubtype r obj (OutputPort Word8 m),
+		ObjectSubtype r obj VoidObjType,
+		ParseObject r obj,
+		InterpretObject m r obj,
+		ParserError m obj,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	portBindings = concatenateList
 		[
 		-- 6.6.1 Ports
@@ -357,10 +390,20 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	setBindings ::
 		(
-		Build cm r,
-		FullScheme m r
+		Eqv obj,
+		Eq obj,
+		ObjectSubtype r obj Bool,
+		ObjectSubtype r obj Word8,
+		ObjectSubtype r obj Char,
+		ObjectSubtype r obj Integer,
+		ObjectSubtype r obj (SRefArray r Word8),
+		ObjectSubtype r obj (SRefArray r Char),
+		ObjectSubtype r obj (SRefArray r obj),
+		InterpretObject m r obj,
+		FullBuild m r,
+		Build cm r
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	setBindings = concatenateList
 		[
 		-- 6.1 Equivalence Predicates
@@ -382,13 +425,29 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcNBinding			"vector-fill!"		vectorFillPN
 		];
 
+	systemBindings ::
+		(
+		ObjectSubtype r obj EIReal,
+		InterpretObject m r obj,
+		Build cm r
+		) =>
+	 (forall a. IO a -> m a) ->
+	 RefBindings cm r obj;
+	systemBindings lifter = concatenateList
+		[
+		addProcBinding	"current-time"			(currentTimeP lifter)
+		];
+
 	systemPortBindings ::
 		(
+		ObjectSubtype r obj (SList Char),
+		ObjectSubtype r obj (OutputPort Word8 m),
+		ObjectSubtype r obj (InputPort Word8 m),
+		InterpretObject m r obj,
 		Build cm r,
-		Scheme m r,
 		?system :: System m
 		) =>
-	 LocationBindings cm r m;
+	 RefBindings cm r obj;
 	systemPortBindings = concatenateList
 		[
 		-- 6.6.1 Ports
@@ -398,4 +457,5 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"open-input-file"		openInputFileP,
 		addProcBinding	"open-output-file"		openOutputFileP
 		];
+
 	}

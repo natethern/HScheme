@@ -41,25 +41,27 @@ module Org.Org.Semantic.HScheme.Core.Build where
 	class
 		(
 		Build m r,
-		MonadThrow ex m
+		MonadFullReference m r
+--		, forall a. Eq (r a)
 		) =>
-	 BuildThrow m ex r;
+	 FullBuild m r;
 
 	instance
 		(
 		Build m r,
-		MonadThrow ex m
+		MonadFullReference m r
+--		, forall a. Eq (r a)
 		) =>
-	 BuildThrow m ex r;
+	 FullBuild m r;
 
-	class SchemeObject ref obj | obj -> ref where
+	class ListObject ref obj | obj -> ref where
 		{
 		objectCell :: obj -> Maybe (Maybe (ref obj,ref obj));
 		pairObject :: ref obj -> ref obj -> obj;
 		nilObject :: obj;
 		};
 
-	cons :: (Build m ref,SchemeObject ref obj) =>
+	cons :: (Build m ref,ListObject ref obj) =>
 	 obj -> obj -> m obj;
 	cons h t = do
 		{
@@ -68,7 +70,7 @@ module Org.Org.Semantic.HScheme.Core.Build where
 		return (pairObject hr tr);
 		};
 
-	makeList :: (Build m ref,SchemeObject ref obj) =>
+	makeList :: (Build m ref,ListObject ref obj) =>
 	 [obj] -> m obj;
 	makeList [] = return nilObject;
 	makeList (h:t) = do

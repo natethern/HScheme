@@ -29,9 +29,11 @@ module Org.Org.Semantic.HScheme
 	module Org.Org.Semantic.HScheme.RunLib,
 	module Org.Org.Semantic.HScheme.Bind,
 	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
+	module Org.Org.Semantic.HScheme.Imperative,
+	module Org.Org.Semantic.HScheme.Object.CompleteObject
 	) where
 	{
+	import Org.Org.Semantic.HScheme.Object.CompleteObject;
 	import Org.Org.Semantic.HScheme.Imperative;
 	import Org.Org.Semantic.HScheme.MainProg;
 	import Org.Org.Semantic.HScheme.Bind;

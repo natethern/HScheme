@@ -46,7 +46,8 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 	 OutputPortTypeExpected		|
 	 ByteArrayTypeExpected		|
 	 StringTypeExpected			|
-	 ProcedureTypeExpected		;
+	 ProcedureTypeExpected		|
+	 RangeExpected Integer Integer	;
 
 	listExpected :: Expected;
 	listExpected = EitherExpected NullExpected PairTypeExpected;
@@ -74,6 +75,7 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 		show ByteArrayTypeExpected		= "byte-array";
 		show StringTypeExpected			= "string";
 		show ProcedureTypeExpected		= "procedure";
+		show (RangeExpected a b)		= "integer in range [" ++ (show a) ++ "," ++ (show b) ++ "]";
 		};
 
 	data Mismatch obj = MkMismatch Expected obj;
@@ -87,4 +89,10 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 	mismatch exp obj = return (throwSingle (MkMismatch exp obj));
 
 	type MatchMonad obj = Result (Mismatch obj);
+
+	data ArgumentMismatch obj =
+	 UnionArgMismatch (ArgumentMismatch obj) (ArgumentMismatch obj)	|
+	 TooFewArguments Int					|
+	 TooManyArguments Int [obj]				|
+	 WrongArgumentType Int (Mismatch obj)	;
 	}

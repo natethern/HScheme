@@ -22,36 +22,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	{
+	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	data ArgumentMismatch obj =
-	 UnionArgMismatch (ArgumentMismatch obj) (ArgumentMismatch obj)	|
-	 TooFewArguments Int					|
-	 TooManyArguments Int [obj]				|
-	 WrongArgumentType Int (Mismatch obj)	;
-
-	instance (Build cm r) =>
-	 MonadIsA cm (Object r m) (ArgumentMismatch (Object r m)) where
-		{
-		getConvert (UnionArgMismatch am1 am2) = do
-			{
-			am1Obj <- getConvert am1;
-			am2Obj <- getConvert am2;
-			makeList [am1Obj,am2Obj];
-			};
-		getConvert (TooFewArguments pos) = getObject (MkSymbol "too-few-arguments",(pos,()));
-		getConvert (TooManyArguments pos list) = getObject (MkSymbol "too-few-arguments",(pos,(list,())));
-		getConvert (WrongArgumentType pos mm) = do
-			{
-			(mObj :: Object r m) <- getConvert mm;
-			getObject (MkSymbol "wrong-argument-type",(pos,(mObj,())))
-			};
-		};
-
 	type ArgumentMatchMonad obj = Result (ArgumentMismatch obj);
 
-	class (SchemeObject r obj) =>
+	class
+		(
+		ListObject r obj
+		) =>
 	 ArgumentList r obj a | obj -> r where
 		{
 		maybeConvertFromObjects :: forall cm. (Build cm r,?objType :: Type obj) =>
@@ -60,26 +40,23 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	convertFromObjects ::
 		(
-		BuildThrow cm (Object r m) r,
-		ArgumentList r (Object r m) a,
-		?objType :: Type (Object r m)
+		ProcedureError cm obj,
+		Build cm r,
+		ArgumentList r obj a,
+		?objType :: Type obj
 		) =>
-	 [Object r m] -> cm a;
+	 [obj] -> cm a;
 	convertFromObjects args = do
 		{
 		ma <- maybeConvertFromObjects 0 args;
 		case ma of
 			{
 			SuccessResult a -> return a;
-			ExceptionResult am -> do
-				{
-				amObj <- getConvert am;
-				throwArgError "arg-list-mismatch" [amObj];
-				};
+			ExceptionResult am -> throwArgumentListMismatchError am;
 			};
 		};
 
-	instance (SchemeObject r obj) =>
+	instance (ListObject r obj) =>
 	 ArgumentList r obj () where
 		{
 		maybeConvertFromObjects _ [] = return (return ());
@@ -96,7 +73,7 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		maybeConvertFromObjects pos [] = return (throwSingle (TooFewArguments pos));
 		maybeConvertFromObjects pos (obj:objs) = do
 			{
-			ma <- fromObject obj;
+			ma <- resultFromObject obj;
 			mb <- maybeConvertFromObjects (pos + 1) objs;
 			return (liftF2 (,) (fmap2 (WrongArgumentType pos) ma) mb);
 			};
@@ -111,7 +88,7 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		maybeConvertFromObjects pos [] = return (return Nothing);
 		maybeConvertFromObjects pos [obj] = do
 			{
-			ma <- fromObject obj;
+			ma <- resultFromObject obj;
 			return (fmap2 (WrongArgumentType pos) (fmap Just ma));
 			};
 		maybeConvertFromObjects pos args = return (throwSingle (TooManyArguments pos args));
@@ -126,7 +103,7 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		maybeConvertFromObjects pos [] = return (return []);
 		maybeConvertFromObjects pos (obj:objs) = do
 			{
-			ma <- fromObject obj;
+			ma <- resultFromObject obj;
 			mas <- maybeConvertFromObjects (pos + 1) objs;
 			return (liftF2 (:) (fmap2 (WrongArgumentType pos) ma) mas);
 			};
@@ -160,11 +137,11 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	convertPLToProcedure ::
 		(
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
-	 (args -> m [Object r m]) -> Procedure (Object r m) m;
+	 (args -> m [obj]) -> Procedure obj m;
 	convertPLToProcedure foo argObjs = do
 		{
 		args <- convertFromObjects argObjs;
@@ -173,11 +150,11 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	convertPNToProcedure ::
 		(
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
-	 (args -> m ()) -> Procedure (Object r m) m;
+	 (args -> m ()) -> Procedure obj m;
 	convertPNToProcedure foo = convertPLToProcedure (\args -> do
 		{
 		foo args;
@@ -186,12 +163,12 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	convertToProcedure ::
 		(
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args,
-		ObjectSubtype r (Object r m) ret,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		ArgumentList r obj args,
+		ObjectSubtype r obj ret,
+		?objType :: Type obj
 		) =>
-	 (args -> m ret) -> Procedure (Object r m) m;
+	 (args -> m ret) -> Procedure obj m;
 	convertToProcedure foo = convertPLToProcedure (\args -> do
 		{
 		r <- foo args;

@@ -26,8 +26,8 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
-	type CPS r = SchemeCPS r (IO ());
-	type GCPS r = SchemeGCPS r (IO ());
+	type CPS r = SchemeCPS (IO ()) (Object r);
+	type GCPS r = SchemeGCPS (IO ()) (Object r);
 
 	type IdentityConst = Constant Identity;
 
@@ -70,6 +70,7 @@ module Main where
 						evalBindings (lift . lift),
 						setBindings,
 						portBindings,
+						systemBindings (lift . lift),
 						systemPortBindings
 						]) emptyBindings;
 					initCommand <- if initfile
@@ -129,6 +130,7 @@ module Main where
 						evalBindings lift,
 						setBindings,
 						portBindings,
+						systemBindings lift,
 						systemPortBindings
 						]) emptyBindings;
 					initCommand <- if initfile
@@ -187,6 +189,7 @@ module Main where
 						evalBindings id,
 						setBindings,
 						portBindings,
+						systemBindings id,
 						systemPortBindings
 						]) emptyBindings;
 					initCommand <- if initfile

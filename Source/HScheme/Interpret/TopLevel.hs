@@ -31,31 +31,30 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
---	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	data TopLevelCommand r m a = MkTopLevelCommand
+	data TopLevelCommand r obj m a = MkTopLevelCommand
 		{
-		tleExpression :: SchemeExpression r m a,
-		tleInitialBindings :: [(Symbol,ObjectSchemeExpression r m)],
-		tleSyntaxes :: [(Symbol,Syntax r (Object r m))]
+		tleExpression :: SchemeExpression r obj a,
+		tleInitialBindings :: [(Symbol,ObjectSchemeExpression r obj m)],
+		tleSyntaxes :: [(Symbol,Syntax r obj)]
 		};
 
-	expressionCommand :: SchemeExpression r m a -> TopLevelCommand r m a;
+	expressionCommand :: SchemeExpression r obj a -> TopLevelCommand r obj m a;
 	expressionCommand expr = MkTopLevelCommand expr [] [];
 
-	instance HasReturn (TopLevelCommand r m) where
+	instance HasReturn (TopLevelCommand r obj m) where
 		{
 		return a = expressionCommand (return a);
 		};
 
-	instance Functor (TopLevelCommand r m) where
+	instance Functor (TopLevelCommand r obj m) where
 		{
 		fmap ab (MkTopLevelCommand expr binds syntax) = MkTopLevelCommand (fmap ab expr) binds syntax;
 		};
 
-	instance FunctorApply (TopLevelCommand r m) where
+	instance FunctorApply (TopLevelCommand r obj m) where
 		{
 		fApply (MkTopLevelCommand ab binds1 syntax1) (MkTopLevelCommand a binds2 syntax2) = 
 		 MkTopLevelCommand (fApply ab a) (binds1 ++ binds2) (syntax1 ++ syntax2);
@@ -67,39 +66,40 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		 MkTopLevelCommand (fSeq a b) (binds1 ++ binds2) (syntax1 ++ syntax2);
 		};
 
-	type TopLevelListCommand r m = TopLevelCommand r m (m [Object r m]);
+	type TopLevelListCommand r obj m = TopLevelCommand r obj m (m [obj]);
 
 	instance (HasReturn m) =>
-	 HasNothing (TopLevelListCommand r m) where
+	 HasNothing (TopLevelListCommand r obj m) where
 		{
 		nothing = return (return nothing);
 		};
 
-	newtype TopLevelMacro cm r m = MkTopLevelMacro (
+	newtype TopLevelMacro cm r obj m = MkTopLevelMacro (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	 [Object r m] -> cm (TopLevelListCommand r m));
+	 [obj] -> cm (TopLevelListCommand r obj m));
 
-	remonadTopLevelMacro :: (forall a. cm1 a -> cm2 a) -> TopLevelMacro cm1 r m -> TopLevelMacro cm2 r m;
+	remonadTopLevelMacro :: (forall a. cm1 a -> cm2 a) -> TopLevelMacro cm1 r obj m -> TopLevelMacro cm2 r obj m;
 	remonadTopLevelMacro map (MkTopLevelMacro tlm) = MkTopLevelMacro (map . tlm);
 
-	newtype TopLevelBinder r m = MkTopLevelBinder
-	 {unTopLevelBinder :: forall a. [(Symbol,ObjectSchemeExpression r m)] -> SchemeExpression r m (m a) -> SchemeExpression r m (m a)};
+	newtype TopLevelBinder r obj m = MkTopLevelBinder
+	 {unTopLevelBinder :: forall a. [(Symbol,ObjectSchemeExpression r obj m)] -> SchemeExpression r obj (m a) -> SchemeExpression r obj (m a)};
 
 	assembleTopLevelListCommand ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> cm (TopLevelListCommand r m);
+	 obj -> cm (TopLevelListCommand r obj m);
 	assembleTopLevelListCommand obj = do
 		{
-		mpair <- fromObject obj;
+		mpair <- resultFromObject obj;
 		case mpair of
 			{
 			SuccessResult (sym,args) -> case ?toplevelbindings sym of
@@ -120,14 +120,15 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> cm (ListSchemeExpression r m);
+	 obj -> cm (ListSchemeExpression r obj m);
 	assembleTopLevelExpression obj = do
 		{
 		MkTopLevelCommand expr _ _ <- assembleTopLevelListCommand obj;
@@ -136,19 +137,20 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	beginCommand ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 a ->
-	 (m [Object r m] -> a) ->
-	 (m [Object r m] -> a -> a) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 cm (TopLevelCommand r m a);
+	 (m [obj] -> a) ->
+	 (m [obj] -> a -> a) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 cm (TopLevelCommand r obj m a);
 	beginCommand none one conn command1 objs = do
 		{
 		commandr <- let
@@ -159,18 +161,19 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	begin ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 a -> 
-	 (m [Object r m] -> a) ->
-	 (m [Object r m] -> a -> a) ->
-	 [Object r m] ->
-	 cm (TopLevelCommand r m a);
+	 (m [obj] -> a) ->
+	 (m [obj] -> a -> a) ->
+	 [obj] ->
+	 cm (TopLevelCommand r obj m a);
 	begin none one conn [] = return (return none);
 	begin none one conn [obj] = do
 		{
@@ -185,20 +188,21 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressions ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 m a -> 
-	 (m [Object r m] -> m a) ->
-	 (m [Object r m] -> m a -> m a) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 cm (SchemeExpression r m (m a));
+	 (m [obj] -> m a) ->
+	 (m [obj] -> m a -> m a) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 cm (SchemeExpression r obj (m a));
 	assembleTopLevelExpressions none one conn command objs = do
 		{
 		MkTopLevelCommand expr binds _ <- beginCommand none one conn command objs;
@@ -207,17 +211,18 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressionsList ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 cm (SchemeExpression r m (m [Object r m]));
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 cm (SchemeExpression r obj (m [obj]));
 	assembleTopLevelExpressionsList = assembleTopLevelExpressions
 	 (return [])
 	 id
@@ -230,18 +235,19 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressionsEat ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Object r m -> m ()) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 cm (SchemeExpression r m (m ()));
+	 (obj -> m ()) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 cm (SchemeExpression r obj (m ()));
 	assembleTopLevelExpressionsEat eat = assembleTopLevelExpressions
 	 (return ())
 	 (\mr -> do

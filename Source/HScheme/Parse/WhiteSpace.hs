@@ -1,7 +1,7 @@
 -- This is written in Haskell.
 {--
 HScheme -- a Scheme interpreter written in Haskell
-Copyright (C) 2002 Ashley Yakeley <ashley@semantic.org>
+Copyright (C) 2003 Ashley Yakeley <ashley@semantic.org>
 
 This file is part of HScheme.
 
@@ -20,25 +20,40 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity where
+module Org.Org.Semantic.HScheme.Parse.WhiteSpace where
 	{
-	import Org.Org.Semantic.HScheme.Object.CompleteObject;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase.Text.Properties.Misc;
 	import Org.Org.Semantic.HBase;
 
-	instance MonadCreatable IO (Constant Identity) where
+	restOfLineParse :: (MonadOrParser Char p) =>
+	 p ();
+	restOfLineParse = do
 		{
-		new a = return (unIdentity (new a));
+		mZeroOrMore (matchTokenParse (not . isLineBreak));
+		((matchTokenParse isLineBreak) >> (return ())) ||| (return ());
 		};
 
-	instance MonadGettableReference IO (Constant Identity) where
+	commentParse :: (MonadOrParser Char p) =>
+	 p ();
+	commentParse = do
 		{
-		get r = return (unIdentity (get r));
+		isTokenParse ';';
+		restOfLineParse;
 		};
 
-	instance MonadThrow (Object (Constant Identity) Identity) Identity where
+	optionalWhitespaceParse :: (MonadOrParser Char p) =>
+	 p ();
+	optionalWhitespaceParse = do
 		{
-		throw obj = error (unIdentity (toString obj));
+		mZeroOrMore (((matchTokenParse isWhiteSpace) >> (return ())) ||| commentParse);
+		return ();
+		};
+
+	whitespaceParse :: (MonadOrParser Char p) =>
+	 p ();
+	whitespaceParse = do
+		{
+		mOneOrMore (((matchTokenParse isWhiteSpace) >> (return ())) ||| commentParse);
+		return ();
 		};
 	}

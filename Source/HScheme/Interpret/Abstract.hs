@@ -35,24 +35,24 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	substMap :: (Scheme m r) =>
-	 (ObjLocation r m -> m a) -> Object r m -> m a;
+	substMap :: (Build m r) =>
+	 (r obj -> m a) -> obj -> m a;
 	substMap va value = do
 		{
 		loc <- new value;
 		va loc;
 		};
 
-	mSubstMap :: (Scheme m r) =>
-	 (ObjLocation r m -> m a) -> m (Object r m) -> m a;
+	mSubstMap :: (Build m r) =>
+	 (r obj -> m a) -> m obj -> m a;
 	mSubstMap va mvalue = do
 		{
 	 	value <- mvalue;
 		substMap va value;
 		};
 
-	mSubstLocMap :: (Scheme m r) =>
-	 (ObjLocation r m -> m a) -> m (Object r m) -> m (a,ObjLocation r m);
+	mSubstLocMap :: (Build m r) =>
+	 (r obj -> m a) -> m obj -> m (a,r obj);
 	mSubstLocMap va mvalue = do
 		{
 	 	value <- mvalue;
@@ -63,33 +63,33 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 
 	schemeExprAbstractList ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 [Symbol] -> SchemeExpression r m (m a) ->
-	 SchemeExpression r m ([Object r m] -> (m a));
-	schemeExprAbstractList = exprAbstractListGuardedMap substMap (throwSimpleError "too-few-args") (\args -> throwArgError "too-many-args" undefined);
+	 [Symbol] -> SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj ([obj] -> (m a));
+	schemeExprAbstractList = exprAbstractListGuardedMap substMap throwTooFewArgumentsError throwTooManyArgumentsError;
 
-	schemeExprLet :: (Scheme m r) =>
-	 Symbol -> ObjectSchemeExpression r m ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m a);
+	schemeExprLet :: (InterpretObject m r obj) =>
+	 Symbol -> ObjectSchemeExpression r obj m ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m a);
 	schemeExprLet = exprLetMap mSubstMap;
 
-	schemeExprLocLet :: (Scheme m r) =>
-	 Symbol -> ObjectSchemeExpression r m ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m (a,ObjLocation r m));
+	schemeExprLocLet :: (InterpretObject m r obj) =>
+	 Symbol -> ObjectSchemeExpression r obj m ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m (a,r obj));
 	schemeExprLocLet = exprLetMap mSubstLocMap;
 
-	schemeExprLetSeparate :: (Scheme m r) =>
-	 [(Symbol,ObjectSchemeExpression r m)] ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m a);
+	schemeExprLetSeparate :: (InterpretObject m r obj) =>
+	 [(Symbol,ObjectSchemeExpression r obj m)] ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m a);
 	schemeExprLetSeparate = exprLetMapSeparate separater where
 		{
-		separater :: (ExtractableFunctor t,Scheme m r) =>
-		 t (m (Object r m)) -> (t (ObjLocation r m) -> m a) -> m a;
+		separater :: (ExtractableFunctor t,InterpretObject m r obj) =>
+		 t (m obj) -> (t (r obj) -> m a) -> m a;
 		separater bindExprs absBody = do
 			{
 			objs <- fExtract bindExprs;
@@ -98,16 +98,16 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 			};
 		};
 
-	schemeExprLetSequential :: (Scheme m r) =>
-	 [(Symbol,ObjectSchemeExpression r m)] ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m a);
+	schemeExprLetSequential :: (InterpretObject m r obj) =>
+	 [(Symbol,ObjectSchemeExpression r obj m)] ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m a);
 	schemeExprLetSequential = exprLetMapSequential mSubstMap;
 
-	schemeExprLetRecursive :: (MonadFix m,Scheme m r) =>
-	 [(Symbol,ObjectSchemeExpression r m)] ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m a);
+	schemeExprLetRecursive :: (MonadFix m,InterpretObject m r obj) =>
+	 [(Symbol,ObjectSchemeExpression r obj m)] ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m a);
 	schemeExprLetRecursive = exprLetMapRecursive fixer where
 		{
 --		fixFunctor :: (Functor t) => t (t a -> a) -> t a;

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	(
+	MapObjects(..),SyntaxError(..),
 	defineSyntaxT,caseMatchM
 	) where
 	{
@@ -32,164 +33,174 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 --	data Bind sym a = MkBind sym a;
 	type Bind = (,);
 
-	type Binding r m = Bind Symbol (Object r m);
+	type Binding = Bind Symbol;
 
-	substitute :: (Build cm r) =>
-	 [Binding r m] -> Object r m -> cm (Object r m);
-	substitute [] x = return x;
-	substitute subs (PairObject hloc tloc) = do
+	class MapObjects r obj | obj -> r where
 		{
-		head <- get hloc;
-		head' <- substitute subs head;
-		hloc' <- new head';
-		tail <- get tloc;
-		tail' <- substitute subs tail;
-		tloc' <- new tail';
-		return (PairObject hloc' tloc')
+		internalMap :: forall cm. (Build cm r) => (obj -> cm obj) -> obj -> cm obj;
 		};
-	substitute subs (VectorObject arr) = do
+
+	substituteSymbol ::
+		(
+		ObjectSubtype r obj Symbol,
+		Build cm r
+		) =>
+	 [Binding obj] -> Symbol -> cm obj;
+	substituteSymbol [] sym = getObject sym;
+	substituteSymbol (((,) patvar sub):subs) sym =
+	 if sym == patvar
+	 then return sub
+	 else substituteSymbol subs sym;
+
+	substitute ::
+		(
+		Build cm r,
+		MapObjects r obj,
+		ObjectSubtype r obj Symbol
+		) =>
+	 [Binding obj] -> obj -> cm obj;
+	substitute [] = return;
+	substitute subs = internalMap (\obj -> do
 		{
-		list' <- subList (toList arr);
-		return (VectorObject (fromList list'));
-		} where
-		{
-		subList [] = return [];
-		subList (loc:locs) = do
+		msym <- resultFromObject obj;
+		case msym of
 			{
-			head <- get loc;
-			head' <- substitute subs head;
-			loc' <- new head';
-			locs' <- subList locs;
-			return (loc':locs');
+			SuccessResult sym -> substituteSymbol subs sym;
+			_ -> return obj;
+			};
+		});
+
+	tryEach :: (Monad m) =>
+	 m a -> [m (Result ex (m a))] -> m a;		
+	tryEach none [] = none;
+	tryEach none (action:rest) = do
+		{
+		rma <- action;
+		case rma of
+			{
+			SuccessResult ma -> ma;
+			_ -> tryEach none rest;
 			};
 		};
-	substitute (((,) patvar sub):subs) (SymbolObject name) =
-	 if name == patvar
-	 then return sub
-	 else substitute subs (SymbolObject name);
-	substitute _ x = return x;
 
 	caseMatchM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		Build cm r,
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		PatternError m obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
-	 cm (ListSchemeExpression r m);
+	 (obj,([Symbol],[(obj,(obj,()))])) ->
+	 cm (ListSchemeExpression r obj m);
 	caseMatchM (argExprObj,(literals,rules)) = do
 		{
 		argExpr <- assembleSingleExpression argExprObj;
-		sExprs <- fExtract (fmap (\(patternObj,(bodyObj,())) -> do
+		sExprs <- for (\(patternObj,(bodyObj,())) -> do
 			{
 			pattern <- makeObjectPattern literals patternObj;
 			bodyExpr <- assembleExpression bodyObj;
 			return (patternBind pattern bodyExpr);
-			}) rules);
+			}) rules;
 		return (liftF2 (\marg pcases -> do
 			{
 			arg <- marg;
-			matchCases arg pcases;
+			tryEach 
+			 (throwPatternNotMatchedError [arg])
+			 (fmap (\pcase -> pcase arg) pcases);
 			}) argExpr (fExtract sExprs));
-		} where
-		{
-		matchCases ::
-			(
-			BuildThrow cm (Object r m) r,
-			?objType :: Type (Object r m)
-			) =>
-		 Object r m ->
-		 [Object r m -> cm (Result ex (cm a))] ->
-		 cm a;		
-		matchCases arg [] = throwArgError "no-match" [arg];
-		matchCases arg (pcase:rest) = do
-			{
-			nmobj <- pcase arg;
-			case nmobj of
-				{
-				SuccessResult mobj -> mobj;
-				_ -> matchCases arg rest;
-				};
-			};
 		};
 
 	syntaxRulesM ::
 		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m)
+		MapObjects r obj,
+		Build cm r,
+		ObjectSubtype r obj obj,
+		ObjectSubtype r obj Symbol,
+		?objType :: Type obj
 		) =>
-	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm (Syntax r (Object r m));
+	 ([Symbol],[((Symbol,obj),(obj,()))]) -> cm (Syntax r obj);
 	syntaxRulesM (literals,rules) = return (MkSyntax (transform rules)) where
 		{
 		transform ::
 			(
-			BuildThrow cm (Object r m) r,
-			?objType :: Type (Object r m)
+			MapObjects r obj,
+			Build cm r,
+			PatternError cm obj, 
+			ObjectSubtype r obj obj,
+			ObjectSubtype r obj Symbol,
+			?objType :: Type obj
 			) =>
-		 [((Symbol,Object r m),(Object r m,()))] ->
+		 [((Symbol,obj),(obj,()))] ->
 		 Type (r ()) -> 
-		 [Object r m] ->
-		 cm (Object r m);
-		transform [] _ _ = throwSimpleError "no-match";
-		transform (((_,patternObj),(template,_)):rs) t args = do
+		 [obj] ->
+		 cm obj;
+		transform rules t args = tryEach
+		 (throwPatternNotMatchedError args)
+		 (fmap (\((_,patternObj),(template,_)) -> do
 			{
 			pattern <- makeListPattern literals patternObj;
 			nlist <- patternZip pattern args;
-			case nlist of
-				{
-				SuccessResult subs -> substitute subs template;
-				_ -> transform rs t args;
-				}
-			};
+			return (fmap (\subs -> substitute subs template) nlist);
+			}) rules)
+		};
+
+	class (ProcedureError cm obj) =>
+	 SyntaxError cm obj where
+		{
+		throwUndefinedSyntaxError :: forall a. (?objType :: Type obj) =>
+		 Symbol -> cm a;
+		throwUnknownSyntaxConstructorError :: forall a. (?objType :: Type obj) =>
+		 Symbol -> cm a;
 		};
 
 	compileSyntax ::
 		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		MapObjects r obj,
+		ObjectSubtype r obj obj,
+		ObjectSubtype r obj Symbol,
+		SyntaxError cm obj,
+		Build cm r,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	 Object r m -> cm (Syntax r (Object r m));
-	compileSyntax (SymbolObject sym) = case getBinding ?syntacticbindings sym of
+	 obj -> cm (Syntax r obj);
+	compileSyntax obj = do
 		{
-		Just syntax -> return syntax;
-		Nothing -> throwArgError "undefined-syntax" [SymbolObject sym];
-		};
-	compileSyntax obj@(PairObject head tail) = do
-		{
-		h <- get head;
-		case h of
+		choice <- fromObject obj;
+		case choice of
 			{
-			SymbolObject (MkSymbol "syntax-rules") -> do
+			Left sym -> case getBinding ?syntacticbindings sym of
 				{
-				t <- get tail;
-				margs <- fromObject t;
-				case margs of
-					{
-					ExceptionResult mm -> do
-						{
-						mmObj <- getConvert mm;
-						throwArgError "bad-syntax-rules-syntax" [t,mmObj];
-						};
-					SuccessResult args -> syntaxRulesM args;
-					};
+				Just syntax -> return syntax;
+				Nothing -> throwUndefinedSyntaxError sym;
 				};
-			SymbolObject _ -> throwArgError "undefined-syntax-maker" [h];
-			_ -> throwArgError "form-not-syntax" [obj];
+			Right (hsym,tail) -> case hsym of
+				{
+				MkSymbol "syntax-rules" -> do
+					{
+					args <- fromObject tail;
+					syntaxRulesM args;
+					};
+				_ -> throwUnknownSyntaxConstructorError hsym;
+				};
 			};
 		};
-	compileSyntax obj = throwArgError "form-not-syntax" [obj];
 
 	defineSyntaxT ::
 		(
-		BuildThrow cm (Object r m) r,
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj obj,
+		MapObjects r obj,
+		SyntaxError cm obj,
+		Build cm r,
 		Monad m,
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelListCommand r m);
+	 (Symbol,(obj,())) -> cm (TopLevelListCommand r obj m);
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = MkType} in compileSyntax obj;

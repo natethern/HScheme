@@ -47,17 +47,18 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	class
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
+		Build cm r,
 		Runnable cm m
+--		InterpretObject m r obj,
+--		AssembleError cm obj
 		) =>
-	 RunnableScheme cm m r where
+	 RunnableScheme cm m r obj where
 		{
 		rsRunInterp ::
-		 (Object r m -> cm ()) ->
-		 (forall a. (ArgumentList r (Object r m) a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
-		 cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]) ->
-		 ((Object r m -> m ()) -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ())) ->
+		 (obj -> cm ()) ->
+		 (forall a. (ArgumentList r obj a) => ((Symbol -> Maybe (r obj)) -> m a) -> m a) ->
+		 cm ((Symbol -> Maybe (r obj)) -> m [obj]) ->
+		 ((obj -> m ()) -> cm ((Symbol -> Maybe (r obj)) -> m ())) ->
 		 cm ();
 		};
 
@@ -69,11 +70,13 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	instance
 		(
-		MonadGettableReference m r,
-		MonadCreatable m r,
-		MonadException (Object r m) m
+		Build m r,
+		Monad m,
+		ListObject r obj
+--		InterpretObject m r obj,
+--		AssembleError m obj
 		) =>
-	 RunnableScheme m m r where
+	 RunnableScheme m m r obj where
 		{
 		rsRunInterp outproc mrun interpList interpEat = do
 			{
@@ -89,10 +92,12 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	instance
 		(
-		BuildThrow IO (Object r Identity) r,
-		BuildThrow Identity (Object r Identity) r
+		ObjectSubtype r obj obj,
+		Build IO r
+--		InterpretObject Identity r obj,
+--		AssembleError IO obj
 		) =>
-	 RunnableScheme IO Identity r where
+	 RunnableScheme IO Identity r obj where
 		{
 		rsRunInterp outproc mrun interpList interpEat = do
 			{
@@ -105,11 +110,11 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	printResult ::
 		(
-		Build IO r,
-		?objType :: Type (Object r m),
+		ToString IO obj,
+		?objType :: Type obj,
 		?stdout :: FlushSink IO Word8
 		) =>
-	 Object r m -> IO ();
+	 obj -> IO ();
 	printResult obj = do
 		{
 		str <- toString obj;
@@ -118,17 +123,19 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	evaluateObjects ::
 		(
-		RunnableScheme cm m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?macrobindings :: Symbol -> Maybe (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
+		InterpretObject m r obj,
+		AssembleError cm obj,
+		RunnableScheme cm m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
-	 (forall a. (ArgumentList r (Object r m) a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
-	 (Object r m -> cm ()) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
+	 (forall a. (ArgumentList r obj a) => ((Symbol -> Maybe (r obj)) -> m a) -> m a) ->
+	 (obj -> cm ()) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
 	 cm ();
 	evaluateObjects mrun outproc command objects = rsRunInterp outproc mrun
 	  (interpretTopLevelExpressionsList command objects)
@@ -136,17 +143,19 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	runObjects ::
 		(
-		RunnableScheme cm m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?macrobindings :: Symbol -> Maybe (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
+		InterpretObject m r obj,
+		AssembleError cm obj,
+		RunnableScheme cm m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
-	 (Object r m -> cm ()) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 SymbolBindings (ObjLocation r m) ->
+	 (obj -> cm ()) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 SymbolBindings (r obj) ->
 	 cm ();
 	runObjects outproc command objects bindings =
 	 evaluateObjects mrun outproc command objects where
@@ -156,18 +165,20 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	runObjectsWithExit ::
 		(
-		RunnableScheme cm m r,
+		InterpretObject m r obj,
+		AssembleError cm obj,
+		RunnableScheme cm m r obj,
 		MonadCont m,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?macrobindings :: Symbol -> Maybe (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
-	 (Object r m -> cm ()) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] ->
-	 SymbolBindings (ObjLocation r m) ->
+	 (obj -> cm ()) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] ->
+	 SymbolBindings (r obj) ->
 	 cm ();
 	runObjectsWithExit outproc command objects rootBindings =
 	 evaluateObjects mrun outproc command objects where

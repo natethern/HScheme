@@ -41,11 +41,11 @@ module Org.Org.Semantic.HScheme.Bind
 	import Org.Org.Semantic.HBase;
 
 	mutualBind ::
-	 ((?syntacticbindings	:: SymbolBindings syntax) => MacroBindings cm r m) ->
-	 ((?syntacticbindings	:: SymbolBindings syntax) => TopLevelBindings cm r m) ->
+	 ((?syntacticbindings	:: SymbolBindings syntax) => MacroBindings cm r obj m) ->
+	 ((?syntacticbindings	:: SymbolBindings syntax) => TopLevelBindings cm r obj m) ->
 	 ((?syntacticbindings	:: SymbolBindings syntax,
-		?macrobindings		:: Symbol -> Maybe (Macro cm r m),
-	 	?toplevelbindings	:: Symbol -> Maybe (TopLevelMacro cm r m)) => a) ->
+		?macrobindings		:: Symbol -> Maybe (Macro cm r obj m),
+	 	?toplevelbindings	:: Symbol -> Maybe (TopLevelMacro cm r obj m)) => a) ->
 	 a;
 	mutualBind macroBinds tlBinds a = 
 	 let

@@ -28,16 +28,16 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	getBadLoc :: Symbol -> ObjLocation r m;
+	getBadLoc :: Symbol -> r obj;
 --	getBadLoc sym = throwArgError "unbound-symbol" ([SymbolObject sym]);
 	getBadLoc sym = error ("unbound-symbol: " ++ (show sym));
 
 	getLoc ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+--		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 (Symbol -> Maybe (ObjLocation r m)) -> Symbol -> ObjLocation r m;
+	 (Symbol -> Maybe (r obj)) -> Symbol -> r obj;
 	getLoc getter sym = case (getter sym) of
 		{
 		Just loc -> loc;
@@ -46,33 +46,35 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 {--
 	getSymbolBinding ::
 		(
-		Scheme m r
+		InterpretObject m r obj
 		) =>
-	 Bindings r m -> Symbol -> m (ObjLocation r m);
+	 Bindings r m -> Symbol -> m (r obj);
 	getSymbolBinding bindings sym = getLoc (getBinding bindings);
 --}
 
 	bindExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		Monad cm,
+--		BuildThrow cm obj r,
+--		InterpretObject m r obj,
+		?objType :: Type obj
+--		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+--		?syntacticbindings :: SymbolBindings (Syntax r obj),
+--		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 SchemeExpression r m a -> cm ((Symbol -> Maybe (ObjLocation r m)) -> a);
+	 SchemeExpression r obj a -> cm ((Symbol -> Maybe (r obj)) -> a);
 	bindExpression rr = return (\lookupSym -> runLambda (getLoc lookupSym) rr);
 
 	interpretTopLevelExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
+	 obj -> cm ((Symbol -> Maybe (r obj)) -> m [obj]);
 	interpretTopLevelExpression obj = let {?objType = MkType} in do
 		{
 		rr <- assembleTopLevelExpression obj;
@@ -81,16 +83,17 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 
 	interpretTopLevelExpressionsEat ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Object r m -> m ()) ->
-	 TopLevelListCommand r m ->
-	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ());
+	 (obj -> m ()) ->
+	 TopLevelListCommand r obj m ->
+	 [obj] -> cm ((Symbol -> Maybe (r obj)) -> m ());
 	interpretTopLevelExpressionsEat eat command objs = let {?objType = MkType} in do	
 		{
 		rr <- assembleTopLevelExpressionsEat eat command objs;
@@ -99,15 +102,16 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 
 	interpretTopLevelExpressionsList ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 TopLevelListCommand r m ->
-	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
+	 TopLevelListCommand r obj m ->
+	 [obj] -> cm ((Symbol -> Maybe (r obj)) -> m [obj]);
 	interpretTopLevelExpressionsList command objs = let {?objType = MkType} in do	
 		{
 		rr <- assembleTopLevelExpressionsList command objs;

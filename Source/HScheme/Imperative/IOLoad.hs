@@ -47,11 +47,12 @@ module Org.Org.Semantic.HScheme.Imperative.IOLoad where
 
 	ioRead ::
 		(
-		Scheme m r,
-		BuildThrow IO (Object r m) r,
-		?objType :: Type (Object r m)
+		ParserError IO obj,
+		ParseObject r obj,
+		Build IO r,
+		?objType :: Type obj
 		) =>
 	 [String] -> 
-	 String -> IO [Object r m];
+	 String -> IO [obj];
 	ioRead paths = readWithProcs (openInputFileWithPaths paths);
 	}

@@ -46,57 +46,65 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		return b';
 		};
 
-	type LocationBindings cm r m = RefBindings cm r (Object r m);
-
 	addProcBinding ::
 		(
 		Build cm r,
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args,
-		ObjectSubtype r (Object r m) ret
+		ArgumentList r obj args,
+		ObjectSubtype r obj ret,
+		InterpretObject m r obj
 		) =>
 	 String ->
-	 ((?objType :: Type (Object r m)) => args -> m ret) ->
-	 LocationBindings cm r m;
-	addProcBinding name p b = addLocationBinding (MkSymbol name)
-	 (ProcedureObject (convertToProcedure p)) b;
+	 ((?objType :: Type obj) => args -> m ret) ->
+	 RefBindings cm r obj;
+	addProcBinding name p b = do
+		{
+		procObj <- getObject (convertToProcedure p);
+		addLocationBinding (MkSymbol name) procObj b;
+		};
 
 	addProcNBinding ::
 		(
 		Build cm r,
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args
+		InterpretObject m r obj,
+		ArgumentList r obj args
 		) =>
 	 String ->
-	 ((?objType :: Type (Object r m)) => args -> m ()) ->
-	 LocationBindings cm r m;
-	addProcNBinding name p b = addLocationBinding (MkSymbol name)
-	 (ProcedureObject (convertPNToProcedure p)) b;
+	 ((?objType :: Type obj) => args -> m ()) ->
+	 RefBindings cm r obj;
+	addProcNBinding name p b = do
+		{
+		procObj <- getObject (convertPNToProcedure p);
+		addLocationBinding (MkSymbol name) procObj b;
+		};
 
 	addProcLBinding ::
 		(
 		Build cm r,
-		BuildThrow m (Object r m) r,
-		ArgumentList r (Object r m) args
+		InterpretObject m r obj,
+		ArgumentList r obj args
 		) =>
 	 String ->
-	 ((?objType :: Type (Object r m)) => args -> m [Object r m]) ->
-	 LocationBindings cm r m;
-	addProcLBinding name p b = addLocationBinding (MkSymbol name)
-	 (ProcedureObject (convertPLToProcedure p)) b;
+	 ((?objType :: Type obj) => args -> m [obj]) ->
+	 RefBindings cm r obj;
+	addProcLBinding name p b = do
+		{
+		procObj <- getObject (convertPLToProcedure p);
+		addLocationBinding (MkSymbol name) procObj b;
+		};
 
 	convertToMacro ::
 		(
-		BuildThrow cm (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		ProcedureError cm obj,
+		Build cm r,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	  args -> cm (ListSchemeExpression r m)) ->
-	 Macro cm r m;
+	  args -> cm (ListSchemeExpression r obj m)) ->
+	 Macro cm r obj m;
 	convertToMacro foo = MkMacro (\objs -> do
 		{
 		args <- convertFromObjects objs;
@@ -105,64 +113,67 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 
 	convertToTopLevelMacro ::
 		(
-		BuildThrow cm (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		ProcedureError cm obj,
+		Build cm r,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	 args -> cm (TopLevelListCommand r m)) ->
-	 TopLevelMacro cm r m;
+	 args -> cm (TopLevelListCommand r obj m)) ->
+	 TopLevelMacro cm r obj m;
 	convertToTopLevelMacro foo = MkTopLevelMacro (\argObjs -> do
 		{
 		args <- convertFromObjects argObjs;
 		foo args;
 		});
 
-	type MacroBindings cm r m =
+	type MacroBindings cm r obj m =
 		(
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 SymbolBindings (Macro cm r m) -> SymbolBindings (Macro cm r m);
+	 SymbolBindings (Macro cm r obj m) -> SymbolBindings (Macro cm r obj m);
 
 	addMacroBinding ::
 		(
-		BuildThrow cm (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		ProcedureError cm obj,
+		Build cm r,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
 	 String ->
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	  args -> cm (ListSchemeExpression r m)) ->
-	 MacroBindings cm r m;
+	  args -> cm (ListSchemeExpression r obj m)) ->
+	 MacroBindings cm r obj m;
 	addMacroBinding name p b = addBinding (MkSymbol name) (convertToMacro p) b;
 
-	type TopLevelBindings cm r m =
+	type TopLevelBindings cm r obj m =
 		(
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 SymbolBindings (TopLevelMacro cm r m) -> SymbolBindings (TopLevelMacro cm r m);
+	 SymbolBindings (TopLevelMacro cm r obj m) -> SymbolBindings (TopLevelMacro cm r obj m);
 
 	addTopLevelMacroBinding ::
 		(
-		BuildThrow cm (Object r m) r,
-		ArgumentList r (Object r m) args,
-		?objType :: Type (Object r m)
+		ProcedureError cm obj,
+		Build cm r,
+		ArgumentList r obj args,
+		?objType :: Type obj
 		) =>
 	 String ->
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	 args -> cm (TopLevelListCommand r m)) ->
-	 TopLevelBindings cm r m;
+	 args -> cm (TopLevelListCommand r obj m)) ->
+	 TopLevelBindings cm r obj m;
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;
 
 	exitFuncProc :: (Monad m) => (a -> m b) -> (a -> m ());

@@ -36,9 +36,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	-- 4.1.2 Literal Expressions
 
-	quoteM :: (Build cm r,Monad m,?objType :: Type (Object r m)) =>
-	 (Object r m,()) ->
-	 cm (ListSchemeExpression r m);
+	quoteM :: (Build cm r,Monad m,?objType :: Type obj) =>
+	 (obj,()) ->
+	 cm (ListSchemeExpression r obj m);
 	quoteM (q,()) = return (return (return [q]));
 
 
@@ -46,40 +46,42 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	lambdaMS ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m ->
-	 [Object r m] ->
-	 cm (SchemeExpression r m (Object r m));
+	 obj ->
+	 [obj] ->
+	 cm (ObjectSchemeExpression r obj m);
 	lambdaMS params bodyObjs = do
 		{
 		bodyExpr <- bodyM bodyObjs;
 		procExpr <- makeLambda params bodyExpr;
-		return (fmap ProcedureObject procExpr);
+		return (fmap getObject procExpr);
 		};
 
 	lambdaM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Object r m,[Object r m]) ->
-	 cm (ListSchemeExpression r m);
+	 (obj,[obj]) ->
+	 cm (ListSchemeExpression r obj m);
 	lambdaM (params,bodyObjs) = do
 		{
 		objExpr <- lambdaMS params bodyObjs;
-		return (fmap (\obj -> return [obj]) objExpr);
+		return (fmap (fmap (\obj -> [obj])) objExpr);
 		};
 
 
@@ -87,14 +89,16 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	ifM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		IsA Bool obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Object r m,(Object r m,Maybe (Object r m))) ->
-	 cm (ListSchemeExpression r m);
+	 (obj,(obj,Maybe obj)) ->
+	 cm (ListSchemeExpression r obj m);
 	ifM (condObj,(thenObj,mElseObj)) = do
 		{
 		condExpr <- assembleSingleExpression condObj;
@@ -118,13 +122,15 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	setBangM ::
 		(
-		BuildThrow cm (Object r m) r,
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		FullBuild m r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (ListSchemeExpression r m);
+	 (Symbol,(obj,())) -> cm (ListSchemeExpression r obj m);
 	setBangM (sym,(obj,())) = do
 		{
 		expr <- assembleSingleExpression obj;
@@ -141,14 +147,15 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	assembleBinds ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 [(Symbol,(Object r m,()))] ->
-	 cm [(Symbol,ObjectSchemeExpression r m)];
+	 [(Symbol,(obj,()))] ->
+	 cm [(Symbol,ObjectSchemeExpression r obj m)];
 	assembleBinds [] = return [];
 	assembleBinds ((sym,(obj,())):bs) = do
 		{
@@ -159,16 +166,17 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	letSequentialM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ListSchemeExpression r m);
+	 ([(Symbol,(obj,()))],[obj]) ->
+	 cm (ListSchemeExpression r obj m);
 	letSequentialM (bindList,bodyObj) = do
 		{
 		binds <- assembleBinds bindList;
@@ -178,16 +186,17 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	letSeparateM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ListSchemeExpression r m);
+	 ([(Symbol,(obj,()))],[obj]) ->
+	 cm (ListSchemeExpression r obj m);
 	letSeparateM (bindList,bodyObj) = do
 		{
 		binds <- assembleBinds bindList;
@@ -197,17 +206,18 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	letRecursiveM ::
 		(
+		AssembleError cm obj,
 		MonadFix m,
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ListSchemeExpression r m);
+	 ([(Symbol,(obj,()))],[obj]) ->
+	 cm (ListSchemeExpression r obj m);
 	letRecursiveM (bindList,bodyObj) = do
 		{
 		binds <- assembleBinds bindList;
@@ -220,30 +230,32 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	bodyM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 [Object r m] ->
-	 cm (ListSchemeExpression r m);
+	 [obj] ->
+	 cm (ListSchemeExpression r obj m);
 	bodyM = assembleTopLevelExpressions (return []) id (>>) nothing;
 
 	bodyListM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 [Object r m] ->
-	 cm (ListSchemeExpression r m);
+	 [obj] ->
+	 cm (ListSchemeExpression r obj m);
 	bodyListM objs = fmap (fmap (\mlist -> do
 		{
 		list <- mlist;
@@ -253,16 +265,17 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	bodyValuesM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 [Object r m] ->
-	 cm (ListSchemeExpression r m);
+	 [obj] ->
+	 cm (ListSchemeExpression r obj m);
 	bodyValuesM = assembleTopLevelExpressionsList nothing;
 
 
@@ -270,17 +283,18 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	namedLetM ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
 		MonadFix m,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Symbol,([(Symbol,(Object r m,()))],[Object r m])) ->
-	 cm (ListSchemeExpression r m);
+	 (Symbol,([(Symbol,(obj,()))],[obj])) ->
+	 cm (ListSchemeExpression r obj m);
 	namedLetM (var,(bindlist,bodyObj)) = do
 		{
 		bodyExpr <- bodyM bodyObj;
@@ -291,7 +305,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 			{
 			exp = schemeExprAbstractList (fmap fst bindlist) bodyExpr;
 			} in
-		 schemeExprLetRecursive [(var,fmap (return . ProcedureObject) exp)] (liftF2 (\objsf mobjs -> do
+		 schemeExprLetRecursive [(var,fmap getObject exp)] (liftF2 (\objsf mobjs -> do
 			{
 			objs <- fExtract mobjs;
 			objsf objs;
@@ -304,15 +318,16 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	beginT ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 [Object r m] ->
-	 cm (TopLevelListCommand r m);
+	 [obj] ->
+	 cm (TopLevelListCommand r obj m);
 	beginT = begin (return []) id (>>);
 
 
@@ -320,18 +335,19 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	pureDefine ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 Symbol -> ObjectSchemeExpression r m -> TopLevelListCommand r m;
+	 Symbol -> ObjectSchemeExpression r obj m -> TopLevelListCommand r obj m;
 	pureDefine sym valExpr = MkTopLevelCommand (return (return [])) [(sym,valExpr)] [];
 
 	fullDefine ::
 		(
-		FullScheme m r,
-		?objType :: Type (Object r m)
+		FullBuild m r,
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 Symbol -> ObjectSchemeExpression r m-> TopLevelListCommand r m;
+	 Symbol -> ObjectSchemeExpression r obj m-> TopLevelListCommand r obj m;
 	fullDefine sym valExpr = MkTopLevelCommand 
 	 (liftF2 (\loc mval -> do
 		{
@@ -344,16 +360,17 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	defineT ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Symbol -> ObjectSchemeExpression r m -> TopLevelListCommand r m) -> 
-	 Either (Symbol,(Object r m,())) ((Symbol,Object r m),[Object r m]) -> cm (TopLevelListCommand r m);
+	 (Symbol -> ObjectSchemeExpression r obj m -> TopLevelListCommand r obj m) -> 
+	 Either (Symbol,(obj,())) ((Symbol,obj),[obj]) -> cm (TopLevelListCommand r obj m);
 	defineT define (Left (sym,(valObj,()))) = do
 		{
 		valExpr <- assembleSingleExpression valObj;
@@ -362,6 +379,6 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	defineT define (Right ((sym,params),bodyObjs)) = do
 		{
 		valExpr <- lambdaMS params bodyObjs;
-		return (define sym (fmap return valExpr));
+		return (define sym valExpr);
 		};
 	}

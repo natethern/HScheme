@@ -1,13 +1,13 @@
 ; 4.2.1 Conditionals
 (define-syntax cond (syntax-rules (=> else)
-	((cond) <nothing>)
+	((cond) (values))
 	((cond (else    . exprs)) (begin . exprs))
 	((cond (test    . exprs) . rest) (if test (begin . exprs) (cond . rest)))
 	((cond (test => . exprs) . rest) (if test (begin . exprs) (cond . rest)))
 ))
 
 (define-syntax case (syntax-rules (else)
-	((case key) <nothing>)
+	((case key) (values))
 	((case key (else . exprs)) (begin . exprs))
 	((case key (() . exprs) . rest) (case key . rest))
 	((case key ((datum . data) . exprs) . rest) (if (equal? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
@@ -313,9 +313,16 @@
 	)
 ))
 
-(define for-each (lambda args
-	(apply map args)
-	<nothing>
+(define for-each (lambda (proc a1 . ar)
+	(case-match a1 ()
+		(() '())
+		((ah . at)
+			(begin
+				(apply proc (cons ah (smap car ar)))
+				(apply for-each (cons proc (cons at (smap cdr ar))))
+			)
+		)
+	)
 ))
 
 (define-syntax catch (syntax-rules () ((catch foo catchclause)

@@ -23,14 +23,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Core.Throw where
 	{
 	import Org.Org.Semantic.HScheme.Core.Conversions;
-	import Org.Org.Semantic.HScheme.Core.Object;
 	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 
 	throwSchemeError ::
 		(
-		BuildThrow cm obj r,
+		Build cm r,
+		MonadThrow obj cm,
 		?objType :: Type obj,
 		ObjectSubtype r obj Symbol,
 		ObjectSubtype r obj rest
@@ -42,24 +42,24 @@ module Org.Org.Semantic.HScheme.Core.Throw where
 		throwObject errorObj;
 		};
 
-	throwSimpleError :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	throwSimpleError ::
+		(
+		Build cm r,
+		MonadThrow obj cm,
+		ObjectSubtype r obj Symbol,
+		?objType :: Type obj
+		) =>
 	 String -> cm a;
 	throwSimpleError name = throwSchemeError name ();
 
-	throwArgError :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
-	 String -> [Object r m] -> cm a;
-	throwArgError = throwSchemeError;
-
-	singleValue ::
+	throwArgError ::
 		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m)
+		Build cm r,
+		MonadThrow obj cm,
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj obj,
+		?objType :: Type obj
 		) =>
-	 [Object r m] -> cm (Object r m);
-{-
-	singleValue [obj] = return obj;
-	singleValue list = throwArgError "single-value-expected" list;
--}
-	singleValue (obj:_) = return obj;
-	singleValue [] = return VoidObject;
+	 String -> [obj] -> cm a;
+	throwArgError = throwSchemeError;
 	}

@@ -25,30 +25,27 @@ module Org.Org.Semantic.HScheme.RunLib.NumericProcedures where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	isNumberP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isNumberP (NumberObject _,()) = return True;
-	isNumberP (_,()) = return False;
+	isNumberP :: (ObjectSubtype r obj Number,Build m r,?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isNumberP (obj,()) = getObjectIs (MkType :: Type Number) obj;
 
-	isExactP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isExactP (NumberObject n,()) = return (isExactN n);
-	isExactP (_,()) = return False;
+	isExactP :: (ObjectSubtype r obj Number,Build m r,?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isExactP (obj,()) = testObject (return . isExactN) obj;
 
-	isInexactP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isInexactP (NumberObject n,()) = return (not (isExactN n));
-	isInexactP (_,()) = return False;
+	isInexactP :: (ObjectSubtype r obj Number,Build m r,?objType :: Type obj) =>
+	 (obj,()) -> m Bool;
+	isInexactP (obj,()) = testObject (return . not . isExactN) obj;
 
-	realPartP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	realPartP :: (Monad m,?objType :: Type obj) =>
 	 (Number,()) -> m Number;
 	realPartP (n,()) = return ((realPart n) :+ 0);
 
-	imagPartP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	imagPartP :: (Monad m,?objType :: Type obj) =>
 	 (Number,()) -> m Number;
 	imagPartP (n,()) = return ((imagPart n) :+ 0);
 
-	isZeroP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	isZeroP :: (Monad m,?objType :: Type obj) =>
 	 (Number,()) -> m Bool;
 	isZeroP (n,()) = return (isZero n);
 
@@ -67,18 +64,18 @@ module Org.Org.Semantic.HScheme.RunLib.NumericProcedures where
 		Nothing -> nan;
 		};
 
-	inverterFoldingLP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	inverterFoldingLP :: (Monad m,?objType :: Type obj) =>
 	 (Number -> Number -> Number) ->
 	 Number ->
 	 (Number,[Number]) -> m Number;
 	inverterFoldingLP op a (n,[]) = return (op a n);
 	inverterFoldingLP op _ (n,ns) = return (foldl op n ns);
 
-	subtractP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	subtractP :: (Monad m,?objType :: Type obj) =>
 	 (Number,[Number]) -> m Number;
 	subtractP = inverterFoldingLP (-) 0;
 	
-	divideP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	divideP :: (Monad m,?objType :: Type obj) =>
 	 (Number,[Number]) -> m Number;
 	divideP = inverterFoldingLP (/) 1;
 	}

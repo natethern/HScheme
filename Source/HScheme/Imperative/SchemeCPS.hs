@@ -26,33 +26,34 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type SchemeCPS r p = ExceptionContinuationPass p (SchemeCPSError r p);
-
-	type SchemeCPSObject r p = Object r (SchemeCPS r p);
-
-	data SchemeCPSError r p = 
+	data SchemeCPSError p mobj = 
 		StringError String				|
 		ExceptionError Exception		|
-		ObjError (SchemeCPSObject r p)	;
+		ObjError (mobj (SchemeCPS p mobj))	;
 
-	instance Show (SchemeCPSError r p) where
+	type SchemeCPS p mobj = ExceptionContinuationPass p (SchemeCPSError p mobj);
+
+	type SchemeCPSObject p mobj = mobj (SchemeCPS p mobj);
+
+	instance Show (SchemeCPSError p mobj) where
 		{
 		show (StringError s) = s;
 		show (ExceptionError ex) = show ex;
 		show (ObjError ex) = "Scheme object error";
 		};
 
-	instance MonadThrow (SchemeCPSObject r p) (SchemeCPS r p) where
+	instance MonadThrow (SchemeCPSObject p mobj) (SchemeCPS p mobj) where
 		{
 		throw = throw . ObjError;
 		};
 
 	instance
 		(
-		MonadCreatable (SchemeCPS r p) r,
-		MonadGettableReference (SchemeCPS r p) r
+		ObjectSubtype r (SchemeCPSObject p mobj) Symbol,
+		ObjectSubtype r (SchemeCPSObject p mobj) (SList Char),
+		Build (SchemeCPS p mobj) r
 		) =>
-	 MonadException (SchemeCPSObject r p) (SchemeCPS r p) where
+	 MonadException (SchemeCPSObject p mobj) (SchemeCPS p mobj) where
 		{
 		catch foo cc = catchSingle foo (\ex -> do
 			{
@@ -61,95 +62,47 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 			});
 		};
 
-	instance
-		(
-		MonadCreatable (SchemeCPS r p) r,
-		MonadGettableReference (SchemeCPS r p) r
-		) =>
-	 MonadIsA (SchemeCPS r p) (SchemeCPSError r p) (SchemeCPSObject r p) where
+	instance (Monad m) =>
+	 MonadIsA m (SchemeCPSError p mobj) (SchemeCPSObject p mobj) where
 		{
 		getConvert = return . ObjError;
 		};
 
 	instance
 		(
-		MonadCreatable (SchemeCPS r p) r,
-		MonadGettableReference (SchemeCPS r p) r
+		ObjectSubtype r (SchemeCPSObject p mobj) Symbol,
+		ObjectSubtype r (SchemeCPSObject p mobj) (SList Char),
+		Build (SchemeCPS p mobj) r
 		) =>
-	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
+	 MonadIsA (SchemeCPS p mobj) (SchemeCPSObject p mobj) (SchemeCPSError p mobj) where
 		{
 		getConvert (ObjError a) = return a;
 		getConvert (ExceptionError x) = getObject (MkSymbol "failure",MkSList (show x));
 		getConvert (StringError s) = getObject (MkSymbol "failure",MkSList s);
 		};
 
-	instance MaybeA (SchemeCPSError r p) String where
+	instance MaybeA (SchemeCPSError p mobj) String where
 		{
 		maybeConvert = Just . convert;
 		};
 
-	instance IsA (SchemeCPSError r p) String where
+	instance IsA (SchemeCPSError p mobj) String where
 		{
 		convert = StringError;
 		};
 
-	instance MaybeA (SchemeCPSError r p) Exception where
+	instance MaybeA (SchemeCPSError p mobj) Exception where
 		{
 		maybeConvert = Just . convert;
 		};
 
-	instance IsA (SchemeCPSError r p) Exception where
+	instance IsA (SchemeCPSError p mobj) Exception where
 		{
 		convert = ExceptionError;
 		};
 
-	instance
-		(
-		MonadGettableReference m r
-		) =>
-	 MonadGettableReference (SchemeCPS r (m p)) r where
-		{
-		get r = lift ((get :: r a -> m a) r);
-		};
-
-	instance
-		(
-		MonadSettableReference m r
-		) =>
-	 MonadSettableReference (SchemeCPS r (m p)) r where
-		{
-		set r v = lift ((set :: r a -> a -> m ()) r v);
-		};
-
-	instance
-		(
-		MonadCreatable m r
-		) =>
-	 MonadCreatable (SchemeCPS r (m p)) r where
-		{
-		new a = lift ((new :: a -> m (r a)) a);
-		};
-
-	instance
-		(
-		MonadEqualReference m r
-		) =>
-	 MonadEqualReference (SchemeCPS r (m p)) r where
-		{
-		getEqualReference a b = lift ((getEqualReference :: r a -> r a -> m Bool) a b);
-		};
-
-	instance
-		(
-		MonadStandardReference m r
-		) =>
-	 MonadStandardReference (SchemeCPS r (m a)) r;
-
-	instance
-		(
-		MonadException (SchemeCPSObject r (m ())) m
-		) =>
-	 Runnable m (SchemeCPS r (m ())) where
+	instance (MonadException (SchemeCPSObject (cm ()) mobj) cm) =>
+	 Runnable cm (SchemeCPS (cm ()) mobj) where
 		{
 		rsRun ma = runExceptionContinuationPass
 		 (\err -> case err of
@@ -162,11 +115,11 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 
 	instance
 		(
-		MonadGettableReference m r,
-		MonadCreatable m r,
-		MonadException (SchemeCPSObject r (m ())) m
+		Build cm r,
+		MonadException (SchemeCPSObject (cm ()) mobj) cm,
+		ListObject r (SchemeCPSObject (cm ()) mobj)
 		) =>
-	 RunnableScheme m (SchemeCPS r (m ())) r where
+	 RunnableScheme cm (SchemeCPS (cm ()) mobj) r (SchemeCPSObject (cm ()) mobj) where
 		{
 		rsRunInterp outproc mrun interpList interpEat = do
 			{

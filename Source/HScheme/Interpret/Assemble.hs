@@ -24,7 +24,9 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	(
 	SchemeExpression,ObjectSchemeExpression,ListSchemeExpression,
 	Macro(..),remonadMacro,
-	assembleExpression,assembleSingleExpression
+	PatternError(..),Syntax(..),
+	AssembleError(..),
+	InterpretObject,assembleExpression,assembleSingleExpression
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
@@ -32,73 +34,78 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type SchemeExpression r m = TrackingExpression Symbol (ObjLocation r m);
-
-	type ObjectSchemeExpression r m = SchemeExpression r m (m (Object r m));
-
-	type ListSchemeExpression r m = SchemeExpression r m (m [Object r m]);
-
-	newtype Macro cm r m = MkMacro
-		((
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+	class
+		(
+		ObjectSubtype r obj obj,
+		ObjectSubtype r obj Symbol,
+		ApplyObject m r obj
 		) =>
-	 [Object r m] -> cm (ListSchemeExpression r m));
+	 InterpretObject m r obj | obj -> m r;
 
-	remonadMacro :: (forall a. cm1 a -> cm2 a) -> Macro cm1 r m -> Macro cm2 r m;
-	remonadMacro map (MkMacro tlm) = MkMacro (map . tlm);
+	instance
+		(
+		ObjectSubtype r obj obj,
+		ObjectSubtype r obj Symbol,
+		ApplyObject m r obj
+		) =>
+	 InterpretObject m r obj;
 
-	-- as fProductList
-	execList :: (Monad m) =>
-	 [m a] -> m [a];
-	execList [] = return [];
-	execList (ma:mas) = do
+	class PatternError cm obj where
 		{
-		a <- ma;
-		as <- execList mas;
-		return (a:as);
+		throwBadPatternError :: forall a. (?objType :: Type obj) =>
+		 obj -> cm a;
+		throwPatternNotMatchedError :: forall a. (?objType :: Type obj) =>
+		 [obj] -> cm a;
 		};
 
-	doApply ::
-		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+	newtype Syntax r obj = MkSyntax (forall m. (Build m r,PatternError m obj,?objType :: Type obj) => Type (r ()) -> [obj] -> m obj);
+
+	type SchemeExpression r obj = TrackingExpression Symbol (r obj);
+
+	type ObjectSchemeExpression r obj m = SchemeExpression r obj (m obj);
+
+	type ListSchemeExpression r obj m = SchemeExpression r obj (m [obj]);
+
+	newtype Macro cm r obj m = MkMacro
+		((
+		?syntacticbindings :: SymbolBindings (Syntax r obj)
 		) =>
-	 m (Object r m) ->
-	 m [Object r m] ->
-	 m [Object r m];
-	doApply mf margs = do
+	 [obj] -> cm (ListSchemeExpression r obj m));
+
+	remonadMacro :: (forall a. cm1 a -> cm2 a) -> Macro cm1 r obj m -> Macro cm2 r obj m;
+	remonadMacro map (MkMacro tlm) = MkMacro (map . tlm);
+
+	class
+		(
+		ProcedureError cm obj,
+		PatternError cm obj
+		) =>
+	 AssembleError cm obj where
 		{
-		f <- mf;
-		case f of
-			{
-			ProcedureObject proc -> do
-				{
-				args <- margs;
-				proc args;
-				};
-			_ -> throwArgError "bad-apply-form" [f];
-			};
+		throwBadCombinationError :: forall a. (?objType :: Type obj) =>
+		 obj -> Mismatch obj -> cm a;
 		};
 
 	makeApply ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 ObjectSchemeExpression r m ->
-	 [ObjectSchemeExpression r m] ->
-	 ListSchemeExpression r m;
-	makeApply f args = fApply (fmap doApply f) (fmap execList (fExtract args));
+	 ObjectSchemeExpression r obj m ->
+	 [ObjectSchemeExpression r obj m] ->
+	 ListSchemeExpression r obj m;
+	makeApply f args = fApply (fmap doApply f) (fmap fExtract (fExtract args));
 
 	assembleApplyExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		Build cm r,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> [Object r m] -> cm (ListSchemeExpression r m);
+	 obj -> [obj] -> cm (ListSchemeExpression r obj m);
 	assembleApplyExpression f arglist = do
 		{
 		fe <- assembleSingleExpression f;
@@ -108,68 +115,67 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	assembleExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		Build cm r,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> cm (ListSchemeExpression r m);
-	assembleExpression (SymbolObject sym) = return (fmap (\loc -> do
+	 obj -> cm (ListSchemeExpression r obj m);
+	assembleExpression subjObj = do
 		{
-		obj <- get loc;
-		return [obj];
-		}) (exprSymbol sym));
-	assembleExpression (PairObject head tail) = do
-		{
-		h <- get head;
-		t <- get tail;
-		marglist <- fromObject t;
-		case marglist of
+		msubj <- resultFromObject subjObj;
+		case msubj of
 			{
-			ExceptionResult (MkMismatch exp obj) -> do
+			SuccessResult (Left sym) -> return (fmap (\loc -> do
 				{
-				expobj <- getObject (MkSList (show exp));
-				throwArgError "bad-argument-list" [t,expobj,obj];
-				};
-			SuccessResult arglist -> case h of
+				obj <- get loc;
+				return [obj];
+				}) (exprSymbol sym));
+			SuccessResult (Right (h :: obj,t :: obj)) -> do
 				{
-				SymbolObject sym -> case getBinding ?syntacticbindings sym of
+				marglist <- resultFromObject t;
+				case marglist of
 					{
-					Just (MkSyntax syntax) -> do
+					ExceptionResult mismatch -> throwBadCombinationError t mismatch;
+					SuccessResult arglist -> do
 						{
-						obj <- syntax MkType arglist;
-						assembleExpression obj;
-						};
-					Nothing -> case ?macrobindings sym of
-						{
-						Just (MkMacro macro) -> macro arglist;
-						Nothing -> assembleApplyExpression h arglist;
+						mheadSym <- resultFromObject h;
+						case mheadSym of
+							{
+							SuccessResult sym -> case getBinding ?syntacticbindings sym of
+								{
+								Just (MkSyntax syntax) -> do
+									{
+									obj <- syntax MkType arglist;
+									assembleExpression obj;
+									};
+								Nothing -> case ?macrobindings sym of
+									{
+									Just (MkMacro macro) -> macro arglist;
+									Nothing -> assembleApplyExpression h arglist;
+									};
+								};
+							_ -> assembleApplyExpression h arglist;
+							};
 						};
 					};
-				_ -> assembleApplyExpression h arglist;
 				};
+			ExceptionResult _ -> return (return (return [subjObj]));
 			};
-		};
-	assembleExpression a = case a of
-		{
-		BooleanObject _ -> return (return (return [a]));
-		NumberObject _ -> return (return (return [a]));
-		CharObject _ -> return (return (return [a]));
-		StringObject _ -> return (return (return [a]));
-		ByteArrayObject _ -> return (return (return [a]));
-		_ -> throwArgError "cant-evaluate-form" [a];
 		};
 
 	assembleSingleExpression ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		Build cm r,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 Object r m -> cm (ObjectSchemeExpression r m);
+	 obj -> cm (ObjectSchemeExpression r obj m);
 	assembleSingleExpression obj = do
 		{
 		listExp <- assembleExpression obj;

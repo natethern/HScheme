@@ -22,10 +22,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Parse
 	(
-	module Org.Org.Semantic.HScheme.Parse.SExpChars,
-	module Org.Org.Semantic.HScheme.Parse.SExpParser
+	module Org.Org.Semantic.HScheme.Parse.ParserError,
+	module Org.Org.Semantic.HScheme.Parse.SchemeParser,
+	module Org.Org.Semantic.HScheme.Parse.WhiteSpace,
+	module Org.Org.Semantic.HScheme.Parse.Symbol,
+	module Org.Org.Semantic.HScheme.Parse.Numeric,
+	module Org.Org.Semantic.HScheme.Parse.Text,
+	module Org.Org.Semantic.HScheme.Parse.SpecialForm,
+	module Org.Org.Semantic.HScheme.Parse.List,
+	module Org.Org.Semantic.HScheme.Parse.ParseObject,
+	module Org.Org.Semantic.HScheme.Parse.Misc
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Parse.SExpParser;
-	import Org.Org.Semantic.HScheme.Parse.SExpChars;
+	import Org.Org.Semantic.HScheme.Parse.Misc;
+	import Org.Org.Semantic.HScheme.Parse.ParseObject;
+	import Org.Org.Semantic.HScheme.Parse.List;
+	import Org.Org.Semantic.HScheme.Parse.SpecialForm;
+	import Org.Org.Semantic.HScheme.Parse.Text;
+	import Org.Org.Semantic.HScheme.Parse.Numeric;
+	import Org.Org.Semantic.HScheme.Parse.Symbol;
+	import Org.Org.Semantic.HScheme.Parse.WhiteSpace;
+	import Org.Org.Semantic.HScheme.Parse.SchemeParser;
+	import Org.Org.Semantic.HScheme.Parse.ParserError;
 	}

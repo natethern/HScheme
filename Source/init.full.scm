@@ -11,7 +11,7 @@
 
 ; 4.2.5 Delayed Evaluation
 (define make-promise (lambda (proc)
-	(let ((result-ready? #f) (result <nothing>))
+	(let ((result-ready? #f) (result #f))
 		(lambda ()
 			(if result-ready? result
 				(let ((x (proc)))

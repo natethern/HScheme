@@ -28,8 +28,8 @@ module Main where
 	import Org.Org.Semantic.HBase.Protocol.CGI;
 	import Org.Org.Semantic.HBase;
 
-	type CPS r = SchemeCPS r (IO ());
-	type GCPS r = SchemeGCPS r (IO ());
+	type CPS r = SchemeCPS (IO ()) (Object r);
+	type GCPS r = SchemeGCPS (IO ()) (Object r);
 
 	type IdentityConst = Constant Identity;
 
@@ -96,7 +96,8 @@ module Main where
 					monadGuardBindings,
 					evalBindings (lift . lift),
 					setBindings,
-					portBindings
+					portBindings,
+					systemBindings (lift . lift)
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram
@@ -142,7 +143,8 @@ module Main where
 					monadContBindings,
 					evalBindings lift,
 					setBindings,
-					portBindings
+					portBindings,
+					systemBindings lift
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram
@@ -186,7 +188,8 @@ module Main where
 					monadFixBindings,
 					evalBindings id,
 					setBindings,
-					portBindings
+					portBindings,
+					systemBindings id
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram

@@ -71,7 +71,7 @@ HCOPTFLAGS		= -O -fvia-C
 HCFLAGS			= -no-recomp $(HCWARNFLAGS) $(HCLANGFLAGS) $(HCPACKAGES) $(HCIMPORTDIRS)
 HCPROFOPTS		= -prof -hisuf p_hi -osuf p_o
 HCFLAGS_REL		= $(HCOPTFLAGS)
-HCFLAGS_PROF	= $(HCOPTFLAGS) $(HCPROFOPTS) -auto-all +RTS -K32M -RTS
+HCFLAGS_PROF	= -fvia-C $(HCPROFOPTS) -auto-all +RTS -K32M -RTS
 HCFLAGS_QUICK	= -hisuf q_hi -osuf q_o
 LDH				= $(HC) $(HCFLAGS)
 LDFLAGS			=
@@ -92,6 +92,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/Core/Conversions.hs	\
 	$(HIER)/Core/Throw.hs	\
 	$(HIER)/Core/Stream.hs	\
+	$(HIER)/Core/Procedure.hs	\
 	$(HIER)/Core.hs	\
 	\
 	$(HIER)/Interpret/LambdaExpression.hs	\
@@ -112,8 +113,16 @@ LIB_HC_SRCS			= \
 	$(HIER)/MacroLib/Load.hs	\
 	$(HIER)/MacroLib.hs	\
 	\
-	$(HIER)/Parse/SExpChars.hs	\
-	$(HIER)/Parse/SExpParser.hs	\
+	$(HIER)/Parse/ParserError.hs	\
+	$(HIER)/Parse/SchemeParser.hs	\
+	$(HIER)/Parse/WhiteSpace.hs	\
+	$(HIER)/Parse/Symbol.hs	\
+	$(HIER)/Parse/Numeric.hs	\
+	$(HIER)/Parse/Text.hs	\
+	$(HIER)/Parse/SpecialForm.hs	\
+	$(HIER)/Parse/List.hs	\
+	$(HIER)/Parse/ParseObject.hs	\
+	$(HIER)/Parse/Misc.hs	\
 	$(HIER)/Parse.hs	\
 	\
 	$(HIER)/RunLib/ArgumentList.hs	\
@@ -121,7 +130,9 @@ LIB_HC_SRCS			= \
 	$(HIER)/RunLib/Control.hs	\
 	$(HIER)/RunLib/NumericProcedures.hs	\
 	$(HIER)/RunLib/PortProcedures.hs	\
+	$(HIER)/RunLib/ListProcedures.hs	\
 	$(HIER)/RunLib/Procedures.hs	\
+	$(HIER)/RunLib/ToString.hs	\
 	$(HIER)/RunLib/FullProcedures.hs	\
 	$(HIER)/RunLib/SystemPorts.hs	\
 	$(HIER)/RunLib.hs	\
@@ -132,6 +143,9 @@ LIB_HC_SRCS			= \
 	$(HIER)/Bind/Run.hs	\
 	$(HIER)/Bind/FMapBindings.hs	\
 	$(HIER)/Bind.hs	\
+	\
+	$(HIER)/Object/CompleteObject1.hs	\
+	$(HIER)/Object/CompleteObject.hs	\
 	\
 	$(HIER)/MainProg/Batch.hs	\
 	$(HIER)/MainProg/Interactive.hs	\
@@ -222,6 +236,9 @@ test-pure:	\
  test/load.scm.pure.diff	\
  test/load.scm.initpure.diff	\
  test/helloworld.scm.initpure.diff
+
+test-speed: test/speed.scm.initfull.out
+	cat $^
 
 test-full:	\
  test/constants.scm.full.diff	\
@@ -457,12 +474,6 @@ Org/Org/Semantic/HScheme/Core/Build.o Org/Org/Semantic/HScheme/Core/Build.q_o Or
 Org/Org/Semantic/HScheme/Core/Symbol.o Org/Org/Semantic/HScheme/Core/Symbol.q_o Org/Org/Semantic/HScheme/Core/Symbol.p_o : Org/Org/Semantic/HScheme/Core/Symbol.hs
 Org/Org/Semantic/HScheme/Core/Binding.o Org/Org/Semantic/HScheme/Core/Binding.q_o Org/Org/Semantic/HScheme/Core/Binding.p_o : Org/Org/Semantic/HScheme/Core/Binding.hs
 Org/Org/Semantic/HScheme/Core/Object.o Org/Org/Semantic/HScheme/Core/Object.q_o Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Object.hs
-Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Numerics.hi
-Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Numerics.q_hi
-Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Numerics.p_hi
-Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Port.hi
-Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Port.q_hi
-Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Port.p_hi
 Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
 Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
@@ -473,32 +484,14 @@ Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Binding
 Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Binding.q_hi
 Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Binding.p_hi
 Org/Org/Semantic/HScheme/Core/Scheme.o Org/Org/Semantic/HScheme/Core/Scheme.q_o Org/Org/Semantic/HScheme/Core/Scheme.p_o : Org/Org/Semantic/HScheme/Core/Scheme.hs
-Org/Org/Semantic/HScheme/Core/Scheme.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
-Org/Org/Semantic/HScheme/Core/Scheme.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
-Org/Org/Semantic/HScheme/Core/Scheme.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
-Org/Org/Semantic/HScheme/Core/Scheme.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core/Scheme.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
-Org/Org/Semantic/HScheme/Core/Scheme.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Mismatch.o Org/Org/Semantic/HScheme/Core/Mismatch.q_o Org/Org/Semantic/HScheme/Core/Mismatch.p_o : Org/Org/Semantic/HScheme/Core/Mismatch.hs
 Org/Org/Semantic/HScheme/Core/Mismatch.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
 Org/Org/Semantic/HScheme/Core/Mismatch.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
 Org/Org/Semantic/HScheme/Core/Mismatch.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o Org/Org/Semantic/HScheme/Core/Conversions.q_o Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Conversions.hs
-Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Numerics.hi
-Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Numerics.q_hi
-Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Numerics.p_hi
-Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Port.hi
-Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Port.q_hi
-Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Port.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
-Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
-Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
-Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
-Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
-Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Mismatch.hi
 Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.q_hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.p_hi
@@ -509,9 +502,6 @@ Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Build.
 Org/Org/Semantic/HScheme/Core/Throw.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
 Org/Org/Semantic/HScheme/Core/Throw.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
 Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
-Org/Org/Semantic/HScheme/Core/Throw.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core/Throw.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
-Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Throw.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
 Org/Org/Semantic/HScheme/Core/Throw.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
 Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
@@ -519,15 +509,28 @@ Org/Org/Semantic/HScheme/Core/Stream.o Org/Org/Semantic/HScheme/Core/Stream.q_o 
 Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
 Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
 Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
+Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
 Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Throw.hi
 Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Throw.q_hi
 Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Throw.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Scheme.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Scheme.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Scheme.p_hi
+Org/Org/Semantic/HScheme/Core/Procedure.o Org/Org/Semantic/HScheme/Core/Procedure.q_o Org/Org/Semantic/HScheme/Core/Procedure.p_o : Org/Org/Semantic/HScheme/Core/Procedure.hs
+Org/Org/Semantic/HScheme/Core/Procedure.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Procedure.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
+Org/Org/Semantic/HScheme/Core/Procedure.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Procedure.o : ./Org/Org/Semantic/HScheme/Core/Mismatch.hi
+Org/Org/Semantic/HScheme/Core/Procedure.q_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.q_hi
+Org/Org/Semantic/HScheme/Core/Procedure.p_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.p_hi
+Org/Org/Semantic/HScheme/Core/Procedure.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
+Org/Org/Semantic/HScheme/Core/Procedure.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
+Org/Org/Semantic/HScheme/Core/Procedure.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
 Org/Org/Semantic/HScheme/Core.o Org/Org/Semantic/HScheme/Core.q_o Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core.hs
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Numerics.q_hi
@@ -562,6 +565,9 @@ Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Throw.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Stream.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Stream.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Stream.p_hi
+Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Procedure.hi
+Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Procedure.q_hi
+Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Procedure.p_hi
 Org/Org/Semantic/HScheme/Interpret/LambdaExpression.o Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_o Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_o : Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hs
 Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hs
 Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
@@ -722,36 +728,125 @@ Org/Org/Semantic/HScheme/MacroLib.p_o : ./Org/Org/Semantic/HScheme/MacroLib/Macr
 Org/Org/Semantic/HScheme/MacroLib.o : ./Org/Org/Semantic/HScheme/MacroLib/Load.hi
 Org/Org/Semantic/HScheme/MacroLib.q_o : ./Org/Org/Semantic/HScheme/MacroLib/Load.q_hi
 Org/Org/Semantic/HScheme/MacroLib.p_o : ./Org/Org/Semantic/HScheme/MacroLib/Load.p_hi
-Org/Org/Semantic/HScheme/Parse/SExpChars.o Org/Org/Semantic/HScheme/Parse/SExpChars.q_o Org/Org/Semantic/HScheme/Parse/SExpChars.p_o : Org/Org/Semantic/HScheme/Parse/SExpChars.hs
-Org/Org/Semantic/HScheme/Parse/SExpParser.o Org/Org/Semantic/HScheme/Parse/SExpParser.q_o Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : Org/Org/Semantic/HScheme/Parse/SExpParser.hs
-Org/Org/Semantic/HScheme/Parse/SExpParser.o : ./Org/Org/Semantic/HScheme/Core.hi
-Org/Org/Semantic/HScheme/Parse/SExpParser.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
-Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Parse/SExpParser.o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.hi
-Org/Org/Semantic/HScheme/Parse/SExpParser.q_o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.q_hi
-Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.p_hi
+Org/Org/Semantic/HScheme/Parse/ParserError.o Org/Org/Semantic/HScheme/Parse/ParserError.q_o Org/Org/Semantic/HScheme/Parse/ParserError.p_o : Org/Org/Semantic/HScheme/Parse/ParserError.hs
+Org/Org/Semantic/HScheme/Parse/ParserError.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/ParserError.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/ParserError.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.o Org/Org/Semantic/HScheme/Parse/SchemeParser.q_o Org/Org/Semantic/HScheme/Parse/SchemeParser.p_o : Org/Org/Semantic/HScheme/Parse/SchemeParser.hs
+Org/Org/Semantic/HScheme/Parse/SchemeParser.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.o : ./Org/Org/Semantic/HScheme/Parse/ParserError.hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.q_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.q_hi
+Org/Org/Semantic/HScheme/Parse/SchemeParser.p_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.p_hi
+Org/Org/Semantic/HScheme/Parse/WhiteSpace.o Org/Org/Semantic/HScheme/Parse/WhiteSpace.q_o Org/Org/Semantic/HScheme/Parse/WhiteSpace.p_o : Org/Org/Semantic/HScheme/Parse/WhiteSpace.hs
+Org/Org/Semantic/HScheme/Parse/Symbol.o Org/Org/Semantic/HScheme/Parse/Symbol.q_o Org/Org/Semantic/HScheme/Parse/Symbol.p_o : Org/Org/Semantic/HScheme/Parse/Symbol.hs
+Org/Org/Semantic/HScheme/Parse/Symbol.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Parse/Symbol.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
+Org/Org/Semantic/HScheme/Parse/Symbol.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
+Org/Org/Semantic/HScheme/Parse/Numeric.o Org/Org/Semantic/HScheme/Parse/Numeric.q_o Org/Org/Semantic/HScheme/Parse/Numeric.p_o : Org/Org/Semantic/HScheme/Parse/Numeric.hs
+Org/Org/Semantic/HScheme/Parse/Numeric.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/Numeric.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/Numeric.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/Numeric.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/Numeric.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/Numeric.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/Text.o Org/Org/Semantic/HScheme/Parse/Text.q_o Org/Org/Semantic/HScheme/Parse/Text.p_o : Org/Org/Semantic/HScheme/Parse/Text.hs
+Org/Org/Semantic/HScheme/Parse/Text.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/Text.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/Text.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.o Org/Org/Semantic/HScheme/Parse/SpecialForm.q_o Org/Org/Semantic/HScheme/Parse/SpecialForm.p_o : Org/Org/Semantic/HScheme/Parse/SpecialForm.hs
+Org/Org/Semantic/HScheme/Parse/SpecialForm.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/SpecialForm.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/List.o Org/Org/Semantic/HScheme/Parse/List.q_o Org/Org/Semantic/HScheme/Parse/List.p_o : Org/Org/Semantic/HScheme/Parse/List.hs
+Org/Org/Semantic/HScheme/Parse/List.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/List.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/List.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/List.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/List.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/List.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/List.o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.hi
+Org/Org/Semantic/HScheme/Parse/List.q_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.q_hi
+Org/Org/Semantic/HScheme/Parse/List.p_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.p_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.o Org/Org/Semantic/HScheme/Parse/ParseObject.q_o Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : Org/Org/Semantic/HScheme/Parse/ParseObject.hs
+Org/Org/Semantic/HScheme/Parse/ParseObject.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.o : ./Org/Org/Semantic/HScheme/Parse/ParserError.hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.q_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.q_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.p_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.q_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.q_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.p_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.o : ./Org/Org/Semantic/HScheme/Parse/Numeric.hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.q_o : ./Org/Org/Semantic/HScheme/Parse/Numeric.q_hi
+Org/Org/Semantic/HScheme/Parse/ParseObject.p_o : ./Org/Org/Semantic/HScheme/Parse/Numeric.p_hi
+Org/Org/Semantic/HScheme/Parse/Misc.o Org/Org/Semantic/HScheme/Parse/Misc.q_o Org/Org/Semantic/HScheme/Parse/Misc.p_o : Org/Org/Semantic/HScheme/Parse/Misc.hs
+Org/Org/Semantic/HScheme/Parse/Misc.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/Misc.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Parse/Misc.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/Misc.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse/Misc.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse/Misc.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse/Misc.o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.hi
+Org/Org/Semantic/HScheme/Parse/Misc.q_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.q_hi
+Org/Org/Semantic/HScheme/Parse/Misc.p_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.p_hi
+Org/Org/Semantic/HScheme/Parse/Misc.o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.hi
+Org/Org/Semantic/HScheme/Parse/Misc.q_o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.q_hi
+Org/Org/Semantic/HScheme/Parse/Misc.p_o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.p_hi
 Org/Org/Semantic/HScheme/Parse.o Org/Org/Semantic/HScheme/Parse.q_o Org/Org/Semantic/HScheme/Parse.p_o : Org/Org/Semantic/HScheme/Parse.hs
-Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.hi
-Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.q_hi
-Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/SExpChars.p_hi
-Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/SExpParser.hi
-Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/SExpParser.q_hi
-Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/SExpParser.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/ParserError.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/ParserError.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/SchemeParser.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/WhiteSpace.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/Symbol.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/Symbol.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/Symbol.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/Numeric.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/Numeric.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/Numeric.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/Text.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/Text.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/Text.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/SpecialForm.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/SpecialForm.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/SpecialForm.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/List.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/List.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/List.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/ParseObject.p_hi
+Org/Org/Semantic/HScheme/Parse.o : ./Org/Org/Semantic/HScheme/Parse/Misc.hi
+Org/Org/Semantic/HScheme/Parse.q_o : ./Org/Org/Semantic/HScheme/Parse/Misc.q_hi
+Org/Org/Semantic/HScheme/Parse.p_o : ./Org/Org/Semantic/HScheme/Parse/Misc.p_hi
 Org/Org/Semantic/HScheme/RunLib/ArgumentList.o Org/Org/Semantic/HScheme/RunLib/ArgumentList.q_o Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.hs
 Org/Org/Semantic/HScheme/RunLib/ArgumentList.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/ArgumentList.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
 Org/Org/Semantic/HScheme/RunLib/Equality.o Org/Org/Semantic/HScheme/RunLib/Equality.q_o Org/Org/Semantic/HScheme/RunLib/Equality.p_o : Org/Org/Semantic/HScheme/RunLib/Equality.hs
-Org/Org/Semantic/HScheme/RunLib/Equality.o : ./Org/Org/Semantic/HScheme/Core.hi
-Org/Org/Semantic/HScheme/RunLib/Equality.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
-Org/Org/Semantic/HScheme/RunLib/Equality.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
 Org/Org/Semantic/HScheme/RunLib/Control.o Org/Org/Semantic/HScheme/RunLib/Control.q_o Org/Org/Semantic/HScheme/RunLib/Control.p_o : Org/Org/Semantic/HScheme/RunLib/Control.hs
 Org/Org/Semantic/HScheme/RunLib/Control.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/Control.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/RunLib/Control.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/RunLib/Control.o : ./Org/Org/Semantic/HScheme/RunLib/ArgumentList.hi
-Org/Org/Semantic/HScheme/RunLib/Control.q_o : ./Org/Org/Semantic/HScheme/RunLib/ArgumentList.q_hi
-Org/Org/Semantic/HScheme/RunLib/Control.p_o : ./Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_hi
+Org/Org/Semantic/HScheme/RunLib/Control.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/RunLib/Control.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
+Org/Org/Semantic/HScheme/RunLib/Control.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
 Org/Org/Semantic/HScheme/RunLib/NumericProcedures.o Org/Org/Semantic/HScheme/RunLib/NumericProcedures.q_o Org/Org/Semantic/HScheme/RunLib/NumericProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/NumericProcedures.hs
 Org/Org/Semantic/HScheme/RunLib/NumericProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/NumericProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -760,10 +855,21 @@ Org/Org/Semantic/HScheme/RunLib/PortProcedures.o Org/Org/Semantic/HScheme/RunLib
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/RunLib/ListProcedures.o Org/Org/Semantic/HScheme/RunLib/ListProcedures.q_o Org/Org/Semantic/HScheme/RunLib/ListProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/ListProcedures.hs
+Org/Org/Semantic/HScheme/RunLib/ListProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/ListProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/RunLib/ListProcedures.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
 Org/Org/Semantic/HScheme/RunLib/Procedures.o Org/Org/Semantic/HScheme/RunLib/Procedures.q_o Org/Org/Semantic/HScheme/RunLib/Procedures.p_o : Org/Org/Semantic/HScheme/RunLib/Procedures.hs
 Org/Org/Semantic/HScheme/RunLib/Procedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/Procedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/RunLib/Procedures.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/ToString.o Org/Org/Semantic/HScheme/RunLib/ToString.q_o Org/Org/Semantic/HScheme/RunLib/ToString.p_o : Org/Org/Semantic/HScheme/RunLib/ToString.hs
+Org/Org/Semantic/HScheme/RunLib/ToString.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/ToString.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/RunLib/ToString.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
 Org/Org/Semantic/HScheme/RunLib/FullProcedures.o Org/Org/Semantic/HScheme/RunLib/FullProcedures.q_o Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/FullProcedures.hs
 Org/Org/Semantic/HScheme/RunLib/FullProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/FullProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -791,9 +897,15 @@ Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/NumericP
 Org/Org/Semantic/HScheme/RunLib.o : ./Org/Org/Semantic/HScheme/RunLib/PortProcedures.hi
 Org/Org/Semantic/HScheme/RunLib.q_o : ./Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_hi
 Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : ./Org/Org/Semantic/HScheme/RunLib/ListProcedures.hi
+Org/Org/Semantic/HScheme/RunLib.q_o : ./Org/Org/Semantic/HScheme/RunLib/ListProcedures.q_hi
+Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/ListProcedures.p_hi
 Org/Org/Semantic/HScheme/RunLib.o : ./Org/Org/Semantic/HScheme/RunLib/Procedures.hi
 Org/Org/Semantic/HScheme/RunLib.q_o : ./Org/Org/Semantic/HScheme/RunLib/Procedures.q_hi
 Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/Procedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : ./Org/Org/Semantic/HScheme/RunLib/ToString.hi
+Org/Org/Semantic/HScheme/RunLib.q_o : ./Org/Org/Semantic/HScheme/RunLib/ToString.q_hi
+Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/ToString.p_hi
 Org/Org/Semantic/HScheme/RunLib.o : ./Org/Org/Semantic/HScheme/RunLib/FullProcedures.hi
 Org/Org/Semantic/HScheme/RunLib.q_o : ./Org/Org/Semantic/HScheme/RunLib/FullProcedures.q_hi
 Org/Org/Semantic/HScheme/RunLib.p_o : ./Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_hi
@@ -878,6 +990,32 @@ Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/Run.p_hi
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : Org/Org/Semantic/HScheme/Object/CompleteObject1.hs
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o : ./Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o : ./Org/Org/Semantic/HScheme/MacroLib.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o : ./Org/Org/Semantic/HScheme/MacroLib.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : ./Org/Org/Semantic/HScheme/MacroLib.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o : ./Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o : ./Org/Org/Semantic/HScheme/Parse.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : ./Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.o : ./Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject1.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.o Org/Org/Semantic/HScheme/Object/CompleteObject.q_o Org/Org/Semantic/HScheme/Object/CompleteObject.p_o : Org/Org/Semantic/HScheme/Object/CompleteObject.hs
+Org/Org/Semantic/HScheme/Object/CompleteObject.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.o : ./Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.q_o : ./Org/Org/Semantic/HScheme/Parse.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.p_o : ./Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.o : ./Org/Org/Semantic/HScheme/Object/CompleteObject1.hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.q_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject1.q_hi
+Org/Org/Semantic/HScheme/Object/CompleteObject.p_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject1.p_hi
 Org/Org/Semantic/HScheme/MainProg/Batch.o Org/Org/Semantic/HScheme/MainProg/Batch.q_o Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.hs
 Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -957,6 +1095,9 @@ Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.p_o : ./Org/Org/Semantic/HSch
 Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.o : ./Org/Org/Semantic/HScheme/RunLib.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.q_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.q_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.p_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.p_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.o Org/Org/Semantic/HScheme/Imperative/SchemeIO.q_o Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hs
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -964,6 +1105,9 @@ Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : ./Org/Org/Semantic/HScheme/Co
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : ./Org/Org/Semantic/HScheme/RunLib.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.q_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.q_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.p_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o Org/Org/Semantic/HScheme/Imperative/SchemeCPS.q_o Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hs
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -1022,6 +1166,9 @@ Org/Org/Semantic/HScheme.p_o : ./Org/Org/Semantic/HScheme/MainProg.p_hi
 Org/Org/Semantic/HScheme.o : ./Org/Org/Semantic/HScheme/Imperative.hi
 Org/Org/Semantic/HScheme.q_o : ./Org/Org/Semantic/HScheme/Imperative.q_hi
 Org/Org/Semantic/HScheme.p_o : ./Org/Org/Semantic/HScheme/Imperative.p_hi
+Org/Org/Semantic/HScheme.o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.hi
+Org/Org/Semantic/HScheme.q_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.q_hi
+Org/Org/Semantic/HScheme.p_o : ./Org/Org/Semantic/HScheme/Object/CompleteObject.p_hi
 Arguments.o Arguments.q_o Arguments.p_o : Arguments.hs
 BatchMain.o BatchMain.q_o BatchMain.p_o : BatchMain.hs
 BatchMain.o : ./Org/Org/Semantic/HScheme.hi

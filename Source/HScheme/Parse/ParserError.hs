@@ -1,7 +1,7 @@
 -- This is written in Haskell.
 {--
 HScheme -- a Scheme interpreter written in Haskell
-Copyright (C) 2002 Ashley Yakeley <ashley@semantic.org>
+Copyright (C) 2003 Ashley Yakeley <ashley@semantic.org>
 
 This file is part of HScheme.
 
@@ -20,32 +20,37 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
+module Org.Org.Semantic.HScheme.Parse.ParserError where
 	{
-	import Org.Org.Semantic.HScheme.Object.CompleteObject;
-	import Org.Org.Semantic.HScheme.RunLib;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type IOConst = Constant IO;
-
-	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadThrow (Object r m) IO where
+	class (Monad cm) =>
+	 ParserError cm obj where
 		{
-		throw obj = do
+		throwParseFailed :: forall a. (?objType :: Type obj) =>
+		 cm a;
+		throwInappropriateCharacter :: forall a. (?objType :: Type obj) =>
+		 String -> Char -> cm a;
+		throwInappropriateStreamEnd :: forall a. (?objType :: Type obj) =>
+		 String -> cm a;
+		throwUTF8Error :: forall a. (?objType :: Type obj) =>
+		 UTF8Error -> cm a;
+{-
+		unexpectedCharError context = do
 			{
-			text <- toString obj;
-			fail text;
+			contextObj <- parserLift (getObject (MkSList context));
+			(do
+				{
+				t <- tokenParse;
+				parserLift (do
+					{
+					tObj <- getObject t;
+					throwArgError "inappropriate-character" [tObj,contextObj];
+					});
+				}) |||
+			(parserLift (throwArgError "inappropriate-stream-end" [contextObj]));
 			};
-		};
-
-	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadException (Object r m) IO where
-		{
-		catch foo cc = catchSingle foo (\ex -> do
-			{
-			obj <- getObject (MkSymbol "failure",(MkSList (show ex),()));
-			cc obj;
-			});
+-}
 		};
 	}

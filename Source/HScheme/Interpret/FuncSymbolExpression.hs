@@ -35,7 +35,9 @@ module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression(FuncSymbolExpress
 
 	instance Functor (FuncSymbolExpression sym val) where
 		{
-		fmap map (MkFuncSymbolExpression func) = MkFuncSymbolExpression (map . func);
+		fmap map (MkFuncSymbolExpression func) =
+		 {-# SCC "fmap" #-}
+		 MkFuncSymbolExpression (map . func);
 		};
 
 	instance (Eq sym) => FunctorApply (FuncSymbolExpression sym val) where

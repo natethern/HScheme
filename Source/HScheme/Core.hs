@@ -32,9 +32,11 @@ module Org.Org.Semantic.HScheme.Core
 	module Org.Org.Semantic.HScheme.Core.Mismatch,
 	module Org.Org.Semantic.HScheme.Core.Conversions,
 	module Org.Org.Semantic.HScheme.Core.Throw,
-	module Org.Org.Semantic.HScheme.Core.Stream
+	module Org.Org.Semantic.HScheme.Core.Stream,
+	module Org.Org.Semantic.HScheme.Core.Procedure
 	) where
 	{
+	import Org.Org.Semantic.HScheme.Core.Procedure;
 	import Org.Org.Semantic.HScheme.Core.Stream;
 	import Org.Org.Semantic.HScheme.Core.Throw;
 	import Org.Org.Semantic.HScheme.Core.Conversions;

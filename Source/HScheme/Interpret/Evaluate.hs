@@ -31,14 +31,22 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 
 	-- 6.5 Eval
 
+	data Environment r obj = MkEnvironment
+		{
+		envSyn :: SymbolBindings (Syntax r obj),
+		envLoc :: SymbolBindings (r obj)
+		};
+
 	evaluateObject ::
 		(
-		Scheme m r,
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: Symbol -> Maybe (Macro m r m)
+		AssembleError m obj,
+		MonadThrow obj m,
+		InterpretObject m r obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro m r obj m)
 		) =>
-	 Object r m -> (Symbol -> Maybe (ObjLocation r m)) -> m [Object r m];
+	 obj -> (Symbol -> Maybe (r obj)) -> m [obj];
 	evaluateObject obj lookupSym = do
 		{
 		mobj <- interpretTopLevelExpression obj;
@@ -47,13 +55,15 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 
 	evaluatePL ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
-		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		AssembleError m obj,
+		MonadThrow obj m,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (forall a. cm a -> m a) ->
-	 (Object r m,(Environment r (Object r m),())) -> m [Object r m];
+	 (obj,(Environment r obj,())) -> m [obj];
 	evaluatePL remonad (obj,(MkEnvironment syn loc,())) = let
 		{
 		?syntacticbindings = syn;
@@ -61,14 +71,4 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		?macrobindings = fmap (fmap (remonadMacro remonad)) ?macrobindings;
 		} in
 	 evaluateObject obj (getBinding loc);
-
-{--
-	currentEnvironmentP ::
-		(
-		Scheme m r,
-		?bindings :: Bindings r m
-		) =>
-	 () -> m (Bindings r m);
-	currentEnvironmentP () = return ?bindings;
---}
 	}

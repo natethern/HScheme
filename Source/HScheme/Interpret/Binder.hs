@@ -34,20 +34,20 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 	import Org.Org.Semantic.HBase;
 
 	newSymbolBindingExpression :: (Monad m) =>
-	 Symbol -> ObjectSchemeExpression r m;
+	 Symbol -> ObjectSchemeExpression r obj m;
 	newSymbolBindingExpression sym =
 	 return (return (error ("uninitialised binding: " ++ (show sym))));
 
-	schemeExprLetNewRefs :: (FullScheme m r) =>
-	 [Symbol] -> SchemeExpression r m (m a) -> SchemeExpression r m (m a);
+	schemeExprLetNewRefs :: (InterpretObject m r obj) =>
+	 [Symbol] -> SchemeExpression r obj (m a) -> SchemeExpression r obj (m a);
 	schemeExprLetNewRefs [] bodyexpr = bodyexpr;
 	schemeExprLetNewRefs (sym:rest) bodyexpr = 
 	 schemeExprLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefs rest bodyexpr);
 
-	bindsToSetSequence :: (FullScheme m r) =>
-	 [(Symbol,ObjectSchemeExpression r m)] ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m a);
+	bindsToSetSequence :: (InterpretObject m r obj,FullBuild m r) =>
+	 [(Symbol,ObjectSchemeExpression r obj m)] ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m a);
 	bindsToSetSequence [] bodyexpr = bodyexpr;
 	bindsToSetSequence ((sym,bindexpr):rest) bodyexpr = 
 	 liftF3 setBindValue (exprSymbol sym) bindexpr (bindsToSetSequence rest bodyexpr) where
@@ -62,10 +62,10 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 			};
 		};
 
-	interactiveBind :: (FullScheme m r) =>
-	 [(Symbol,ObjectSchemeExpression r m)] ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (m (a,[(Symbol,ObjLocation r m)]));
+	interactiveBind :: (InterpretObject m r obj,FullBuild m r) =>
+	 [(Symbol,ObjectSchemeExpression r obj m)] ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (m (a,[(Symbol,r obj)]));
 	interactiveBind binds expr = schemeExprLetNewRefsCollectLocs binds (bindsToSetSequence binds expr) where
 		{
 		schemeExprLetNewRefsCollectLocs [] bodyexpr = fmap (fmap (\a -> (a,[]))) bodyexpr;
@@ -76,11 +76,42 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 		gather sym = fmap (fmap (\((a,binds),loc) -> (a,(sym,loc):binds)))
 		};
 
-
-	setBinder :: (FullScheme m r) => TopLevelBinder r m;
-	setBinder = MkTopLevelBinder
-	 (\binds expr -> schemeExprLetNewRefs (fmap fst binds) (bindsToSetSequence binds expr));
-
-	recursiveBinder :: (MonadFix m,Scheme m r) => TopLevelBinder r m;
+	recursiveBinder :: (MonadFix m,InterpretObject m r obj) => TopLevelBinder r obj m;
 	recursiveBinder = MkTopLevelBinder schemeExprLetRecursive;
+
+	setBinder :: (InterpretObject m r obj,FullBuild m r) => TopLevelBinder r obj m;
+	setBinder =
+	 {-# SCC "setBinder.root" #-}
+	 t5 where
+		{
+		t1 =
+		 {-# SCC "setBinder.t1" #-}
+		 fmap' fst';
+		
+		t2 =
+		 {-# SCC "setBinder.t2" #-}
+		 bindsToSetSequence;
+		
+		t3 binds =
+		 {-# SCC "setBinder.t3" #-}
+		 schemeExprLetNewRefs (t1 binds);
+		
+		t4 binds expr =
+		 {-# SCC "setBinder.t4" #-}
+		 (t3 binds) (t2 binds expr);
+		
+		t5 =
+		 {-# SCC "setBinder.t5" #-}
+		 MkTopLevelBinder t4;
+
+		fst' :: (a,b) -> a;
+		fst' = 
+		 {-# SCC "setBinder.fst'" #-}
+		 fst;
+
+		fmap' :: (Functor f) => (a -> b) -> f a -> f b;
+		fmap' = 
+		 {-# SCC "setBinder.fmap'" #-}
+		 fmap;
+		};
 	}

@@ -25,6 +25,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	Pattern(),SchemePattern,
 	makeObjectPattern,makeListPattern,
 	patternZip,patternBind,
+	throwMismatchObjError,
 	mustMatch,makeLambda
 	) where
 	{
@@ -37,25 +38,17 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	-- lists always the same size
 	data Pattern m n obj subject = MkPattern [Symbol] (subject -> m (n [obj]));
 
-	patternZip :: (Monad m,Monad n) =>
+	patternZip :: (Functor m,Functor n) =>
 	 Pattern m n obj subject ->
 	 subject ->
 	 m (n [(Symbol,obj)]);
-	patternZip (MkPattern syms func) subject = do
-		{
-		nlist <- func subject;
-		return (do
-			{
-			list <- nlist;
-			return (zip syms list);
-			});
-		};
+	patternZip (MkPattern syms func) subject = fmap (fmap (zip syms)) (func subject);
 
 	type SchemePattern pm obj = Pattern pm (MatchMonad obj) obj;
 
 	makeEllipsisPatternFunc' ::
 		(
- 		SchemeObject r obj,
+ 		ListObject r obj,
 		Build pm r,
 		?objType :: Type obj
 		) =>
@@ -77,7 +70,6 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 
 	makeEllipsisPatternFunc ::
 		(
- 		SchemeObject r obj,
 		ObjectSubtype r obj obj,
 		Build pm r,
 		?objType :: Type obj
@@ -87,7 +79,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 (obj -> pm (MatchMonad obj [obj]));
 	makeEllipsisPatternFunc syms func subject = do
 		{
-		msubjs <- fromObject subject;
+		msubjs <- resultFromObject subject;
 		case msubjs of
 			{
 			SuccessResult subjs -> makeEllipsisPatternFunc' syms func subjs;
@@ -100,146 +92,150 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 
 	makeObjectPattern ::
 		(
- 		BuildThrow cm (Object r m) r,
+		PatternError cm obj,
+  		ObjectSubtype r obj obj,
+  		ObjectSubtype r obj Symbol,
+		Build cm r,
 		Build pm r,
-		?objType :: Type (Object r m)
+		?objType :: Type obj
 		) =>
 	 [Symbol] ->
-	 Object r m ->
-	 cm (SchemePattern pm (Object r m) (Object r m));
-	makeObjectPattern _ NilObject = return (MkPattern [] (\obj -> do
+	 obj ->
+	 cm (SchemePattern pm obj obj);
+	makeObjectPattern literals patternObj = do
 		{
-		mobj <- fromObject obj;
-		return (do
+		mPattern <- resultFromObject patternObj;
+		case mPattern of
 			{
-			(_ :: ()) <- mobj;
-			return [];
-			});
-		}));
-	makeObjectPattern literals (SymbolObject sym) | hasElement sym literals =
-	 return (MkPattern [] (\obj -> do
-		{
-		mobj <- fromObject obj;
-		return (do
-			{
-			sym' <- mobj;
-			if sym' == sym
-			 then return []
-			 else throwSingle (MkMismatch (LiteralExpected sym) obj);
-			});
-		}));
-	makeObjectPattern _ (SymbolObject sym) =
-	 return (MkPattern [sym] (\obj -> 
-	  return (return [obj])
-	 ));
-	makeObjectPattern literals pobj@(PairObject _ _) = do
-		{
-		SuccessResult (hobj,tobj) <- fromObject pobj;
-		MkPattern hsyms hfunc <- makeObjectPattern literals hobj;
-		mellipsis <- fromObject tobj;
-		case mellipsis of
-			{
-			SuccessResult (sym,()) | sym == ellipsisSymbol ->
-			 return (MkPattern hsyms (makeEllipsisPatternFunc hsyms hfunc));
-			_ -> do
+			SuccessResult (Left (Left ())) -> return (MkPattern [] (\obj -> do
 				{
-				MkPattern tsyms tfunc <- makeObjectPattern literals tobj;
-				return (MkPattern (hsyms ++ tsyms) (\subj -> do
+				mobj <- resultFromObject obj;
+				return (do
 					{
-					msubj <- fromObject subj;
-					case msubj of
+					(_ :: ()) <- mobj;
+					return [];
+					});
+				}));
+			SuccessResult (Left (Right (hobj,tobj))) ->  do
+				{
+				MkPattern hsyms hfunc <- makeObjectPattern literals hobj;
+				mellipsis <- resultFromObject tobj;
+				case mellipsis of
+					{
+					SuccessResult (sym,()) | sym == ellipsisSymbol ->
+					return (MkPattern hsyms (makeEllipsisPatternFunc hsyms hfunc));
+					_ -> do
 						{
-						ExceptionResult exp -> return (ExceptionResult exp);
-						SuccessResult (hsubj,tsubj) -> do
+						MkPattern tsyms tfunc <- makeObjectPattern literals tobj;
+						return (MkPattern (hsyms ++ tsyms) (\subj -> do
 							{
-							nhres <- hfunc hsubj;
-							ntres <- tfunc tsubj;
-							return (do
+							msubj <- resultFromObject subj;
+							case msubj of
 								{
-								hres <- nhres;
-								tres <- ntres;
-								return (hres ++ tres)
-								});
-							};
+								ExceptionResult exp -> return (ExceptionResult exp);
+								SuccessResult (hsubj,tsubj) -> do
+									{
+									nhres <- hfunc hsubj;
+									ntres <- tfunc tsubj;
+									return (do
+										{
+										hres <- nhres;
+										tres <- ntres;
+										return (hres ++ tres)
+										});
+									};
+								};
+							}));
 						};
-					}));
+					};
 				};
-			};
+			SuccessResult (Right sym) -> if hasElement sym literals
+			 then return (MkPattern [] (\obj -> do
+				{
+				mobj <- resultFromObject obj;
+				return (do
+					{
+					sym' <- mobj;
+					if sym' == sym
+					then return []
+					else throwSingle (MkMismatch (LiteralExpected sym) obj);
+					});
+				}))
+			 else return (MkPattern [sym] (\obj -> return (return [obj])));
+			_ -> throwBadPatternError patternObj;
+			}
 		};
-	makeObjectPattern _ obj = throwArgError "bad-pattern" [obj];
 
 	makeListPattern ::
 		(
- 		BuildThrow cm (Object r m) r,
+ 		PatternError cm obj,
+		ObjectSubtype r obj obj,
+  		ObjectSubtype r obj Symbol,
+ 		Build cm r,
 		Build pm r,
-		?objType :: Type (Object r m)
+		?objType :: Type obj
 		) =>
 	 [Symbol] ->
-	 Object r m ->
-	 cm (SchemePattern pm (Object r m) [Object r m]);
-	makeListPattern literals pattern = do
-		{
-		MkPattern syms func <- makeObjectPattern literals pattern;
-		return (MkPattern syms (\list -> do
+	 obj ->
+	 cm (SchemePattern pm obj [obj]);
+	makeListPattern literals pattern = fmap
+		(\(MkPattern syms func) -> MkPattern syms (\list -> do
 			{
 			obj <- getObject list;
 			func obj;
-			}));
-		};
+			}))
+		(makeObjectPattern literals pattern);
 
 	patternBind ::
 		(
 		Monad pm,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 SchemePattern pm (Object r m) subject ->
-	 SchemeExpression r m (m a) ->
-	 SchemeExpression r m (subject -> pm (MatchMonad (Object r m) (m a)));	-- big stack o' monads
-	patternBind (MkPattern syms func) bodyExpr = fmap (\valsmobj subject -> do
-		{
-	 	matchvals <- func subject;
-		return (do
-			{
-	 		vals <- matchvals;
-			return (do
-				{
---	 			locs <- fExtract (fmap new vals);
---				valsmobj locs;
-				valsmobj vals;
-				});
-			});
-		}) (schemeExprAbstractList syms bodyExpr);
+	 SchemePattern pm obj subject ->
+	 SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj (subject -> pm (MatchMonad obj (m a)));	-- big stack o' monads
+	patternBind (MkPattern syms func) bodyExpr = fmap
+	 (\valsmobj subject -> fmap (fmap valsmobj) (func subject))
+	 (schemeExprAbstractList syms bodyExpr);
 
-	mustMatch :: 
+	throwMismatchObjError ::
 		(
-		Scheme m r,
-		?objType :: Type (Object r m)
+ 		ObjectSubtype r obj obj,
+		ObjectSubtype r obj Symbol,
+		Build m r,
+		MonadThrow obj m,
+		MonadIsA m obj (Mismatch obj),
+		?objType :: Type obj
 		) =>
-	 MatchMonad (Object r m) (m a) -> m a;
-	mustMatch (SuccessResult ma) = ma;
-	mustMatch (ExceptionResult mm) = do
+	 Mismatch obj -> m a;
+	throwMismatchObjError mm = do
 		{
 		mmObj <- getConvert mm;
 		throwArgError "pattern-mismatch" [mmObj];
 		};
 
+	mustMatch :: (Mismatch obj -> m a) -> MatchMonad obj (m a) -> m a;
+	mustMatch _ (SuccessResult ma) = ma;
+	mustMatch mismatcher (ExceptionResult mm) = mismatcher mm;
+
 	makeLambda ::
 		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		PatternError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj
 		) =>
-	 Object r m ->
-	 SchemeExpression r m (m a) ->
-	 cm (SchemeExpression r m ([Object r m] -> m a));
+	 obj ->
+	 SchemeExpression r obj (m a) ->
+	 cm (SchemeExpression r obj ([obj] -> m a));
 	makeLambda patternObj expr = do
 		{
 		pattern <- makeListPattern [] patternObj;
 		return (fmap (\proc subject -> do
 			{
 			match <- proc subject;
-			mustMatch match;
+			mustMatch throwMismatchError match;
 			}) (patternBind pattern expr));
 		};
 	}

@@ -20,9 +20,11 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Parse.SExpChars where
+module Org.Org.Semantic.HScheme.Parse.Symbol (symbolParse) where
 	{
+	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HBase.Text.Properties.GeneralCategory;
+	import Org.Org.Semantic.HBase.Text.Properties.Case;
 	import Org.Org.Semantic.HBase;
 
 {--
@@ -113,4 +115,18 @@ others = () (Ps,Pe), '",;#\ (Po), ` (Sk)
 		ClNumber -> True;
 		_ -> allowedIdentifier1 i;
 		};
+
+
+	symbolParse :: (MonadOrParser Char p) =>
+	 p Symbol;
+	symbolParse = fmap MkSymbol (
+	 (fmap (\c -> [c]) (isTokenParse '+'))	|||
+	 (fmap (\c -> [c]) (isTokenParse '-'))	|||
+	 (do
+		{
+		n <- matchTokenParse allowedIdentifier1;
+		ns <- mZeroOrMore ((matchTokenParse allowedIdentifierR) >>= (return . toLowerCase));
+		return (toLowerCase n:ns);
+		})
+	 );
 	}

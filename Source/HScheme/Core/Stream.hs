@@ -22,17 +22,31 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.Stream where
 	{
-	import Org.Org.Semantic.HScheme.Core.Scheme;
 	import Org.Org.Semantic.HScheme.Core.Throw;
+	import Org.Org.Semantic.HScheme.Core.Conversions;
 	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
-
-	handleUTF8Error :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+{-
+	handleUTF8Error ::
+		(
+		BuildThrow cm obj r,
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj (SList Char),
+		?objType :: Type obj
+		) =>
 	 UTF8Error -> cm a;
-	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
-
-	parseUTF8Char :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [MkSList (show err)];
+	parseUTF8Char ::
+		(
+		MonadThrow UTF8Error cm,
+--		Build cm r,
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj (SList Char),
+		?objType :: Type obj
+		) =>
 	 cm (Maybe Word8) -> cm (Maybe Char);
 	parseUTF8Char source = exRun handleUTF8Error (parseUTF8 source);
+-}
 	}
