@@ -149,36 +149,47 @@ install:	\
 
 # Test
 
-test: test-full test-pure test_p
+test: test-pure test-full
 
-test/%.scm.diff: test/%.scm.ref test/%.scm.out
+%.full.diff: %.ref %.full.out
 	diff -u $^
 
-test/%.scm.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --noinit $< > $@
+%.pure.diff: %.ref %.pure.out
+	diff -u $^
+
+test/%.scm.full.out: test/%.scm bin/$(COMMAND_REL)
+	time bin/$(COMMAND_REL) --noinit --full $< > $@ || (rm $@; exit 1)
+
+test/%.scm.pure.out: test/%.scm bin/$(COMMAND_REL)
+	time bin/$(COMMAND_REL) --noinit --pure $< > $@ || (rm $@; exit 1)
+
+test-pure: \
+ test/constants.scm.pure.diff \
+ test/helloworld.scm.pure.diff \
+ test/several.scm.pure.diff \
+ test/equal.scm.pure.diff \
+ test/syntax.scm.pure.diff \
+ test/syntax-rec.scm.pure.diff \
+ test/letrec.scm.pure.diff \
+ test/letrec-fix.scm.pure.diff \
+ test/binding.scm.pure.diff \
+ test/boundlate.scm.pure.diff \
+ test/factorial.scm.pure.diff
+
+#	time ./$< test/helloworld.scm
 
 test-full: \
- test/constants.scm.diff \
- test/helloworld.scm.diff \
- test/several.scm.diff \
- test/syntax.scm.diff \
- test/syntax-rec.scm.diff \
- test/letrec.scm.diff \
- test/letrec-fix.scm.diff \
- test/binding.scm.diff \
- test/setvar.scm.diff \
- test/boundlate.scm.diff \
- test/factorial.scm.diff \
- bin/$(COMMAND_REL)
-	time ./$< test/helloworld.scm
-
-test-pure: bin/$(COMMAND_REL)
-	time ./$< --pure --noinit test/helloworld.scm
-	time ./$< --pure --noinit test/several.scm
-	time ./$< --pure --noinit test/binding.scm
-	time ./$< --pure --noinit test/boundlate.scm
-	time ./$< --pure --noinit test/factorial.scm
-	time ./$< --pure test/helloworld.scm
+ test/constants.scm.full.diff \
+ test/helloworld.scm.full.diff \
+ test/several.scm.full.diff \
+ test/equal.scm.full.diff \
+ test/syntax.scm.full.diff \
+ test/syntax-rec.scm.full.diff \
+ test/letrec.scm.full.diff \
+ test/binding.scm.full.diff \
+ test/setvar.scm.full.diff \
+ test/boundlate.scm.full.diff \
+ test/factorial.scm.full.diff
 
 test_p: bin/$(COMMAND_PROF)
 	time ./$< +RTS -p -RTS --noinit test/helloworld.scm
@@ -292,6 +303,9 @@ $(bindir)/%: bin/%
 # Standard Suffix Rules for Building
 
 .SUFFIXES: .hs .lhs .o .hi .p_o .p_hi .hc .s .ghc-pkg
+
+# switch off intermediate file deletion
+.SECONDARY:
 
 %.ghc-pkg: %.ghc-pkg.m4
 	m4 \

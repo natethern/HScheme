@@ -27,13 +27,8 @@
 
 (letrec
 	(
-		(e (string-append d "e"))
-		(b (string-append a "b"))
-		(a "a")
-		(p (list a b c d e))
-		(d (string-append c "d"))
-		(c (string-append b "c"))
-		(q (list e p))
+		(pq '(p q))
+		(rpq (cons 'r pq))
 	)
-	(list a b c d e p q)
+	(list pq rpq)
 )
