@@ -13,9 +13,7 @@
 <LI><P>Ellipses don't work in vectors in <TT>syntax-rules</TT>.</P>
 <LI><P>The <TT>quasiquote</TT> implementation isn't standard.</P>
 <LI><P>The procedure <TT>eval</TT> exists, but no environments are available to use it with.</P>
-<LI><P>Currently procedures always compare false (e.g., <TT>(eqv? car car)</TT>).</P>
-<LI><P>HScheme returns exact results to certain functions, such as <TT>floor</TT>, <TT>quotient</TT>, <TT>rationalize</TT>, even when given inexact arguments. Also, an inexact finite number multiplied by exact zero, etc., is exact zero. Frankly I think that's correct, but R5RS says otherwise.</P>
-<LI><P>The procedure <TT>list?</TT> doesn't terminate when given a circular "list".</P>
+<LI><P>HScheme returns exact results to certain functions when given inexact arguments, such as <TT>floor</TT>, <TT>quotient</TT>, <TT>rationalize</TT>.</P>
 <LI><P>I expect there are missing and broken procedures and macros. I haven't yet checked every one.</P>
 </UL>
 <P CLASS=path>
