@@ -5,18 +5,26 @@
 	<TITLE>Interpret HScheme</TITLE>
 </HEAD>
 <BODY>
+<P>
+<?
+if (file_exists("../cgi-bin/interpret.cgi"))
+	{
+	echo "Interpreter last modified ".
+	 date("F d Y H:i:s.",filemtime("../cgi-bin/interpret.cgi"));
+	}
+else echo "<B>Interpreter not available.</B>"
+?>
+</P>
 <FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
 <P>Scheme Code:<BR>
 <TEXTAREA NAME="input" ROWS="40" COLS="100">
 </TEXTAREA><BR>
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="full" CHECKED> full
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure"> pure
-<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
-<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
+<INPUT TYPE="RADIO" NAME="monad" VALUE="gcps" CHECKED> full
+<INPUT TYPE="RADIO" NAME="monad" VALUE="pure"> pure
 <INPUT TYPE="RESET" VALUE="Clear">
 <INPUT TYPE="SUBMIT" VALUE="Interpret">
 </FORM>
-<P>"Pure" means pure functional only; "continuations" allows <TT>call-with-current-continuation</TT>, but is slower than "direct" and disallows <TT>call-with-result</TT>.</P>
+<P>"Pure" means purely functional procedures only.</P>
 <P CLASS=path>
 <A HREF="./">HScheme</A> -&gt;
 <SPAN CLASS=here>Interpret</SPAN>
