@@ -30,17 +30,35 @@ module Org.Org.Semantic.HScheme.Object where
 	class
 		(
 		MonadCreatable m r,
-		MonadGettableReference m r,
-		MonadThrow (Object r m) m
+		MonadGettableReference m r
 		) =>
-	 Scheme m r;
+	 Build m r;
 
 	instance
 		(
 		MonadCreatable m r,
-		MonadGettableReference m r,
-		MonadThrow (Object r m) m
+		MonadGettableReference m r
 		) =>
+	 Build m r;
+
+	class
+		(
+		Build cm r,
+		MonadThrow obj cm
+		) =>
+	 BuildThrow cm obj r;
+
+	instance
+		(
+		Build cm r,
+		MonadThrow obj cm
+		) =>
+	 BuildThrow cm obj r;
+
+	class (BuildThrow m (Object r m) r) =>
+	 Scheme m r;
+
+	instance (BuildThrow m (Object r m) r) =>
 	 Scheme m r;
 
 	class
@@ -78,8 +96,8 @@ module Org.Org.Semantic.HScheme.Object where
 
 	type Bindings r m = Binds Symbol (ObjLocation r m);
 
-	newObjBinding :: (Scheme m r) => 
-	 Bindings r m -> Symbol -> Object r m -> m (ObjLocation r m,Bindings r m);
+	newObjBinding :: (Build cm r) => 
+	 Bindings r m -> Symbol -> Object r m -> cm (ObjLocation r m,Bindings r m);
 	newObjBinding bindings sym obj = do
 		{
 		loc <- new obj;
@@ -136,8 +154,8 @@ module Org.Org.Semantic.HScheme.Object where
 	getObjectsRType :: [Object r m] -> Type (r ());
 	getObjectsRType _ = Type;
 
-	cons :: (Scheme m r) =>
-	 Object r m -> Object r m -> m (Object r m);
+	cons :: (Build cm r) =>
+	 Object r m -> Object r m -> cm (Object r m);
 	cons head tail = do
 		{
 		h <- new head;

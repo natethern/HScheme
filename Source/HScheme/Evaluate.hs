@@ -31,58 +31,34 @@ module Org.Org.Semantic.HScheme.Evaluate where
 
 	-- throw, etc.
 
-	lastResortThrowObject :: (Scheme m r,?refType :: Type (r ())) =>
-	 Object r m -> m a;
+	lastResortThrowObject :: (MonadThrow obj m,?objType :: Type obj) =>
+	 obj -> m a;
 	lastResortThrowObject = throw;
 
-	throwObject :: (Scheme m r,?refType :: Type (r ())) =>
-	 Object r m -> m a;
-	throwObject obj = lastResortThrowObject obj;
-{--	case getBinding ?bindings (MkSymbol "throw") of
-		{
-		Nothing -> lastResortThrowObject obj;
-		Just loc -> do
-			{
-			throwObj <- get loc;
-			case throwObj of
-				{
-				(ProcedureObject proc) -> do
-					{
-					proc ?bindings [obj];
-					lastResortThrowObject (SymbolObject (MkSymbol "no-throw"));
-					};
-				_ -> do
-					{
-					objList <- getConvert (MkSymbol "throw-not-procedure",(throwObj,()));
-					lastResortThrowObject objList;
-					};
-				};
-			};
-		};
---}
-	throwSchemeError :: (Scheme m r,?refType :: Type (r ()),MonadIsA m (Object r m) rest) =>
-	 String -> rest -> m a;
+	throwObject :: (MonadThrow obj m,?objType :: Type obj) =>
+	 obj -> m a;
+	throwObject = lastResortThrowObject;
+
+	throwSchemeError ::
+		(
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m),
+		MonadIsA cm (Object r m) rest
+		) =>
+	 String -> rest -> cm a;
 	throwSchemeError name errRest = do
 		{
 		errorObj <- getConvert (MkSymbol name,errRest);
 		throwObject errorObj;
 		};
 
-	throwSimpleError :: (Scheme m r,?refType :: Type (r ())) =>
-	 String -> m a;
-	throwSimpleError name = do -- throwSchemeError name ();
-		{
-		errorObj <- getConvert (MkSymbol name,());
-		throwObject errorObj;
-		};
+	throwSimpleError :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 String -> cm a;
+	throwSimpleError name = throwSchemeError name ();
 
-	throwArgError :: (Scheme m r,?refType :: Type (r ())) =>
-	 String -> [Object r m] -> m a;
-	throwArgError name objs = do -- throwSchemeError name objs;
-		{
-		errorObj <- getConvert (MkSymbol name,objs);
-		throwObject errorObj;
-		};
+	throwArgError :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 String -> [Object r m] -> cm a;
+	throwArgError = throwSchemeError;
 
 
 	-- 6.5 Eval
@@ -99,7 +75,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	getSymbolBinding bindings sym = case (getBinding bindings sym) of
 		{
 		Just loc -> return loc;
-		Nothing -> let {?refType = Type} in throwArgError "unbound-symbol" (tt bindings [SymbolObject sym]);
+		Nothing -> let {?objType = Type} in throwArgError "unbound-symbol" (tt bindings [SymbolObject sym]);
 		} where
 		{
 		tt :: Bindings r m -> [Object r m] -> [Object r m];
@@ -109,8 +85,8 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	evaluate ::
 		(
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>
 	 Bindings r m -> Object r m -> m (Object r m);
 	evaluate bindings obj = do
@@ -122,9 +98,9 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	evalObjects ::
 		(
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>
 	 (Object r m -> m ()) ->
 	 Bindings r m -> [Object r m] -> m ();
@@ -138,8 +114,8 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		(
 		Scheme m r,
 		?bindings		:: Bindings r m,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>
 	 (Object r m,Maybe (Bindings r m)) -> m (Object r m);
 	evaluateP (obj,Just bindings) = evaluate bindings obj;

@@ -28,7 +28,7 @@ module Org.Org.Semantic.HScheme.Equality where
 	import Org.Org.Semantic.HBase;
 	
 	-- 6.1 Equivalence Predicates
-	sameList	:: (Scheme m r,?refType :: Type (r ())) => 
+	sameList	:: (Scheme m r,?objType :: Type (Object r m)) => 
 	 (a -> b -> m Bool) -> [a] -> [b] -> m Bool;
 	sameList _ [] [] = return True;
 	sameList same (a:as) (b:bs) = do
@@ -38,7 +38,7 @@ module Org.Org.Semantic.HScheme.Equality where
 		};
 	sameList _ _ _ = return False;
 
-	sameSRefArray	:: (Scheme m r,?refType :: Type (r ())) => 
+	sameSRefArray	:: (Scheme m r,?objType :: Type (Object r m)) => 
 	 (a -> b -> m Bool) -> SRefArray r a -> SRefArray r b -> m Bool;
 	sameSRefArray same arra arrb = do
 		{
@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.Equality where
 		sameList same la lb;
 		};
 
-	equal :: (Scheme m r,?refType :: Type (r ())) => 
+	equal :: (Scheme m r,?objType :: Type (Object r m)) => 
 	 Object r m -> Object r m -> m Bool;
 	equal NilObject NilObject = (return True);
 	equal (BooleanObject a) (BooleanObject b) = return (a == b);
@@ -72,7 +72,7 @@ module Org.Org.Semantic.HScheme.Equality where
 	equal (ValuesObject a) (ValuesObject b) = sameList equal a b;
 	equal _ _ = return False;
 
-	eqvRefList	:: (FullScheme m r,?refType :: Type (r ())) => 
+	eqvRefList	:: (FullScheme m r,?objType :: Type (Object r m)) => 
 	 [r a] -> [r a] -> m Bool;
 	eqvRefList [] [] = return True;
 	eqvRefList (a:as) (b:bs) = do
@@ -82,7 +82,7 @@ module Org.Org.Semantic.HScheme.Equality where
 		};
 	eqvRefList _ _ = return False;
 
-	eqv :: (FullScheme m r,?refType :: Type (r ())) => 
+	eqv :: (FullScheme m r,?objType :: Type (Object r m)) => 
 	 Object r m -> Object r m -> m Bool;
 	eqv (NumberObject a) (NumberObject b) = return (eqvNumber a b);
 	eqv (PairObject ah at) (PairObject bh bt) = do
@@ -96,21 +96,21 @@ module Org.Org.Semantic.HScheme.Equality where
 	eqv (ValuesObject a) (ValuesObject b) = sameList eqv a b;
 	eqv a b = equal a b;
 
-	eq :: (FullScheme m r,?refType :: Type (r ())) => 
+	eq :: (FullScheme m r,?objType :: Type (Object r m)) => 
 	 Object r m -> Object r m -> m Bool;
 	eq (NumberObject a) (NumberObject b) = return (eqNumber a b);
 	eq (ValuesObject a) (ValuesObject b) = sameList eq a b;
 	eq a b = eqv a b;
 
-	eqP ::  (FullScheme m r,?refType :: Type (r ())) => 
+	eqP ::  (FullScheme m r,?objType :: Type (Object r m)) => 
 	 (Object r m,(Object r m,())) -> m Bool;
 	eqP (a,(b,())) = eq a b;
 
-	eqvP ::  (FullScheme m r,?refType :: Type (r ())) => 
+	eqvP ::  (FullScheme m r,?objType :: Type (Object r m)) => 
 	 (Object r m,(Object r m,())) -> m Bool;
 	eqvP (a,(b,())) = eqv a b;
 
-	equalP ::  (Scheme m r,?refType :: Type (r ())) => 
+	equalP ::  (Scheme m r,?objType :: Type (Object r m)) => 
 	 (Object r m,(Object r m,())) -> m Bool;
 	equalP (a,(b,())) = equal a b;
 	}

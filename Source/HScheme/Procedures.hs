@@ -30,70 +30,70 @@ module Org.Org.Semantic.HScheme.Procedures where
 
 
 	-- 6.3.1 Booleans
-	notP :: (Scheme m r,?refType :: Type (r ())) =>
+	notP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Bool,()) -> m Bool;
 	notP (b,()) = return (not b);
 
-	isBooleanP :: (Scheme m r,?refType :: Type (r ())) =>
+	isBooleanP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isBooleanP (BooleanObject _,()) = return True;
 	isBooleanP (_,()) = return False;
 
 
 	-- 6.3.2 Pairs and Lists
-	isPairP :: (Scheme m r,?refType :: Type (r ())) =>
+	isPairP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isPairP (PairObject _ _,()) = return True;
 	isPairP (_,()) = return False;
 
-	consP :: (Scheme m r,?refType :: Type (r ())) =>
+	consP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,(Object r m,())) -> m (Object r m);
 	consP (h,(t,())) = cons h t;
 
-	carP :: (Scheme m r,?refType :: Type (r ())) =>
+	carP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 ((Object r m,Object r m),()) -> m (Object r m);
 	carP ((h,_),()) = return h;
 
-	cdrP :: (Scheme m r,?refType :: Type (r ())) =>
+	cdrP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 ((Object r m,Object r m),()) -> m (Object r m);
 	cdrP ((_,t),()) = return t;
 
-	isNilP :: (Scheme m r,?refType :: Type (r ())) =>
+	isNilP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isNilP (NilObject,()) = return True;
 	isNilP (_,()) = return False;
 
-	listP ::  (Scheme m r,?refType :: Type (r ())) =>
+	listP ::  (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m [Object r m];
 	listP list = return list;
 
-	appendP ::  (Scheme m r,?refType :: Type (r ())) =>
+	appendP ::  (Scheme m r,?objType :: Type (Object r m)) =>
 	 [[Object r m]] -> m [Object r m];
 	appendP listlist = return (concatenateList listlist);
 
 
 	-- 6.3.3 Symbols
-	isSymbolP :: (Scheme m r,?refType :: Type (r ())) =>
+	isSymbolP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isSymbolP (SymbolObject _,()) = return True;
 	isSymbolP (_,()) = return False;
 
-	makeSymbolP :: (Scheme m r,?refType :: Type (r ())) =>
+	makeSymbolP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SList Char,()) -> m Symbol;
 	makeSymbolP (MkSList s,()) = return (MkSymbol s);
 
 
 	-- 6.3.4 Characters
-	charTestP :: (Scheme m r,?refType :: Type (r ())) =>
+	charTestP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Char -> Bool) -> (Object r m,()) -> m Bool;
 	charTestP f (CharObject c,()) = return (f c);
 	charTestP f (_,()) = return False;
 
-	charFuncP :: (Scheme m r,?refType :: Type (r ())) =>
+	charFuncP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Char -> a) -> (Char,()) -> m a;
 	charFuncP f (c,()) = return (f c);
 
-	integerToCharP :: (Scheme m r,?refType :: Type (r ())) =>
+	integerToCharP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Integer,()) -> m Char;
 	integerToCharP (i,()) = case nthFromStart i of
 		{
@@ -102,12 +102,12 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 
 	-- 6.3.5 Strings
-	isStringP :: (Scheme m r,?refType :: Type (r ())) =>
+	isStringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isStringP (StringObject _,()) = return True;
 	isStringP (_,()) = return False;
 
-	makeRefList :: (Scheme m r,?refType :: Type (r ())) =>
+	makeRefList :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 Integer -> a -> m [r a];
 	makeRefList 0 _ = return [];
 	makeRefList i c = do
@@ -117,7 +117,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (ref:refs);
 		};
 
-	makeStringP :: (Scheme m r,?refType :: Type (r ())) =>
+	makeStringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Integer,Maybe Char) -> m (SRefList r Char);
 	makeStringP (i,Nothing) = do
 		{
@@ -140,21 +140,21 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (item:items);
 		};
 --}
-	stringP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Char] -> m (SList Char);
 	stringP cs = return (MkSList cs);
 
-	stringLengthP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringLengthP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Char,()) -> m Int;
 	stringLengthP (s,()) = return (length s);
 
-	getArrayRef :: (Scheme m r,?refType :: Type (r ())) =>
+	getArrayRef :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 Integer -> ArrayList a -> m a;
 	getArrayRef i _ | i < 0 = throwSimpleError "out-of-range";
 	getArrayRef i arr | i >= convertFromInt (length arr) = throwSimpleError "out-of-range";
 	getArrayRef i arr = return (arr !! (convertToInt i));
 
-	stringRefP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringRefP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Char,(Integer,())) -> m Char;
 	stringRefP (arr,(i,())) = do
 		{
@@ -162,23 +162,23 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
-	stringCharsP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringCharsP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SList Char,()) -> m [Char];
 	stringCharsP (MkSList cs,()) = return cs;
 
 	-- create a completely new string
-	stringAppendP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringAppendP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [SList Char] -> m (SList Char);
 	stringAppendP = return . MkSList . concatenateList . (fmap unSList);
 
 
 	-- Byte Arrays
-	isByteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	isByteArrayP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isByteArrayP (ByteArrayObject _,()) = return True;
 	isByteArrayP (_,()) = return False;
 
-	makeByteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	makeByteArrayP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Integer,Maybe Word8) -> m (SRefList r Word8);
 	makeByteArrayP (i,Nothing) = do
 		{
@@ -191,15 +191,15 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (MkSRefList rs);
 		};
 
-	byteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Word8] -> m (SList Word8);
 	byteArrayP cs = return (MkSList cs);
 
-	byteArrayLengthP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayLengthP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Word8,()) -> m Int;
 	byteArrayLengthP (s,()) = return (length s);
 
-	byteArrayRefP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayRefP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Word8,(Integer,())) -> m Word8;
 	byteArrayRefP (arr,(i,())) = do
 		{
@@ -207,12 +207,12 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
-	byteArrayBytesP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayBytesP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SList Word8,()) -> m [Word8];
 	byteArrayBytesP (MkSList cs,()) = return cs;
 
 	-- create a completely new byte array
-	byteArrayAppendP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayAppendP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [SList Word8] -> m (SList Word8);
 	byteArrayAppendP = return . MkSList . concatenateList . (fmap unSList);
 
@@ -223,11 +223,11 @@ module Org.Org.Semantic.HScheme.Procedures where
 	accreteEitherList (Left a:r) = (a:accreteEitherList r);
 	accreteEitherList (Right (MkSList al):r) = al ++ (accreteEitherList r);
 
-	encodeP :: (Scheme m r,?refType :: Type (r ())) =>
+	encodeP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (String -> [Word8]) -> [Either Char (SList Char)] -> m (SList Word8);
 	encodeP enc el = return (MkSList (enc (accreteEitherList el)));
 
-	decodeP :: (Scheme m r,?refType :: Type (r ())) =>
+	decodeP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 ([Word8] -> ExceptionMonad m x String) ->
 	 [Either Word8 (SList Word8)] -> m (Either (SList Char) Bool);
 	decodeP dec el = do
@@ -242,25 +242,25 @@ module Org.Org.Semantic.HScheme.Procedures where
 
 
 	-- 6.4 Control Features
-	applyP :: (Scheme m r,?refType :: Type (r ())) =>
+	applyP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Procedure r m,([Object r m],())) -> m (Object r m);
 	applyP (proc,(args,())) = proc args;
 
-	valuesP :: (Scheme m r,?refType :: Type (r ())) =>
+	valuesP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m (Object r m);
 	valuesP = return . mkValuesObject;
 	
-	valuesToListP :: (Scheme m r,?refType :: Type (r ())) =>
+	valuesToListP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m [Object r m];
 	valuesToListP (ValuesObject list,()) = return list;
 	valuesToListP (obj,()) = return [obj];
 
-	lastResortThrowP :: (Scheme m r,?refType :: Type (r ())) =>
+	lastResortThrowP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m (Object r m);
 	lastResortThrowP (obj,()) = lastResortThrowObject obj;
 
 {--
-	catchM :: (Scheme m r,MonadException (Object r m) m,?refType :: Type (r ())) =>
+	catchM :: (Scheme m r,MonadException (Object r m) m,?objType :: Type (Object r m)) =>
 	 (Procedure r m,()) -> m (Object r m);
 	catchM = catch;
 --}
@@ -403,7 +403,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	toString (ProcedureObject _)	= return "#<procedure>";
 	toString (BindingsObject _)		= return "#<environment>";
 
-	toStringP :: (Scheme m r,?refType :: Type (r ())) =>
+	toStringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m (SList Char);
 	toStringP (o,()) = do
 		{

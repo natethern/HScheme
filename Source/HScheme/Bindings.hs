@@ -33,9 +33,9 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addLocationBinding ::
 		(
-		Scheme m r
+		Build cm r
 		) =>
-	 Symbol -> Object r m -> Bindings r m -> m (Bindings r m);
+	 Symbol -> Object r m -> Bindings r m -> cm (Bindings r m);
 	addLocationBinding name obj b = do
 		{
 		(_,b') <- newObjBinding b name obj;
@@ -44,24 +44,25 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addProcBinding ::
 		(
-		ArgumentList m r args,
+		Build cm r,
+		ArgumentList m m r args,
 		MonadIsA m (Object r m) ret,
-		?refType :: Type (r ())
+		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 ((?refType :: Type (r ())) => args -> m ret) ->
+	 ((?objType :: Type (Object r m)) => args -> m ret) ->
 	 Bindings r m ->
-	 m (Bindings r m);
+	 cm (Bindings r m);
 	addProcBinding name p b = addLocationBinding (MkSymbol name)
 	 (ProcedureObject (convertToProcedure p)) b;
 
 	convertToTopLevelMacro ::
 		(
-		ArgumentList m r args,
-		?refType :: Type (r ())
+		ArgumentList cm m r args,
+		?objType :: Type (Object r m)
 		) =>
-	 (args -> TopLevelAction r m) ->
-	 (TopLevelMacro r m);
+	 (args -> TopLevelAction cm r m) ->
+	 (TopLevelMacro cm r m);
 	convertToTopLevelMacro foo argObjs = MkTopLevelAction (\beg restObjs -> do
 		{
 		args <- convertFromObjects argObjs;
@@ -70,24 +71,24 @@ module Org.Org.Semantic.HScheme.Bindings where
 
 	addMacroBinding ::
 		(
-		ArgumentList m r args,
-		?refType :: Type (r ())
+		ArgumentList cm m r args,
+		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> m result) ->
-	 Binds Symbol ([Object r m] -> m result) ->
-	 Binds Symbol ([Object r m] -> m result);
+	 (args -> cm result) ->
+	 Binds Symbol ([Object r m] -> cm result) ->
+	 Binds Symbol ([Object r m] -> cm result);
 	addMacroBinding name p b = addBinding (MkSymbol name) (convertToMacro p) b;
 
 	addTopLevelMacroBinding ::
 		(
-		ArgumentList m r args,
-		?refType :: Type (r ())
+		ArgumentList cm m r args,
+		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> TopLevelAction r m) ->
-	 Binds Symbol ([Object r m] -> TopLevelAction r m) ->
-	 Binds Symbol ([Object r m] -> TopLevelAction r m);
+	 (args -> TopLevelAction cm r m) ->
+	 Binds Symbol ([Object r m] -> TopLevelAction cm r m) ->
+	 Binds Symbol ([Object r m] -> TopLevelAction cm r m);
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;
 
 	exitFuncProc :: (Monad m) => (a -> m b) -> (a -> m ());

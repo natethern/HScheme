@@ -32,22 +32,22 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	class
 		(
-		Scheme m r,
+		BuildThrow cm (Object r m) r,
 		StoppableMonadOrParser (Object r m) Char p,
-		LiftedParser Char m p
+		LiftedParser Char cm p
 		) =>
-	 SchemeParser m r p | p -> m;
+	 SchemeParser cm m r p | p -> cm;
 
 	instance
 		(
-		Scheme m r,
+		BuildThrow cm (Object r m) r,
 		StoppableMonadOrParser (Object r m) Char p,
-		LiftedParser Char m p
+		LiftedParser Char cm p
 		) =>
-	 SchemeParser m r p;
+	 SchemeParser cm m r p;
 
-	runParser :: (Scheme m r,?refType :: Type (r ())) =>
-	 m (Maybe t) -> OrStreamParser m t a -> m a;
+	runParser :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 cm (Maybe t) -> OrStreamParser cm t a -> cm a;
 	runParser source parser = do
 		{
 		mr <- runOrStreamParser source parser;
@@ -58,8 +58,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			};
 		};
 
-	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
-	 [t] -> OrListParser m t a -> m ([t],a);
+	runParserString :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 [t] -> OrListParser cm t a -> cm ([t],a);
 	runParserString text parser = do
 		{
 		mr <- doOrListParser text parser;
@@ -70,7 +70,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			};
 		};
 
-	unexpectedCharError :: (SchemeParser m r p,?refType :: Type (r ())) =>
+	unexpectedCharError :: (SchemeParser cm m r p,?objType :: Type (Object r m)) =>
 	 String -> p a;
 	unexpectedCharError context = do
 		{
@@ -83,7 +83,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		 (parserLift (throwArgError "inappropriate-stream-end" [contextObj]));
 		};
 
-	mOrUnexpectedCharError :: (SchemeParser m r p,?refType :: Type (r ())) =>
+	mOrUnexpectedCharError :: (SchemeParser cm m r p,?objType :: Type (Object r m)) =>
 	 String -> p a -> p a;
 	mOrUnexpectedCharError s ma = ma ||| (unexpectedCharError s);
 
@@ -178,8 +178,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listContentsParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p (Object r m);
 	listContentsParse = do
@@ -201,8 +201,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p (Object r m);
 	listParse = do
@@ -216,8 +216,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	vectorContentsParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p [Object r m];
 	vectorContentsParse = do
@@ -234,8 +234,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	byteArrayContentsParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p [Word8];
 	byteArrayContentsParse = do
@@ -252,8 +252,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	specialCharParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 String -> Symbol -> p (Object r m);
 	specialCharParse s symbol = do
@@ -266,8 +266,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	quotedParse :: 
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p (Object r m);
 	quotedParse =
@@ -299,8 +299,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	hashLiteralParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) => 
 	 p (Object r m);
 	hashLiteralParse = do
@@ -381,8 +381,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	stringLiteralParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p String;
 	stringLiteralParse = do
@@ -398,17 +398,16 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	plift ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
---	 m (Object r m) -> p (Object r m);
-	 m a -> p a;
+	 cm a -> p a;
 	plift = parserLift;
 
 	expressionParse ::
 		(
-		?refType :: Type (r ()),
-		SchemeParser m r p
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
 		) =>
 	 p (Object r m);
 	expressionParse = do
@@ -424,39 +423,39 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		 listParse				;
 		};
 
-	expressionOrEndParse :: (SchemeParser m r p) =>
+	expressionOrEndParse :: (SchemeParser cm m r p) =>
 	 p (Maybe (Object r m));
-	expressionOrEndParse = let {?refType=Type} in 
+	expressionOrEndParse = let {?objType=Type} in 
 		(expressionParse >>= (return . Just)) |||
 		(optionalWhitespaceParse >> streamEndParse >> (return Nothing)) |||
 		(unexpectedCharError "input");
 
-	expressionsParse :: (SchemeParser m r p) =>
+	expressionsParse :: (SchemeParser cm m r p) =>
 	 p [Object r m];
 	expressionsParse = accumulateMaybeSource expressionOrEndParse;
 
-	parseFromCharSource :: (Scheme m r,?refType :: Type (r ())) =>
+	parseFromCharSource :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 m (Maybe Char) -> m (Maybe (Object r m));
 	parseFromCharSource source = runParser source expressionOrEndParse;
 
-	parseFromPort :: (Scheme m r,?refType :: Type (r ())) =>
+	parseFromPort :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 InputPort Word8 m -> m (Maybe (Object r m));
 	parseFromPort port = parseFromCharSource (parseUTF8Char (ipRead port));
 
-	parseFromString :: (Scheme m r,?refType :: Type (r ())) =>
+	parseFromString :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
 
-	parseAllFromString :: (Scheme m r,?refType :: Type (r ())) =>
+	parseAllFromString :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
 	 String ->
-	 m [Object r m];
+	 cm [Object r m];
 	parseAllFromString text = do	
 		{
 		(_,objs) <- runParserString text expressionsParse;
 		return objs;
 		};
 
-	portReadP :: (Scheme m r,?refType :: Type (r ())) =>
+	portReadP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m (Object r m);
 	portReadP (port,()) = do
 		{		

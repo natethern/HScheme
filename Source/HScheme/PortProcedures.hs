@@ -29,17 +29,17 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 	import Org.Org.Semantic.HBase;
 
 	-- 6.6.1 Ports
-	isInputPortP :: (Scheme m r,?refType :: Type (r ())) =>
+	isInputPortP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isInputPortP (InputPortObject _,()) = return True;
 	isInputPortP (_,()) = return False;
 
-	isOutputPortP :: (Scheme m r,?refType :: Type (r ())) =>
+	isOutputPortP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isOutputPortP (OutputPortObject _,()) = return True;
 	isOutputPortP (_,()) = return False;
 
-	inputPortCloseP :: (Scheme m r,?refType :: Type (r ())) =>
+	inputPortCloseP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m NullObjType;
 	inputPortCloseP (port,()) = do
 		{
@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		return MkNullObjType;
 		};
 
-	outputPortCloseP :: (Scheme m r,?refType :: Type (r ())) =>
+	outputPortCloseP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (OutputPort Word8 m,()) -> m NullObjType;
 	outputPortCloseP (port,()) = do
 		{
@@ -59,11 +59,11 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 	eofObject :: (Scheme m r) => Object r m;
 	eofObject = nullObject;
 
-	isEOFObjectP :: (Scheme m r,?refType :: Type (r ())) =>
+	isEOFObjectP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isEOFObjectP (obj,()) = return (isNullObject obj);
 	
-	portReadByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	portReadByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
 	portReadByteP (port,()) = do
 		{
@@ -75,7 +75,7 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 			});
 		};
 	
-	portPeekByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	portPeekByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
 	portPeekByteP (port,()) = do
 		{
@@ -87,12 +87,12 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 			});
 		};
 	
-	portByteReadyP :: (Scheme m r,?refType :: Type (r ())) =>
+	portByteReadyP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m Bool;
 	portByteReadyP (port,()) = ipReady port;
 
 	-- 6.6.3 Output
-	portWriteByteP :: (Scheme m r,?refType :: Type (r ())) =>
+	portWriteByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Word8,(OutputPort Word8 m,())) -> m NullObjType;
 	portWriteByteP (c,(port,())) = do
 		{
@@ -101,15 +101,15 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		};
 
 	-- conversion
-	handleUTF8Error :: (Scheme m r,?refType :: Type (r ())) =>
-	 UTF8Error -> m a;
+	handleUTF8Error :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 UTF8Error -> cm a;
 	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
 
-	parseUTF8Char :: (Scheme m r,?refType :: Type (r ())) =>
-	 m (Maybe Word8) -> m (Maybe Char);
+	parseUTF8Char :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 cm (Maybe Word8) -> cm (Maybe Char);
 	parseUTF8Char source = exRun handleUTF8Error (parseUTF8 source);
 
-	parseUTF8P :: (Scheme m r,?refType :: Type (r ())) =>
+	parseUTF8P :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Procedure r m,()) -> m (Either NullObjType Char);
 	parseUTF8P (source,()) = do
 		{

@@ -29,7 +29,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	import Org.Org.Semantic.HBase;
 
 	-- 6.3.2 Pairs and Lists
-	setCarP :: (FullScheme m r,?refType :: Type (r ())) =>
+	setCarP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,(Object r m,())) -> m NullObjType;
 	setCarP ((PairObject carLoc _),(obj,())) = do
 		{
@@ -38,7 +38,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		};
 	setCarP (p,(obj,())) = throwArgError "wrong-type-arg" [p];
 
-	setCdrP :: (FullScheme m r,?refType :: Type (r ())) =>
+	setCdrP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,(Object r m,())) -> m NullObjType;
 	setCdrP ((PairObject _ cdrLoc),(obj,())) = do
 		{
@@ -48,7 +48,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	setCdrP (p,(obj,())) = throwArgError "wrong-type-arg" [p];
 
 	-- 6.3.5 Strings
-	stringSetP :: (FullScheme m r,?refType :: Type (r ())) =>
+	stringSetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Char,(Integer,(Char,()))) -> m NullObjType;
 	stringSetP (arr,(i,(c,()))) = do
 		{
@@ -58,7 +58,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		};
 
 	-- 6.3.5 Strings
-	byteArraySetP :: (FullScheme m r,?refType :: Type (r ())) =>
+	byteArraySetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Word8,(Integer,(Word8,()))) -> m NullObjType;
 	byteArraySetP (arr,(i,(c,()))) = do
 		{

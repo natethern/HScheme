@@ -23,27 +23,26 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.ArgumentList where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
---	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	class (Scheme m r) => ArgumentList m r a where
+	class (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r a where
 		{
-		convertFromObjects' :: (?refType :: Type (r ())) => [Object r m] -> m a;
+		convertFromObjects' :: (?objType :: Type (Object r m)) => [Object r m] -> cm a;
 		};
 
-	convertFromObjects :: (ArgumentList m r a,?refType :: Type (r ())) =>
-	 [Object r m] -> m a;
+	convertFromObjects :: (ArgumentList cm m r a,?objType :: Type (Object r m)) =>
+	 [Object r m] -> cm a;
 	convertFromObjects = convertFromObjects';
 
-	instance (Scheme m r) => ArgumentList m r () where
+	instance (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r () where
 		{
 		convertFromObjects' [] = return ();
 		convertFromObjects' (_:_) = throwSimpleError "too-many-args";
 		};
 
-	convertFromObject :: (Scheme m r,MonadMaybeA m to (Object r m),?refType :: Type (r ())) =>
-	 (Object r m) -> m to;
+	convertFromObject :: (Build cm r,MonadThrow (Object r m) cm,MonadMaybeA cm to (Object r m),?objType :: Type (Object r m)) =>
+	 (Object r m) -> cm to;
 	convertFromObject from = do
 		{
 		mto <- getMaybeConvert from;
@@ -56,10 +55,10 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 
 	instance
 		(
-		MonadMaybeA m a (Object r m),
-		ArgumentList m r b
+		MonadMaybeA cm a (Object r m),
+		ArgumentList cm m r b
 		) =>
-	 ArgumentList m r (a,b) where
+	 ArgumentList cm m r (a,b) where
 		{
 		convertFromObjects' [] = do
 			{
@@ -75,10 +74,11 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 
 	instance
 		(
-		Scheme m r,
-		MonadMaybeA m a (Object r m)
+		Build cm r,
+		MonadThrow (Object r m) cm,
+		MonadMaybeA cm a (Object r m)
 		) =>
-	 ArgumentList m r (Maybe a) where
+	 ArgumentList cm m r (Maybe a) where
 		{
 		convertFromObjects' [] = return Nothing;
 		convertFromObjects' [obj] = do
@@ -91,10 +91,11 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 
 	instance
 		(
-		Scheme m r,
-		MonadMaybeA m a (Object r m)
+		Build cm r,
+		MonadThrow (Object r m) cm,
+		MonadMaybeA cm a (Object r m)
 		) =>
-	 ArgumentList m r [a] where
+	 ArgumentList cm m r [a] where
 		{
 		convertFromObjects' [] = return [];
 		convertFromObjects' (obj:objs) = do
@@ -107,11 +108,11 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 
 	convertToMacro ::
 		(
-		ArgumentList m r args,
-		?refType :: Type (r ())
+		ArgumentList cm m r args,
+		?objType :: Type (Object r m)
 		) =>
-	 (args -> m result) ->
-	 ([Object r m] -> m result);
+	 (args -> cm result) ->
+	 ([Object r m] -> cm result);
 	convertToMacro foo objs = do
 		{
 		args <- convertFromObjects objs;
@@ -120,9 +121,9 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 
 	convertToProcedure ::
 		(
-		ArgumentList m r args,
+		ArgumentList m m r args,
 		MonadIsA m (Object r m) ret,
-		?refType :: Type (r ())
+		?objType :: Type (Object r m)
 		) =>
 	 (args -> m ret) -> Procedure r m;
 	convertToProcedure foo objs = do

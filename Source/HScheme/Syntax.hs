@@ -38,8 +38,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	type Binding r m = Bind Symbol (Object r m);
 
-	substitute :: (Scheme m r) =>
-	 [Binding r m] -> Object r m -> m (Object r m);
+	substitute :: (Build cm r) =>
+	 [Binding r m] -> Object r m -> cm (Object r m);
 	substitute [] x = return x;
 	substitute subs (PairObject hloc tloc) = do
 		{
@@ -73,8 +73,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 else substitute subs (SymbolObject name);
 	substitute _ x = return x;
 
-	matchBinding :: (Scheme m r) =>
-	 [Symbol] -> Object r m -> Object r m -> m (Maybe [Binding r m]);
+	matchBinding :: (Build cm r) =>
+	 [Symbol] -> Object r m -> Object r m -> cm (Maybe [Binding r m]);
 	matchBinding literals NilObject NilObject = return (Just []);
 	matchBinding literals NilObject _ = return Nothing;
 	matchBinding literals (PairObject phl ptl) (PairObject ahl atl) = do
@@ -109,8 +109,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 else return (Just [MkBind name args]);
 	matchBinding literals _ _ = return Nothing;
 	
-	matchBindings :: (Scheme m r) =>
-	 [Symbol] -> Object r m -> [Object r m] -> m (Maybe [Binding r m]);
+	matchBindings :: (Build cm r) =>
+	 [Symbol] -> Object r m -> [Object r m] -> cm (Maybe [Binding r m]);
 	matchBindings literals NilObject [] = return (Just []);
 	matchBindings literals (PairObject phl ptl) (a1:as) = do
 		{
@@ -141,8 +141,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 		};
 	matchBindings literals _ _ = return Nothing;
 
-	caseMatch :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
+	caseMatch :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> cm ([Binding r m],Object r m);
 	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
 	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
 		{
@@ -154,7 +154,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 			};
 		};
 {--
-	caseMatchM :: (Scheme m r,?refType :: Type (r ())) =>
+	caseMatchM :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
 	caseMatchM (argExpr,(literals,cases)) = do
 		{
@@ -163,8 +163,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 		let {?bindings = addBindings subs ?bindings;} in evaluate expr;
 		};
 --}
-	syntaxRulesM :: (Scheme m r,?refType :: Type (r ())) =>
-	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
+	syntaxRulesM :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm (Syntax cm r m);
 	syntaxRulesM (literals,rules) = return (\args -> let
 		{
 		transform [] = throwSimpleError "no-match";
@@ -182,11 +182,11 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	compileSyntax ::
 		(
-		Scheme m r,
-		?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m)
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m)
 		) =>
-	 Object r m -> m (Syntax r m);
+	 Object r m -> cm (Syntax cm r m);
 	compileSyntax (SymbolObject sym) = case getBinding ?syntacticbindings sym of
 		{
 		Just syntax -> return syntax;
@@ -215,14 +215,14 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	defineSyntaxT ::
 		(
-		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		BuildThrow cm (Object r m) r,
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> TopLevelAction r m;
+	 (Symbol,(Object r m,())) -> TopLevelAction cm r m;
 	defineSyntaxT (sym,(obj,())) = MkTopLevelAction (\beg objs -> do
 		{
-		syntax <- let {?refType = Type} in compileSyntax obj;
+		syntax <- let {?objType = Type} in compileSyntax obj;
 		let
 			{
 			?syntacticbindings = newBinding ?syntacticbindings sym syntax;

@@ -33,35 +33,6 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	data PureSystemInterface m r = MkPureSystemInterface
-		{
-		psiReadFile	:: String -> m [Object r m]
-		};
-
-	data FullSystemInterface m r = MkFullSystemInterface
-		{
-		fsiPure					:: PureSystemInterface m r,
-		fsiCurrentInputPort		:: InputPort Word8 m,
-		fsiCurrentOutputPort	:: OutputPort Word8 m,
-		fsiCurrentErrorPort		:: OutputPort Word8 m,
-		fsiOpenInputFile		:: String -> m (InputPort Word8 m),
-		fsiOpenOutputFile		:: String -> m (OutputPort Word8 m)
-		};
-{--
-	doEval :: (Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
-	 Bindings r m ->
-	 Object r m ->
-	 m (Bindings r m);
-	doEval foo bindings obj = do
-		{
-		(bindings',result) <- topLevelEvaluate bindings obj;
-		let {?bindings = bindings'} in foo result;
-		return bindings';	
-		};
---}
 	printResult :: (Scheme m r) =>
 	 OutputPort Word8 m -> Object r m -> m ();
 	printResult output obj = if (isNullObject obj)
@@ -71,98 +42,27 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		str <- toString obj;
 		opWriteList output (encodeUTF8 (str ++ "\n"));
 		};
-{--
-	printeval :: (Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 ((?bindings :: Bindings r m) => OutputPort Word8 m) ->
-	 Bindings r m ->
-	 Object r m ->
-	 m (Bindings r m);
-	printeval output bindings obj = doEval (printResult output) bindings obj;
---}
-{--
-	parseEvalFromString ::
+
+	parseFromPortBulk ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		?bindings		:: Bindings r m,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m)
 		) =>
-	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
-	 String -> m ();
-	parseEvalFromString foo text = do	
-		{
-		objs <- parseAllFromString text;
-		evalObjects foo objs;
-		};
-
-	parseEvalFromPortByLine :: (Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m),?refType :: Type (r ())) =>
-	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
-	 Bindings r m ->
-	 InputPort Word8 m ->
-	 m (Bindings r m);
-	parseEvalFromPortByLine foo bindings input = do	
-		{
-		mobject <- let {?bindings=bindings} in parseFromPort input;
-		case mobject of
-			{
-			Nothing -> return bindings;
-			Just obj -> do
-				{
-				bindings' <- doEval foo bindings obj;
-				parseEvalFromPortByLine foo bindings' input;
-				};
-			};
-		};
-
-	parseEvalFromPortBulk :: (Scheme m r,?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
-	 Bindings r m ->
-	 InputPort Word8 m ->
-	 m (Bindings r m);
-	parseEvalFromPortBulk foo bindings input = do	
-		{
-		text <- accumulateSource (let {?bindings=bindings} in parseUTF8Char (ipRead input));
-		parseEvalFromString foo bindings text;
-		};
-
-	loadBindingsWithProcs :: (Scheme m r,?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 (String -> m (InputPort Word8 m)) ->
-	 ((?bindings :: Bindings r m) => OutputPort Word8 m) ->
-	 Bindings r m -> String -> m (Bindings r m);
-	loadBindingsWithProcs oif output bindings name = do
-		{
-		input <- oif name;
-		bindings' <- parseEvalFromPortBulk (printResult output) bindings input;
-		ipClose input;
-		return bindings';
-		};
---}
-
-	parseFromPortBulk :: (Scheme m r,?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 InputPort Word8 m ->
-	 m [Object r m];
+	 InputPort Word8 cm ->
+	 cm [Object r m];
 	parseFromPortBulk input = do	
 		{
 		text <- accumulateMaybeSource (parseUTF8Char (ipRead input));
 		parseAllFromString text;
 		};
 
-	readWithProcs :: (Scheme m r,?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 (String -> m (InputPort Word8 m)) ->
---	 ((?bindings :: Bindings r m) => OutputPort Word8 m) ->
-	 String -> m [Object r m];
+	readWithProcs ::
+		(
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m)
+		) =>
+	 (String -> cm (InputPort Word8 cm)) ->
+	 String -> cm [Object r m];
 	readWithProcs oif name = do
 		{
 		input <- oif name;
@@ -171,11 +71,13 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		return objects;
 		};
 
-	readFiles :: (Scheme m r,?refType :: Type (r ()),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)) =>
-	 (String -> m (InputPort Word8 m)) ->
-	 [String] -> m [Object r m];
+	readFiles ::
+		(
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m)
+		) =>
+	 (String -> cm (InputPort Word8 cm)) ->
+	 [String] -> cm [Object r m];
 	readFiles oif [] = return [];
 	readFiles oif (name:names) = do
 		{
@@ -184,52 +86,67 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		return (objs1 ++ objsr);
 		};
 
-	loadT :: (Scheme m r) =>
-	 PureSystemInterface m r ->
-	 (SList Char,()) -> TopLevelAction r m;
+	data PureSystemInterface cm m r = MkPureSystemInterface
+		{
+		psiReadFile	:: String -> cm [Object r m]
+		};
+
+	data FullSystemInterface cm m r = MkFullSystemInterface
+		{
+		fsiPure					:: PureSystemInterface cm m r,
+		fsiCurrentInputPort		:: InputPort Word8 cm,
+		fsiCurrentOutputPort	:: OutputPort Word8 cm,
+		fsiCurrentErrorPort		:: OutputPort Word8 cm,
+		fsiOpenInputFile		:: String -> cm (InputPort Word8 cm),
+		fsiOpenOutputFile		:: String -> cm (OutputPort Word8 cm)
+		};
+
+	loadT :: (Build cm r) =>
+	 PureSystemInterface cm m r ->
+	 (SList Char,()) -> TopLevelAction cm r m;
 	loadT psi (MkSList filename,()) = MkTopLevelAction (\beg objs -> do
 		{
 		readObjects <- psiReadFile psi filename;
 		beg (readObjects ++ objs);
 		});
 
-	currentInputPortP :: (Scheme m r) =>
-	 FullSystemInterface m r ->
-	 () -> m (InputPort Word8 m);
+	currentInputPortP :: (Build cm r) =>
+	 FullSystemInterface cm m r ->
+	 () -> cm (InputPort Word8 cm);
 	currentInputPortP fsi () = return (fsiCurrentInputPort fsi);
 
-	currentOutputPortP :: (Scheme m r) =>
-	 FullSystemInterface m r ->
-	 () -> m (OutputPort Word8 m);
+	currentOutputPortP :: (Build cm r) =>
+	 FullSystemInterface cm m r ->
+	 () -> cm (OutputPort Word8 cm);
 	currentOutputPortP fsi () = return (fsiCurrentOutputPort fsi);
 
-	currentErrorPortP :: (Scheme m r) =>
-	 FullSystemInterface m r ->
-	 () -> m (OutputPort Word8 m);
+	currentErrorPortP :: (Build cm r) =>
+	 FullSystemInterface cm m r ->
+	 () -> cm (OutputPort Word8 cm);
 	currentErrorPortP fsi () = return (fsiCurrentErrorPort fsi);
 
-	openInputFileP :: (Scheme m r) =>
-	 FullSystemInterface m r ->
-	 (SList Char,()) -> m (InputPort Word8 m);
+	openInputFileP :: (Build cm r) =>
+	 FullSystemInterface cm m r ->
+	 (SList Char,()) -> cm (InputPort Word8 cm);
 	openInputFileP fsi (MkSList name,()) = fsiOpenInputFile fsi name;
 
-	openOutputFileP :: (Scheme m r) =>
-	 FullSystemInterface m r ->
-	 (SList Char,()) -> m (OutputPort Word8 m);
+	openOutputFileP :: (Build cm r) =>
+	 FullSystemInterface cm m r ->
+	 (SList Char,()) -> cm (OutputPort Word8 cm);
 	openOutputFileP fsi (MkSList name,()) = fsiOpenOutputFile fsi name;
 
-	systemMacroBindings :: (Scheme m r,?refType :: Type (r ())) =>
-	 PureSystemInterface m r ->
-	 Binds Symbol (TopLevelMacro r m) ->
-	 Binds Symbol (TopLevelMacro r m);
+	systemMacroBindings :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 PureSystemInterface cm m r ->
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
 	systemMacroBindings psi = concatenateList
 		[
 		-- 6.6.4 System Interface
 		addTopLevelMacroBinding	"load"	(loadT psi)
 		];
 
-	fullSystemBindings :: (Scheme m r,?refType :: Type (r ())) =>
-	 FullSystemInterface m r -> Bindings r m -> m (Bindings r m);
+	fullSystemBindings :: (Build cm r,Scheme m r,?objType :: Type (Object r m)) =>
+	 FullSystemInterface m m r -> Bindings r m -> cm (Bindings r m);
 	fullSystemBindings fsi = concatenateList
 		[
 		-- 6.6.1 Ports

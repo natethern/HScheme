@@ -201,13 +201,13 @@ module Org.Org.Semantic.HScheme.Lambda where
 	isProcedure (ProcedureObject _) = return True;
 	isProcedure _ = return False;
 
-	isProcedureP :: (Scheme m r,?refType :: Type (r ())) =>
+	isProcedureP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
 	isProcedureP (obj,()) = isProcedure obj;
 	
 	callCCP ::
 		(
-		Scheme m r,?refType :: Type (r ()),
+		Scheme m r,?objType :: Type (Object r m),
 		MonadCont m
 		) =>
 	 (Procedure r m,()) -> m (Object r m);
@@ -220,7 +220,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	fixP ::
 		(
-		Scheme m r,?refType :: Type (r ()),
+		Scheme m r,?objType :: Type (Object r m),
 		MonadFix m
 		) =>
 	 (Procedure r m,()) -> m (Object r m);

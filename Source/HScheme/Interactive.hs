@@ -33,7 +33,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	reportError :: (Scheme m r,?refType :: Type (r ())) =>
+	reportError :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 OutputPort Word8 m -> Object r m -> m ();
 	reportError errPort errObj = do
 		{
@@ -47,11 +47,11 @@ module Org.Org.Semantic.HScheme.Interactive where
 		Scheme m r,
 		MonadBottom m,
 		MonadException (Object r m) m,
-		?refType :: Type (r ()),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?system :: FullSystemInterface m r
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
 		) =>
 	  Bindings r m -> m ();
 	interactiveLoop bindings = do
@@ -104,11 +104,11 @@ module Org.Org.Semantic.HScheme.Interactive where
 		Scheme m r,
 		MonadBottom m,
 		MonadException (Object r m) m,
-		?refType :: Type (r ()),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?system :: FullSystemInterface m r
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
 		) =>
 	 Bindings r m ->
 	 String ->
@@ -132,11 +132,11 @@ module Org.Org.Semantic.HScheme.Interactive where
 		MonadCont m,
 		MonadBottom m,
 		MonadException (Object r m) m,
-		?refType :: Type (r ()),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?system :: FullSystemInterface m r
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
 		) =>
 	 Bindings r m ->
 	 String ->

@@ -35,13 +35,14 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	fullMacroBindings ::
 		(
 		FullScheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ())
+		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro r m) ->
-	 Binds Symbol (Macro r m);
+	 Binds Symbol (Macro cm r m) ->
+	 Binds Symbol (Macro cm r m);
 	fullMacroBindings = concatenateList
 		[
 		pureMacroBindings,
@@ -53,8 +54,11 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 --		,addTopLevelMacroBinding	"define"			(defineT fullSetLoc),
 		];
 
-	simpleFullBindings :: (FullScheme m r,
-		?refType :: Type (r ())) =>
+	simpleFullBindings ::
+		(
+		FullScheme m r,
+		?objType :: Type (Object r m)
+		) =>
 	 Bindings r m -> m (Bindings r m);
 	simpleFullBindings = concatenateList
 		[
@@ -76,13 +80,13 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 		];
 
 	monadFixFullBindings :: (FullScheme m r,MonadFix m,
-		?refType :: Type (r ())) =>
+		?objType :: Type (Object r m)) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
 
 	-- this one is closest to R5RS
 	monadContFullBindings :: (FullScheme m r,MonadCont m,
-		?refType :: Type (r ())) =>
+		?objType :: Type (Object r m)) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContFullBindings = simpleFullBindings ++ monadContBindings;
 	}

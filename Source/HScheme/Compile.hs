@@ -33,8 +33,12 @@ module Org.Org.Semantic.HScheme.Compile where
 	  ((b -> m obj) -> obj -> (a -> m obj))
 	  (f (a -> m obj) -> f (b -> m obj));
 
-	getThingySingle :: (Scheme m r) =>
-	 Object r m -> m (ThingySingle m (SchemeExpression r m) (Object r m) a);
+	getThingySingle :: 
+		(
+		Build cm r,
+		Scheme m r
+		) =>
+	 Object r m -> cm (ThingySingle m (SchemeExpression r m) (Object r m) a);
 	-- b = a
 	getThingySingle NilObject = return (MkThingySingle (\f obj a -> do
 		{
@@ -73,8 +77,12 @@ module Org.Org.Semantic.HScheme.Compile where
 	  ((b -> m obj) -> [obj] -> (a -> m obj))
 	  (f (a -> m obj) -> f (b -> m obj));
 
-	getThingyList :: (Scheme m r) =>
-	 Object r m -> m (ThingyList m (SchemeExpression r m) (Object r m) a);
+	getThingyList :: 
+		(
+		Build cm r,
+		Scheme m r
+		) =>
+	 Object r m -> cm (ThingyList m (SchemeExpression r m) (Object r m) a);
 	-- b = a
 	getThingyList NilObject = return (MkThingyList (\f list a -> case list of
 		{
@@ -104,10 +112,14 @@ module Org.Org.Semantic.HScheme.Compile where
 	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
 	getThingyList _ = fail "bad arg list in lambda";
 
-	makeLambda :: (Scheme m r) =>
+	makeLambda ::
+		(
+		Build cm r,
+		Scheme m r
+		) =>
 	 Object r m ->
 	 SchemeExpression r m (m (Object r m)) ->
-	 m (SchemeExpression r m ([Object r m] -> m (Object r m)));
+	 cm (SchemeExpression r m ([Object r m] -> m (Object r m)));
 	makeLambda params expr = do
 		{
 		MkThingyList map bindSyms <- getThingyList params;
@@ -128,18 +140,30 @@ module Org.Org.Semantic.HScheme.Compile where
 	 (Symbol,SchemeExpression r m (m (ObjLocation r m)));
 	convertToLocationBinding (sym,valueExpr) = (sym,convertToLocationExpression valueExpr);
 
-	type Macro r m = [Object r m] -> m (SchemeExpression r m (m (Object r m)));
-	type Syntax r m = [Object r m] -> m (Object r m);
+	type Macro cm r m = [Object r m] -> cm (SchemeExpression r m (m (Object r m)));
+	type Syntax cm r m = [Object r m] -> cm (Object r m);
+
+{--
+	data Definable r m = ValueDefinable (SchemeExpression r m (m (Object r m))) |
+		SyntaxDefinable (Syntax cm r m);
+--}
+	newtype TopLevelAction cm r m = MkTopLevelAction {unTopLevelAction :: forall a.
+	 ([Object r m] -> cm (SchemeExpression r m (m a))) ->
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m a))};
+
+	type TopLevelMacro cm r m = [Object r m] -> TopLevelAction cm r m;
 
 	lambdaM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 (Object r m,[Object r m]) ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	lambdaM (params,bodyObj) = do
 		{
 		body <- beginM bodyObj;
@@ -149,12 +173,13 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	compileBinds ::
 		(
+		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 [(Symbol,(Object r m,()))] ->
-	 m [(Symbol,SchemeExpression r m (m (Object r m)))];
+	 cm [(Symbol,SchemeExpression r m (m (Object r m)))];
 	compileBinds [] = return [];
 	compileBinds ((sym,(obj,())):bs) = do
 		{
@@ -174,13 +199,14 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	letSequentialM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	letSequentialM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -190,13 +216,14 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	letSeparateM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	letSeparateM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -206,13 +233,14 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	letRecursiveM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	letRecursiveM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -220,24 +248,14 @@ module Org.Org.Semantic.HScheme.Compile where
 		return (fSubstMapRecursive substMap binds body);
 		};
 
-{--
-	data Definable r m = ValueDefinable (SchemeExpression r m (m (Object r m))) |
-		SyntaxDefinable (Syntax r m);
---}
-	newtype TopLevelAction r m = MkTopLevelAction {unTopLevelAction :: forall a.
-	 ([Object r m] -> m (SchemeExpression r m (m a))) ->
-	 [Object r m] ->
-	 m (SchemeExpression r m (m a))};
-
-	type TopLevelMacro r m = [Object r m] -> TopLevelAction r m;
-
 	defineT ::
 		(
+		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> TopLevelAction r m;
+	 (Symbol,(Object r m,())) -> TopLevelAction cm r m;
 	defineT (sym,(val,())) = MkTopLevelAction (\beg objs -> do
 		{
 		valExpr <- compile val;
@@ -252,16 +270,17 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	begin ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 m (SchemeExpression r m (m a)) -> 
+	 cm (SchemeExpression r m (m a)) -> 
 	 (m (Object r m) -> (m a)) ->
 	 (m (Object r m) -> (m a) -> (m a)) ->
 	 [Object r m] ->
-	 m (SchemeExpression r m (m a));
+	 cm (SchemeExpression r m (m a));
 	begin none one _ [] = none;
 	begin none one conn (obj:objs) = do
 		{
@@ -292,24 +311,26 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	beginM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	beginM = begin (fail "bad begin") id (>>);
 
 	beginList ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 m (SchemeExpression r m (m [Object r m]));
+	 cm (SchemeExpression r m (m [Object r m]));
 	beginList = begin
 	 (return (return' (return [])))
 	 (\mr -> do
@@ -329,25 +350,27 @@ module Org.Org.Semantic.HScheme.Compile where
 
 	beginListM ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 m (SchemeExpression r m (m (Object r m)));
+	 cm (SchemeExpression r m (m (Object r m)));
 	beginListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (beginList obj);
 
 	beginListEat ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 (Object r m -> m ()) ->
 	 [Object r m] ->
-	 m (SchemeExpression r m (m ()));
+	 cm (SchemeExpression r m (m ()));
 	beginListEat eat = begin
 	 (return (return' (return ())))
 	 (\mr -> do
@@ -422,11 +445,12 @@ macro: quote, lambda, if, let, let*, syntax-rules, case-match, letrec, begin, se
 
 	compileApply ::
 		(
+		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 Object r m -> [Object r m] -> m (SchemeExpression r m (m (Object r m)));
+	 Object r m -> [Object r m] -> cm (SchemeExpression r m (m (Object r m)));
 	compileApply f arglist = do
 		{
 		fe <- compile f;
@@ -436,11 +460,12 @@ macro: quote, lambda, if, let, let*, syntax-rules, case-match, letrec, begin, se
 
 	compile ::
 		(
+		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 Object r m -> m (SchemeExpression r m (m (Object r m)));
+	 Object r m -> cm (SchemeExpression r m (m (Object r m)));
 	compile (SymbolObject sym) = return (fmap (\mloc -> do
 		{
 		loc <- mloc;

@@ -43,13 +43,14 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	macroBindings ::
 		(
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ())
+		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro r m) ->
-	 Binds Symbol (Macro r m);
+	 Binds Symbol (Macro cm r m) ->
+	 Binds Symbol (Macro cm r m);
 	macroBindings = concatenateList
 		[
 		-- 4.1.2 Literal Expressions
@@ -70,13 +71,14 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	pureMacroBindings ::
 		(
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ())
+		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro r m) ->
-	 Binds Symbol (Macro r m);
+	 Binds Symbol (Macro cm r m) ->
+	 Binds Symbol (Macro cm r m);
 	pureMacroBindings = concatenateList
 		[
 		macroBindings,
@@ -89,12 +91,13 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	topLevelBindings ::
 		(
 		Scheme m r,
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ())
+		BuildThrow cm (Object r m) r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (TopLevelMacro r m) ->
-	 Binds Symbol (TopLevelMacro r m);
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
 	topLevelBindings = concatenateList
 		[
 		-- 4.3.2 Pattern Language
@@ -108,7 +111,12 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addTopLevelMacroBinding	"define-syntax"		defineSyntaxT
 		];
 
-	commonStrictPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	commonStrictPureBindings ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> m (Bindings r m);
 	commonStrictPureBindings = concatenateList
 		[
 		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
@@ -215,10 +223,20 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 --		,addMacroBinding	"case-match"					caseMatchM								-- nonstandard
 		];
 
-	simpleStrictPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	simpleStrictPureBindings ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> m (Bindings r m);
 	simpleStrictPureBindings = commonStrictPureBindings;
 
-	commonPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	commonPureBindings ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> m (Bindings r m);
 	commonPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
@@ -240,36 +258,36 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
 		];
 
-	simplePureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	simplePureBindings :: (Scheme m r,?objType :: Type (Object r m)) => Bindings r m -> m (Bindings r m);
 	simplePureBindings = commonPureBindings;
 
-	monadContBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadContBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) => Bindings r m -> m (Bindings r m);
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-current-continuation"	callCCP
 		];
 
-	monadFixBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) => Bindings r m -> m (Bindings r m);
+	monadFixBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) => Bindings r m -> m (Bindings r m);
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-result"				fixP									-- nonstandard
 		];
 
-	monadFixStrictPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) =>
+	monadFixStrictPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
 
-	monadContStrictPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) =>
+	monadContStrictPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
 
-	monadFixPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) =>
+	monadFixPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
 
-	monadContPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) =>
+	monadContPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContPureBindings = simplePureBindings ++ monadContBindings;
 	}

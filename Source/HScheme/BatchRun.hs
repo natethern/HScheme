@@ -24,9 +24,7 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.SystemInterface;
-	import Org.Org.Semantic.HScheme.SExpParser;
 	import Org.Org.Semantic.HScheme.Bindings;
-	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Procedures;
 	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
@@ -34,7 +32,7 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	reportError :: (Scheme m r,?refType :: Type (r ())) =>
+	reportError :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 OutputPort Word8 m -> Object r m -> m ();
 	reportError errPort errObj = do
 		{
@@ -48,11 +46,11 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		Scheme m r,
 		MonadBottom m,
 		MonadException (Object r m) m,
-		?refType :: Type (r ()),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?system :: FullSystemInterface m r
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro m r m),
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
+		?system :: FullSystemInterface m m r
 		) =>
 	 m () ->
 	 [String] ->
@@ -76,11 +74,11 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		MonadCont m,
 		MonadBottom m,
 		MonadException (Object r m) m,
-		?refType :: Type (r ()),
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
-		?system :: FullSystemInterface m r
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro m r m),
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
+		?system :: FullSystemInterface m m r
 		) =>
 	 m () ->
 	 [String] ->

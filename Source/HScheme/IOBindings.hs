@@ -91,38 +91,41 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	ioPureSystemInterface ::
 		(
 		Scheme m r,
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ()),
+		BuildThrow cm (Object r m) r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m),
 		?stdout :: FlushSink IO Word8
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
+	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m m r;
 	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdOutputPort)--});
 
 	ioQuietPureSystemInterface ::
 		(
 		Scheme m r,
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ()),
+		BuildThrow cm (Object r m) r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m),
 		?stderr :: FlushSink IO Word8
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
+	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m m r;
 	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
 	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdErrorPort)--});
 
 	ioFullSystemInterface ::
 		(
 		Scheme m r,
-		?macrobindings :: Binds Symbol (Macro r m),
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?refType :: Type (r ()),
+		BuildThrow cm (Object r m) r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m),
 		?stdin :: PeekSource IO (Maybe Word8),
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m r;
+	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m m r;
 	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
 		{
 		fsiPure = ioPureSystemInterface remonad loadpaths,
