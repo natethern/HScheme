@@ -271,7 +271,6 @@ module SExpParser where
 	specialCharP :: (Scheme x m r) => Symbol -> TextParser m (Maybe (Object r m));
 	specialCharP symbol = do
 		{
-		nextC;
 		mh2 <- expressionP;
 		case mh2 of
 			{
@@ -291,9 +290,30 @@ module SExpParser where
 		mc <- currentC;
 		case mc of
 			{
-			Just '\'' -> specialCharP (MkSymbol "quote");
-			Just '`' -> specialCharP (MkSymbol "quasiquote");
-			Just ',' -> specialCharP (MkSymbol "unquote");
+			Just '\'' -> do
+				{
+				nextC;
+				specialCharP (MkSymbol "quote");
+				};
+			Just '`' -> do
+				{
+				nextC;
+				specialCharP (MkSymbol "quasiquote");
+				};
+			Just ',' -> do
+				{
+				nextC;
+				mc <- currentC;
+				case mc of
+					{
+					Just '@' -> do
+						{
+						nextC;
+						specialCharP (MkSymbol "unquote-splicing");
+						};
+					_ -> specialCharP (MkSymbol "unquote");
+					};
+				};
 			_ -> return Nothing;
 			};
 		};
