@@ -77,7 +77,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
@@ -100,7 +100,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
@@ -121,7 +121,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		MonadCont m,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>

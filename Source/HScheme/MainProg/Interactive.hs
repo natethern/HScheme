@@ -45,7 +45,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>
@@ -102,7 +102,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>
@@ -130,7 +130,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>

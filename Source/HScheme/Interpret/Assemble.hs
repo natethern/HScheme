@@ -38,7 +38,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	newtype Macro cm r m = MkMacro
 		((
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] -> cm (ObjectSchemeExpression r m));
@@ -80,9 +80,10 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	assembleApplyExpression ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> [Object r m] -> cm (ObjectSchemeExpression r m);
@@ -95,9 +96,10 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	assembleExpression ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm (ObjectSchemeExpression r m);
@@ -118,9 +120,9 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 				{
 				SymbolObject sym -> case getBinding ?syntacticbindings sym of
 					{
-					Just syntax -> do
+					Just (MkSyntax syntax) -> do
 						{
-						obj <- syntax arglist;
+						obj <- syntax Type arglist;
 						assembleExpression obj;
 						};
 					Nothing -> case getBinding ?macrobindings sym of
@@ -140,6 +142,6 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		CharObject _ -> return (return' (return a));
 		StringObject _ -> return (return' (return a));
 		ByteArrayObject _ -> return (return' (return a));
-		_ -> fail "can't evaluate form" -- throwArgError "cant-evaluate-form" [a];
+		_ -> throwArgError "cant-evaluate-form" [a];
 		};
 	}

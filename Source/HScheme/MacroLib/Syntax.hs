@@ -158,30 +158,37 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		let {?bindings = addBindings subs ?bindings;} in evaluateObject expr;
 		};
 --}
-	syntaxRulesM :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
-	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm (Syntax cm r m);
-	syntaxRulesM (literals,rules) = return (\args -> let
+
+	syntaxRulesM ::
+		(
+		BuildThrow cm' (Object r m) r,
+		?objType :: Type (Object r m)
+		) =>
+	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm' (Syntax r (Object r m));
+	syntaxRulesM (literals,rules) = return (MkSyntax (transform rules)) where
 		{
-		transform [] = throwSimpleError "no-match";
-		transform (((_,pattern),(template,())):rs) = do
+		transform :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+		 [((Symbol,Object r m),(Object r m,()))] ->
+		 Type (r ()) -> [Object r m] -> cm (Object r m);
+		transform [] _ _ = throwSimpleError "no-match";
+		transform (((_,pattern),(template,_)):rs) t args = do
 			{
 			msubs <- matchBindings literals pattern args;
 			case msubs of
 				{
-				Nothing -> transform rs;
+				Nothing -> transform rs t args;
 				Just subs -> substitute subs template;
 				};
 			};
-		} in transform rules);
-
+		};
 
 	compileSyntax ::
 		(
 		BuildThrow cm (Object r m) r,
 		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
 		) =>
-	 Object r m -> cm (Syntax cm r m);
+	 Object r m -> cm (Syntax r (Object r m));
 	compileSyntax (SymbolObject sym) = case getBinding ?syntacticbindings sym of
 		{
 		Just syntax -> return syntax;
@@ -212,14 +219,14 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		(
 		BuildThrow cm (Object r m) r,
 		Monad m,
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
+	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = Type} in compileSyntax obj;
-		return (MkTopLevelExpression (return' (return nullObject)) []
+		return (MkTopLevelCommand (return' (return nullObject)) []
 		 [(sym,syntax)]);
 		};
 	}

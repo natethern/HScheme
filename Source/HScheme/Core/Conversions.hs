@@ -440,18 +440,18 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	
 	-- Environment
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (Environment r m) where
+	instance (Monad cm) => MonadIsA cm (Object r m) (Environment r (Object r m)) where
 		{
 		getConvert = return . EnvironmentObject;
 		};
 
-	instance (Monad cm) => MonadMaybeA cm (Environment r m) (Object r m) where
+	instance (Monad cm) => MonadMaybeA cm (Environment r (Object r m)) (Object r m) where
 		{
 		getMaybeConvert (EnvironmentObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Environment r m);
+	instance (Monad cm) => MonadSubtype cm (Object r m) (Environment r (Object r m));
 
 	
 	-- InputPort
@@ -638,16 +638,16 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	
 	-- Procedure
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (Procedure r m) where
+	instance (Monad cm) => MonadIsA cm (Object r m) (Procedure (Object r m) m) where
 		{
 		getConvert = return . ProcedureObject;
 		};
 
-	instance (Monad cm) => MonadMaybeA cm (Procedure r m) (Object r m) where
+	instance (Monad cm) => MonadMaybeA cm (Procedure (Object r m) m) (Object r m) where
 		{
 		getMaybeConvert (ProcedureObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Procedure r m);
+	instance (Monad cm) => MonadSubtype cm (Object r m) (Procedure (Object r m) m);
 	}

@@ -40,9 +40,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	-- 4.1.5 Conditionals
 	ifM ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Object r m,(Object r m,Maybe (Object r m))) ->
@@ -69,9 +70,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	-- 4.1.6 Assignments
 	setBangM ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		FullScheme m r,
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Symbol,(Object r m,())) -> cm (ObjectSchemeExpression r m);

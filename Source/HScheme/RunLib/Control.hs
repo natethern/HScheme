@@ -38,10 +38,11 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	
 	callCCP ::
 		(
-		Scheme m r,?objType :: Type (Object r m),
+		Scheme m r,
+		?objType :: Type (Object r m),
 		MonadCont m
 		) =>
-	 (Procedure r m,()) -> m (Object r m);
+	 (Procedure (Object r m) m,()) -> m (Object r m);
 	callCCP (proc,()) = callCC (\cont -> proc
 	  [ProcedureObject (\args -> do
 	  	{
@@ -51,9 +52,9 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	
 	fixP ::
 		(
-		Scheme m r,?objType :: Type (Object r m),
+		?objType :: Type obj,
 		MonadFix m
 		) =>
-	 (Procedure r m,()) -> m (Object r m);
+	 (Procedure obj m,()) -> m obj;
 	fixP (proc,()) = mfix (\a -> proc [a]);
 	}

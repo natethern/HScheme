@@ -96,7 +96,7 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 
 	-- conversion
 	parseUTF8P :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure r m,()) -> m (Either NullObjType Char);
+	 (Procedure (Object r m) m,()) -> m (Either NullObjType Char);
 	parseUTF8P (source,()) = do
 		{
 		mc <- parseUTF8Char (do

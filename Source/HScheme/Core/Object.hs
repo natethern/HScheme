@@ -31,15 +31,15 @@ module Org.Org.Semantic.HScheme.Core.Object where
 
 	type SymbolBindings = Bindings Symbol;
 
-	type Syntax cm r m = [Object r m] -> cm (Object r m);
+	newtype Syntax r obj = MkSyntax (forall m. (BuildThrow m obj r,?objType :: Type obj) => Type (r ()) -> [obj] -> m obj);
 
-	data Environment r m = MkEnvironment
+	data Environment r obj = MkEnvironment
 		{
-		envSyn :: SymbolBindings (Syntax m r m),
-		envLoc :: SymbolBindings (ObjLocation r m)
+		envSyn :: SymbolBindings (Syntax r obj),
+		envLoc :: SymbolBindings (r obj)
 		};
 
-	type Procedure r m = ([Object r m] -> m (Object r m));
+	type Procedure obj m = [obj] -> m obj;
 
 	type SRefArray r a = ArrayList (r a);
 
@@ -56,8 +56,8 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	 VectorObject		(SRefArray r (Object r m))			|
 	 InputPortObject 	(InputPort Word8 m)					|
 	 OutputPortObject 	(OutputPort Word8 m)				|
-	 ProcedureObject	(Procedure r m)						|
-	 EnvironmentObject	(Environment r m)					;
+	 ProcedureObject	(Procedure (Object r m) m)			|
+	 EnvironmentObject	(Environment r (Object r m))		;
 
 	type ObjLocation r m = r (Object r m);
 

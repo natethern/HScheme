@@ -54,10 +54,10 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 --}
 	interpretTopLevelExpression ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m (Object r m));
@@ -69,10 +69,10 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 
 	interpretTopLevelExpressionsEat ::
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Object r m -> m ()) ->
@@ -90,7 +90,7 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		(
 		Scheme m r,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
-		?syntacticbindings :: SymbolBindings (Syntax m r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro m r m)
 		) =>
 	 Object r m -> (Symbol -> Maybe (ObjLocation r m)) -> m (Object r m);
@@ -107,7 +107,7 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
 		?macrobindings :: SymbolBindings (Macro m r m)
 		) =>
-	 (Object r m,(Environment r m,())) -> m (Object r m);
+	 (Object r m,(Environment r (Object r m),())) -> m (Object r m);
 	evaluateP (obj,(MkEnvironment syn loc,())) = let {?syntacticbindings = syn} in
 	 evaluateObject obj (getBinding loc);
 

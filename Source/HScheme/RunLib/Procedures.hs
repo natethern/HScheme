@@ -240,7 +240,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 
 	-- 6.4 Control Features
 	applyP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure r m,([Object r m],())) -> m (Object r m);
+	 (Procedure (Object r m) m,([Object r m],())) -> m (Object r m);
 	applyP (proc,(args,())) = proc args;
 
 	valuesP :: (Scheme m r,?objType :: Type (Object r m)) =>
@@ -258,7 +258,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 
 {--
 	catchM :: (Scheme m r,MonadException (Object r m) m,?objType :: Type (Object r m)) =>
-	 (Procedure r m,()) -> m (Object r m);
+	 (Procedure (Object r m) m,()) -> m (Object r m);
 	catchM = catch;
 --}
 

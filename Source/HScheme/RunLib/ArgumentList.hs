@@ -111,7 +111,7 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		MonadIsA m (Object r m) ret,
 		?objType :: Type (Object r m)
 		) =>
-	 (args -> m ret) -> Procedure r m;
+	 (args -> m ret) -> Procedure (Object r m) m;
 	convertToProcedure foo objs = do
 		{
 		args <- convertFromObjects objs;
