@@ -78,4 +78,14 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		set r c;
 		return MkArgNoneType;
 		};
+
+	-- 6.3.5 Strings
+	byteArraySetP :: (FullScheme m r,?refType :: Type (r ())) =>
+	 (SRefArray r Word8,(Integer,(Word8,()))) -> m ArgNoneType;
+	byteArraySetP (arr,(i,(c,()))) = do
+		{
+		r <- getArrayRef i arr;
+		set r c;
+		return MkArgNoneType;
+		};
 	}

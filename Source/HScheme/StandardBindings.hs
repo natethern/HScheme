@@ -128,6 +128,14 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"string-ref"					stringRefP,
 		addProcBinding	"string-append"					stringAppendP,
 
+		-- Byte Arrays (all nonstandard)
+		addProcBinding	"byte-array?"					isByteArrayP,
+		addProcBinding	"make-byte-array"				makeByteArrayP,
+		addProcBinding	"byte-array"					byteArrayP,
+		addProcBinding	"byte-array-length"				byteArrayLengthP,
+		addProcBinding	"byte-array-ref"				byteArrayRefP,
+		addProcBinding	"byte-array-append"				byteArrayAppendP,
+
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,
 		addProcBinding	"apply"							applyP,

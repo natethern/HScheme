@@ -37,21 +37,24 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 		commonPureBindings,
 
 		-- 4.1.6 Assignments
-		addMacroBinding			"set!"			setBangM,
+		addMacroBinding			"set!"				setBangM,
 
 		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"		(defineT fullSetLoc),
+		addTopLevelMacroBinding	"define"			(defineT fullSetLoc),
 
 		-- 6.1 Equivalence Predicates
-		addProcBinding			"eqv?"			eqvP,
-		addProcBinding			"eq?"			eqP,
+		addProcBinding			"eqv?"				eqvP,
+		addProcBinding			"eq?"				eqP,
 
 		-- 6.3.2 Pairs and Lists
-		addProcBinding			"set-car!"		setCarP,
-		addProcBinding			"set-cdr!"		setCdrP,
+		addProcBinding			"set-car!"			setCarP,
+		addProcBinding			"set-cdr!"			setCdrP,
 
 		-- 6.3.5 Strings
-		addProcBinding			"string-set!"	stringSetP
+		addProcBinding			"string-set!"		stringSetP,
+
+		-- Byte Arrays
+		addProcBinding			"byte-array-set!"	byteArraySetP
 		];
 
 	monadFixFullBindings :: (FullScheme m r,MonadFix m) =>

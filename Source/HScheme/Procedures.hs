@@ -183,6 +183,47 @@ module Org.Org.Semantic.HScheme.Procedures where
 	stringAppendP = return . MkSList . concatenateList . (fmap unSList);
 
 
+	-- Byte Arrays
+	isByteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Object r m,()) -> m Bool;
+	isByteArrayP (ByteArrayObject _,()) = return True;
+	isByteArrayP (_,()) = return False;
+
+	makeByteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Integer,Maybe Word8) -> m (SRefList r Word8);
+	makeByteArrayP (i,Nothing) = do
+		{
+		rs <- makeRefList i 0;
+		return (MkSRefList rs);
+		};
+	makeByteArrayP (i,Just c) = do
+		{
+		rs <- makeRefList i c;
+		return (MkSRefList rs);
+		};
+
+	byteArrayP :: (Scheme m r,?refType :: Type (r ())) =>
+	 [Word8] -> m (SList Word8);
+	byteArrayP cs = return (MkSList cs);
+
+	byteArrayLengthP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (SRefArray r Word8,()) -> m Int;
+	byteArrayLengthP (s,()) = return (length s);
+
+	byteArrayRefP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (SRefArray r Word8,(Integer,())) -> m Word8;
+	byteArrayRefP (arr,(i,())) = do
+		{
+		r <- getArrayRef i arr;
+		get r;
+		};
+
+	-- create a completely new byte array
+	byteArrayAppendP :: (Scheme m r,?refType :: Type (r ())) =>
+	 [SList Word8] -> m (SList Word8);
+	byteArrayAppendP = return . MkSList . concatenateList . (fmap unSList);
+
+
 	-- 6.4 Control Features
 	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Procedure r m,([Object r m],())) -> m (Object r m);

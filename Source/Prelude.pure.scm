@@ -98,22 +98,6 @@
 	(car (list-tail x k))
 ))
 
-(define memq (lambda (key lst)
-	(if (null? lst) #f
-		(if (eq? item (car lst)) lst
-			(memq item (cdr lst))
-		)
-	)
-))
-
-(define memv (lambda (item lst)
-	(if (null? lst) #f
-		(if (eqv? item (car lst)) lst
-			(memv item (cdr lst))
-		)
-	)
-))
-
 (define member (lambda (item lst)
 	(if (null? lst) #f
 		(if (equal? item (car lst)) lst
@@ -122,24 +106,10 @@
 	)
 ))
 
-(define assq (lambda (key alist)
-	(case-match alist ()
-		(() #f)
-		(((k v) . rest) (if (eq? k key) v (assq key rest)))
-	)
-))
-
-(define assv (lambda (key alist)
-	(case-match alist ()
-		(() #f)
-		(((k v) . rest) (if (eqv? k key) v (assv key rest)))
-	)
-))
-
 (define assoc (lambda (key alist)
 	(case-match alist ()
 		(() #f)
-		(((k v) . rest) (if (eqv? k key) v (assoc key rest)))
+		(((k v) . rest) (if (equal? k key) v (assoc key rest)))
 	)
 ))
 
@@ -200,6 +170,12 @@
 ; 6.3.5 Strings
 (define string-copy (lambda (s)
 	(string-append s)
+))
+
+
+; Byte Arrays
+(define byte-array-copy (lambda (s)
+	(byte-array-append s)
 ))
 
 
