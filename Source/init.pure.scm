@@ -30,8 +30,9 @@
 
 
 ; 4.2.6 Quasiquotation
-(define quasiquote (syntax-rules (unquote unquote-splicing)
+(define quasiquote (syntax-rules (unquote unquote-splicing quasiquote)
 	((quasiquote (unquote a)) a)
+	((quasiquote (quasiquote a)) (quote (quasiquote a)))
 	((quasiquote ((unquote-splicing a) . b)) (append a (quasiquote b)))
 	((quasiquote (a . b)) (cons (quasiquote a) (quasiquote b)))
 	((quasiquote a) (quote a))
