@@ -23,14 +23,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.SymbolExpression
 	(
 	FunctorLambda(..),
-	fSubstSequential,fSubstSeparate,fSubstRecursive,
+	fSubst,fSubstMap,
+	fSubstMapSequential,fSubstMapSeparate,fSubstRecursive,
 
 	SymbolExpression,
 	runSymbolExpression,runSymbolExpressionF,runSymbolExpressionM
 	) where
 	{
 	import Org.Org.Semantic.HBase;
-import Control.Monad.Fix(fix);
 
 
 	-- FunctorLambda
@@ -41,18 +41,25 @@ import Control.Monad.Fix(fix);
 		{
 		fSymbol :: sym -> f val;
 		fAbstract :: sym -> f a -> f (val -> a);
-		fSubst :: sym -> f val -> f a -> f a;
-
-		fSubst sym valueExpr bodyExpr = fApply (fAbstract sym bodyExpr) valueExpr;
 		};
 
-	-- | substs are actually done in reverse order
-	fSubstSequential :: (FunctorLambda sym val f) => [(sym,f val)] -> f a -> f a;
-	fSubstSequential [] bodyExpr = bodyExpr;
-	fSubstSequential ((sym,valueExpr):binds) bodyExpr = fSubst sym valueExpr (fSubstSequential binds bodyExpr);
+	fSubst :: (FunctorLambda sym val f) =>
+	 sym -> f val -> f a -> f a;
+	fSubst sym valueExpr bodyExpr = fApply (fAbstract sym bodyExpr) valueExpr;
 
-	fSubstSeparate :: (FunctorLambda sym val f) => [(sym,f val)] -> f a -> f a;
-	fSubstSeparate = fSubstSequential; -- NYI
+	fSubstMap :: (FunctorLambda sym val f) =>
+	 ((val -> a) -> b -> a) -> sym -> f b -> f a -> f a;
+	fSubstMap map sym valueExpr bodyExpr = liftF2 map (fAbstract sym bodyExpr) valueExpr;
+
+	-- | substs are actually done in reverse order
+	fSubstMapSequential :: (FunctorLambda sym val f) =>
+	 ((val -> a) -> b -> a) -> [(sym,f b)] -> f a -> f a;
+	fSubstMapSequential _ [] bodyExpr = bodyExpr;
+	fSubstMapSequential map ((sym,valueExpr):binds) bodyExpr = fSubstMap map sym valueExpr (fSubstMapSequential map binds bodyExpr);
+
+	fSubstMapSeparate :: (FunctorLambda sym val f) =>
+	 ((val -> a) -> b -> a) -> [(sym,f b)] -> f a -> f a;
+	fSubstMapSeparate = fSubstMapSequential; -- NYI
 
 	data ZeroList a = MkZeroList;
 	data NextList t a = MkNextList a (t a);

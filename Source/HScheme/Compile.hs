@@ -162,6 +162,15 @@ module Org.Org.Semantic.HScheme.Compile where
 		return ((sym,expr):bcs);
 		};
 
+	substMap :: (Scheme m r) =>
+	 (m (ObjLocation r m) -> m a) -> m (Object r m) -> m a;
+	substMap va mvalue = do
+		{
+	 	value <- mvalue;
+		loc <- new value;
+		va (return loc);
+		};
+
 	letSequentialM ::
 		(
 		Scheme m r,
@@ -175,7 +184,7 @@ module Org.Org.Semantic.HScheme.Compile where
 		{
 		binds <- compileBinds bindList;
 		body <- beginM bodyObj;
-		return (fSubstSequential (fmap (\(sym,valueExpr) -> (sym,convertToLocationExpression valueExpr)) binds) body);
+		return (fSubstMapSequential substMap binds body);
 		};
 
 	letSeparateM ::
@@ -191,7 +200,7 @@ module Org.Org.Semantic.HScheme.Compile where
 		{
 		binds <- compileBinds bindList;
 		body <- beginM bodyObj;
-		return (fSubstSeparate (fmap convertToLocationBinding binds) body);
+		return (fSubstMapSeparate substMap binds body);
 		};
 
 	letRecursiveM ::
