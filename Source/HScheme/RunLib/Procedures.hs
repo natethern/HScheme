@@ -70,10 +70,11 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	 [Object r m] -> m [Object r m];
 	listP list = return list;
 
+{-
 	appendP ::  (Scheme m r,?objType :: Type (Object r m)) =>
 	 [[Object r m]] -> m [Object r m];
 	appendP listlist = return (concatenateList listlist);
-
+-}
 
 	-- 6.3.3 Symbols
 	isSymbolP :: (Scheme m r,?objType :: Type (Object r m)) =>

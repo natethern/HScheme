@@ -115,6 +115,21 @@
 ))
 
 
+(define (append . p)
+	(case-match p ()
+		(() '())
+		((p . rest) (letrec
+			((append-two (lambda (a b)
+				(case-match a ()
+					(() b)
+					((e . r) (cons e (append-two r b)))
+				)
+			)))
+			(append-two p (apply append rest))
+		))
+	)
+)
+
 ; 6.3.3 Symbols
 (define symbol->string to-string)
 

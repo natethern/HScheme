@@ -356,6 +356,10 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	 p Number;
 	complexParse = (do
 		{
+		n <- imaginaryParse;
+		return (rectComplex zero n);
+		}) ||| (do
+		{
 		n1 <- realParse;
 		(do
 			{
@@ -369,10 +373,6 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 			return (rectComplex n1 n2);
 			}) |||
 		(return (rectComplex n1 zero));
-		}) ||| (do
-		{
-		n <- imaginaryParse;
-		return (rectComplex zero n);
 		});
 
 	numberParse :: (

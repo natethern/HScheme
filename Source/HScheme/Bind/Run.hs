@@ -69,6 +69,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 (Number,()) -> m Number;
 	unaryNumberP = unaryP;
 
+	switchArgs :: (a -> b -> c) -> (b -> a -> c);
+	switchArgs foo b a = foo a b;
+
 	commonStrictPureBindings ::
 		(
 		Build cm r,
@@ -110,8 +113,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"-"								subtractP,
 		addProcBinding	"/"								divideP,
 		addProcBinding	"abs"							(unaryP (abs :: Number -> EIReal)),
-		addProcBinding	"quotient"						(binaryP (let {?rounding = roundTowardZero} in failingIntegerDivideModal :: EIReal -> EIReal -> Integer)),
-		addProcBinding	"remainder"						(binaryP (let {?rounding = roundTowardZero} in failingModuloModal :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"quotient"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingIntegerDivideModal :: EIReal -> EIReal -> Integer)),
+		addProcBinding	"remainder"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingModuloModal :: EIReal -> EIReal -> EIReal)),
 		addProcBinding	"modulo"						(binaryP (failingModulo :: EIReal -> EIReal -> EIReal)),
 		addProcBinding	"gcd"							(listaryP (gcd :: [Integer] -> Integer)),
 		addProcBinding	"lcm"							(listaryP (lcm :: [Integer] -> Integer)),
@@ -161,7 +164,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"list?"							isListP,
 		addProcBinding	"list"							listP,
 		--				"length" 						init.pure.scm
-		addProcBinding	"append"						appendP,
+		--				"append"						init.pure.scm
 		--				"reverse" 						init.pure.scm
 		--				"list-tail" 					init.pure.scm
 		--				"list-ref" 						init.pure.scm

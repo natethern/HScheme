@@ -164,11 +164,23 @@ test: testrelease
 
 testrelease: test-pure test-full
 
+%.initfull.diff: %.ref %.initfull.out
+	diff -u $^
+
+%.initpure.diff: %.ref %.initpure.out
+	diff -u $^
+
 %.full.diff: %.ref %.full.out
 	diff -u $^
 
 %.pure.diff: %.ref %.pure.out
 	diff -u $^
+
+test/%.scm.initfull.out: test/%.scm bin/$(COMMAND_REL)
+	time bin/$(COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
+
+test/%.scm.initpure.out: test/%.scm bin/$(COMMAND_REL)
+	time bin/$(COMMAND_REL) --mpure --noinit init.full.scm $< > $@ || (rm $@; exit 1)
 
 test/%.scm.full.out: test/%.scm bin/$(COMMAND_REL)
 	time bin/$(COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
@@ -193,8 +205,8 @@ test-pure:	\
  test/begin.scm.pure.diff	\
  test/factorial.scm.pure.diff	\
  test/case-match.scm.pure.diff	\
- test/vector.scm.pure.diff
-	time bin/$(COMMAND_REL) --mpure --noinit init.pure.scm test/helloworld.scm
+ test/vector.scm.pure.diff	\
+ test/helloworld.scm.initpure.diff
 
 test-full:	\
  test/constants.scm.full.diff	\
@@ -213,9 +225,9 @@ test-full:	\
  test/begin.scm.full.diff	\
  test/factorial.scm.full.diff	\
  test/case-match.scm.full.diff	\
- test/vector.scm.full.diff
-	time bin/$(COMMAND_REL) --noinit init.full.scm test/helloworld.scm
-	time bin/$(COMMAND_REL) --noinit init.full.scm test/report-examples.scm
+ test/vector.scm.full.diff	\
+ test/helloworld.scm.initfull.diff	\
+ test/report-examples.scm.initfull.diff
 
 testprof: $(COMMAND_PROF).prof
 
