@@ -237,6 +237,46 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 			};
 		};
 
+	
+	-- 6.3.6 Vectors
+	isVectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Object r m,()) -> m Bool;
+	isVectorP (VectorObject _,_) = return True;
+	isVectorP (_,_) = return False;
+
+	makeVector :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 Int -> Object r m -> m (SList (Object r m));
+	makeVector i fill = return (MkSList (makeList i fill)) where
+		{
+		makeList 0 a = [];
+		makeList i a = (a:(makeList (i - 1) a));
+		};
+
+	makeVectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Int,Maybe (Object r m)) -> m (SList (Object r m));
+	makeVectorP (i,Just fill) = makeVector i fill;
+	makeVectorP (i,Nothing) = makeVector i nullObject;
+
+	vectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 ([Object r m],()) -> m (SList (Object r m));
+	vectorP (list,_) = return (MkSList list);
+
+	vectorLengthP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r (Object r m),()) -> m Int;
+	vectorLengthP (vec,_) = return (length vec);
+
+	vectorRefP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r (Object r m),(Int,())) -> m (Object r m);
+	vectorRefP (arr,(i,_)) = get (fetchElement i arr);
+
+	vectorToListP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (SList (Object r m),()) -> m [Object r m];
+	vectorToListP (MkSList objs,_) = return objs;
+
+	listToVectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 ([Object r m],()) -> m (SList (Object r m));
+	listToVectorP (list,_) = return (MkSList list);
+
 
 	-- 6.4 Control Features
 	applyP :: (Scheme m r,?objType :: Type (Object r m)) =>

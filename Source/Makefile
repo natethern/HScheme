@@ -188,7 +188,8 @@ test-pure:	\
  test/boundlate.scm.pure.diff	\
  test/begin.scm.pure.diff	\
  test/factorial.scm.pure.diff	\
- test/case-match.scm.pure.diff
+ test/case-match.scm.pure.diff	\
+ test/vector.scm.pure.diff
 	time bin/$(COMMAND_REL) --mpure --noinit init.pure.scm test/helloworld.scm
 
 test-full:	\
@@ -206,7 +207,8 @@ test-full:	\
  test/boundlate.scm.full.diff	\
  test/begin.scm.full.diff	\
  test/factorial.scm.full.diff	\
- test/case-match.scm.full.diff
+ test/case-match.scm.full.diff	\
+ test/vector.scm.full.diff
 	time bin/$(COMMAND_REL) --noinit init.full.scm test/helloworld.scm
 
 testprof: $(COMMAND_PROF).prof
@@ -336,7 +338,7 @@ $(bindir)/%: bin/%
 # switch off intermediate file deletion
 .SECONDARY:
 
-.PHONY: default build
+.PHONY: default build test
 
 %.ghc-pkg: %.ghc-pkg.m4
 	m4 \

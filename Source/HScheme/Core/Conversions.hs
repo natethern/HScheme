@@ -418,7 +418,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		{
 		getConvert i = getConvert (convert (convertFromInt i :: Integer) :: Number);
 		};
-{--
+
 	instance (Monad cm) => MonadMaybeA cm Int (Object r m) where
 		{
 		getMaybeConvert obj = do
@@ -427,13 +427,14 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: Number) <- mn;
-				maybeConvert n;
+				(i :: Integer) <- maybeConvert n;
+				maybeConvert i;
 				});
 			};
 		};
 
 	instance (Monad cm) => MonadSubtype cm (Object r m) Int;
---}
+
 
 	-- Word8
 
@@ -717,6 +718,75 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		};
 	
 	instance (Build cm r) => MonadSubtype cm (Object r m) (SList Char);
+
+
+	-- SRefArray r (Object r m)
+
+	instance MaybeA (SRefArray r (Object r m)) (Object r m) where
+		{
+		maybeConvert (VectorObject a) = Just a;
+		maybeConvert _ = Nothing;
+		};
+
+	instance (Monad cm) => MonadIsA cm (Object r m) (SRefArray r (Object r m)) where
+		{
+		getConvert rs = return (VectorObject rs);
+		};
+
+	instance (Monad cm) => MonadMaybeA cm (SRefArray r (Object r m)) (Object r m) where
+		{
+		getMaybeConvert = return . maybeConvert;
+		};
+	
+	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefArray r (Object r m));
+
+
+	-- SRefList r (Object r m)
+
+	instance MaybeA (SRefList r (Object r m)) (Object r m) where
+		{
+		maybeConvert obj = do
+			{
+			(arr :: SRefArray r (Object r m)) <- maybeConvert obj;
+			return (MkSRefList (toList arr));
+			};
+		};
+
+	instance (Monad cm) => MonadIsA cm (Object r m) (SRefList r (Object r m)) where
+		{
+		getConvert (MkSRefList rs) = return (VectorObject (fromList rs));
+		};
+
+	instance (Monad cm) => MonadMaybeA cm (SRefList r (Object r m)) (Object r m) where
+		{
+		getMaybeConvert = return . maybeConvert;
+		};
+
+	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefList r (Object r m));
+
+
+	-- SList (Object r m)
+
+	instance (Build cm r) => MonadIsA cm (Object r m) (SList (Object r m)) where
+		{
+		getConvert (MkSList list) = do
+			{
+			arr <- makeSRefArray list;
+			return (VectorObject arr);
+			};
+		};
+
+	instance (Build cm r) => MonadMaybeA cm (SList (Object r m)) (Object r m) where
+		{
+		getMaybeConvert (VectorObject rarray) = do
+			{
+			slist <- getSRefArrayList rarray;
+			return (Just (MkSList slist));
+			};
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Build cm r) => MonadSubtype cm (Object r m) (SList (Object r m));
 
 	
 	-- Procedure

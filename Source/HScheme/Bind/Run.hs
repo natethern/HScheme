@@ -129,6 +129,15 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"encode-latin1"					(encodeP encodeLatin1),
 		addProcBinding	"decode-latin1"					(decodeP (return . decodeLatin1)),
 
+		-- 6.3.6 Vectors
+		addProcBinding	"vector?"						isVectorP,
+		addProcBinding	"make-vector"					makeVectorP,
+		addProcBinding	"vector"						vectorP,
+		addProcBinding	"vector-length"					vectorLengthP,
+		addProcBinding	"vector-ref"					vectorRefP,
+		addProcBinding	"vector->list"					vectorToListP,
+		addProcBinding	"list->vector"					listToVectorP,
+
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,
 		addProcBinding	"apply"							applyP,
@@ -295,7 +304,11 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding			"string-set!"		stringSetP,
 
 		-- Byte Arrays
-		addProcBinding			"byte-array-set!"	byteArraySetP
+		addProcBinding			"byte-array-set!"	byteArraySetP,
+
+		-- 6.3.6 Vectors
+		addProcBinding			"vector-set!"		vectorSetP,
+		addProcBinding			"vector-fill!"		vectorFillP
 		];
 
 	monadFixFullBindings ::

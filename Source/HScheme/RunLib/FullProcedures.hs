@@ -29,16 +29,16 @@ module Org.Org.Semantic.HScheme.RunLib.FullProcedures where
 	-- 6.3.2 Pairs and Lists
 	setCarP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,(Object r m,())) -> m NullObjType;
-	setCarP ((PairObject carLoc _),(obj,())) = do
+	setCarP ((PairObject carLoc _),(obj,_)) = do
 		{
 		set carLoc obj;
 		return MkNullObjType;
 		};
-	setCarP (p,(obj,())) = throwArgError "wrong-type-arg" [p];
+	setCarP (p,(obj,_)) = throwArgError "wrong-type-arg" [p];
 
 	setCdrP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,(Object r m,())) -> m NullObjType;
-	setCdrP ((PairObject _ cdrLoc),(obj,())) = do
+	setCdrP ((PairObject _ cdrLoc),(obj,_)) = do
 		{
 		set cdrLoc obj;
 		return MkNullObjType;
@@ -46,22 +46,43 @@ module Org.Org.Semantic.HScheme.RunLib.FullProcedures where
 	setCdrP (p,(obj,())) = throwArgError "wrong-type-arg" [p];
 
 	-- 6.3.5 Strings
-	stringSetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
-	 (SRefArray r Char,(Integer,(Char,()))) -> m NullObjType;
-	stringSetP (arr,(i,(c,()))) = do
+	arraySetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r a,(Integer,(a,()))) -> m NullObjType;
+	arraySetP (arr,(i,(a,_))) = do
 		{
 		r <- getArrayRef i arr;
-		set r c;
+		set r a;
 		return MkNullObjType;
 		};
+
+	stringSetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r Char,(Integer,(Char,()))) -> m NullObjType;
+	stringSetP = arraySetP;
 
 	-- 6.3.5 Strings
 	byteArraySetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r Word8,(Integer,(Word8,()))) -> m NullObjType;
-	byteArraySetP (arr,(i,(c,()))) = do
+	byteArraySetP = arraySetP;
+
+	-- 6.3.6 Vectors
+	vectorSetP :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r (Object r m),(Integer,(Object r m,()))) -> m NullObjType;
+	vectorSetP = arraySetP;
+
+	for :: (Monad m) =>
+	 [a] -> (a -> m ()) -> m ();
+	for [] _ = return ();
+	for (a:as) f = do
 		{
-		r <- getArrayRef i arr;
-		set r c;
+		f a;
+		for as f;
+		};
+
+	vectorFillP :: (FullScheme m r,?objType :: Type (Object r m)) =>
+	 (SRefArray r (Object r m),(Object r m,())) -> m NullObjType;
+	vectorFillP (arr,(obj,_)) = do
+		{
+		for (toList arr) (\r -> set r obj);
 		return MkNullObjType;
 		};
 	}

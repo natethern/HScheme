@@ -562,6 +562,8 @@
 				ABAD37AF04A403EE00A80103,
 				ABAD37B004A403EE00A80103,
 				ABAD37B104A403EE00A80103,
+				ABB6927C04A4677500A80103,
+				ABB6927D04A4678C00A80103,
 			);
 			isa = PBXGroup;
 			path = test;
@@ -808,6 +810,17 @@
 			settingsToExpand = 6;
 			settingsToPassInEnvironment = 287;
 			settingsToPassOnCommandLine = 280;
+		};
+		ABB6927C04A4677500A80103 = {
+			isa = PBXFileReference;
+			path = vector.scm;
+			refType = 4;
+		};
+		ABB6927D04A4678C00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = vector.scm.ref;
+			refType = 4;
 		};
 	};
 	rootObject = ABAD36BC04A4020700A80103;
