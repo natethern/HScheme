@@ -264,8 +264,8 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	makeVectorP (i,Nothing) = makeVector i nullObject;
 
 	vectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 ([Object r m],()) -> m (SList (Object r m));
-	vectorP (list,_) = return (MkSList list);
+	 [Object r m] -> m (SList (Object r m));
+	vectorP list = return (MkSList list);
 
 	vectorLengthP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r (Object r m),()) -> m Int;
