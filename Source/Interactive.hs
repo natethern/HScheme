@@ -51,23 +51,32 @@ module Interactive where
 	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
 	interactiveLoop t fsi bindings = do
 		{
-		opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
-		opFlush (fsiCurrentOutputPort fsi);
-		mobject <- portRead (fsiCurrentInputPort fsi);
-		case mobject of
+		mbindings' <- catchError (do
 			{
-			Nothing -> return ();
-			Just obj -> do
+			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
+			opFlush (fsiCurrentOutputPort fsi);
+			mobject <- portRead (fsiCurrentInputPort fsi);
+			case mobject of
 				{
-				bindings' <- catchError (printeval (fsiCurrentOutputPort fsi) bindings obj)
-					(\error -> do
+				Nothing -> return Nothing;
+				Just obj -> do
 					{
-					runParser (fsiCurrentInputPort fsi) restOfLineParser;
-					reportError t (fsiCurrentErrorPort fsi) error;
-					return bindings;
-					});
-				interactiveLoop t fsi bindings';
+					bindings' <- printeval (fsiCurrentOutputPort fsi) bindings obj;
+					return (Just bindings');
+					};
 				};
+			})
+			(\error -> do
+			{
+			runParser (fsiCurrentInputPort fsi) restOfLineParser;
+			reportError t (fsiCurrentErrorPort fsi) error;
+			return (Just bindings);
+			});
+
+		case mbindings' of
+			{
+			Just bindings' -> interactiveLoop t fsi bindings';
+			Nothing -> return ();
 			};
 		};
 

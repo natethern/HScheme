@@ -94,8 +94,8 @@ module SystemInterface where
 
 	loadT :: (Scheme x m r) =>
 	 PureSystemInterface m r ->
-	 Bindings r m -> (StringType) -> m (Bindings r m,ArgNoneType);
-	loadT psi bindings (MkStringType filename) = do
+	 Bindings r m -> (StringType,()) -> m (Bindings r m,ArgNoneType);
+	loadT psi bindings (MkStringType filename,()) = do
 		{
 		bindings' <- psiLoadBindings psi bindings filename;
 		return (bindings',MkArgNoneType);
