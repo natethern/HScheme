@@ -154,7 +154,7 @@ module Main where
 				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
 				 let {?load = ioLoad loadpaths} in
 				 let {?system = ioSystem rsLift} in
-				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- (monadContFullBindings ++ fullSystemBindings) emptyBindings;
 					runProgramBindingsWithExit printResult reportError (allFileNames "init.full.scm") bindings;
@@ -163,7 +163,7 @@ module Main where
 				 let {?objType = Type::Type (Object IORef IO)} in
 				 let {?load = ioLoad loadpaths} in
 				 let {?system = ioSystem rsLift} in
-				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.full.scm") bindings;
@@ -174,7 +174,7 @@ module Main where
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
 				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadContPureBindings emptyBindings;
 					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
@@ -182,7 +182,7 @@ module Main where
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst IO)} in
 				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadFixPureBindings emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
@@ -193,7 +193,7 @@ module Main where
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
 				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadContStrictPureBindings emptyBindings;
 					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
@@ -201,7 +201,7 @@ module Main where
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst IO)} in
 				 let {?load = ioLoad loadpaths} in
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;

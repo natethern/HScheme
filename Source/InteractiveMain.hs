@@ -105,16 +105,16 @@ module Main where
 		?stdout :: FlushSink IO Word8,
 		?stdin :: PeekSource IO Word8
 		) =>
-	 ((?macrobindings :: Binds Symbol (Macro r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax r m),
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
+	 ((?macrobindings :: SymbolBindings (Macro r m),
+	 	?syntacticbindings :: SymbolBindings (Syntax r m),
+	 	?toplevelbindings :: SymbolBindings (TopLevelMacro r m),
 	 	?system :: FullSystemInterface m r
 	 	) => Bindings r m -> String -> m result) ->
 	 [String] ->
 	 (forall a. IO a -> m a) ->
-	 	((?macrobindings :: Binds Symbol (Macro r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax r m)
-	 	) => Binds Symbol (Macro r m) -> Binds Symbol (Macro r m)) ->
+	 	((?macrobindings :: SymbolBindings (Macro r m),
+	 	?syntacticbindings :: SymbolBindings (Syntax r m)
+	 	) => SymbolBindings (Macro r m) -> SymbolBindings (Macro r m)) ->
 	 ((?system :: FullSystemInterface m r) => Bindings r m -> m (Bindings r m)) ->
 	 String ->
 	 m result;
