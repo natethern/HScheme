@@ -26,11 +26,12 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	schemeExprLet,
 	schemeExprLetSeparate,
 	schemeExprLetSequential,
-	schemeExprLetRecursive
+	schemeExprLetRecursive,
+	schemeExprLocLet
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -50,6 +51,16 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 		substMap va value;
 		};
 
+	mSubstLocMap :: (Scheme m r) =>
+	 (ObjLocation r m -> m a) -> m (Object r m) -> m (a,ObjLocation r m);
+	mSubstLocMap va mvalue = do
+		{
+	 	value <- mvalue;
+		loc <- new value;
+		result <- va loc;
+		return (result,loc);
+		};
+
 	schemeExprAbstractList ::
 		(
 		Scheme m r,
@@ -64,6 +75,12 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	 SchemeExpression r m (m a) ->
 	 SchemeExpression r m (m a);
 	schemeExprLet = exprLetMap mSubstMap;
+
+	schemeExprLocLet :: (Scheme m r) =>
+	 Symbol -> ObjectSchemeExpression r m ->
+	 SchemeExpression r m (m a) ->
+	 SchemeExpression r m (m (a,ObjLocation r m));
+	schemeExprLocLet = exprLetMap mSubstLocMap;
 
 	schemeExprLetSeparate :: (Scheme m r) =>
 	 [(Symbol,ObjectSchemeExpression r m)] ->

@@ -5,6 +5,19 @@
 	};
 	objectVersion = 38;
 	objects = {
+		AB3D178904C508B900A80103 = {
+			indentWidth = 4;
+			isa = PBXFileReference;
+			path = FunctorLambda.hs;
+			refType = 4;
+			usesTabs = 1;
+		};
+		AB3D178A04C6704100A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = Arguments.hs;
+			refType = 4;
+		};
 		AB4CB45704B819E300A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME";
 			buildPhases = (
@@ -340,6 +353,7 @@
 		};
 		ABAD376504A403EE00A80103 = {
 			children = (
+				AB3D178904C508B900A80103,
 				ABAD376904A403EE00A80103,
 				ABAD376D04A403EE00A80103,
 				ABAD376B04A403EE00A80103,
@@ -374,7 +388,7 @@
 		};
 		ABAD376904A403EE00A80103 = {
 			isa = PBXFileReference;
-			path = FunctorLambda.hs;
+			path = LambdaExpression.hs;
 			refType = 4;
 		};
 		ABAD376A04A403EE00A80103 = {
@@ -818,9 +832,10 @@
 		};
 		ABAD37B304A4053000A80103 = {
 			children = (
+				AB3D178A04C6704100A80103,
 				ABAD373A04A403EE00A80103,
-				ABAD374904A403EE00A80103,
 				ABAD378E04A403EE00A80103,
+				ABAD374904A403EE00A80103,
 			);
 			isa = PBXGroup;
 			name = Mains;

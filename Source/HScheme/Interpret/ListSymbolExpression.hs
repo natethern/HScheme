@@ -25,7 +25,7 @@ module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
 --	ListSymbolExpression		currently broken
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HBase;
 
 	-- list lengths always the same size
@@ -53,7 +53,7 @@ module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
 			};
 		};
 
-	instance (Eq sym) => FunctorLambda sym val (ListSymbolExpression sym val) where
+	instance (Eq sym) => LambdaExpression sym val (ListSymbolExpression sym val) where
 		{
 		exprSymbol sym = MkListSymbolExpression [sym] (\[val] -> val);
 
@@ -71,8 +71,13 @@ module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
 			};
 		};
 
-	instance (Eq sym) => RunnableFunctorLambda sym val (ListSymbolExpression sym val) where
+	instance (Eq sym) => RunnableLambdaExpression sym val (ListSymbolExpression sym val) where
 		{
 		runLambda resolve (MkListSymbolExpression syms func) = func (fmap resolve syms);
+		};
+
+	instance (Eq sym) => FreeSymbolLambdaExpression sym val (ListSymbolExpression sym val) where
+		{
+		exprFreeSymbols (MkListSymbolExpression syms _) = syms;
 		};
 	}

@@ -22,65 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Main where
 	{
+	import Arguments;
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
 	type CPS r = SchemeCPS r (IO ());
-
-	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
-
-	data SchemeWhichMonad = IOWhichMonad | CPSWhichMonad;
-
-	parseArgs :: (Monad m) =>
-	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],[String]);
-	parseArgs [] = return (Nothing,Nothing,[],[]);
-	parseArgs ("-":files) = return (Nothing,Nothing,[],files);
-	parseArgs ("--pure":args) = do
-		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,files);
-		};
-	parseArgs ("--cps":args) = do
-		{
-		(f,_,paths,files) <- parseArgs args;
-		return (f,Just CPSWhichMonad,paths,files);
-		};
-	parseArgs ("--plain":args) = do
-		{
-		(f,_,paths,files) <- parseArgs args;
-		return (f,Just IOWhichMonad,paths,files);
-		};
-	parseArgs ("-p":args) = do
-		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,files);
-		};
-	parseArgs ("--full":args) = do
-		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,files);
-		};
-	parseArgs ("-f":args) = do
-		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,files);
-		};
-	parseArgs (('-':('I':path@(_:_))):args) = do
-		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,path:paths,files);
-		};
-	parseArgs ("-I":(path:args)) = do
-		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,path:paths,files);
-		};
-	parseArgs (flag@('-':_):args) = fail ("unrecognised flag "++(show flag));
-	parseArgs (file:args) = do
-		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,paths,(file:files));
-		};
 
 	cpsInteract :: (?refType :: Type (r ())) =>
 	 CPS r () -> IO ();

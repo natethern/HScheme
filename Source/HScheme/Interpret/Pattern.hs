@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Abstract;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+--	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 	import Data.List(zip);

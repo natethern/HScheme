@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HBase;
 
 	data SymbolExpression sym val a = ClosedSymbolExpression a |
@@ -46,7 +46,7 @@ module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) whe
 			OpenSymbolExpression sym (fApply (fmap (\oab oa o -> oab o (oa o)) rdoab) (exprAbstract sym rda));
 		};
 
-	instance (Eq sym) => FunctorLambda sym val (SymbolExpression sym val) where
+	instance (Eq sym) => LambdaExpression sym val (SymbolExpression sym val) where
 		{
 		exprSymbol sym = OpenSymbolExpression sym (ClosedSymbolExpression id);
 
@@ -55,9 +55,15 @@ module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) whe
 		exprAbstract sym (OpenSymbolExpression sym' sp) = OpenSymbolExpression sym' (fmap (\a val' val -> a val val') (exprAbstract sym sp));
 		};
 
-	instance (Eq sym) => RunnableFunctorLambda sym val (SymbolExpression sym val) where
+	instance (Eq sym) => RunnableLambdaExpression sym val (SymbolExpression sym val) where
 		{
 		runLambda resolve (ClosedSymbolExpression a) = a;
 		runLambda resolve (OpenSymbolExpression sym sp) = runLambda resolve sp (resolve sym);
+		};
+
+	instance (Eq sym) => FreeSymbolLambdaExpression sym val (SymbolExpression sym val) where
+		{
+		exprFreeSymbols (ClosedSymbolExpression _) = [];
+		exprFreeSymbols (OpenSymbolExpression sym expr) = (sym:exprFreeSymbols expr);
 		};
 	}

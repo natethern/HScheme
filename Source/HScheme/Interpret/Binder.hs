@@ -20,31 +20,38 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Interpret.Binder where
+module Org.Org.Semantic.HScheme.Interpret.Binder
+	(
+	interactiveBind,schemeExprLetNewRefs,
+	setBinder,recursiveBinder
+	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Abstract;
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+	import Org.Org.Semantic.HScheme.Interpret.Assemble;
+	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	setBinder :: (FullScheme m r) =>
-	 TopLevelBinder r m;
-	setBinder = MkTopLevelBinder (\(MkTopLevelCommand expr binds _) ->
-	 exprLetBindsNewRef binds (seqSets binds expr)) where
+	newSymbolBindingExpression :: (Monad m) =>
+	 Symbol -> ObjectSchemeExpression r m;
+	newSymbolBindingExpression sym =
+	 return (return (error ("uninitialised binding: " ++ (show sym))));
+
+	schemeExprLetNewRefs :: (FullScheme m r) =>
+	 [Symbol] -> SchemeExpression r m (m a) -> SchemeExpression r m (m a);
+	schemeExprLetNewRefs [] bodyexpr = bodyexpr;
+	schemeExprLetNewRefs (sym:rest) bodyexpr = 
+	 schemeExprLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefs rest bodyexpr);
+
+	bindsToSetSequence :: (FullScheme m r) =>
+	 [(Symbol,ObjectSchemeExpression r m)] ->
+	 SchemeExpression r m (m a) ->
+	 SchemeExpression r m (m a);
+	bindsToSetSequence [] bodyexpr = bodyexpr;
+	bindsToSetSequence ((sym,bindexpr):rest) bodyexpr = 
+	 liftF3 setBindValue (exprSymbol sym) bindexpr (bindsToSetSequence rest bodyexpr) where
 		{
-		liftF3' :: (FunctorApply f) =>
-		 (a -> b -> c -> r) ->
-		 (f a -> f b -> f c -> f r);
-		liftF3' func fa fb =
-		 {-# SCC "liftF3'" #-}
-		 fApply (fApply (fmap func fa) fb);
-
-		seqSets [] bodyexpr = bodyexpr;
-		seqSets ((sym,bindexpr):rest) bodyexpr = 
-		 {-# SCC "seqSets" #-}
-		 liftF3' setBindValue (exprSymbol sym) bindexpr (seqSets rest bodyexpr);
-
 		setBindValue ref bindaction bodyaction =
 		 {-# SCC "setBindValue" #-}
 		 do
@@ -53,21 +60,27 @@ module Org.Org.Semantic.HScheme.Interpret.Binder where
 			set ref bindvalue;
 			bodyaction;
 			};
-
-		exprLetBindsNewRef [] bodyexpr = bodyexpr;
-		exprLetBindsNewRef ((sym,_):rest) bodyexpr = 
-		 {-# SCC "exprLetBindsNewRef" #-}
-		 schemeExprLet sym (return (newSymbolBinding sym)) (exprLetBindsNewRef rest bodyexpr);
-
-		newSymbolBinding :: (Monad m) =>
-		 Symbol -> m (Object r m);
-		newSymbolBinding sym = 
-		 {-# SCC "newSymbolBinding" #-}
-		 return (error ("uninitialised binding: " ++ (show sym)));
 		};
 
-	recursiveBinder :: (MonadFix m,Scheme m r) =>
-	 TopLevelBinder r m;
-	recursiveBinder = MkTopLevelBinder (\(MkTopLevelCommand expr binds _) ->
-	 schemeExprLetRecursive binds expr);
+	interactiveBind :: (FullScheme m r) =>
+	 [(Symbol,ObjectSchemeExpression r m)] ->
+	 SchemeExpression r m (m a) ->
+	 SchemeExpression r m (m (a,[(Symbol,ObjLocation r m)]));
+	interactiveBind binds expr = schemeExprLetNewRefsCollectLocs binds (bindsToSetSequence binds expr) where
+		{
+		schemeExprLetNewRefsCollectLocs [] bodyexpr = fmap (fmap (\a -> (a,[]))) bodyexpr;
+		schemeExprLetNewRefsCollectLocs ((sym,_):rest) bodyexpr = 
+		 {-# SCC "schemeExprLetNewRefsCollectLocs" #-}
+		 gather sym (schemeExprLocLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefsCollectLocs rest bodyexpr));
+
+		gather sym = fmap (fmap (\((a,binds),loc) -> (a,(sym,loc):binds)))
+		};
+
+
+	setBinder :: (FullScheme m r) => TopLevelBinder r m;
+	setBinder = MkTopLevelBinder
+	 (\binds expr -> schemeExprLetNewRefs (fmap fst binds) (bindsToSetSequence binds expr));
+
+	recursiveBinder :: (MonadFix m,Scheme m r) => TopLevelBinder r m;
+	recursiveBinder = MkTopLevelBinder schemeExprLetRecursive;
 	}

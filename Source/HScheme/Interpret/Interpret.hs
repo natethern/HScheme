@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 

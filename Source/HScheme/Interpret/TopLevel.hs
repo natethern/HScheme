@@ -25,11 +25,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro(..),TopLevelBinder(..),
 	begin,
 	assembleTopLevelExpression,assembleTopLevelExpressions,
-	assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList
+	assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList,
+	assembleTopLevelObjectCommand
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
---	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+--	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -49,7 +50,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 [Object r m] -> cm (TopLevelObjectCommand r m));
 
 	newtype TopLevelBinder r m = MkTopLevelBinder
-	 {unTopLevelBinder :: forall a. TopLevelCommand r m (m a) -> SchemeExpression r m (m a)};
+	 {unTopLevelBinder :: forall a. [(Symbol,ObjectSchemeExpression r m)] -> SchemeExpression r m (m a) -> SchemeExpression r m (m a)};
 
 	assembleTopLevelObjectCommand ::
 		(
@@ -144,8 +145,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 cm (SchemeExpression r m (m a));
 	assembleTopLevelExpressions none one conn objs = do
 		{
-		tlc <- begin none one conn objs;
-		return (unTopLevelBinder ?binder tlc);
+		MkTopLevelCommand expr binds _ <- begin none one conn objs;
+		return (unTopLevelBinder ?binder binds expr);
 		};
 
 	assembleTopLevelExpressionsList ::

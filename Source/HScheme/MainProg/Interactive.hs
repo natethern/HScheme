@@ -29,6 +29,53 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
+{-
+	data TopLevelCommand r m a = MkTopLevelCommand
+		{
+		tleExpression :: SchemeExpression r m a,
+		tleInitialBindings :: [(Symbol,ObjectSchemeExpression r m)],
+		tleSyntaxes :: [(Symbol,Syntax r (Object r m))]
+		};
+-}
+
+{-
+	newtype Context um r = Symbol -> ObjLocation r (InteractiveMonad um);
+
+	type InteractiveMonad um r = ContextMonad um (Context um r);
+
+	interpretInteractive ::
+		(
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
+		) =>
+	 Object r (InteractiveMonad um) -> InteractiveMonad um r ();
+	interpretInteractive obj = do
+		{
+		(MkTopLevelCommand exp newbinds syntaxes) <- assembleTopLevelObjectCommand obj;
+		runLambda bindings 
+		let {?syntacticbindings = newBindings syntaxes ?syntacticbindings} in
+		 runLambda 
+		};
+-}
+
+	interpretInteractive ::
+		(
+		FullScheme m r,
+		?objType :: Type (Object r m),
+		?macrobindings :: Bindings Symbol (Macro m r m),
+		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		) =>
+	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),Object r m);
+	interpretInteractive (MkEnvironment synbindings runbindings) obj = let
+		{
+		?syntacticbindings = synbindings;
+		} in do
+		{
+		(MkTopLevelCommand expr newbinds newsyntaxes) <- assembleTopLevelObjectCommand obj;
+		let {boundExpr = exprConstMapLet (getBinding runbindings) (interactiveBind newbinds expr)};
+		(result,allnewbinds) <- runLambda (\_ -> error "undefined symbol") (schemeExprLetNewRefs (exprFreeSymbols boundExpr) boundExpr);
+		return (MkEnvironment (newBindings synbindings newsyntaxes) (newBindings runbindings allnewbinds),result);
+		};
+
 	reportError :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 OutputPort Word8 m -> Object r m -> m ();
 	reportError errPort errObj = do
