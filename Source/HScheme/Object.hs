@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Object where
 	{
+	import Org.Org.Semantic.HScheme.SymbolExpression;
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
@@ -67,11 +68,15 @@ module Org.Org.Semantic.HScheme.Object where
 		show (MkSymbol s) = s;
 		};
 
-	data Bindings r m = MkBindings
+	data Binds sym a = MkBinds
 		{
-		newBinding :: Symbol -> ObjLocation r m -> Bindings r m,
-		getBinding :: Symbol -> Maybe (ObjLocation r m)
+		newBinding :: sym -> a -> Binds sym a,
+		getBinding :: sym -> Maybe a
 		};
+
+	type SchemeExpression r m = SymbolExpression Symbol (m (ObjLocation r m));
+
+	type Bindings r m = Binds Symbol (ObjLocation r m);
 
 	newObjBinding :: (Scheme m r) => 
 	 Bindings r m -> Symbol -> Object r m -> m (ObjLocation r m,Bindings r m);
@@ -82,7 +87,9 @@ module Org.Org.Semantic.HScheme.Object where
 		};
 
 	type Procedure r m =
-	 Bindings r m -> [Object r m] -> m (Object r m);
+--	 SchemeExpression r m
+	  ([Object r m] -> m (Object r m));
+{--
 	type Macro r m =
 	 Bindings r m -> Object r m -> m (Object r m);
 	type TopLevelMacro r m =
@@ -90,6 +97,10 @@ module Org.Org.Semantic.HScheme.Object where
 	type Syntax r m =
 	 [Object r m] -> m (Object r m);
 
+	data Syntactic r m =
+	 SyntaxSyntactic (Syntax r m) |
+	 MacroSyntactic (Syn
+--}
 	type SRefArray r a = ArrayList (r a);
 
 	data Object r m =
@@ -106,10 +117,7 @@ module Org.Org.Semantic.HScheme.Object where
 	 InputPortObject 	(InputPort Word8 m)					|
 	 OutputPortObject 	(OutputPort Word8 m)				|
 	 ProcedureObject	(Procedure r m)						|
-	 BindingsObject		(Bindings r m)						|
-	 SyntaxObject		(Syntax r m)						|
-	 MacroObject		(Macro r m)							|
-	 TopLevelMacroObject(TopLevelMacro r m)					;
+	 BindingsObject		(Bindings r m)						;
 
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;

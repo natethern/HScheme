@@ -22,18 +22,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Evaluate where
 	{
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.SymbolExpression;
 	import Org.Org.Semantic.HBase;
 
 
 	-- throw, etc.
 
-	lastResortThrowObject :: (Scheme m r,?bindings :: Bindings r m) =>
+	lastResortThrowObject :: (Scheme m r,?refType :: Type (r ())) =>
 	 Object r m -> m a;
 	lastResortThrowObject = throw;
 
-	throwObject :: (Scheme m r,?bindings :: Bindings r m) =>
+	throwObject :: (Scheme m r,?refType :: Type (r ())) =>
 	 Object r m -> m a;
 	throwObject obj = lastResortThrowObject obj;
 {--	case getBinding ?bindings (MkSymbol "throw") of
@@ -58,7 +60,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 			};
 		};
 --}
-	throwSchemeError :: (Scheme m r,?bindings :: Bindings r m,MonadIsA m (Object r m) rest) =>
+	throwSchemeError :: (Scheme m r,?refType :: Type (r ()),MonadIsA m (Object r m) rest) =>
 	 String -> rest -> m a;
 	throwSchemeError name errRest = do
 		{
@@ -66,7 +68,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		throwObject errorObj;
 		};
 
-	throwSimpleError :: (Scheme m r,?bindings :: Bindings r m) =>
+	throwSimpleError :: (Scheme m r,?refType :: Type (r ())) =>
 	 String -> m a;
 	throwSimpleError name = do -- throwSchemeError name ();
 		{
@@ -74,7 +76,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		throwObject errorObj;
 		};
 
-	throwArgError :: (Scheme m r,?bindings :: Bindings r m) =>
+	throwArgError :: (Scheme m r,?refType :: Type (r ())) =>
 	 String -> [Object r m] -> m a;
 	throwArgError name objs = do -- throwSchemeError name objs;
 		{
@@ -91,14 +93,13 @@ module Org.Org.Semantic.HScheme.Evaluate where
 
 	getSymbolBinding ::
 		(
-		Scheme m r,
-		?bindings :: Bindings r m
+		Scheme m r
 		) =>
-	 Symbol -> m (ObjLocation r m);
-	getSymbolBinding sym = case (getBinding ?bindings sym) of
+	 Bindings r m -> Symbol -> m (ObjLocation r m);
+	getSymbolBinding bindings sym = case (getBinding bindings sym) of
 		{
 		Just loc -> return loc;
-		Nothing -> throwArgError "unbound-symbol" (tt ?bindings [SymbolObject sym]);
+		Nothing -> let {?refType = Type} in throwArgError "unbound-symbol" (tt bindings [SymbolObject sym]);
 		} where
 		{
 		tt :: Bindings r m -> [Object r m] -> [Object r m];
@@ -108,100 +109,41 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	evaluate ::
 		(
 		Scheme m r,
-		?bindings :: Bindings r m
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
 		) =>
-	 Object r m -> m (Object r m);
-
-	evaluate (SymbolObject sym) = do
+	 Bindings r m -> Object r m -> m (Object r m);
+	evaluate bindings obj = do
 		{
-		loc <- getSymbolBinding sym;
-		get loc;
+		rr <- compile obj;
+		runSymbolExpression (getSymbolBinding bindings) rr;
 		};
 
-	evaluate (PairObject head tail) = do
+	evalObjects ::
+		(
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
+		) =>
+	 (Object r m -> m ()) ->
+	 Bindings r m -> [Object r m] -> m ();
+	evalObjects eat bindings objs = do	
 		{
-		h <- get head;
-		t <- get tail;
-		f <- evaluate h;
-		applyEval f t;
-		};
-
-	evaluate a = case a of
-		{
-		BooleanObject _ -> return a;
-		NumberObject _ -> return a;
-		CharObject _ -> return a;
-		StringObject _ -> return a;
-		ByteArrayObject _ -> return a;
-		VectorObject _ -> return a;
-		_ -> throwArgError "cant-evaluate-form" [a];
+		rr <- beginListEat eat objs;
+		runSymbolExpression (getSymbolBinding bindings) rr;
 		};
 
 	evaluateP ::
 		(
 		Scheme m r,
-		?bindings		:: Bindings r m
+		?bindings		:: Bindings r m,
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
 		) =>
 	 (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateP (obj,Just bindings) = let  {?bindings = bindings} in evaluate obj;
-	evaluateP (obj,Nothing) = evaluate obj;
-
-	evalList ::
-		(
-		Scheme m r,
-		?bindings		:: Bindings r m
-		) =>
-	 Object r m -> m [Object r m];
-	evalList NilObject = return [];
-	evalList (PairObject al dl) = do
-		{
-		a <- get al;
-		ae <- evaluate a;
-		d <- get dl;
-		de <- evalList d;
-		return (ae:de);
-		};
-	evalList obj = throwArgError "bad-procedure-call-form" [obj];
-
-	macroToList ::
-		(
-		Scheme m r,
-		?bindings		:: Bindings r m
-		) =>
-	 Object r m -> m [Object r m];
-	macroToList NilObject = return [];
-	macroToList (PairObject al dl) = do
-		{
-		a <- get al;
-		d <- get dl;
-		de <- macroToList d;
-		return (a:de);
-		};
-	macroToList obj = throwArgError "bad-macro-call-form" [obj];
-
-	applyEval ::
-		(
-		Scheme m r,
-		?bindings		:: Bindings r m
-		) =>
-	 Object r m -> Object r m -> m (Object r m);
-	applyEval (SyntaxObject f) arglist = do
-		{
-		args <- macroToList arglist;
-		res <- f args;
-		evaluate res;
-		};
-	applyEval (ProcedureObject f) arglist = do
-		{
-		result <- evalList arglist;
-		f ?bindings result;
-		};
-	applyEval (MacroObject f) arglist = do
-		{
---		args <- macroToList arglist;
-		f ?bindings arglist;
-		};
-	applyEval obj _ = throwArgError "bad-apply-form" [obj];
+	evaluateP (obj,Just bindings) = evaluate bindings obj;
+	evaluateP (obj,Nothing) = evaluate ?bindings obj;
 
 	currentEnvironmentP ::
 		(

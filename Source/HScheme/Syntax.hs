@@ -28,19 +28,14 @@ module Org.Org.Semantic.HScheme.Syntax where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	data Binding r m = MkBinding Symbol (Object r m);
+	data Bind sym a = MkBind sym a;
 
-	addBindings ::
-		(
-		Scheme m r
-		) =>
-	 [Binding r m] -> Bindings r m -> m (Bindings r m);
-	addBindings [] bindings = return bindings;
-	addBindings ((MkBinding name obj):binds) bindings = do
-		{
-		bindings' <- addBinding name obj bindings;
-		addBindings binds bindings';
-		};
+	addBindings :: [Bind sym a] -> Binds sym a -> Binds sym a;
+	addBindings [] binds = binds;
+	addBindings ((MkBind sym a):binds) bindings =
+	 addBindings binds (addBinding sym a bindings);
+
+	type Binding r m = Bind Symbol (Object r m);
 
 	substitute :: (Scheme m r) =>
 	 [Binding r m] -> Object r m -> m (Object r m);
@@ -71,7 +66,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 			return (loc':locs');
 			};
 		};
-	substitute ((MkBinding patvar sub):subs) (SymbolObject name) =
+	substitute ((MkBind patvar sub):subs) (SymbolObject name) =
 	 if name == patvar
 	 then return sub
 	 else substitute subs (SymbolObject name);
@@ -110,7 +105,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 	SymbolObject name' | name == name' -> return (Just []);
 	 	_ -> return Nothing;
 	 	}
-	 else return (Just [MkBinding name args]);
+	 else return (Just [MkBind name args]);
 	matchBinding literals _ _ = return Nothing;
 	
 	matchBindings :: (Scheme m r) =>
@@ -141,11 +136,11 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 else do
 		{
 		argList <- getConvert args;
-		return (Just [MkBinding name argList]);
+		return (Just [MkBind name argList]);
 		};
 	matchBindings literals _ _ = return Nothing;
 
-	caseMatch :: (Scheme m r,?bindings :: Bindings r m) =>
+	caseMatch :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
 	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
 	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
@@ -157,15 +152,14 @@ module Org.Org.Semantic.HScheme.Syntax where
 			Just subs -> return (subs,expr);
 			};
 		};
-
+{--
 	caseMatchM :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
 	caseMatchM (argExpr,(literals,cases)) = do
 		{
 		arg <- evaluate argExpr;
 		(subs,expr) <- caseMatch (arg,(literals,cases));
-		bindings <- addBindings subs ?bindings;
-		let {?bindings = bindings;} in evaluate expr;
+		let {?bindings = addBindings subs ?bindings;} in evaluate expr;
 		};
 
 	syntaxRulesM :: (Scheme m r,?bindings :: Bindings r m) =>
@@ -183,4 +177,5 @@ module Org.Org.Semantic.HScheme.Syntax where
 				};
 			};
 		} in transform rules);
+--}
 	}

@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 m t -> RecoverableStreamParser m t a -> m a;
 	runParser = runRecoverableStreamParser;
 
-	runParserString :: (Scheme m r,?bindings :: Bindings r m) =>
+	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
 	 [c] -> RecoverableListParser c m a -> m ([c],a);
 	runParserString text parser = do
 		{
@@ -418,15 +418,15 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 m (Maybe Char) -> m (Maybe (Object r m));
 	parseFromCharSource source = runParser source expressionOrEndParse;
 
-	parseFromPort :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
+	parseFromPort :: (Scheme m r,?refType :: Type (r ())) =>
 	 InputPort Word8 m -> m (Maybe (Object r m));
 	parseFromPort port = parseFromCharSource (parseUTF8Char (ipRead port));
 
-	parseFromString :: (Scheme m r,?bindings :: Bindings r m) =>
+	parseFromString :: (Scheme m r,?refType :: Type (r ())) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
 
-	parseAllFromString :: (Scheme m r,?bindings :: Bindings r m) =>
+	parseAllFromString :: (Scheme m r,?refType :: Type (r ())) =>
 	 String ->
 	 m [Object r m];
 	parseAllFromString text = do	
@@ -435,7 +435,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return objs;
 		};
 
-	portReadP :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
+	portReadP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (InputPort Word8 m,()) -> m (Object r m);
 	portReadP (port,()) = do
 		{		

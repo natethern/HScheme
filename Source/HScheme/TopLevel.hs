@@ -22,16 +22,18 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.TopLevel
 	(
-	pureSetLoc,fullSetLoc,
+{--	pureSetLoc,fullSetLoc,
 	defineT,
-	topLevelEvaluate
+--}
+--	topLevelEvaluate
 	) where
 	{
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
-
+{--
 	pureSetLoc :: (Scheme m r,?bindings :: Bindings r m) =>
 	 ObjLocation r m -> Object r m -> m ();
 	pureSetLoc _ newdef = throwArgError "cant-redefine" [newdef];
@@ -120,4 +122,19 @@ module Org.Org.Semantic.HScheme.TopLevel
 				};
 			};
 		};
+--}
+{--
+	topLevelEvaluate ::
+		(
+		Scheme m r,
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
+		) =>
+	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
+	topLevelEvaluate bindings a = do
+		{
+		r <- let {?bindings = bindings} in evaluate a;
+		return (bindings,r);
+		};
+--}
 	}

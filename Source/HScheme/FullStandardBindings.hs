@@ -23,24 +23,41 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.FullStandardBindings where
 	{
 	import Org.Org.Semantic.HScheme.Equality;
+	import Org.Org.Semantic.HScheme.Macros;
 	import Org.Org.Semantic.HScheme.FullProcedures;
 	import Org.Org.Semantic.HScheme.StandardBindings;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	simpleFullBindings :: (FullScheme m r) =>
+	fullMacroBindings ::
+		(
+		FullScheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ())
+		) =>
+	 Binds Symbol (Macro r m) ->
+	 Binds Symbol (Macro r m);
+	fullMacroBindings = concatenateList
+		[
+		macroBindings,
+
+		-- 4.1.6 Assignments
+		addMacroBinding			"set!"				setBangM
+
+		-- 5.2 Definitions
+--		,addTopLevelMacroBinding	"define"			(defineT fullSetLoc),
+		];
+
+	simpleFullBindings :: (FullScheme m r,
+		?refType :: Type (r ())) =>
 	 Bindings r m -> m (Bindings r m);
 	simpleFullBindings = concatenateList
 		[
 		commonPureBindings,
-
-		-- 4.1.6 Assignments
-		addMacroBinding			"set!"				setBangM,
-
-		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"			(defineT fullSetLoc),
 
 		-- 6.1 Equivalence Predicates
 		addProcBinding			"eqv?"				eqvP,
@@ -57,12 +74,14 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 		addProcBinding			"byte-array-set!"	byteArraySetP
 		];
 
-	monadFixFullBindings :: (FullScheme m r,MonadFix m) =>
+	monadFixFullBindings :: (FullScheme m r,MonadFix m,
+		?refType :: Type (r ())) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
 
 	-- this one is closest to R5RS
-	monadContFullBindings :: (FullScheme m r,MonadCont m) =>
+	monadContFullBindings :: (FullScheme m r,MonadCont m,
+		?refType :: Type (r ())) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContFullBindings = simpleFullBindings ++ monadContBindings;
 	}

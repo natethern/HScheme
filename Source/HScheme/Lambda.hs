@@ -23,12 +23,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Lambda where
 	{
 	import Org.Org.Semantic.HScheme.ArgumentList;
-	import Org.Org.Semantic.HScheme.TopLevel;
-	import Org.Org.Semantic.HScheme.Evaluate;
+--	import Org.Org.Semantic.HScheme.TopLevel;
+--	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
-
+{--
 	-- 4.2.3 Sequencing
 	begin :: (Scheme m r) =>
 	 Bindings r m -> [Object r m] -> m (Object r m);
@@ -194,7 +194,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	lambdaM :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Object r m,[Object r m]) -> m (Procedure r m);
 	lambdaM (argBindings,body) = lambda argBindings body;
-
+--}
 	-- 6.4 Control Features
 	isProcedure :: (Scheme m r) =>
 	 Object r m -> m Bool;
@@ -208,12 +208,11 @@ module Org.Org.Semantic.HScheme.Lambda where
 	callCCP ::
 		(
 		Scheme m r,?refType :: Type (r ()),
-		MonadCont m,
-		?bindings :: Bindings r m
+		MonadCont m
 		) =>
 	 (Procedure r m,()) -> m (Object r m);
-	callCCP (proc,()) = callCC (\cont -> proc ?bindings
-	  [ProcedureObject (\_ args -> do
+	callCCP (proc,()) = callCC (\cont -> proc
+	  [ProcedureObject (\args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;
 	  	cont resultArg;
@@ -222,9 +221,8 @@ module Org.Org.Semantic.HScheme.Lambda where
 	fixP ::
 		(
 		Scheme m r,?refType :: Type (r ()),
-		MonadFix m,
-		?bindings :: Bindings r m
+		MonadFix m
 		) =>
 	 (Procedure r m,()) -> m (Object r m);
-	fixP (proc,()) = mfix (\a -> proc ?bindings [a]);
+	fixP (proc,()) = mfix (\a -> proc [a]);
 	}

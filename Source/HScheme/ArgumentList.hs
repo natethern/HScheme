@@ -23,15 +23,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.ArgumentList where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
+--	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
 	class (Scheme m r) => ArgumentList m r a where
 		{
-		convertFromObjects' :: (?bindings :: Bindings r m) => [Object r m] -> m a;
+		convertFromObjects' :: (?refType :: Type (r ())) => [Object r m] -> m a;
 		};
 
-	convertFromObjects :: (ArgumentList m r a,?bindings :: Bindings r m) =>
+	convertFromObjects :: (ArgumentList m r a,?refType :: Type (r ())) =>
 	 [Object r m] -> m a;
 	convertFromObjects = convertFromObjects';
 
@@ -41,7 +42,7 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 		convertFromObjects' (_:_) = throwSimpleError "too-many-args";
 		};
 
-	convertFromObject :: (Scheme m r,?bindings :: Bindings r m,MonadMaybeA m to (Object r m)) =>
+	convertFromObject :: (Scheme m r,MonadMaybeA m to (Object r m),?refType :: Type (r ())) =>
 	 (Object r m) -> m to;
 	convertFromObject from = do
 		{
@@ -104,48 +105,29 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 			};
 		};
 
+	convertToMacro ::
+		(
+		ArgumentList m r args,
+		?refType :: Type (r ())
+		) =>
+	 (args -> m result) ->
+	 ([Object r m] -> m result);
+	convertToMacro foo objs = do
+		{
+		args <- convertFromObjects objs;
+		foo args;
+		};
+
 	convertToProcedure ::
 		(
 		ArgumentList m r args,
-		MonadIsA m (Object r m) ret
+		MonadIsA m (Object r m) ret,
+		?refType :: Type (r ())
 		) =>
-	 ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
-
-	convertToProcedure foo bindings obj = do
+	 (args -> m ret) -> Procedure r m;
+	convertToProcedure foo objs = do
 		{
-		args <- let {?bindings=bindings} in convertFromObjects obj;
-		r <- let {?bindings=bindings} in foo args;
+		r <- convertToMacro foo objs;
 		getConvert r;
-		};
-	
-	convertToMacro ::
-		(
-		Scheme m r,
-		MonadMaybeA m args (Object r m),
-		MonadIsA m (Object r m) ret
-		) =>
-	 ((?bindings :: Bindings r m) => args -> m ret) -> Macro r m;
-	
-	convertToMacro foo bindings obj = do
-		{
-		args <- let {?bindings=bindings} in convertFromObject obj;
-		r <- let {?bindings=bindings;} in foo args;
-		getConvert r;
-		};
-	
-	convertToTopLevelMacro ::
-		(
-		Scheme m r,
-		MonadMaybeA m args (Object r m),
-		MonadIsA m (Object r m) ret
-		) =>
-	 (Bindings r m -> args -> m (Bindings r m,ret)) -> TopLevelMacro r m;
-	
-	convertToTopLevelMacro foo bindings obj = do
-		{
-		args <- let {?bindings=bindings} in convertFromObject obj;
-		(bindings',r) <- foo bindings args;
-		result <- getConvert r;
-		return (bindings',result);
 		};
 	}

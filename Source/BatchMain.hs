@@ -32,59 +32,69 @@ module Main where
 	data SchemeWhichMonad = IOWhichMonad | CPSWhichMonad;
 
 	parseArgs :: (Monad m) =>
-	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],[String]);
-	parseArgs [] = return (Nothing,Nothing,[],[]);
-	parseArgs ("-":files) = return (Nothing,Nothing,[],files);
+	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],Bool,[String]);
+	parseArgs [] = return (Nothing,Nothing,[],True,[]);
+	parseArgs ("-":files) = return (Nothing,Nothing,[],True,files);
 	parseArgs ("--pure":args) = do
 		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,files);
+		(_,m,paths,initfile,files) <- parseArgs args;
+		return (Just PureFlavour,m,paths,initfile,files);
 		};
 	parseArgs ("--cps":args) = do
 		{
-		(f,_,paths,files) <- parseArgs args;
-		return (f,Just CPSWhichMonad,paths,files);
+		(f,_,paths,initfile,files) <- parseArgs args;
+		return (f,Just CPSWhichMonad,paths,initfile,files);
 		};
 	parseArgs ("--plain":args) = do
 		{
-		(f,_,paths,files) <- parseArgs args;
-		return (f,Just IOWhichMonad,paths,files);
+		(f,_,paths,initfile,files) <- parseArgs args;
+		return (f,Just IOWhichMonad,paths,initfile,files);
 		};
 	parseArgs ("-p":args) = do
 		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,files);
+		(_,m,paths,initfile,files) <- parseArgs args;
+		return (Just PureFlavour,m,paths,initfile,files);
 		};
 	parseArgs ("--full":args) = do
 		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,files);
+		(_,m,paths,initfile,files) <- parseArgs args;
+		return (Just FullFlavour,m,paths,initfile,files);
 		};
 	parseArgs ("-f":args) = do
 		{
-		(_,m,paths,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,files);
+		(_,m,paths,initfile,files) <- parseArgs args;
+		return (Just FullFlavour,m,paths,initfile,files);
 		};
 	parseArgs (('-':('I':path@(_:_))):args) = do
 		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,path:paths,files);
+		(f,m,paths,initfile,files) <- parseArgs args;
+		return (f,m,path:paths,initfile,files);
 		};
 	parseArgs ("-I":(path:args)) = do
 		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,path:paths,files);
+		(f,m,paths,initfile,files) <- parseArgs args;
+		return (f,m,path:paths,initfile,files);
+		};
+	parseArgs ("--noinit":args) = do
+		{
+		(f,m,paths,_,files) <- parseArgs args;
+		return (f,m,paths,False,files);
+		};
+	parseArgs ("-n":args) = do
+		{
+		(f,m,paths,_,files) <- parseArgs args;
+		return (f,m,paths,False,files);
 		};
 	parseArgs (flag@('-':_):args) = fail ("unrecognised flag "++(show flag));
 	parseArgs (file:args) = do
 		{
-		(f,m,paths,files) <- parseArgs args;
-		return (f,m,paths,(file:files));
+		(f,m,paths,initfile,files) <- parseArgs args;
+		return (f,m,paths,initfile,(file:files));
 		};
 
-	cpsInteract :: (?refType :: Type (r ())) =>
+	cpsRun :: (?refType :: Type (r ())) =>
 	 CPS r () -> IO ();
-	cpsInteract ma = runContinuationPass
+	cpsRun ma = runContinuationPass
 	 (\_ -> fail "error in catch code!") return ma;
 
 	defaultFlavour :: SchemeFlavour;
@@ -94,7 +104,7 @@ module Main where
 	 t -> ((?refType :: t) => a) -> a;
 	withRefType t a = let {?refType = t} in a;
 
-	boundInteraction ::
+	boundRun ::
 		(
 		MonadBottom m,
 		MonadException (Object r m) m,
@@ -109,16 +119,15 @@ module Main where
 	 	?syntacticbindings :: Binds Symbol (Syntax r m),
 	 	?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
 	 	?system :: FullSystemInterface m r
-	 	) => Bindings r m -> String -> m result) ->
+	 	) => Bindings r m -> m result) ->
 	 [String] ->
 	 (forall a. IO a -> m a) ->
 	 	((?macrobindings :: Binds Symbol (Macro r m),
 	 	?syntacticbindings :: Binds Symbol (Syntax r m)
 	 	) => Binds Symbol (Macro r m) -> Binds Symbol (Macro r m)) ->
 	 ((?system :: FullSystemInterface m r) => Bindings r m -> m (Bindings r m)) ->
-	 String ->
 	 m result;
-	boundInteraction interacter loadpaths lifter macroBinds symbolBinds filename = 
+	boundRun interacter loadpaths lifter macroBinds symbolBinds = 
 	 let {?syntacticbindings = emptyBindings} in
 	 let {?macrobindings = let
 			{
@@ -129,14 +138,18 @@ module Main where
 	 do
 		{
 		bindings <- symbolBinds emptyBindings;
-		interacter bindings filename;
+		interacter bindings;
 		};
+
+	optPrepend :: Bool -> a -> [a] -> [a];
+	optPrepend True a as = (a:as);
+	optPrepend _ _ as = as;
 
 	main :: IO ();
 	main = ioRunProgram (do
 		{
 		args <- ?getArgs;
-		(mflavour,mwm,paths,files) <- parseArgs args;
+		(mflavour,mwm,paths,initfile,filenames) <- parseArgs args;
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
@@ -151,24 +164,24 @@ module Main where
 			{
 			FullFlavour -> withRefType ioRefType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 fullMacroBindings (monadContFullBindings ++ fullSystemBindings ?system) "init.full.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 fullMacroBindings (monadFixFullBindings ++ fullSystemBindings ?system) "init.full.scm";
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.full.scm" filenames)) loadpaths lift
+				 fullMacroBindings (monadContFullBindings ++ fullSystemBindings ?system));
+				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.full.scm" filenames)) loadpaths id
+				 fullMacroBindings (monadFixFullBindings ++ fullSystemBindings ?system);
 				});
 			PureFlavour -> withRefType ioConstType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 macroBindings monadContPureBindings "init.pure.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 macroBindings monadFixPureBindings "init.pure.scm";
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
+				 macroBindings monadContPureBindings);
+				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
+				 macroBindings monadFixPureBindings;
 				});
 			StrictPureFlavour -> withRefType ioConstType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 macroBindings monadContStrictPureBindings "init.pure.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 macroBindings monadFixStrictPureBindings "init.pure.scm";
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
+				 macroBindings monadContStrictPureBindings);
+				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
+				 macroBindings monadFixStrictPureBindings;
 				});
 			};
 		});

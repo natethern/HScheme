@@ -26,22 +26,23 @@ module Org.Org.Semantic.HScheme.FMapBindings(emptyBindings) where
 	import Org.Org.Semantic.HBase;
 
 	fmapGetBinding ::
-	 FiniteMap Symbol (ObjLocation r m) -> Symbol -> Maybe (ObjLocation r m);
+	 FiniteMap Symbol a -> Symbol -> Maybe a;
 	fmapGetBinding map sym = lookup sym map;
 
-	fmapNewBinding :: (Scheme m r) =>
-	 FiniteMap Symbol (ObjLocation r m) -> Symbol -> ObjLocation r m ->
-	 Bindings r m;
-	fmapNewBinding map sym loc = toBindings (addMapEntry (sym,loc) map);
+	fmapNewBinding ::
+	 FiniteMap Symbol a ->
+	 Symbol ->
+	 a ->
+	 Binds Symbol a;
+	fmapNewBinding map sym a = toBindings (addMapEntry (sym,a) map);
 
-	toBindings :: (Scheme m r) =>
-	 FiniteMap Symbol (ObjLocation r m) -> Bindings r m;
-	toBindings map = MkBindings
+	toBindings :: FiniteMap Symbol a -> Binds Symbol a;
+	toBindings map = MkBinds
 		{
 		getBinding = fmapGetBinding map,
 		newBinding = fmapNewBinding map
 		};
 
-	emptyBindings :: (Scheme m r) => Bindings r m;
+	emptyBindings :: Binds Symbol a;
 	emptyBindings = toBindings empty;
 	}

@@ -29,29 +29,6 @@ module Org.Org.Semantic.HScheme.Procedures where
 	import Org.Org.Semantic.HBase;
 
 
-	-- 4.1.2 Literal Expressions
-	quoteM :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m,()) -> m (Object r m);
-	quoteM (q,()) = return q;
-
-
-	-- 4.1.5 Conditionals
-	ifM :: (Scheme m r,?bindings :: Bindings r m) =>
-	 (Object r m,(Object r m,Maybe (Object r m))) -> m (Object r m);
-	ifM (cond,(thenClause,mElseClause)) = do
-		{
-		isObj <- evaluate cond;
-		isVal <- getConvert isObj;
-		if isVal
-		 then evaluate thenClause
-		 else case mElseClause of
-			{
-			Nothing -> return nullObject;
-			Just elseClause -> evaluate elseClause;
-			};
-		};
-
-
 	-- 6.3.1 Booleans
 	notP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Bool,()) -> m Bool;
@@ -116,7 +93,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (Char -> a) -> (Char,()) -> m a;
 	charFuncP f (c,()) = return (f c);
 
-	integerToCharP :: (Scheme m r,?bindings :: Bindings r m) =>
+	integerToCharP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Integer,()) -> m Char;
 	integerToCharP (i,()) = case nthFromStart i of
 		{
@@ -171,13 +148,13 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (SRefArray r Char,()) -> m Int;
 	stringLengthP (s,()) = return (length s);
 
-	getArrayRef :: (Scheme m r,?bindings :: Bindings r m) =>
+	getArrayRef :: (Scheme m r,?refType :: Type (r ())) =>
 	 Integer -> ArrayList a -> m a;
 	getArrayRef i _ | i < 0 = throwSimpleError "out-of-range";
 	getArrayRef i arr | i >= convertFromInt (length arr) = throwSimpleError "out-of-range";
 	getArrayRef i arr = return (arr !! (convertToInt i));
 
-	stringRefP :: (Scheme m r,?bindings :: Bindings r m) =>
+	stringRefP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (SRefArray r Char,(Integer,())) -> m Char;
 	stringRefP (arr,(i,())) = do
 		{
@@ -185,7 +162,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
-	stringCharsP :: (Scheme m r,?bindings :: Bindings r m) =>
+	stringCharsP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (SList Char,()) -> m [Char];
 	stringCharsP (MkSList cs,()) = return cs;
 
@@ -222,7 +199,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (SRefArray r Word8,()) -> m Int;
 	byteArrayLengthP (s,()) = return (length s);
 
-	byteArrayRefP :: (Scheme m r,?bindings :: Bindings r m) =>
+	byteArrayRefP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (SRefArray r Word8,(Integer,())) -> m Word8;
 	byteArrayRefP (arr,(i,())) = do
 		{
@@ -230,7 +207,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
-	byteArrayBytesP :: (Scheme m r,?bindings :: Bindings r m) =>
+	byteArrayBytesP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (SList Word8,()) -> m [Word8];
 	byteArrayBytesP (MkSList cs,()) = return cs;
 
@@ -265,10 +242,10 @@ module Org.Org.Semantic.HScheme.Procedures where
 
 
 	-- 6.4 Control Features
-	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
+	applyP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Procedure r m,([Object r m],())) -> m (Object r m);
-	applyP (proc,(args,())) = proc ?bindings args;
-	
+	applyP (proc,(args,())) = proc args;
+
 	valuesP :: (Scheme m r,?refType :: Type (r ())) =>
 	 [Object r m] -> m (Object r m);
 	valuesP = return . mkValuesObject;
@@ -278,7 +255,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	valuesToListP (ValuesObject list,()) = return list;
 	valuesToListP (obj,()) = return [obj];
 
-	lastResortThrowP :: (Scheme m r,?bindings :: Bindings r m) =>
+	lastResortThrowP :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m,()) -> m (Object r m);
 	lastResortThrowP (obj,()) = lastResortThrowObject obj;
 
@@ -424,9 +401,6 @@ module Org.Org.Semantic.HScheme.Procedures where
 	toString (InputPortObject _)	= return "#<input port>";
 	toString (OutputPortObject _)	= return "#<output port>";
 	toString (ProcedureObject _)	= return "#<procedure>";
-	toString (MacroObject _)		= return "#<macro>";
-	toString (TopLevelMacroObject _)= return "#<top-level macro>";
-	toString (SyntaxObject _)		= return "#<syntax>";
 	toString (BindingsObject _)		= return "#<environment>";
 
 	toStringP :: (Scheme m r,?refType :: Type (r ())) =>

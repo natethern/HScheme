@@ -101,21 +101,21 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		};
 
 	-- conversion
-	handleUTF8Error :: (Scheme m r,?bindings :: Bindings r m) =>
+	handleUTF8Error :: (Scheme m r,?refType :: Type (r ())) =>
 	 UTF8Error -> m a;
 	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
 
-	parseUTF8Char :: (Scheme m r,?bindings :: Bindings r m) =>
+	parseUTF8Char :: (Scheme m r,?refType :: Type (r ())) =>
 	 m (Maybe Word8) -> m (Maybe Char);
 	parseUTF8Char source = exRun handleUTF8Error (parseUTF8 source);
 
-	parseUTF8P :: (Scheme m r,?bindings :: Bindings r m) =>
+	parseUTF8P :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Procedure r m,()) -> m (Either NullObjType Char);
 	parseUTF8P (source,()) = do
 		{
 		mc <- parseUTF8Char (do
 			{
-			obj <- source ?bindings [];
+			obj <- source [];
 			meb <- getMaybeConvert obj;
 			case meb of
 				{

@@ -27,6 +27,7 @@ module Org.Org.Semantic.HScheme
 
 	module Org.Org.Semantic.HScheme.Object,
 	module Org.Org.Semantic.HScheme.Conversions,
+	module Org.Org.Semantic.HScheme.Compile,
 	module Org.Org.Semantic.HScheme.Evaluate,
 	module Org.Org.Semantic.HScheme.TopLevel,
 	module Org.Org.Semantic.HScheme.SystemInterface,
@@ -41,10 +42,12 @@ module Org.Org.Semantic.HScheme
 
 	module Org.Org.Semantic.HScheme.SchemeIO,
 	module Org.Org.Semantic.HScheme.SchemeCPS,
-	module Org.Org.Semantic.HScheme.Interactive
+--	module Org.Org.Semantic.HScheme.Interactive,
+	module Org.Org.Semantic.HScheme.BatchRun
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interactive;
+	import Org.Org.Semantic.HScheme.BatchRun;
+--	import Org.Org.Semantic.HScheme.Interactive;
 	import Org.Org.Semantic.HScheme.SchemeCPS;
 	import Org.Org.Semantic.HScheme.SchemeIO;
 
@@ -59,6 +62,7 @@ module Org.Org.Semantic.HScheme
 	import Org.Org.Semantic.HScheme.SystemInterface;
 	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 

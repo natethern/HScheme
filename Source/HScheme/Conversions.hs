@@ -652,7 +652,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 	
 	instance (Scheme m r) => MonadSubtype m (Object r m) (Procedure r m);
 
-	
+{--	
 	-- Syntax
 
 	instance (Scheme m r) => MonadIsA m (Object r m) (Syntax r m) where
@@ -667,4 +667,5 @@ module Org.Org.Semantic.HScheme.Conversions where
 		};
 	
 	instance (Scheme m r) => MonadSubtype m (Object r m) (Syntax r m);
+--}
 	}

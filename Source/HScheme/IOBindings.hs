@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.IOBindings where
 	{
 	import Org.Org.Semantic.HScheme.SystemInterface;
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
@@ -87,19 +88,35 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		return (remonadOutputPort remonad (handleOutputPort h));
 		};
 
-	ioPureSystemInterface :: (Scheme m r,?refType :: Type (r ()),?stdout :: FlushSink IO Word8) =>
+	ioPureSystemInterface ::
+		(
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ()),
+		?stdout :: FlushSink IO Word8
+		) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdOutputPort));
+	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdOutputPort)--});
 
-	ioQuietPureSystemInterface :: (Scheme m r,?refType :: Type (r ()),?stderr :: FlushSink IO Word8) =>
+	ioQuietPureSystemInterface ::
+		(
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ()),
+		?stderr :: FlushSink IO Word8
+		) =>
 	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
 	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdErrorPort));
+	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdErrorPort)--});
 
 	ioFullSystemInterface ::
 		(
 		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
 		?refType :: Type (r ()),
 		?stdin :: PeekSource IO Word8,
 		?stdout :: FlushSink IO Word8,

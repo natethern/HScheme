@@ -23,14 +23,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.StandardBindings where
 	{
 	import Org.Org.Semantic.HScheme.SExpParser;
-	import Org.Org.Semantic.HScheme.Syntax;
+--	import Org.Org.Semantic.HScheme.Syntax;
 	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Lambda;
 	import Org.Org.Semantic.HScheme.Equality;
 	import Org.Org.Semantic.HScheme.NumericProcedures;
+	import Org.Org.Semantic.HScheme.Macros;
 	import Org.Org.Semantic.HScheme.Procedures;
-	import Org.Org.Semantic.HScheme.TopLevel;
-	import Org.Org.Semantic.HScheme.Evaluate;
+--	import Org.Org.Semantic.HScheme.TopLevel;
+--	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
@@ -38,28 +40,75 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	loop :: a;
 	loop = loop;
 
-	commonStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	commonStrictPureBindings = concatenateList
+	macroBindings ::
+		(
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ())
+		) =>
+	 Binds Symbol (Macro r m) ->
+	 Binds Symbol (Macro r m);
+	macroBindings = concatenateList
 		[
-		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
-		addBinding		(MkSymbol "<loop>")				loop,									-- test
-		addBinding		(MkSymbol "<undefined>")		undefined,								-- test
-
 		-- 4.1.2 Literal Expressions
-		addMacroBinding	"quote"							quoteM,
+		addMacroBinding	"quote"					quoteM,
 
 		-- 4.1.4 Procedures
-		addMacroBinding	"lambda"						lambdaM,
+		addMacroBinding	"lambda"				lambdaM,
 
 		-- 4.1.5 Conditionals
-		addMacroBinding	"if"							ifM,
+		addMacroBinding	"if"					ifM,
 
 		-- 4.2.2 Binding Constructs
-		addMacroBinding	"let"							letM,
-		addMacroBinding	"let*"							letStarM,
+		addMacroBinding	"let"					letM,
+		addMacroBinding	"let*"					letStarM
 
 		-- 4.3.2 Pattern Language
-		addMacroBinding	"syntax-rules"					syntaxRulesM,
+--		,addMacroBinding	"syntax-rules"			syntaxRulesM
+		];
+
+	pureMacroBindings ::
+		(
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ())
+		) =>
+	 Binds Symbol (Macro r m) ->
+	 Binds Symbol (Macro r m);
+	pureMacroBindings = concatenateList
+		[
+		macroBindings,
+
+		-- 4.2.3 Sequencing
+		addMacroBinding	"begin"					beginM
+		];
+
+	topLevelBindings ::
+		(
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro r m),
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?refType :: Type (r ())
+		) =>
+	 Binds Symbol (TopLevelMacro r m) ->
+	 Binds Symbol (TopLevelMacro r m);
+	topLevelBindings = concatenateList
+		[
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"				defineT
+--		,addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
+		];
+
+	commonStrictPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	commonStrictPureBindings = concatenateList
+		[
+		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
+		addLocationBinding		(MkSymbol "<loop>")				loop,									-- test
+		addLocationBinding		(MkSymbol "<undefined>")		undefined,								-- test
 
 		-- 6.1 Equivalence Predicates
 		addProcBinding	"equal?"						equalP,
@@ -153,30 +202,21 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"throw"							lastResortThrowP,						-- nonstandard
 
 		-- 6.5 Eval
-		addProcBinding	"eval"							evaluateP,
-		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
+--		addProcBinding	"eval"							evaluateP,
+--		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
 
 		-- Misc
-		addProcBinding	"to-string"						toStringP,								-- nonstandard
-		addMacroBinding	"case-match"					caseMatchM								-- nonstandard
+		addProcBinding	"to-string"						toStringP								-- nonstandard
+--		,addMacroBinding	"case-match"					caseMatchM								-- nonstandard
 		];
 
-	simpleStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	simpleStrictPureBindings = concatenateList
-		[
-		commonStrictPureBindings,
+	simpleStrictPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	simpleStrictPureBindings = commonStrictPureBindings;
 
-		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
-		];
-
-	commonPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	commonPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
 	commonPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
-
-		-- 4.2.3 Sequencing
-		addMacroBinding	"begin"							beginM,
 
 		-- 6.6.1 Ports
 		addProcBinding	"input-port?"					isInputPortP,
@@ -195,42 +235,36 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
 		];
 
-	simplePureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	simplePureBindings = concatenateList
-		[
-		commonPureBindings,
+	simplePureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);
+	simplePureBindings = commonPureBindings;
 
-		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
-		];
-
-	monadContBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadContBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) => Bindings r m -> m (Bindings r m);
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-current-continuation"	callCCP
 		];
 
-	monadFixBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
+	monadFixBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) => Bindings r m -> m (Bindings r m);
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-result"				fixP									-- nonstandard
 		];
 
-	monadFixStrictPureBindings :: (Scheme m r,MonadFix m) =>
+	monadFixStrictPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
 
-	monadContStrictPureBindings :: (Scheme m r,MonadCont m) =>
+	monadContStrictPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
 
-	monadFixPureBindings :: (Scheme m r,MonadFix m) =>
+	monadFixPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
 
-	monadContPureBindings :: (Scheme m r,MonadCont m) =>
+	monadContPureBindings :: (Scheme m r,?refType :: Type (r ()),MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
 	monadContPureBindings = simplePureBindings ++ monadContBindings;
 	}
