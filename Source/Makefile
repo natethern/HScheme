@@ -255,6 +255,7 @@ test-full:	\
  test/helloworld.scm.full.diff	\
  test/several.scm.full.diff	\
  test/equal.scm.full.diff	\
+ test/eq.scm.full.diff	\
  test/syntax.scm.full.diff	\
  test/syntax-rec.scm.full.diff	\
  test/letbinding.scm.full.diff	\

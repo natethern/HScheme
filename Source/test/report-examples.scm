@@ -223,7 +223,7 @@ x										;===>  (a . 4)
 y										;===>  (a . 4)
 (list? y)								;===>  #f
 (set-cdr! x x)							;===>  unspecified	nothing
-"omit" ;(list? x)								;===>  #f
+(list? x)								;===>  #f
 
 "procedure:  (pair? obj)"
 (pair? '(a . b))						;===>  #t
@@ -261,10 +261,10 @@ y										;===>  (a . 4)
 (list? '(a b c))						;===>  #t
 (list? '())								;===>  #t
 (list? '(a . b))						;===>  #f
-"omit" ;(let ((x (list 'a)))
-;	(set-cdr! x x)
-;	(list? x)
-;)										;===>  #f
+(let ((x (list 'a)))
+	(set-cdr! x x)
+	(list? x)
+)										;===>  #f
 
 "library procedure:  (list obj ...)"
 (list 'a (+ 3 4) 'c)                     ;===>  (a 7 c)

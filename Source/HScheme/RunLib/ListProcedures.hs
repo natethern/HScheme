@@ -59,4 +59,63 @@ module Org.Org.Semantic.HScheme.RunLib.ListProcedures where
 	listP ::  (Monad m,?objType :: Type obj) =>
 	 [obj] -> m [obj];
 	listP list = return list;
+
+	isListP ::
+		(
+		Build m r,
+		Eq (r obj),
+		ListObject r obj,
+		?objType :: Type obj
+		) =>
+	 (obj,()) -> m Bool;
+	isListP (obj,()) = case (getTailRef obj) of
+		{
+		SuccessResult rt -> checkLoop rt rt;
+		ExceptionResult res -> return res;
+		} where
+		{
+		getTailRef :: (ListObject r obj) => obj -> Result Bool (r obj);
+		getTailRef x = case (objectCell x) of
+			{
+			Just (Just (_,r)) -> return r;
+			Just _ -> throw True;	-- finite list
+			_ -> throw False;		-- improper
+			};
+
+		checkLoop ::
+			(
+			Build m r,
+			Eq (r obj),
+			ListObject r obj,
+			?objType :: Type obj
+			) =>
+		 r obj -> r obj -> m Bool;
+		checkLoop ra rb = do
+			{
+			b <- get rb;
+			case (getTailRef b) of
+				{
+				SuccessResult rb' -> if (ra == rb')
+				 then return False		-- circular
+				 else do
+					{
+					b' <- get rb';
+					case (getTailRef b') of
+						{
+						SuccessResult rb'' -> do
+							{
+							a <- get ra;
+							case (getTailRef a) of
+								{
+								SuccessResult ra' -> checkLoop ra' rb'';
+								ExceptionResult res -> return res;
+								}
+							};
+						ExceptionResult res -> return res;
+						}
+					};
+				ExceptionResult res -> return res;
+				}
+			};
+		};
 	}

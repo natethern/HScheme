@@ -7,3 +7,10 @@
 (equal? '(a b) '(a 1))
 (equal? '(a b) '())
 (equal? '(a b) 4)
+"Procedures"
+;(equal? car car)
+(equal? car cdr)
+;(let ((f (lambda () '())))
+;  (equal? f f)
+;)
+(equal? (lambda () '()) (lambda () '()))

@@ -192,7 +192,6 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		--				"set-cdr!" 						Full
 		--				"caar" etc.						init.pure.scm
 		addProcBinding	"null?"							isNilP,
-		--				"list?"							init.pure.scm
 		addProcBinding	"list"							listP,
 		--				"length" 						init.pure.scm
 		--				"append"						init.pure.scm
@@ -399,10 +398,28 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcNBinding	"port-write-string-utf8"		portWriteStringUTF8PN					-- nonstandard
 		];
 
-	setBindings ::
+	eqBindings ::
 		(
 		Eqv obj,
 		Eq obj,
+		Eq (r obj),
+		ObjectSubtype r obj Bool,
+		InterpretObject m r obj,
+		Build cm r
+		) =>
+	 RefBindings cm r obj;
+	eqBindings = concatenateList
+		[
+		-- 6.1 Equivalence Predicates
+		addProcBinding			"eqv?"				eqvP,
+		addProcBinding			"eq?"				eqP,
+
+		-- 6.3.2 Pairs and Lists
+		addProcBinding			"list?"				isListP
+		];
+
+	setBindings ::
+		(
 		ObjectSubtype r obj Bool,
 		ObjectSubtype r obj Word8,
 		ObjectSubtype r obj Char,
@@ -417,10 +434,6 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 RefBindings cm r obj;
 	setBindings = concatenateList
 		[
-		-- 6.1 Equivalence Predicates
-		addProcBinding			"eqv?"				eqvP,
-		addProcBinding			"eq?"				eqP,
-
 		-- 6.3.2 Pairs and Lists
 		addProcNBinding			"set-car!"			setCarPN,
 		addProcNBinding			"set-cdr!"			setCdrPN,

@@ -95,6 +95,7 @@ module Main where
 					monadContBindings,
 					monadGuardBindings,
 					evalBindings (lift . lift),
+					eqBindings,
 					setBindings,
 					portBindings,
 					systemBindings (lift . lift)
@@ -142,6 +143,7 @@ module Main where
 					monadFixBindings,
 					monadContBindings,
 					evalBindings lift,
+					eqBindings,
 					setBindings,
 					portBindings,
 					systemBindings lift
@@ -187,6 +189,7 @@ module Main where
 					baseBindings,
 					monadFixBindings,
 					evalBindings id,
+					eqBindings,
 					setBindings,
 					portBindings,
 					systemBindings id

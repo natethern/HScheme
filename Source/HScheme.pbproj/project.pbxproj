@@ -172,6 +172,18 @@
 			path = Procedure.hs;
 			refType = 4;
 		};
+		ABA0E2D40538033500A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = eq.scm;
+			refType = 4;
+		};
+		ABA0E2D50538034400A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = eq.scm.ref;
+			refType = 4;
+		};
 		ABA6AB99050C861C00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -737,6 +749,8 @@
 				ABAD37AD04A403EE00A80103,
 				ABAD379E04A403EE00A80103,
 				ABAD379F04A403EE00A80103,
+				ABA0E2D40538033500A80103,
+				ABA0E2D50538034400A80103,
 				ABAD37B004A403EE00A80103,
 				ABAD37B104A403EE00A80103,
 				ABAD37AE04A403EE00A80103,

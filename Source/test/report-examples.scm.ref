@@ -163,7 +163,7 @@
 #t
 (a . 4)
 #f
-"omit"
+#f
 "procedure:  (pair? obj)"
 #t
 #t
@@ -191,7 +191,7 @@ a
 #t
 #t
 #f
-"omit"
+#f
 "library procedure:  (list obj ...)"
 (a 7 c)
 ()
