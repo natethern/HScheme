@@ -23,10 +23,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.MainProg.Batch
 	(
 	RunnableScheme(..),
-	runProgram,
-	runProgramBindings,runProgramBindingsWithExit
+	runProgramBindings,
+	runProgramBindingsWithExit
 	) where
 	{
+	import Org.Org.Semantic.HScheme.RunLib;
 	import Org.Org.Semantic.HScheme.Bind;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
@@ -40,11 +41,30 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		) =>
 	 RunnableScheme cm m r where
 		{
-		rsRun :: (?objType :: Type (Object r m)) =>
-		 m () -> cm ();
-		rsLift :: forall a. (?objType :: Type (Object r m)) =>
-		 cm a -> m a;
+		rsRunInterp ::
+		 (Object r m -> cm ()) ->
+		 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
+		 cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]) ->
+		 ((Object r m -> m ()) -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ())) ->
+		 cm ();
 		};
+		
+
+{--		
+rsRunInterp outproc mrun interpList interpEat = do
+	{
+	program <- interpList;
+	results <- rsRun (mrun program);
+	sinkList outproc results;
+	return ();
+	}
+
+rsRunInterp outproc mrun interpList interpEat = do
+	{
+	program <- interpEat (rsLift . outproc);
+	rsRun (mrun program);
+	}
+--}
 
 	instance
 		(
@@ -54,9 +74,31 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		) =>
 	 RunnableScheme m m r where
 		{
-		rsRun = id;
-		rsLift = id;
+		rsRunInterp outproc mrun interpList interpEat = do
+			{
+			program <- interpEat outproc;
+			mrun program;
+			}
 		};
+
+
+	instance
+		(
+		BuildThrow IO (Object r Identity) r,
+		MonadException (Object r Identity) IO,
+		BuildThrow Identity (Object r Identity) r
+		) =>
+	 RunnableScheme IO Identity r where
+		{
+		rsRunInterp outproc mrun interpList interpEat = do
+			{
+			program <- interpList;
+			results <- return (unIdentity (mrun program));
+			sinkList outproc results;
+			return ();
+			}
+		};
+
 
 	readFiles ::
 		(
@@ -74,6 +116,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	runProgram ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
@@ -81,7 +124,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
-	 (((Symbol -> Maybe (ObjLocation r m)) -> m ()) -> m ()) ->
+	 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
 	 [String] ->
@@ -90,13 +133,16 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 	 catch (do
 		{
 		objects <- readFiles filenames;
-		program <- interpretTopLevelExpressionsEat (\obj -> rsLift (outproc obj)) objects;
-		rsRun (mrun program);
+		
+		rsRunInterp outproc mrun
+		 (interpretTopLevelExpressionsList objects)
+		 (\proc -> interpretTopLevelExpressionsEat proc objects);
 		})
 		failproc;
 
 	runProgramBindings ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?macrobindings :: SymbolBindings (Macro cm r m),
@@ -117,6 +163,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	runProgramBindingsWithExit ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		MonadCont m,
 		?objType :: Type (Object r m),

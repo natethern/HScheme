@@ -153,13 +153,19 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 		) =>
 	 RunnableScheme m (SchemeCPS r (m ())) r where
 		{
-		rsRun ma = runExceptionContinuationPass
-		 (\err -> case err of
+		rsRunInterp outproc mrun interpList interpEat = do
 			{
-			StringError s -> fail s;
-			ExceptionError ex -> fail (show ex);
-			ObjError obj -> throw obj;
-			}) return ma;
-		rsLift = lift;
+			program <- interpEat (lift . outproc);
+			rsRun (mrun program);
+			} where
+			{
+			rsRun ma = runExceptionContinuationPass
+			 (\err -> case err of
+				{
+				StringError s -> fail s;
+				ExceptionError ex -> fail (show ex);
+				ObjError obj -> throw obj;
+				}) return ma;
+			};
 		};
 	}

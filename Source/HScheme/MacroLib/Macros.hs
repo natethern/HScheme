@@ -32,11 +32,6 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	 cm (ObjectSchemeExpression r m);
 	quoteM (q,()) = return (return' (return q));
 
-	liftF3 :: (FunctorApply f) =>
-	 (a -> b -> c -> r) ->
-	 (f a -> f b -> f c -> f r);
-	liftF3 func fa fb fc = fApply (liftF2 func fa fb) fc;
-
 	-- 4.1.5 Conditionals
 	ifM ::
 		(

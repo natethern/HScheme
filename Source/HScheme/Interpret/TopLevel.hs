@@ -24,13 +24,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	(
 	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro(..),
 	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
-	assembleTopLevelExpression,assembleTopLevelExpressionsEat,
+	assembleTopLevelExpression,assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList,
 	pureDefineT,fullDefineT,
 	beginM,bodyM,bodyListM,
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
+--	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
@@ -185,6 +185,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	letSequentialM ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -203,6 +204,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	letSeparateM ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -228,8 +230,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	fixer :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
 	 t (t (ObjLocation r m) -> m (Object r m)) ->
-	 (t (ObjLocation r m) -> m (Object r m)) ->
-	 m (Object r m);
+	 (t (ObjLocation r m) -> m a) ->
+	 m a;
 	fixer bindsT bodyT = (mfixExFunctor (fmap (\tlocmobj tloc -> do
 		{
 		obj <- tlocmobj tloc;
@@ -384,6 +386,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressions ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -399,12 +402,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	assembleTopLevelExpressions none one conn objs = do
 		{
 		MkTopLevelCommand expr binds _ <- begin none one conn objs;
---		return (fSubstMapRecursive substMap binds expr);
+--		return (fSubstMapRecursive fixer binds expr);
 		return (fSubstMapSequential substMap binds expr);
 		};
 
 	bodyM ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -418,6 +422,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	lambdaM ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -436,6 +441,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressionsList ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -464,6 +470,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	bodyListM ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -477,6 +484,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	assembleTopLevelExpressionsEat ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),

@@ -20,18 +20,24 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Imperative
-	(
-	module Org.Org.Semantic.HScheme.Imperative.IOSystem,
-	module Org.Org.Semantic.HScheme.Imperative.IOLoad,
-	module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity,
-	module Org.Org.Semantic.HScheme.Imperative.SchemeIO,
-	module Org.Org.Semantic.HScheme.Imperative.SchemeCPS
-	) where
+module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity where
 	{
-	import Org.Org.Semantic.HScheme.Imperative.SchemeCPS;
-	import Org.Org.Semantic.HScheme.Imperative.SchemeIO;
-	import Org.Org.Semantic.HScheme.Imperative.SchemeIdentity;
-	import Org.Org.Semantic.HScheme.Imperative.IOLoad;
-	import Org.Org.Semantic.HScheme.Imperative.IOSystem;
+	import Org.Org.Semantic.HScheme.RunLib;
+	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+
+	instance MonadCreatable IO (Constant Identity) where
+		{
+		new a = return (unIdentity (new a));
+		};
+
+	instance MonadGettableReference IO (Constant Identity) where
+		{
+		get r = return (unIdentity (get r));
+		};
+
+	instance MonadThrow (Object (Constant Identity) Identity) Identity where
+		{
+		throw obj = error (unIdentity (toString obj));
+		};
 	}

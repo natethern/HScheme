@@ -28,69 +28,95 @@ module Main where
 
 	type CPS r = SchemeCPS r (IO ());
 
+	type IdentityConst = Constant Identity;
+
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
 
-	data SchemeWhichMonad = IOWhichMonad | CPSWhichMonad;
+	instance Show SchemeFlavour where
+		{
+		show FullFlavour = "full";
+		show PureFlavour = "pure";
+		show StrictPureFlavour = "strict pure";
+		};
+
+	data SchemeWhichMonad = IdentityWhichMonad | IOWhichMonad | CPSWhichMonad;
+
+	instance Show SchemeWhichMonad where
+		{
+		show IdentityWhichMonad = "pure";
+		show IOWhichMonad = "IO";
+		show CPSWhichMonad = "CPS IO";
+		};
 
 	parseArgs :: (Monad m) =>
-	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],Bool,[String]);
-	parseArgs [] = return (Nothing,Nothing,[],True,[]);
-	parseArgs ("-":files) = return (Nothing,Nothing,[],True,files);
+	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],Bool,[String],Bool);
+	parseArgs [] = return (Nothing,Nothing,[],True,[],False);
+	parseArgs ("-":files) = return (Nothing,Nothing,[],True,files,False);
 	parseArgs ("--pure":args) = do
 		{
-		(_,m,paths,initfile,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,initfile,files);
+		(_,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (Just PureFlavour,m,paths,initfile,files,verbose);
 		};
 	parseArgs ("--cps":args) = do
 		{
-		(f,_,paths,initfile,files) <- parseArgs args;
-		return (f,Just CPSWhichMonad,paths,initfile,files);
+		(f,_,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,Just CPSWhichMonad,paths,initfile,files,verbose);
 		};
 	parseArgs ("--plain":args) = do
 		{
-		(f,_,paths,initfile,files) <- parseArgs args;
-		return (f,Just IOWhichMonad,paths,initfile,files);
+		(f,_,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,Just IOWhichMonad,paths,initfile,files,verbose);
+		};
+	parseArgs ("--identity":args) = do
+		{
+		(f,_,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,Just IdentityWhichMonad,paths,initfile,files,verbose);
 		};
 	parseArgs ("-p":args) = do
 		{
-		(_,m,paths,initfile,files) <- parseArgs args;
-		return (Just PureFlavour,m,paths,initfile,files);
+		(_,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (Just PureFlavour,m,paths,initfile,files,verbose);
 		};
 	parseArgs ("--full":args) = do
 		{
-		(_,m,paths,initfile,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,initfile,files);
+		(_,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (Just FullFlavour,m,paths,initfile,files,verbose);
 		};
 	parseArgs ("-f":args) = do
 		{
-		(_,m,paths,initfile,files) <- parseArgs args;
-		return (Just FullFlavour,m,paths,initfile,files);
+		(_,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (Just FullFlavour,m,paths,initfile,files,verbose);
 		};
 	parseArgs (('-':('I':path@(_:_))):args) = do
 		{
-		(f,m,paths,initfile,files) <- parseArgs args;
-		return (f,m,path:paths,initfile,files);
+		(f,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,m,path:paths,initfile,files,verbose);
 		};
 	parseArgs ("-I":(path:args)) = do
 		{
-		(f,m,paths,initfile,files) <- parseArgs args;
-		return (f,m,path:paths,initfile,files);
+		(f,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,m,path:paths,initfile,files,verbose);
 		};
 	parseArgs ("--noinit":args) = do
 		{
-		(f,m,paths,_,files) <- parseArgs args;
-		return (f,m,paths,False,files);
+		(f,m,paths,_,files,verbose) <- parseArgs args;
+		return (f,m,paths,False,files,verbose);
 		};
 	parseArgs ("-n":args) = do
 		{
-		(f,m,paths,_,files) <- parseArgs args;
-		return (f,m,paths,False,files);
+		(f,m,paths,_,files,verbose) <- parseArgs args;
+		return (f,m,paths,False,files,verbose);
+		};
+	parseArgs ("-v":args) = do
+		{
+		(f,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,m,paths,initfile,files,True);
 		};
 	parseArgs (flag@('-':_):args) = fail ("unrecognised flag "++(show flag));
 	parseArgs (file:args) = do
 		{
-		(f,m,paths,initfile,files) <- parseArgs args;
-		return (f,m,paths,initfile,(file:files));
+		(f,m,paths,initfile,files,verbose) <- parseArgs args;
+		return (f,m,paths,initfile,(file:files),verbose);
 		};
 
 	defaultFlavour :: SchemeFlavour;
@@ -134,7 +160,7 @@ module Main where
 	main = ioRunProgram (do
 		{
 		args <- ?getArgs;
-		(mflavour,mwm,paths,initfile,filenames) <- parseArgs args;
+		(mflavour,mwm,paths,initfile,filenames,verbose) <- parseArgs args;
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
@@ -142,10 +168,17 @@ module Main where
 			whichmonad = unJust (case flavour of
 				{
 				FullFlavour -> CPSWhichMonad;
+				StrictPureFlavour -> IdentityWhichMonad;
 				_ -> IOWhichMonad;
 				}) mwm;
 			allFileNames initFile = optPrepend initfile initFile filenames
 			};
+		if verbose then do
+			{
+			fsSinkList ?stderr (encodeUTF8 ("monad: " ++ (show whichmonad) ++ "\n"));
+			fsSinkList ?stderr (encodeUTF8 ("flavour: " ++ (show flavour) ++ "\n"));
+			}
+		 else return ();
 		case flavour of
 			{
 			FullFlavour -> case whichmonad of
@@ -153,7 +186,7 @@ module Main where
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
 				 let {?load = ioLoad loadpaths} in
-				 let {?system = ioSystem rsLift} in
+				 let {?system = ioSystem lift} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- (monadContFullBindings ++ fullSystemBindings) emptyBindings;
@@ -162,12 +195,13 @@ module Main where
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IORef IO)} in
 				 let {?load = ioLoad loadpaths} in
-				 let {?system = ioSystem rsLift} in
+				 let {?system = ioSystem id} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemTopLevelBindings) (do
 					{
 					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.full.scm") bindings;
 					}));
+				IdentityWhichMonad -> fail "can't use identity monad with full references";
 				};
 			PureFlavour -> case whichmonad of
 				{
@@ -187,6 +221,14 @@ module Main where
 					bindings <- monadFixPureBindings emptyBindings;
 					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
+				IdentityWhichMonad ->
+				 let {?objType = Type::Type (Object IdentityConst Identity)} in
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
+					{
+					bindings <- monadFixPureBindings emptyBindings;
+					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
+					}));
 				};
 			StrictPureFlavour -> case whichmonad of
 				{
@@ -200,6 +242,14 @@ module Main where
 					}));
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst IO)} in
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
+					{
+					bindings <- monadFixStrictPureBindings emptyBindings;
+					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
+					}));
+				IdentityWhichMonad ->
+				 let {?objType = Type::Type (Object IdentityConst Identity)} in
 				 let {?load = ioLoad loadpaths} in
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemTopLevelBindings) (do
 					{

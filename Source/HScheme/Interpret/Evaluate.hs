@@ -56,6 +56,19 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	 Bindings r m -> Symbol -> m (ObjLocation r m);
 	getSymbolBinding bindings sym = getLoc (getBinding bindings);
 --}
+
+	bindExpression ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?macrobindings :: SymbolBindings (Macro cm r m)
+		) =>
+	 SchemeExpression r m a -> cm ((Symbol -> Maybe (ObjLocation r m)) -> a);
+	bindExpression rr = return (\lookup -> runSymbolExpression (getLoc lookup) rr);
+
 	interpretTopLevelExpression ::
 		(
 		BuildThrow cm (Object r m) r,
@@ -68,11 +81,12 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	interpretTopLevelExpression obj = let {?objType = Type} in do
 		{
 		rr <- assembleTopLevelExpression obj;
-		return (\lookup -> runSymbolExpression (getLoc lookup) rr);
+		bindExpression rr;
 		};
 
 	interpretTopLevelExpressionsEat ::
 		(
+		MonadFix m,FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
@@ -84,7 +98,23 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	interpretTopLevelExpressionsEat eat objs = let {?objType = Type} in do	
 		{
 		rr <- assembleTopLevelExpressionsEat eat objs;
-		return (\lookup -> runSymbolExpression (getLoc lookup) rr);
+		bindExpression rr;
+		};
+
+	interpretTopLevelExpressionsList ::
+		(
+		MonadFix m,FunctorApplyReturn m,
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?macrobindings :: SymbolBindings (Macro cm r m)
+		) =>
+	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
+	interpretTopLevelExpressionsList objs = let {?objType = Type} in do	
+		{
+		rr <- assembleTopLevelExpressionsList objs;
+		bindExpression rr;
 		};
 
 
