@@ -145,28 +145,28 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	currentInputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> () -> m (InputPort Char m);
-	currentInputPortP fsi Type () = return (fsiCurrentInputPort fsi);
+	 () -> m (InputPort Char m);
+	currentInputPortP fsi () = return (fsiCurrentInputPort fsi);
 
 	currentOutputPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> () -> m (OutputPort Char m);
-	currentOutputPortP fsi Type () = return (fsiCurrentOutputPort fsi);
+	 () -> m (OutputPort Char m);
+	currentOutputPortP fsi () = return (fsiCurrentOutputPort fsi);
 
 	currentErrorPortP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> () -> m (OutputPort Char m);
-	currentErrorPortP fsi Type () = return (fsiCurrentErrorPort fsi);
+	 () -> m (OutputPort Char m);
+	currentErrorPortP fsi () = return (fsiCurrentErrorPort fsi);
 
 	openInputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> (SList Char,()) -> m (InputPort Char m);
-	openInputFileP fsi Type (MkSList name,()) = fsiOpenInputFile fsi name;
+	 (SList Char,()) -> m (InputPort Char m);
+	openInputFileP fsi (MkSList name,()) = fsiOpenInputFile fsi name;
 
 	openOutputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> (SList Char,()) -> m (OutputPort Char m);
-	openOutputFileP fsi Type (MkSList name,()) = fsiOpenOutputFile fsi name;
+	 (SList Char,()) -> m (OutputPort Char m);
+	openOutputFileP fsi (MkSList name,()) = fsiOpenOutputFile fsi name;
 
 	pureSystemBindings :: (Scheme m r) =>
 	 PureSystemInterface m r -> Bindings r m -> m (Bindings r m);

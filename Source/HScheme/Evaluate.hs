@@ -68,9 +68,9 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
-	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateP Type (obj,Just bindings) = let  {?bindings = bindings} in evaluate obj;
-	evaluateP Type (obj,Nothing) = evaluate obj;
+	 (Object r m,Maybe (Bindings r m)) -> m (Object r m);
+	evaluateP (obj,Just bindings) = let  {?bindings = bindings} in evaluate obj;
+	evaluateP (obj,Nothing) = evaluate obj;
 
 	evalList ::
 		(
@@ -134,6 +134,6 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		Scheme m r,
 		?bindings :: Bindings r m
 		) =>
-	 Type (r ()) -> () -> m (Bindings r m);
-	currentEnvironmentP Type () = return ?bindings;
+	 () -> m (Bindings r m);
+	currentEnvironmentP () = return ?bindings;
 	}

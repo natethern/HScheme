@@ -28,11 +28,7 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	import Org.Org.Semantic.HBase;
 
 	-- 4.1.6 Assignments
-	setBang ::
-		(
-		FullScheme m r,
-		?bindings :: Bindings r m
-		) =>
+	setBang :: (FullScheme m r,?bindings :: Bindings r m) =>
 	 Symbol -> Object r m -> m ();
 	setBang name obj = case (getBinding ?bindings name) of
 		{
@@ -40,13 +36,9 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		Nothing -> fail ((unSymbol name)++" not defined");
 		};
 	
-	setBangM ::
-		(
-		FullScheme m r,
-		?bindings :: Bindings r m
-		) =>
-	 Type (r ()) -> (Symbol,(Object r m,())) -> m ArgNoneType;
-	setBangM Type (name,(obj,())) = do
+	setBangM :: (FullScheme m r,?bindings :: Bindings r m) =>
+	 (Symbol,(Object r m,())) -> m ArgNoneType;
+	setBangM (name,(obj,())) = do
 		{
 		res <- evaluate obj;
 		setBang name res;
@@ -54,23 +46,23 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 		};
 
 	-- 6.3.2 Pairs and Lists
-	setCarP ::  (FullScheme m r) =>
-	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
-	setCarP Type ((PairObject carLoc _),(obj,())) = do
+	setCarP :: (FullScheme m r,?refType :: Type (r ())) =>
+	 (Object r m,(Object r m,())) -> m ArgNoneType;
+	setCarP ((PairObject carLoc _),(obj,())) = do
 		{
 		set carLoc obj;
 		return MkArgNoneType;
 		};	
-	setCarP Type (_,(obj,())) = fail "not a pair";	
+	setCarP (_,(obj,())) = fail "not a pair";	
 
-	setCdrP ::  (FullScheme m r) =>
-	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
-	setCdrP Type ((PairObject _ cdrLoc),(obj,())) = do
+	setCdrP :: (FullScheme m r,?refType :: Type (r ())) =>
+	 (Object r m,(Object r m,())) -> m ArgNoneType;
+	setCdrP ((PairObject _ cdrLoc),(obj,())) = do
 		{
 		set cdrLoc obj;
 		return MkArgNoneType;
 		};	
-	setCdrP Type (_,(obj,())) = fail "not a pair";	
+	setCdrP (_,(obj,())) = fail "not a pair";	
 
 	-- 6.3.5 Strings
 	getArrayRef :: (Monad m) => Integer -> ArrayList a -> m a;
@@ -78,9 +70,9 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	getArrayRef i arr | i >= convertFromInt (length arr) = fail "array out of range";
 	getArrayRef i arr = return (arr !! (convertToInt i));
 
-	stringSetP :: (FullScheme m r) =>
-	 Type (r ()) -> (SRefArray r Char,(Integer,(Char,()))) -> m ArgNoneType;
-	stringSetP Type (arr,(i,(c,()))) = do
+	stringSetP :: (FullScheme m r,?refType :: Type (r ())) =>
+	 (SRefArray r Char,(Integer,(Char,()))) -> m ArgNoneType;
+	stringSetP (arr,(i,(c,()))) = do
 		{
 		r <- getArrayRef i arr;
 		set r c;

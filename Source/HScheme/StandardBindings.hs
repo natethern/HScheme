@@ -118,7 +118,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"char-number"					(charFuncP getNumber),					-- nonstandard
 		addProcBinding	"char-decimal-digit"			(charFuncP getDecimalDigit),			-- nonstandard
 		addProcBinding	"char->integer"					(charFuncP ordFromStart),
-		addProcBinding	"integer->char"					(\_ (i,()) -> return (failingUnJust (nthFromStart i) :: Char)),
+		addProcBinding	"integer->char"					(\(i,()) -> return (failingUnJust (nthFromStart i) :: Char)),
 
 		-- 6.3.5 Strings
 		addProcBinding	"string?"						isStringP,

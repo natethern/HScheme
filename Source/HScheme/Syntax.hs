@@ -161,13 +161,9 @@ module Org.Org.Semantic.HScheme.Syntax where
 			};
 		};
 
-	caseMatchM ::
-		(
-		Scheme m r,
-		?bindings :: Bindings r m
-		) =>
-	 Type (r ()) -> (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
-	caseMatchM t (argExpr,(literals,cases)) = do
+	caseMatchM :: (Scheme m r,?bindings :: Bindings r m) =>
+	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
+	caseMatchM (argExpr,(literals,cases)) = do
 		{
 		arg <- evaluate argExpr;
 		(subs,expr) <- caseMatch (arg,(literals,cases));
@@ -175,9 +171,9 @@ module Org.Org.Semantic.HScheme.Syntax where
 		let {?bindings = bindings;} in evaluate expr;
 		};
 
-	syntaxRulesM :: (Scheme m r) =>
-	 Type (r ()) -> ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
-	syntaxRulesM Type (literals,rules) = return (\args -> let
+	syntaxRulesM :: (Scheme m r,?refType :: Type (r ())) =>
+	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
+	syntaxRulesM (literals,rules) = return (\args -> let
 		{
 		transform [] = fail "can't match args";
 		transform (((_,pattern),(template,())):rs) = do

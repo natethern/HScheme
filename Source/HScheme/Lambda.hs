@@ -52,8 +52,8 @@ module Org.Org.Semantic.HScheme.Lambda where
 		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
-	 Type (r ()) -> [Object r m] -> m (Object r m);
-	beginM Type objs = begin ?bindings objs;
+	 [Object r m] -> m (Object r m);
+	beginM objs = begin ?bindings objs;
 
 	-- 4.2.2 Binding Constructs
 	accrueBindings ::
@@ -112,16 +112,16 @@ module Org.Org.Semantic.HScheme.Lambda where
 		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
-	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
-	letM Type (newbinds,body) = letf ?bindings newbinds body;
+	 ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
+	letM (newbinds,body) = letf ?bindings newbinds body;
 	
 	letStarM ::
 		(
 		Scheme m r,
 		?bindings		:: Bindings r m
 		) =>
-	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
-	letStarM Type (newbinds,body) = letStar ?bindings newbinds body;
+	 ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
+	letStarM (newbinds,body) = letStar ?bindings newbinds body;
 
 	-- 4.1.4 Procedures
 	matchBinding :: (Scheme m r) =>
@@ -193,8 +193,8 @@ module Org.Org.Semantic.HScheme.Lambda where
 		};
 
 	lambdaM :: (Scheme m r,?bindings :: Bindings r m) =>
-	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
-	lambdaM Type (argBindings,body) = lambda argBindings body;
+	 (Object r m,[Object r m]) -> m (Procedure r m);
+	lambdaM (argBindings,body) = lambda argBindings body;
 
 	-- 6.4 Control Features
 	isProcedure :: (Scheme m r) =>
@@ -202,18 +202,18 @@ module Org.Org.Semantic.HScheme.Lambda where
 	isProcedure (ProcedureObject _) = return True;
 	isProcedure _ = return False;
 
-	isProcedureP :: (Scheme m r) =>
-	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isProcedureP Type (obj,()) = isProcedure obj;
+	isProcedureP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (Object r m,()) -> m Bool;
+	isProcedureP (obj,()) = isProcedure obj;
 	
 	callCCP ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		MonadCont m,
 		?bindings :: Bindings r m
 		) =>
-	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	callCCP Type (proc,()) = callCC (\cont -> proc ?bindings
+	 (Procedure r m,()) -> m (Object r m);
+	callCCP (proc,()) = callCC (\cont -> proc ?bindings
 	  [ProcedureObject (\_ args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;
@@ -222,10 +222,10 @@ module Org.Org.Semantic.HScheme.Lambda where
 	
 	fixP ::
 		(
-		Scheme m r,
+		Scheme m r,?refType :: Type (r ()),
 		MonadFix m,
 		?bindings :: Bindings r m
 		) =>
-	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	fixP Type (proc,()) = mfix (\a -> proc ?bindings [a]);
+	 (Procedure r m,()) -> m (Object r m);
+	fixP (proc,()) = mfix (\a -> proc ?bindings [a]);
 	}

@@ -43,12 +43,13 @@ module Org.Org.Semantic.HScheme.Bindings where
 		MonadIsA m (Object r m) ret
 		) =>
 	 String ->
-	 ((?bindings :: Bindings r m) => Type (r ()) -> args -> m ret) ->
+	 ((?bindings :: Bindings r m,?refType :: Type (r ())) => args -> m ret) ->
 	 Bindings r m ->
 	 m (Bindings r m);
 	addProcBinding name p b = do
 		{
-		addBinding (MkSymbol name) (ProcedureObject (convertToProcedure (p Type))) b;
+		addBinding (MkSymbol name)
+		 (ProcedureObject (convertToProcedure (let {?refType = Type} in p))) b;
 		};
 
 	addMacroBinding ::
@@ -58,12 +59,13 @@ module Org.Org.Semantic.HScheme.Bindings where
 		MonadIsA m (Object r m) ret
 		) =>
 	 String ->
-	 ((?bindings :: Bindings r m) => Type (r ()) -> args -> m ret) ->
+	 ((?bindings :: Bindings r m,?refType :: Type (r ())) => args -> m ret) ->
 	 Bindings r m ->
 	 m (Bindings r m);
 	addMacroBinding name p b = do
 		{
-		addBinding (MkSymbol name) (MacroObject (convertToMacro (p Type))) b;
+		addBinding (MkSymbol name)
+		 (MacroObject (convertToMacro (let {?refType = Type} in p))) b;
 		};
 
 	addTopLevelMacroBinding ::
@@ -81,8 +83,8 @@ module Org.Org.Semantic.HScheme.Bindings where
 		addBinding (MkSymbol name) (TopLevelMacroObject (convertToTopLevelMacro p)) b;
 		};
 
-	exitFuncProc :: (Monad m) => (a -> m b) -> (Type (r ()) -> a -> m ());
-	exitFuncProc exitFunc Type a = do
+	exitFuncProc :: (Monad m) => (a -> m b) -> (a -> m ());
+	exitFuncProc exitFunc a = do
 		{
 		exitFunc a;
 		return ();
