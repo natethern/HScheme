@@ -217,7 +217,7 @@ module Org.Org.Semantic.HScheme.Compile where
 		{
 		binds <- compileBinds bindList;
 		body <- beginM bodyObj;
-		return (fSubstRecursive (fmap convertToLocationBinding binds) body);
+		return (fSubstMapRecursive substMap binds body);
 		};
 
 {--
