@@ -215,6 +215,27 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(specialCharParse ",@" (MkSymbol "unquote-splicing")) |||
 		(specialCharParse "," (MkSymbol "unquote"));
 
+	characterConstantParse :: (MonadOrParser (Maybe Char) p) =>
+	 p Char;
+	characterConstantParse = (do
+		{
+		isStringParse "space";
+		return ' ';
+		}) ||| (do
+		{
+		isStringParse "newline";
+		return '\n';
+		}) ||| (do
+		{
+		isStringParse "tab";
+		return '\t';
+		}) ||| (do
+		{
+		(isCharacterParse 'u' ||| isCharacterParse 'U');
+		i <- readHexDigits;
+		return (nthWrap i);
+		}) ||| characterParse;
+
 	hashLiteralParse ::
 		(
 		Scheme m r,
@@ -235,7 +256,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			}) ||| (do
 			{
 			isCharacterParse '\\';
-			c <- mOrFail "# literal" characterParse;
+			c <- mOrFail "# literal" characterConstantParse;
 			return (CharObject c);
 			}));
 		};
@@ -245,7 +266,29 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	escapedCharInStringParse = do
 		{
 		isCharacterParse '\\';
-		characterParse;
+		(do
+			{
+			isCharacterParse 'n';
+			return '\n';
+			})
+		||| (do
+			{
+			isCharacterParse 't';
+			return '\t';
+			})
+		||| (do
+			{
+			isCharacterParse 'u';
+			i <- readHexFixedDigits 4;
+			return (nthWrap i);
+			})
+		||| (do
+			{
+			isCharacterParse 'U';
+			i <- readHexFixedDigits 6;
+			return (nthWrap i);
+			})
+		||| characterParse;
 		};
 
 	charInStringParse :: (MonadOrParser (Maybe Char) p) =>

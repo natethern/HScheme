@@ -260,27 +260,21 @@ module Org.Org.Semantic.HScheme.Procedures where
 		r <- printVector as;
 		return (f++" "++r);
 		};
-	
-	hexDigit n = hd (mod n 16) where
-		{
-		hd i | i < 10 = succNWrap i '0';
-		hd i = succNWrap (i-10) 'A';
-		};
-
-	hexCode4 i =
-	 [hexDigit (div i 0x1000)] ++
-	 [hexDigit (div i 0x100)] ++
-	 [hexDigit (div i 0x10)] ++
-	 [hexDigit i];
 
 	charToString :: Char -> String;
-	charToString c | (ordFromStart c) < 32 = "#\\u"++(hexCode4 (ordFromStart c));
-	charToString c | (ordFromStart c) > 127 = "#\\u"++(hexCode4 (ordFromStart c));
+	charToString c | (ordFromStart c) >= 0x10000 = "#\\U"++(showFixedHex True 6 (ordFromStart c));
+	charToString c | (ordFromStart c) > 126 = "#\\u"++(showFixedHex True 4 (ordFromStart c));
+	charToString c | (ordFromStart c) < 32 = "#\\u"++(showFixedHex True 4 (ordFromStart c));
 	charToString c = "#\\"++[c];
-	
+
 	escapeChar :: Char -> String;
 	escapeChar '\\' = "\\\\";
-	escapeChar '\"' = "\\\"";
+	escapeChar '"' = "\\\"";
+	escapeChar '\n' = "\\n";
+	escapeChar '\t' = "\\t";
+	escapeChar c | (ordFromStart c) >= 0x10000 = "\\U"++(showFixedHex True 6 (ordFromStart c));
+	escapeChar c | (ordFromStart c) > 126 = "\\u"++(showFixedHex True 4 (ordFromStart c));
+	escapeChar c | (ordFromStart c) < 32 = "\\u"++(showFixedHex True 4 (ordFromStart c));
 	escapeChar c = [c];
 
 	schemeQuote :: String -> String;
@@ -289,7 +283,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		schemeQuote' [] = [];
 		schemeQuote' (c:cs) = (escapeChar c) ++ (schemeQuote' cs)
 		};
-	
+
 	printString :: (Scheme m r) =>
 	 [r Char] -> m String;
 	printString [] = return "";
@@ -299,7 +293,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		r <- printString cs;
 		return ((escapeChar c)++r);
 		};	
-	
+
 	toString :: (Scheme m r) =>
 	 Object r m -> m String;
 	toString NilObject				= return "()";
