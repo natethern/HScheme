@@ -177,6 +177,7 @@ test/%.scm.pure.out: test/%.scm bin/$(COMMAND_REL)
 
 test-pure:	\
  test/constants.scm.pure.diff	\
+ test/parse-num.scm.pure.diff	\
  test/helloworld.scm.pure.diff	\
  test/several.scm.pure.diff	\
  test/equal.scm.pure.diff	\
@@ -196,6 +197,7 @@ test-pure:	\
 
 test-full:	\
  test/constants.scm.full.diff	\
+ test/parse-num.scm.full.diff	\
  test/helloworld.scm.full.diff	\
  test/several.scm.full.diff	\
  test/equal.scm.full.diff	\
@@ -212,6 +214,7 @@ test-full:	\
  test/case-match.scm.full.diff	\
  test/vector.scm.full.diff
 	time bin/$(COMMAND_REL) --noinit init.full.scm test/helloworld.scm
+	time bin/$(COMMAND_REL) --noinit init.full.scm test/report-examples.scm
 
 testprof: $(COMMAND_PROF).prof
 

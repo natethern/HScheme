@@ -24,6 +24,8 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	{
 	import Org.Org.Semantic.HScheme.Parse.SExpChars;
 	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase.Text.Properties.Case;
+	import Org.Org.Semantic.HBase.Text.Properties.Misc;
 	import Org.Org.Semantic.HBase;
 
 	class
@@ -136,54 +138,223 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		return (toLowerCase n:ns);
 		};
 
-	digitParse :: (MonadOrParser Char p) =>
-	 p Integer;
-	digitParse = do
+	prefixParse :: (MonadOrParser Char p) =>
+	 p Char;
+	prefixParse = do
 		{
-		c <- tokenParse;
-		case (getDecimalDigit c) of
+		isTokenParse '#';
+		tokenParse;
+		};
+
+	setMParse :: (
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 (Maybe a) -> a -> p (Maybe a);
+	setMParse Nothing a = return (Just a);
+	setMParse (Just _) _ = unexpectedCharError "number prefix";
+
+	setRadix :: (
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 (Maybe Word8,Maybe Bool) -> Word8 -> p (Maybe Word8,Maybe Bool);
+	setRadix (mr,me) r = do
+		{
+		mr' <- setMParse mr r;
+		return (mr',me);
+		};
+
+	setExactness :: (
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 (Maybe Word8,Maybe Bool) -> Bool -> p (Maybe Word8,Maybe Bool);
+	setExactness (mr,me) e = do
+		{
+		me' <- setMParse me e;
+		return (mr,me');
+		};
+
+	preficesParse :: (
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 (Maybe Word8,Maybe Bool) -> p (Maybe Word8,Maybe Bool);
+	preficesParse mm = (do
+		{
+		c <- prefixParse;
+		mm' <- case c of
 			{
-			Nothing -> mzero;
-			Just n -> return n;
+			'b' -> setRadix mm 2;
+			'o' -> setRadix mm 8;
+			'd' -> setRadix mm 10;
+			'x' -> setRadix mm 16;
+			'i' -> setExactness mm False;
+			'e' -> setExactness mm True;
+			_ -> mzero;
 			};
-		};
+		preficesParse mm';
+		}) ||| return mm;
 
-	assembleDigits :: Integer -> [Integer] -> Integer;
-	assembleDigits i (n:ns) = assembleDigits (i*10 + n) ns;
-	assembleDigits i [] = i;
+	digitParse :: (MonadOrParser Char p,?radix :: Word8) =>
+	 p Word8;
+	digitParse = let {?getDecimalDigit=Just getDecimalDigit;} in readDigit;
 
-	digitsParse :: (MonadOrParser Char p) =>
-	 p Integer;
-	digitsParse = do
+	digitsPointParse :: (MonadOrParser Char p,?radix :: Word8) =>
+	 p ([Word8],Maybe [Word8]);
+	digitsPointParse = (do
 		{
-		digits <- mOneOrMore digitParse;
-		return (assembleDigits 0 digits);
+		isTokenParse '.';
+		ds <- mZeroOrMore digitParse;
+		return ([],Just ds);
+		}) ||| (do
+		{
+		i <- digitParse;
+		(is,mds) <- digitsPointParse;
+		return (i:is,mds);
+		}) ||| (return ([],Nothing));
+
+	hashesPointParse :: (MonadOrParser Char p) =>
+	 p ([Word8],Bool);
+	hashesPointParse = (do
+		{
+		isTokenParse '.';
+		mZeroOrMore (isTokenParse '#');
+		return ([],False);
+		}) ||| (do
+		{
+		isTokenParse '#';
+		(is,mds) <- hashesPointParse;
+		return (0:is,False);
+		}) ||| (return ([],True));
+
+	radixPower :: Word8 -> Int -> Integer;
+	radixPower 2 n = bitShift (convert n) 1;
+	radixPower 4 n = bitShift (convert n*2) 1;
+	radixPower 8 n = bitShift (convert n*3) 1;
+	radixPower 16 n = bitShift (convert n*4) 1;
+	radixPower p n = (convert p) ^ (convert n);
+
+	convertRational :: (?exactness :: Maybe Bool) =>
+	 Bool -> NaNExtended Rational -> EIReal;
+	convertRational exactnessGuess r = if unJust exactnessGuess ?exactness
+	 then convert (fmap Finite r)
+	 else convert (approximate (fmap Finite r) :: Double);
+
+	uintegerParse :: (MonadOrParser Char p,?radix :: Word8) =>
+	 p (Integer,Bool);
+	uintegerParse = do
+		{
+		ds <- mOneOrMore digitParse;
+		hs <- mZeroOrMore (do
+			{
+			isTokenParse '#';
+			return 0;
+			});
+		return (addUpDigits 0 (ds ++ hs),case hs of
+			{
+			[] -> True;
+			(_:_) -> False;
+			});
 		};
-	
-	plusDigitsParse :: (MonadOrParser Char p) =>
-	 p Integer;
-	plusDigitsParse = do
+
+	decimalParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
+	 p EIReal;
+	decimalParse = do
+		{
+		(i,md) <- digitsPointParse;
+		(pre,post,e) <- case md of
+			{
+			Just d -> do
+				{
+				mZeroOrMore (isTokenParse '#');
+				return (i,d,False);
+				};
+			Nothing -> case i of
+				{
+				[] -> mzero;	-- because digitsPointParse didn't match anything at all
+				_ -> do
+					{
+					(is,e) <- hashesPointParse;
+					return (i++is,[],e);
+					};
+				};
+			};
+		return (convertRational e (divide (radixPower ?radix (length post)) (addUpDigits 0 (pre ++ post) :: Integer)));
+		};
+
+	urealParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
+	 p EIReal;
+	urealParse = (do
+		{
+		(i1,e1) <- uintegerParse;
+		isTokenParse '/';
+		(i2,e2) <- uintegerParse;
+		return (convertRational (e1 && e2) (divide i2 i1));
+		}) ||| decimalParse;
+
+	realParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
+	 p EIReal;
+	realParse = (do
 		{
 		isTokenParse '+';
-		digitsParse;
-		};
-	
-	minusDigitsParse :: (MonadOrParser Char p) =>
-	 p Integer;
-	minusDigitsParse = do
+		urealParse;
+		}) ||| (do
 		{
 		isTokenParse '-';
-		n <- digitsParse;
-		return (- n);
+		n <- urealParse;
+		return (negate n);
+		}) ||| urealParse;
+
+	imaginaryParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
+	 p EIReal;
+	imaginaryParse = do
+		{
+		neg <- (isTokenParse '+' >> return False) ||| (isTokenParse '-' >> return True);
+		mn <- mOptional urealParse;
+		isTokenParse 'i';
+		return (let {n = unJust 1 mn} in if neg then negate n else n);
 		};
 
-	integerParse :: (MonadOrParser Char p) =>
-	 p Integer;
-	integerParse = digitsParse ||| plusDigitsParse ||| minusDigitsParse;
-
-	numberParse :: (MonadOrParser Char p) =>
+	complexParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
 	 p Number;
-	numberParse = integerParse >>= (return . fromInteger);
+	complexParse = (do
+		{
+		n1 <- realParse;
+		(do
+			{
+			isTokenParse '@';
+			n2 <- realParse;
+			return (polarComplex n1 n2);
+			}) |||
+		(do
+			{
+			n2 <- imaginaryParse;
+			return (rectComplex n1 n2);
+			}) |||
+		(return (rectComplex n1 zero));
+		}) ||| (do
+		{
+		n <- imaginaryParse;
+		return (rectComplex zero n);
+		});
+
+	numberParse :: (
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 p Number;
+	numberParse = do
+		{
+		(mr,me) <- preficesParse (Nothing,Nothing);
+		let
+			{
+			?radix = unJust 10 mr;
+			?exactness = me;
+			} in
+		 complexParse;
+		};
 
 	listContentsParse ::
 		(
@@ -219,7 +390,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		isTokenParse '(';
 		list <- listContentsParse;
 		optionalWhitespaceParse;
-		mOrUnexpectedCharError "list" (isTokenParse ')');
+		mOrUnexpectedCharError "list end" (isTokenParse ')');
 		return list;
 		};
 	
@@ -429,7 +600,8 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		 hashLiteralParse		|||
 		 quotedParse			|||
 		 (stringLiteralParse >>= (plift . getConvert . MkSList))	|||
-		 listParse				;
+		 listParse				|||
+		 ((streamEndParse ||| (unexpectedCharError "input")) >> mzero);
 		};
 
 	expressionOrEndParse :: (SchemeParser cm m r p) =>

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Parse.SExpChars where
 	{
+	import Org.Org.Semantic.HBase.Text.Properties.GeneralCategory;
 	import Org.Org.Semantic.HBase;
 
 {--

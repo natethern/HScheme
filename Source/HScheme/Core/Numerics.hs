@@ -59,7 +59,7 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 
 	showRational :: Rational -> String;
 	showRational r | (denominator r ==1) = show (numerator r);
-	showRational r = (show (numerator r)) ++"%"++ (show (denominator r));
+	showRational r = (show (numerator r)) ++"/"++ (show (denominator r));
 
 	showInfRational :: InfExtended Rational -> String;
 	showInfRational Infinity = "infinity";
@@ -69,8 +69,15 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 	showEIReal (ExactReal ir) = showInfRational ir;
 	showEIReal (InexactReal d) = show d;
 
+	showImagPart :: EIReal -> String;
+	showImagPart (ExactReal 0) = "";
+	showImagPart (ExactReal 1) = "+i";
+	showImagPart (ExactReal (-1)) = "-i";
+	showImagPart x | isNegative x = "-" ++ (showEIReal (negate x)) ++ "i";
+	showImagPart x = "+" ++ (showEIReal x) ++ "i";
+
 	showNumber :: Number -> String;
-	showNumber (r :+ i) | isZero i = showEIReal r;
-	showNumber (r :+ i) | isZero r = (showEIReal i) ++ "i";
-	showNumber (r :+ i) = (showEIReal r) ++ "+" ++ (showEIReal i) ++ "i";
+	showNumber ((ExactReal 0) :+ (ExactReal 0)) = "0";
+	showNumber ((ExactReal 0) :+ i) = showImagPart i;
+	showNumber (r :+ i) = (showEIReal r) ++ (showImagPart i);
 	}

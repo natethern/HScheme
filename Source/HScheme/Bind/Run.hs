@@ -27,6 +27,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	import Org.Org.Semantic.HScheme.Parse;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase.Text.Properties.Case;
+	import Org.Org.Semantic.HBase.Text.Properties.Misc;
 	import Org.Org.Semantic.HBase;
 
 	loop :: a;

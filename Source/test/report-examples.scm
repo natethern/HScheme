@@ -31,10 +31,13 @@
 (let ((g (gen-loser))) (eqv? g g))		;===>  #t
 (eqv? (gen-loser) (gen-loser))			;===>  unspecified
 
-(letrec ((f (lambda () (if (eqv? f g) 'both 'f)))
-         (g (lambda () (if (eqv? f g) 'both 'g))))
-  (eqv? f g))
-                                ;===>  unspecified
+(letrec
+	(
+		(f (lambda () (if (eqv? f g) 'both 'f)))
+		(g (lambda () (if (eqv? f g) 'both 'g)))
+	)
+	(eqv? f g)
+)										;===>  unspecified
 
 (letrec
 	(
@@ -44,37 +47,37 @@
 	(eqv? f g)
 )										;===>  #f
 
-(eqv? '(a) '(a))                         ;===>  unspecified
-(eqv? "a" "a")                           ;===>  unspecified
-(eqv? '(b) (cdr '(a b)))                 ;===>  unspecified
-(let ((x '(a)))  (eqv? x x))                            ;===>  #t
+(eqv? '(a) '(a))						;===>  unspecified
+(eqv? "a" "a")							;===>  unspecified
+(eqv? '(b) (cdr '(a b)))				;===>  unspecified
+(let ((x '(a)))  (eqv? x x))			;===>  #t
 
 "procedure:  (eq? obj1 obj2)"
-(eq? 'a 'a)                             ;===>  #t
-(eq? '(a) '(a))                         ;===>  unspecified
-(eq? (list 'a) (list 'a))               ;===>  #f
-(eq? "a" "a")                           ;===>  unspecified
-(eq? "" "")                             ;===>  unspecified
-(eq? '() '())                           ;===>  #t
-(eq? 2 2)                               ;===>  unspecified
-(eq? #\A #\A)         ;===>  unspecified
-(eq? car car)                           ;===>  #t
+(eq? 'a 'a)								;===>  #t
+(eq? '(a) '(a))							;===>  unspecified
+(eq? (list 'a) (list 'a))				;===>  #f
+(eq? "a" "a")							;===>  unspecified
+(eq? "" "")								;===>  unspecified
+(eq? '() '())							;===>  #t
+(eq? 2 2)								;===>  unspecified
+(eq? #\A #\A)							;===>  unspecified
+(eq? car car)							;===>  #t
 (let ((n (+ 2 3))) (eq? n n))			;===>  unspecified
 (let ((x '(a))) (eq? x x))				;===>  #t
 (let ((x '#())) (eq? x x))				;===>  #t
 (let ((p (lambda (x) x))) (eq? p p))	;===>  #t
 
 "library procedure:  (equal? obj1 obj2)"
-(equal? 'a 'a)                          ;===>  #t
-(equal? '(a) '(a))                      ;===>  #t
+(equal? 'a 'a)							;===>  #t
+(equal? '(a) '(a))						;===>  #t
 (equal? '(a (b) c)
-        '(a (b) c))                     ;===>  #t
-(equal? "abc" "abc")                    ;===>  #t
-(equal? 2 2)                            ;===>  #t
+        '(a (b) c))						;===>  #t
+(equal? "abc" "abc")					;===>  #t
+(equal? 2 2)							;===>  #t
 (equal? (make-vector 5 'a)
-        (make-vector 5 'a))             ;===>  #t
+        (make-vector 5 'a))				;===>  #t
 (equal? (lambda (x) x)
-        (lambda (y) y))          ;===>  unspecified
+        (lambda (y) y))					;===>  unspecified
 
 
 "6.2.5  Numerical operations"
