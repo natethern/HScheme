@@ -20,11 +20,7 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Interpret.SymbolExpression
-	(
-	SymbolExpression,
-	runSymbolExpression,runSymbolExpressionF,runSymbolExpressionM
-	) where
+module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HBase;
@@ -59,35 +55,9 @@ module Org.Org.Semantic.HScheme.Interpret.SymbolExpression
 		fAbstract sym (OpenSymbolExpression sym' sp) = OpenSymbolExpression sym' (fmap (\a val' val -> a val val') (fAbstract sym sp));
 		};
 
-	runSymbolExpression ::
-	 (sym -> val) ->
-	 SymbolExpression sym val a ->
-	 a;
-	runSymbolExpression resolve (ClosedSymbolExpression a) = a;
-	runSymbolExpression resolve (OpenSymbolExpression sym sp) = runSymbolExpression resolve sp (resolve sym);
-
-	runSymbolExpressionF :: (FunctorApplyReturn f) =>
-	 (sym -> f val) ->
-	 SymbolExpression sym val a ->
-	 f a;
-	runSymbolExpressionF resolve (ClosedSymbolExpression a) = return' a;
-	runSymbolExpressionF resolve (OpenSymbolExpression sym sp) = liftF2
-	 (\val oa -> oa val) (resolve sym) (runSymbolExpressionF resolve sp);
-
-	liftM2 :: (Monad m) =>
-	 (a -> b -> r) -> (m a -> m b -> m r);
-	liftM2 abr ma mb = do
+	instance (Eq sym) => RunnableFunctorLambda sym val (SymbolExpression sym val) where
 		{
-		a <- ma;
-		b <- mb;
-		return (abr a b);
+		runLambda resolve (ClosedSymbolExpression a) = a;
+		runLambda resolve (OpenSymbolExpression sym sp) = runLambda resolve sp (resolve sym);
 		};
-
-	runSymbolExpressionM :: (Monad f) =>
-	 (sym -> f val) ->
-	 SymbolExpression sym val a ->
-	 f a;
-	runSymbolExpressionM resolve (ClosedSymbolExpression a) = return a;
-	runSymbolExpressionM resolve (OpenSymbolExpression sym sp) = liftM2
-	 (\val oa -> oa val) (resolve sym) (runSymbolExpressionM resolve sp);
 	}

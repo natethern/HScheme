@@ -519,9 +519,9 @@ Org/Org/Semantic/HScheme/Interpret/Interpret.o Org/Org/Semantic/HScheme/Interpre
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.q_hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi

@@ -20,11 +20,7 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression
-	(
-	FuncSymbolExpression,
-	runFuncSymbolExpression
-	) where
+module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression(FuncSymbolExpression) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HBase;
@@ -55,9 +51,8 @@ module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression
 		fAbstract abssym (MkFuncSymbolExpression sva) = MkFuncSymbolExpression (\sv v -> sva (\s -> if s == abssym then v else sv s));
 		};
 
-	runFuncSymbolExpression ::
-	 (sym -> val) ->
-	 FuncSymbolExpression sym val a ->
-	 a;
-	runFuncSymbolExpression resolve (MkFuncSymbolExpression sva) = sva resolve;
+	instance (Eq sym) => RunnableFunctorLambda sym val (FuncSymbolExpression sym val) where
+		{
+		runLambda resolve (MkFuncSymbolExpression sva) = sva resolve;
+		};
 	}

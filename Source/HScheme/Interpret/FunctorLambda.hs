@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	(
-	FunctorLambda(..),
+	FunctorLambda(..),RunnableFunctorLambda(..),
 	fSubst,fSubstMap,
 	fSubstMapSequential,fSubstMapSeparate,fSubstMapRecursive
 	) where
@@ -53,6 +53,15 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	 ((val -> r) -> a -> r) -> [(sym,f a)] -> f r -> f r;
 	fSubstMapSequential _ [] bodyExpr = bodyExpr;
 	fSubstMapSequential map ((sym,valueExpr):binds) bodyExpr = fSubstMap map sym valueExpr (fSubstMapSequential map binds bodyExpr);
+
+
+	-- RunnableFunctorLambda
+
+	class (FunctorLambda sym val f) =>
+	 RunnableFunctorLambda sym val f | f -> sym val where
+		{
+		runLambda :: (sym -> val) -> f a -> a;
+		};
 
 
 	-- List
