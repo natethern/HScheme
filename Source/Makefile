@@ -42,9 +42,12 @@ HDOC			= haddock -h
 PACKAGENAME		= HScheme
 PACKAGEFILE		= $(PACKAGENAME).ghc-pkg
 LIBNAME			= $(PACKAGENAME)
-LIBFILE_REL		= lib$(LIBNAME).a
-LIBFILE_PROF	= lib$(LIBNAME)_p.a
-LIBFILE_QUICK	= lib$(LIBNAME)_q.a
+LIBNAME_REL		= $(LIBNAME)
+LIBNAME_PROF	= $(LIBNAME)_p
+LIBNAME_QUICK	= $(LIBNAME)_q
+LIBFILE_REL		= lib$(LIBNAME_REL).a
+LIBFILE_PROF	= lib$(LIBNAME_PROF).a
+LIBFILE_QUICK	= lib$(LIBNAME_QUICK).a
 HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
 COMMAND_REL		= hscheme
@@ -229,19 +232,19 @@ build: $(LIBFILE_QUICK) $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_QUICK) bin/
 cgi: interpret.cgi
 
 interpret.cgi: CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
-	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
+	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
 
 bin/$(COMMAND_REL): BatchMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	mkdir -p bin
-	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
+	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
 
 bin/$(COMMAND_PROF): BatchMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
 	mkdir -p bin
-	$(LDH) $(HCPROFOPTS) $(filter %.p_o,$^) $(LIBFILE_PROF) $(LDFLAGS) -o $@
+	$(LDH) $(HCPROFOPTS) $(filter %.p_o,$^) -L. -l$(LIBNAME_PROF) $(LDFLAGS) -o $@
 
 bin/$(COMMAND_QUICK): BatchMain.q_o $(LIBFILE_QUICK) $(libdir)/libHBase.a
 	mkdir -p bin
-	$(LDH) $(filter %.q_o,$^) $(LIBFILE_QUICK) $(LDFLAGS) -o $@
+	$(LDH) $(filter %.q_o,$^) -L. -l$(LIBNAME_QUICK) $(LDFLAGS) -o $@
 
 $(LIBFILE_REL): $(patsubst %.hs,%.o,$(LIB_HC_SRCS))
 	rm -f $@
@@ -267,7 +270,7 @@ clean: haskellclean
 	rm -rf Doc bin
 	rm -f interpret.cgi
 	rm -f *.prof
-	rm -f $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE)
+	rm -f $(LIBFILE_QUICK) $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE)
 
 haskellclean: $(HROOT)
 	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.hi $${ff}.o $${ff}.p_hi $${ff}.p_o $${ff}.q_hi $${ff}.q_o; done

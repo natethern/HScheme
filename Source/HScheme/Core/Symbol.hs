@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Core.Symbol where
 	{
 	import Org.Org.Semantic.HBase;
 
-	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ordered,Eq);
+	newtype Symbol = MkSymbol {unSymbol :: String} deriving (MaybeOrdered,Ordered,Eq);
 
 	instance Show Symbol where
 		{
