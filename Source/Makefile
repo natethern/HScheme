@@ -24,9 +24,9 @@ HC				= ghc
 HCI				= ghci
 HCPACKAGES		= -package data
 HCIMPORTDIRS	= -i. -iCommon
-HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances
+HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
-LDH				= $(HC) $(HCPACKAGES)
+LDH				= $(HC) -pgml$(CC) $(HCPACKAGES)
 LDFLAGS			=
 
 HC_SRCS			= \
