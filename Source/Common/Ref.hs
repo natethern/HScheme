@@ -20,21 +20,36 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Ref where
 	{
-	data Ref m a = MkRef
+	class (Monad m) => MonadReference m r | r -> m where
 		{
-		get :: m a,
-		set :: a -> m ()
+		get :: forall a. r a -> m a;
+		set :: forall a. r a -> a -> m ();
 		};
 
-	modify :: (Monad m) => Ref m a -> (a -> m a) -> m ();
+	modify :: (MonadReference m r) => r a -> (a -> m a) -> m ();
 	modify ref map = do
 		{
 		a <- get ref;
 		a' <- map a;
 		set ref a;
 		};
+	
+	data Ref m a = MkRef
+		{
+		getRef :: m a,
+		setRef :: a -> m ()
+		};
 
-	refBind :: (Monad m) => (m a) -> (a -> Ref m b) -> Ref m b;
+	instance (Monad m) => MonadReference m (Ref m) where
+		{
+		get = getRef;
+		set = setRef;
+		};
+
+	toRef :: (MonadReference m r) => r a -> Ref m a;
+	toRef r = MkRef (get r) (set r);
+
+	refBind :: (MonadReference m r) => (m a) -> (a -> r b) -> Ref m b;
 	refBind ma arb = MkRef
 		(			ma >>= (\a -> get		(arb a)		))
 		(\b ->		ma >>= (\a -> set		(arb a) b	));

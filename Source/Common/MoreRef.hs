@@ -42,10 +42,14 @@ module MoreRef where
 		newReference   :: a -> m (r a);
 		};
 
-	class (MonadCreatableReference m r) => MonadStandardReference m r | m -> r where
+	class (MonadCreatableReference m r) => MonadStandardReference m r | m -> r;
+
+	newStandardReference :: (MonadStandardReference m r) => a -> m (r a);
+	newStandardReference = newReference;
+
+	class (MonadReference m r) => MonadEqualReference m r where
 		{
-		newStandardReference   :: a -> m (r a);
-		newStandardReference = newReference;
+		getEqualReference :: r a -> r a -> m Bool;
 		};
 
 	newRef :: (MonadStandardReference m r) => a -> m (Ref m a);
@@ -68,6 +72,11 @@ module MoreRef where
 
 	instance MonadStandardReference IO IORef;
 
+	instance MonadEqualReference IO IORef where
+		{
+		getEqualReference a b = return (a == b);
+		};
+
 	instance MonadReference (ST s) (STRef s) where
 		{
 		get = readSTRef;
@@ -80,4 +89,9 @@ module MoreRef where
 		};
 
 	instance MonadStandardReference (ST s) (STRef s);
+
+	instance MonadEqualReference (ST s) (STRef s) where
+		{
+		getEqualReference a b = return (a == b);
+		};
 	}
