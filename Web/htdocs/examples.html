@@ -7,14 +7,14 @@
 <BODY>
 
 <H1>HScheme Examples</H1>
-<H2>10,000 Factorial</H2>
+<H2>1000 Factorial</H2>
 <FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
 <TEXTAREA NAME="input" ROWS="7" COLS="80">
 (define fact (lambda (x)
   (if (equal? x 0) 1 (* x (fact (- x 1))))
 ))
 
-(fact 10000)
+(fact 1000)
 </TEXTAREA><BR>
 <INPUT TYPE="RADIO" NAME="flavour" VALUE="full"> full
 <INPUT TYPE="RADIO" NAME="flavour" VALUE="pure" CHECKED> pure
