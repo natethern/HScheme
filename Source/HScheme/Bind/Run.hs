@@ -146,7 +146,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 		-- 6.2.6 Numerical input and output
 		addProcBinding	"number->string"				(unaryP showNumber),
-		addProcBinding	"string->number"				parseNumberOnlyFromString,
+		addProcBinding	"string->number"				stringToNumberP,
 
 		-- 6.3.1 Booleans
 		addProcBinding	"not"							notP,
@@ -161,7 +161,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		--				"set-cdr!" 						Full
 		--				"caar" etc.						init.pure.scm
 		addProcBinding	"null?"							isNilP,
-		addProcBinding	"list?"							isListP,
+		--				"list?"							init.pure.scm
 		addProcBinding	"list"							listP,
 		--				"length" 						init.pure.scm
 		--				"append"						init.pure.scm

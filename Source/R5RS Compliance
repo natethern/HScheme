@@ -1,0 +1,3 @@
+list? loops on circular lists
+procedures always compare false
+various maths functions return exact results when R5RS prefers inexact

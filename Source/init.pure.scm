@@ -78,6 +78,14 @@
 (define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
 (define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
 
+(define (list? x)
+	(case-match x ()
+		(() #t)
+		((a . b) (list? b))
+		(a #f)
+	)
+)
+
 (define length (lambda (x)
 	(if (null? x) 0 (+ (length (cdr x)) 1))
 ))

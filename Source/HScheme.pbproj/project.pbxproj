@@ -61,6 +61,7 @@
 		ABAD36B804A4020700A80103 = {
 			children = (
 				ABAD378F04A403EE00A80103,
+				ABCE423304C1152600A80103,
 				ABAD374A04A403EE00A80103,
 				ABAD378704A403EE00A80103,
 				ABAD37B304A4053000A80103,
@@ -893,6 +894,12 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			path = "report-examples.scm.ref";
+			refType = 4;
+		};
+		ABCE423304C1152600A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "R5RS Compliance";
 			refType = 4;
 		};
 	};

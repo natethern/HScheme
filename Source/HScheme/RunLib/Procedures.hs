@@ -60,21 +60,10 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	isNilP (NilObject,()) = return True;
 	isNilP (_,()) = return False;
 
-	isListP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m Bool;
-	isListP (NilObject,()) = return True;
-	isListP (PairObject _ _,()) = return True;
-	isListP (_,()) = return False;
-
 	listP ::  (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m [Object r m];
 	listP list = return list;
 
-{-
-	appendP ::  (Scheme m r,?objType :: Type (Object r m)) =>
-	 [[Object r m]] -> m [Object r m];
-	appendP listlist = return (concatenateList listlist);
--}
 
 	-- 6.3.3 Symbols
 	isSymbolP :: (Scheme m r,?objType :: Type (Object r m)) =>
@@ -133,17 +122,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		rs <- makeRefList i c;
 		return (MkSRefList rs);
 		};
-{--
-	makeList :: (Monad m) =>
-	 (a -> m b) -> [a] -> m [b];
-	makeList f [] = return [];
-	makeList f (a:as) = do
-		{
-		items <- makeList f as;
-		item <- f a;
-		return (item:items);
-		};
---}
+
 	stringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Char] -> m (SList Char);
 	stringP cs = return (MkSList cs);

@@ -320,7 +320,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 
 			rat :: Rational;
 			rat = multiply (radixPower offset) fullNum;
-			} in convertRational e (Number rat));
+			} in convertRational (e && not (isJust mexp)) (Number rat));
 		};
 
 	urealParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
@@ -375,21 +375,29 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		(return (rectComplex n1 zero));
 		});
 
+	radixNumberParse ::
+		(
+		?objType :: Type (Object r m),
+		SchemeParser cm m r p
+		) =>
+	 Word8 -> p Number;
+	radixNumberParse radix = do
+		{
+		(mr,me) <- preficesParse (Nothing,Nothing);
+		let
+			{
+			?radix = unJust radix mr;
+			?exactness = me;
+			} in
+		 complexParse;
+		};
+
 	numberParse :: (
 		?objType :: Type (Object r m),
 		SchemeParser cm m r p
 		) =>
 	 p Number;
-	numberParse = do
-		{
-		(mr,me) <- preficesParse (Nothing,Nothing);
-		let
-			{
-			?radix = unJust 10 mr;
-			?exactness = me;
-			} in
-		 complexParse;
-		};
+	numberParse = radixNumberParse 10;
 
 	listContentsParse ::
 		(
@@ -662,10 +670,22 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	parseFromString :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
-
+{-
 	parseNumberOnlyFromString :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 String -> m (Maybe Number);
 	parseNumberOnlyFromString text = runParserOnlyString text numberParse;
+-}
+	stringToNumberP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (SList Char,Maybe Word8) -> m (Either Number Bool);
+	stringToNumberP (MkSList s,mradix) = do
+		{
+		mn <- runParserOnlyString s (radixNumberParse (unJust 10 mradix));
+		return (case mn of
+			{
+			Just n -> Left n;
+			Nothing -> Right False;
+			});
+		};
 
 	parseAllFromString :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
 	 String ->

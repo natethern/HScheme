@@ -11,10 +11,10 @@
 (eqv? #f 'nil)							;===>  #f
 (let ((p (lambda (x) x))) (eqv? p p))	;===>  #t
 
-(eqv? "" "")							;===>  unspecified
-(eqv? '#() '#())						;===>  unspecified
-(eqv? (lambda (x) x) (lambda (x) x))	;===>  unspecified
-(eqv? (lambda (x) x) (lambda (y) y))	;===>  unspecified
+(eqv? "" "")							;===>  unspecified	#t
+(eqv? '#() '#())						;===>  unspecified	#t
+(eqv? (lambda (x) x) (lambda (x) x))	;===>  unspecified	#f
+(eqv? (lambda (x) x) (lambda (y) y))	;===>  unspecified	#f
 
 (define gen-counter (lambda ()
 	(let ((n 0))
@@ -29,7 +29,7 @@
 	)
 ))
 (let ((g (gen-loser))) (eqv? g g))		;===>  #t
-(eqv? (gen-loser) (gen-loser))			;===>  unspecified
+(eqv? (gen-loser) (gen-loser))			;===>  unspecified	#f
 
 (letrec
 	(
@@ -37,7 +37,7 @@
 		(g (lambda () (if (eqv? f g) 'both 'g)))
 	)
 	(eqv? f g)
-)										;===>  unspecified
+)										;===>  unspecified	#f
 
 (letrec
 	(
@@ -47,22 +47,22 @@
 	(eqv? f g)
 )										;===>  #f
 
-(eqv? '(a) '(a))						;===>  unspecified
-(eqv? "a" "a")							;===>  unspecified
-(eqv? '(b) (cdr '(a b)))				;===>  unspecified
+(eqv? '(a) '(a))						;===>  unspecified	#f
+(eqv? "a" "a")							;===>  unspecified	#f
+(eqv? '(b) (cdr '(a b)))				;===>  unspecified	#f
 (let ((x '(a)))  (eqv? x x))			;===>  #t
 
 "procedure:  (eq? obj1 obj2)"
 (eq? 'a 'a)								;===>  #t
-(eq? '(a) '(a))							;===>  unspecified
+(eq? '(a) '(a))							;===>  unspecified	#f
 (eq? (list 'a) (list 'a))				;===>  #f
-(eq? "a" "a")							;===>  unspecified
-(eq? "" "")								;===>  unspecified
+(eq? "a" "a")							;===>  unspecified	#f
+(eq? "" "")								;===>  unspecified	#t
 (eq? '() '())							;===>  #t
-(eq? 2 2)								;===>  unspecified
-(eq? #\A #\A)							;===>  unspecified
+(eq? 2 2)								;===>  unspecified	#t
+(eq? #\A #\A)							;===>  unspecified	#t
 (eq? car car)							;===>  #t
-(let ((n (+ 2 3))) (eq? n n))			;===>  unspecified
+(let ((n (+ 2 3))) (eq? n n))			;===>  unspecified	#t
 (let ((x '(a))) (eq? x x))				;===>  #t
 (let ((x '#())) (eq? x x))				;===>  #t
 (let ((p (lambda (x) x))) (eq? p p))	;===>  #t
@@ -77,7 +77,7 @@
 (equal? (make-vector 5 'a)
         (make-vector 5 'a))				;===>  #t
 (equal? (lambda (x) x)
-        (lambda (y) y))					;===>  unspecified
+        (lambda (y) y))					;===>  unspecified	#f
 
 
 "6.2.5  Numerical operations"
@@ -119,32 +119,32 @@
 (- 3 4)									;===>  -1
 (- 3 4 5)								;===>  -6
 (- 3)									;===>  -3
-(/ 3 4 5)                       ;===>  3/20
-(/ 3)                           ;===>  1/3
+(/ 3 4 5)								;===>  3/20
+(/ 3)									;===>  1/3
 
 "library procedure:  (abs x)"
-(abs -7)                        ;===>  7
+(abs -7)								;===>  7
 
 "procedure:  (quotient n1 n2)"
 "procedure:  (remainder n1 n2)"
 "procedure:  (modulo n1 n2)"
-(modulo 13 4)                   ;===>  1
-(remainder 13 4)                ;===>  1
-(modulo -13 4)                  ;===>  3
-(remainder -13 4)               ;===>  -1
-(modulo 13 -4)                  ;===>  -3
-(remainder 13 -4)               ;===>  1
-(modulo -13 -4)                 ;===>  -1
-(remainder -13 -4)              ;===>  -1
-(remainder -13 -4.0)            ;===>  -1.0  ; inexact
+(modulo 13 4)							;===>  1
+(remainder 13 4)						;===>  1
+(modulo -13 4)							;===>  3
+(remainder -13 4)						;===>  -1
+(modulo 13 -4)							;===>  -3
+(remainder 13 -4)						;===>  1
+(modulo -13 -4)							;===>  -1
+(remainder -13 -4)						;===>  -1
+(remainder -13 -4.0)					;===>  -1.0  ; inexact
 
 "library procedure:  (gcd n1 ...)"
 "library procedure:  (lcm n1 ...)"
-(gcd 32 -36)                    ;===>  4
-"omit" ;(gcd)                           ;===>  0
-(lcm 32 -36)                    ;===>  288
-(lcm 32.0 -36)                  ;===>  288.0  ; inexact
-"omit" ;(lcm)                           ;===>  1
+(gcd 32 -36)							;===>  4
+"omit" ;(gcd)									;===>  0
+(lcm 32 -36)							;===>  288
+(lcm 32.0 -36)							;===>  288.0  ; inexact
+"omit" ;(lcm)									;===>  1
 
 "procedure:  (numerator q)"
 "procedure:  (denominator q)"
@@ -175,10 +175,10 @@
 "6.2.6  Numerical input and output"
 
 "procedure:  (string->number string radix)"
-"omit" ;(string->number "100")					;===>  100
-"omit" ;(string->number "100" 16)             ;===>  256
-"omit" ;(string->number "1e2")                ;===>  100.0
-"omit" ;(string->number "15##")					;===>  1500.0
+(string->number "100")					;===>  100
+(string->number "100" 16)				;===>  256
+(string->number "1e2")					;===>  100.0
+(string->number "15##")					;===>  1500.0
 
 
 "6.3.1  Booleans"
@@ -210,21 +210,21 @@
 
 (define x (list 'a 'b 'c))
 (define y x)
-y                               ;===>  (a b c)
-(list? y)                       ;===>  #t
-(set-cdr! x 4)                  ;===>  unspecified
-x                               ;===>  (a . 4)
-(eqv? x y)                      ;===>  #t
-y                               ;===>  (a . 4)
-(list? y)                       ;===>  #f
-(set-cdr! x x)                  ;===>  unspecified
-(list? x)                       ;===>  #f
+y										;===>  (a b c)
+(list? y)								;===>  #t
+(set-cdr! x 4)							;===>  unspecified	nothing
+x										;===>  (a . 4)
+(eqv? x y)								;===>  #t
+y										;===>  (a . 4)
+(list? y)								;===>  #f
+(set-cdr! x x)							;===>  unspecified	nothing
+"omit" ;(list? x)								;===>  #f
 
 "procedure:  (pair? obj)"
-(pair? '(a . b))                ;===>  #t
-(pair? '(a b c))                ;===>  #t
-(pair? '())                     ;===>  #f
-(pair? '#(a b))                 ;===>  #f
+(pair? '(a . b))						;===>  #t
+(pair? '(a b c))						;===>  #t
+(pair? '())								;===>  #f
+(pair? '#(a b))							;===>  #f
 
 "procedure:  (cons obj1 obj2)"
 (cons 'a '())                   ;===>  (a)
@@ -237,85 +237,86 @@ y                               ;===>  (a . 4)
 (car '(a b c))                  ;===>  a
 (car '((a) b c d))              ;===>  (a)
 (car '(1 . 2))                  ;===>  1
-"omit" ;(car '())                       ;===>  error
+"error" ;(car '())                       ;===>  error
 
 "procedure:  (cdr pair)"
-(cdr '((a) b c d))              ;===>  (b c d)
-(cdr '(1 . 2))                  ;===>  2
-"omit" ;(cdr '())                       ;===>  error
+(cdr '((a) b c d))						;===>  (b c d)
+(cdr '(1 . 2))							;===>  2
+"error" ;(cdr '())                       ;===>  error
 
 "procedure:  (set-car! pair obj)"
 (define (f) (list 'not-a-constant-list))
 (define (g) '(constant-list))
-(set-car! (f) 3)                     ;===>  unspecified
-(set-car! (g) 3)                     ;===>  error
+(set-car! (f) 3)						;===>  unspecified	nothing
+(set-car! (g) 3)						;===>  error
 
 "library procedure:  (list? obj)"
-(list? '(a b c))             ;===>  #t
-(list? '())                  ;===>  #t
-(list? '(a . b))             ;===>  #f
-(let ((x (list 'a)))
-(set-cdr! x x)
-(list? x))                 ;===>  #f
+(list? '(a b c))						;===>  #t
+(list? '())								;===>  #t
+(list? '(a . b))						;===>  #f
+"omit" ;(let ((x (list 'a)))
+;	(set-cdr! x x)
+;	(list? x)
+;)										;===>  #f
 
 "library procedure:  (list obj ...)"
-(list 'a (+ 3 4) 'c)                    ;===>  (a 7 c)
-(list)                                  ;===>  ()
+(list 'a (+ 3 4) 'c)                     ;===>  (a 7 c)
+(list)                                   ;===>  ()
 
 "library procedure:  (length list)"
-(length '(a b c))                       ;===>  3
-(length '(a (b) (c d e)))               ;===>  3
-(length '())                            ;===>  0
+(length '(a b c))                        ;===>  3
+(length '(a (b) (c d e)))                ;===>  3
+(length '())                             ;===>  0
 
 "library procedure:  (append list ...)"
-(append '(x) '(y))                      ;===>  (x y)
-(append '(a) '(b c d))                  ;===>  (a b c d)
-(append '(a (b)) '((c)))                ;===>  (a (b) (c))
-(append '(a b) '(c . d))                ;===>  (a b c . d)
-(append '() 'a)                         ;===>  a
+(append '(x) '(y))                       ;===>  (x y)
+(append '(a) '(b c d))                   ;===>  (a b c d)
+(append '(a (b)) '((c)))                 ;===>  (a (b) (c))
+(append '(a b) '(c . d))                 ;===>  (a b c . d)
+(append '() 'a)                          ;===>  a
 
 "library procedure:  (reverse list)"
-(reverse '(a b c))                      ;===>  (c b a)
+(reverse '(a b c))                       ;===>  (c b a)
 (reverse '(a (b c) d (e (f))))			;===>  ((e (f)) d (b c) a)
 
 "library procedure:  (list-ref list k)"
-(list-ref '(a b c d) 2)                         ;===>  c
+(list-ref '(a b c d) 2)					;===>  c
 (list-ref '(a b c d) (inexact->exact (round 1.8)))	;===>  c
 
 "library procedure:  (memq obj list)"
 "library procedure:  (memv obj list)"
 "library procedure:  (member obj list)"
-(memq 'a '(a b c))                      ;===>  (a b c)
-(memq 'b '(a b c))                      ;===>  (b c)
-(memq 'a '(b c d))                      ;===>  #f
-(memq (list 'a) '(b (a) c))             ;===>  #f
+(memq 'a '(a b c))                       ;===>  (a b c)
+(memq 'b '(a b c))                       ;===>  (b c)
+(memq 'a '(b c d))                       ;===>  #f
+(memq (list 'a) '(b (a) c))              ;===>  #f
 (member (list 'a) '(b (a) c))			;===>  ((a) c)
-(memq 101 '(100 101 102))               ;===>  unspecified
-(memv 101 '(100 101 102))               ;===>  (101 102)
+(memq 101 '(100 101 102))                ;===>  unspecified
+(memv 101 '(100 101 102))                ;===>  (101 102)
 
 "library procedure:  (assq obj alist)"
 "library procedure:  (assv obj alist)"
 "library procedure:  (assoc obj alist)"
 (define e '((a 1) (b 2) (c 3)))
-(assq 'a e)             ;===>  (a 1)
-(assq 'b e)             ;===>  (b 2)
-(assq 'd e)             ;===>  #f
+(assq 'a e)								;===>  (a 1)
+(assq 'b e)								;===>  (b 2)
+(assq 'd e)								;===>  #f
 (assq (list 'a) '(((a)) ((b)) ((c))))	;===>  #f
 (assoc (list 'a) '(((a)) ((b)) ((c))))	;===>  ((a))
-(assq 5 '((2 3) (5 7) (11 13)))	;===>  unspecified
-(assv 5 '((2 3) (5 7) (11 13)))	;===>  (5 7)
+(assq 5 '((2 3) (5 7) (11 13)))			;===>  unspecified
+(assv 5 '((2 3) (5 7) (11 13)))			;===>  (5 7)
 
 
 
 "6.3.3  Symbols"
 
 "procedure:  (symbol? obj)"
-(symbol? 'foo)                  ;===>  #t
-(symbol? (car '(a b)))          ;===>  #t
-(symbol? "bar")                 ;===>  #f
-(symbol? 'nil)                  ;===>  #t
-(symbol? '())                   ;===>  #f
-(symbol? #f)             ;===>  #f
+(symbol? 'foo)							;===>  #t
+(symbol? (car '(a b)))					;===>  #t
+(symbol? "bar")							;===>  #f
+(symbol? 'nil)							;===>  #t
+(symbol? '())							;===>  #f
+(symbol? #f)							;===>  #f
 
 "procedure:  (symbol->string symbol)"
 (symbol->string 'flying-fish)				;===>  "flying-fish"
@@ -401,42 +402,44 @@ y                               ;===>  (a . 4)
 v)                                        ;===>  #(0 1 4 9 16)
 
 "library procedure:  (force promise)"
-(force (delay (+ 1 2)))           ;===>  3
+(force (delay (+ 1 2)))						;===>  3
 (let ((p (delay (+ 1 2)))) (list (force p) (force p)))	;===>  (3 3)
 
 (define a-stream
-  (letrec ((next
-            (lambda (n)
-              (cons n (delay (next (+ n 1)))))))
-    (next 0)))
+	(letrec
+		((next (lambda (n)
+			(cons n (delay (next (+ n 1))))
+		)))
+	(next 0)
+	)
+)
 (define head car)
-(define tail
-  (lambda (stream) (force (cdr stream))))
+(define tail (lambda (stream) (force (cdr stream))))
 
-(head (tail (tail a-stream)))  
-                                       ;===>  2
+(head (tail (tail a-stream)))				;===>  2
 
 (define count 0)
 (define p
-  (delay (begin (set! count (+ count 1))
-                (if (> count x)
-                    count
-                    (force p)))))
+	(delay (begin (set! count (+ count 1))
+		(if (> count x) count (force p))
+	))
+)
 (define x 5)
 p                             ;===>  a promise
 (force p)                     ;===>  6
 p                             ;===>  a promise, still
-(begin (set! x 10)
-       (force p))             ;===>  6
+(begin (set! x 10) (force p))             ;===>  6
 
 "procedure:  (call-with-current-continuation proc)"
 (call-with-current-continuation
-  (lambda (exit)
-    (for-each (lambda (x)
-                (if (negative? x)
-                    (exit x)))
-              '(54 0 37 -3 245 19))
-    #t))                                ;===>  -3
+	(lambda (exit)
+		(for-each
+			(lambda (x) (if (negative? x) (exit x)))
+		'(54 0 37 -3 245 19)
+		)
+		#t
+	)
+)											;===>  -3
 
 (define list-length (lambda (obj)
 	(call-with-current-continuation (lambda (return)
