@@ -62,15 +62,20 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		 [obj] -> cm a;
 		};
 
+	newtype Macro cm r obj m = MkMacro {unMacro ::
+		(
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
+		) =>
+	 [obj] -> cm (ListSchemeExpression r obj m)};
+
 	newtype Syntax r obj m = MkSyntax (forall cm.
 		(
 		Build cm r,
 		AssembleError cm obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
 		?objType :: Type obj
 		) =>
-	 (Type (r ())) -> [obj] -> cm (ListSchemeExpression r obj m));
+	 (Type (r ())) -> Macro cm r obj m);
 
 	type SchemeExpression r obj = TrackingLambdaExpression Symbol (LookupLambdaExpression Symbol (r obj));
 
@@ -79,12 +84,6 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	type ListSchemeExpression r obj m = SchemeExpression r obj (m [obj]);
 
 	type SymbolBindings = Bindings Symbol;
-
-	newtype Macro cm r obj m = MkMacro
-		((
-		?syntacticbindings :: SymbolBindings (Syntax r obj m)
-		) =>
-	 [obj] -> cm (ListSchemeExpression r obj m));
 
 	remonadMacro :: (forall a. cm1 a -> cm2 a) -> Macro cm1 r obj m -> Macro cm2 r obj m;
 	remonadMacro map (MkMacro tlm) = MkMacro (map . tlm);
@@ -151,6 +150,22 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		return [obj];
 		}) (schemeExprSymbol sym);
 
+	getMacro ::
+		(
+		AssembleError cm obj,
+		MonadGettableReference cm r,
+		MonadCreatable cm r,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?objType :: Type obj
+		) =>
+	 Symbol -> Maybe (Macro cm r obj m);
+	getMacro sym = case getBinding ?syntacticbindings sym of
+		{
+		Just (MkSyntax syntax) -> Just (syntax MkType);
+		Nothing -> ?macrobindings sym;
+		};
+
 	assembleExpression ::
 		(
 		AssembleError cm obj,
@@ -178,19 +193,10 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 						mheadSym <- resultFromObject h;
 						case mheadSym of
 							{
-							SuccessResult sym -> case getBinding ?syntacticbindings sym of
+							SuccessResult sym -> case getMacro sym of
 								{
-								Just (MkSyntax syntax) -> do
-									{
---									obj <- syntax arglist;
---									assembleExpression obj;
-									syntax MkType arglist;
-									};
-								Nothing -> case ?macrobindings sym of
-									{
-									Just (MkMacro macro) -> macro arglist;
-									Nothing -> assembleApplyExpression h arglist;
-									};
+								Just (MkMacro macro) -> macro arglist;
+								Nothing -> assembleApplyExpression h arglist;
 								};
 							_ -> assembleApplyExpression h arglist;
 							};

@@ -171,10 +171,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		?objType :: Type obj
 		) =>
 	 ([Symbol],[((Symbol,obj),(obj,()))]) -> cm (Syntax r obj m);
-	syntaxRulesM (literals,rules) = return (MkSyntax (\t arglist -> do
+	syntaxRulesM (literals,rules) = return (MkSyntax (\t -> MkMacro (\arglist -> do
 		{
 		transform t rules arglist;
-		})) where
+		}))) where
 		{
 		transform ::
 			(
