@@ -190,7 +190,10 @@ install:	\
 
 # Test
 
-test: testrelease
+test: test-done test-notyet
+
+test-done: testrelease
+	@echo "* No Regression"
 
 testrelease: test-pure test-full test-cgi
 
@@ -229,7 +232,6 @@ test-pure:	\
  test/equal.scm.pure.diff	\
  test/syntax.scm.pure.diff	\
  test/syntax-rec.scm.pure.diff	\
- test/let-syntax.scm.pure.diff	\
  test/letbinding.scm.pure.diff	\
  test/letrec.scm.pure.diff	\
  test/letrec-fix.scm.pure.diff	\
@@ -255,7 +257,6 @@ test-full:	\
  test/equal.scm.full.diff	\
  test/syntax.scm.full.diff	\
  test/syntax-rec.scm.full.diff	\
- test/let-syntax.scm.full.diff	\
  test/letbinding.scm.full.diff	\
  test/letrec.scm.full.diff	\
  test/letrec-fix.scm.full.diff	\
@@ -271,7 +272,6 @@ test-full:	\
  test/load.scm.initfull.diff	\
  test/helloworld.scm.initfull.diff	\
  test/io.scm.initfull.diff	\
- test/report-examples-4.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
 
 test-cgi: test/cgi-get.diff test/cgi-error.diff
@@ -281,6 +281,11 @@ test/cgi-get.out: $(CGI_COMMAND)
 
 test/cgi-error.out: $(CGI_COMMAND)
 	env REQUEST_METHOD="GET" QUERY_STRING="input=a" ./$< > $@ || (rm $@; exit 1)
+
+test-notyet:	\
+ test/let-syntax.scm.pure.diff	\
+ test/let-syntax.scm.full.diff	\
+ test/report-examples-4.scm.initfull.diff
 
 testprof: $(BATCH_COMMAND_REL).prof
 
