@@ -22,100 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	{
+	import Org.Org.Semantic.HScheme.Interpret.Interpret;
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
-
-
-	isNil :: Object r m -> Bool;
-	isNil NilObject = True;
-	isNil _ = False;
-
-	getBadLoc :: Symbol -> ObjLocation r m;
---	getBadLoc sym = throwArgError "unbound-symbol" ([SymbolObject sym]);
-	getBadLoc sym = error ("unbound-symbol" ++ (show sym));
-
-	getLoc ::
-		(
-		Scheme m r,
-		?objType :: Type (Object r m)
-		) =>
-	 (Symbol -> Maybe (ObjLocation r m)) -> Symbol -> ObjLocation r m;
-	getLoc getter sym = case (getter sym) of
-		{
-		Just loc -> loc;
-		Nothing -> getBadLoc sym;
-		};
-{--
-	getSymbolBinding ::
-		(
-		Scheme m r
-		) =>
-	 Bindings r m -> Symbol -> m (ObjLocation r m);
-	getSymbolBinding bindings sym = getLoc (getBinding bindings);
---}
-
-	bindExpression ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 SchemeExpression r m a -> cm ((Symbol -> Maybe (ObjLocation r m)) -> a);
-	bindExpression rr = return (\lookup -> runSymbolExpression (getLoc lookup) rr);
-
-	interpretTopLevelExpression ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m (Object r m));
-	interpretTopLevelExpression obj = let {?objType = Type} in do
-		{
-		rr <- assembleTopLevelExpression obj;
-		bindExpression rr;
-		};
-
-	interpretTopLevelExpressionsEat ::
-		(
-		MonadFix m,FunctorApplyReturn m,
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 (Object r m -> m ()) ->
-	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ());
-	interpretTopLevelExpressionsEat eat objs = let {?objType = Type} in do	
-		{
-		rr <- assembleTopLevelExpressionsEat eat objs;
-		bindExpression rr;
-		};
-
-	interpretTopLevelExpressionsList ::
-		(
-		MonadFix m,FunctorApplyReturn m,
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
-	interpretTopLevelExpressionsList objs = let {?objType = Type} in do	
-		{
-		rr <- assembleTopLevelExpressionsList objs;
-		bindExpression rr;
-		};
 
 
 	-- 6.5 Eval
@@ -128,10 +39,10 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		?macrobindings :: SymbolBindings (Macro m r m)
 		) =>
 	 Object r m -> (Symbol -> Maybe (ObjLocation r m)) -> m (Object r m);
-	evaluateObject obj lookup = do
+	evaluateObject obj lookupSym = do
 		{
 		mobj <- interpretTopLevelExpression obj;
-		mobj lookup;
+		mobj lookupSym;
 		};
 
 	evaluateP ::

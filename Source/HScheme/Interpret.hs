@@ -26,10 +26,12 @@ module Org.Org.Semantic.HScheme.Interpret
 	module Org.Org.Semantic.HScheme.Interpret.SymbolExpression,
 	module Org.Org.Semantic.HScheme.Interpret.Assemble,
 	module Org.Org.Semantic.HScheme.Interpret.TopLevel,
+	module Org.Org.Semantic.HScheme.Interpret.Interpret,
 	module Org.Org.Semantic.HScheme.Interpret.Evaluate
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Evaluate;
+	import Org.Org.Semantic.HScheme.Interpret.Interpret;
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;

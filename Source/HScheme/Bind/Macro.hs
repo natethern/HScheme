@@ -30,9 +30,10 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	macroBindings ::
 		(
-		MonadFix m, FunctorApplyReturn m,
+		MonadFix m,
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
+		?binder :: TopLevelBinder r m,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
@@ -60,9 +61,10 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	pureMacroBindings ::
 		(
-		MonadFix m, FunctorApplyReturn m,
+		MonadFix m,
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
+		?binder :: TopLevelBinder r m,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
@@ -79,9 +81,10 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	fullMacroBindings ::
 		(
-		MonadFix m, FunctorApplyReturn m,
+		MonadFix m,
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
+		?binder :: TopLevelBinder r m,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>

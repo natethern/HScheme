@@ -68,6 +68,7 @@ rsRunInterp outproc mrun interpList interpEat = do
 
 	instance
 		(
+		FunctorApplyReturn m,
 		MonadGettableReference m r,
 		MonadCreatable m r,
 		MonadException (Object r m) m
@@ -116,9 +117,9 @@ rsRunInterp outproc mrun interpList interpEat = do
 
 	runProgram ::
 		(
-		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
+		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
@@ -142,9 +143,9 @@ rsRunInterp outproc mrun interpList interpEat = do
 
 	runProgramBindings ::
 		(
-		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
+		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
@@ -163,10 +164,10 @@ rsRunInterp outproc mrun interpList interpEat = do
 
 	runProgramBindingsWithExit ::
 		(
-		MonadFix m,FunctorApplyReturn m,
 		RunnableScheme cm m r,
 		MonadCont m,
 		?objType :: Type (Object r m),
+		?binder :: TopLevelBinder r m,
 		?macrobindings :: SymbolBindings (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),

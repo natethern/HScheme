@@ -26,10 +26,11 @@ module Org.Org.Semantic.HScheme.Core.Scheme where
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 
-	class (BuildThrow m (Object r m) r) =>
+	-- ideally, FunctorApplyReturn would be a superclass of Monad
+	class (BuildThrow m (Object r m) r,FunctorApplyReturn m) =>
 	 Scheme m r;
 
-	instance (BuildThrow m (Object r m) r) =>
+	instance (BuildThrow m (Object r m) r,FunctorApplyReturn m) =>
 	 Scheme m r;
 
 	class

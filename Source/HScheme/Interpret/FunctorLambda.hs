@@ -54,10 +54,6 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	fSubstMapSequential _ [] bodyExpr = bodyExpr;
 	fSubstMapSequential map ((sym,valueExpr):binds) bodyExpr = fSubstMap map sym valueExpr (fSubstMapSequential map binds bodyExpr);
 
-	fSubstMapSeparate :: (FunctorLambda sym val f) =>
-	 ((val -> r) -> a -> r) -> [(sym,f a)] -> f r -> f r;
-	fSubstMapSeparate = fSubstMapSequential; -- NYI
-
 
 	-- List
 
@@ -90,11 +86,6 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	data MutualBindings f a v = forall t. (ExtractableFunctor t) =>
 	 MkMutualBindings (t (f a)) (forall r. f r -> f (t v -> r));
 
-	applyMutualBindings :: (FunctorApplyReturn f) =>
-	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) -> MutualBindings f a val -> f r -> f r;
-	applyMutualBindings fixer (MkMutualBindings bindValues abstracter) body =
-	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
-
 	-- uses irrefutable patterns (~) here to get mfix to work
 	makeMutualBindings :: (FunctorLambda sym val f) =>
 	 [(sym,f a)] -> MutualBindings f a val;
@@ -106,7 +97,25 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 		 (\body -> fmap (\atar ~(MkNextList a ta) -> atar a ta) ((fAbstract sym) (abstracter body)));
 		};
 
+	applyMutualBindingsSeparate :: (FunctorApplyReturn f) =>
+	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
+	 MutualBindings f a val -> f r -> f r;
+	applyMutualBindingsSeparate separater (MkMutualBindings bindValues abstracter) body =
+	 liftF2 separater (fExtract bindValues) (abstracter body);
+
+	fSubstMapSeparate :: (FunctorLambda sym val f) =>
+	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
+	 [(sym,f a)] -> f r -> f r;
+	fSubstMapSeparate separater bindings = applyMutualBindingsSeparate separater (makeMutualBindings bindings);
+
+	applyMutualBindingsRecursive :: (FunctorApplyReturn f) =>
+	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
+	 MutualBindings f a val -> f r -> f r;
+	applyMutualBindingsRecursive fixer (MkMutualBindings bindValues abstracter) body =
+	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
+
 	fSubstMapRecursive :: (FunctorLambda sym val f) =>
-	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) -> [(sym,f a)] -> f r -> f r;
-	fSubstMapRecursive fixer bindings = applyMutualBindings fixer (makeMutualBindings bindings);
+	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
+	 [(sym,f a)] -> f r -> f r;
+	fSubstMapRecursive fixer bindings = applyMutualBindingsRecursive fixer (makeMutualBindings bindings);
 	}
