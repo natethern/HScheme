@@ -78,10 +78,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
-	 cm (ObjectSchemeExpression r m);
+	 cm (ListSchemeExpression r m);
 	caseMatchM (argExprObj,(literals,rules)) = do
 		{
-		argExpr <- assembleExpression argExprObj;
+		argExpr <- assembleSingleExpression argExprObj;
 		sExprs <- fExtract (fmap (\(patternObj,(bodyObj,())) -> do
 			{
 			pattern <- makeObjectPattern literals patternObj;
@@ -95,6 +95,14 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			}) argExpr (fExtract sExprs));
 		} where
 		{
+		matchCases ::
+			(
+			BuildThrow cm (Object r m) r,
+			?objType :: Type (Object r m)
+			) =>
+		 Object r m ->
+		 [Object r m -> cm (Result ex (cm a))] ->
+		 cm a;		
 		matchCases arg [] = throwArgError "no-match" [arg];
 		matchCases arg (pcase:rest) = do
 			{
@@ -185,7 +193,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = MkType} in compileSyntax obj;
-		return (MkTopLevelCommand (return (return nullObject)) []
+		return (MkTopLevelCommand (return (return [])) []
 		 [(sym,syntax)]);
 		};
 	}

@@ -27,7 +27,7 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 
 	data Expected =
 	 EitherExpected Expected Expected	|
-	 NonObjectExpected			|
+	 EOFTypeExpected			|
 	 LiteralExpected Symbol		|
 	 NullExpected				|
 	 PairTypeExpected			|
@@ -55,7 +55,7 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 		{
 		show (EitherExpected a b)		= (show a) ++ " or " ++ (show b);
 		show (LiteralExpected sym)		= "'" ++ show sym;
-		show NonObjectExpected			= "#<nothing>";
+		show EOFTypeExpected			= "#<eof>";
 		show NullExpected				= "()";
 		show PairTypeExpected			= "pair";
 		show VectorTypeExpected			= "vector";

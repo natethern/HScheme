@@ -28,9 +28,6 @@ module Org.Org.Semantic.HScheme.Core.Stream where
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 
-	eofObject :: (Scheme m r) => Object r m;
-	eofObject = nullObject;
-
 	handleUTF8Error :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
 	 UTF8Error -> cm a;
 	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];

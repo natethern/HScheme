@@ -241,7 +241,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	makeVectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Int,Maybe (Object r m)) -> m (SList (Object r m));
 	makeVectorP (i,Just fill) = makeVector i fill;
-	makeVectorP (i,Nothing) = makeVector i nullObject;
+	makeVectorP (i,Nothing) = makeVector i VoidObject;
 
 	vectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m (SList (Object r m));
@@ -262,31 +262,6 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	listToVectorP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 ([Object r m],()) -> m (SList (Object r m));
 	listToVectorP (list,_) = return (MkSList list);
-
-
-	-- 6.4 Control Features
-	applyP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,([Object r m],())) -> m (Object r m);
-	applyP (proc,(args,())) = proc args;
-
-	valuesP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 [Object r m] -> m (Object r m);
-	valuesP = return . mkValuesObject;
-	
-	valuesToListP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m [Object r m];
-	valuesToListP (ValuesObject list,()) = return list;
-	valuesToListP (obj,()) = return [obj];
-
-	lastResortThrowP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,()) -> m (Object r m);
-	lastResortThrowP (obj,()) = lastResortThrowObject obj;
-
-{--
-	catchM :: (Scheme m r,MonadException (Object r m) m,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,()) -> m (Object r m);
-	catchM = catch;
---}
 
 	-- Misc
 	printList :: (Build cm r) =>
@@ -408,12 +383,6 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		text <- printString (toList arr);
 		return ("\""++text++"\"");
 		};
-	toString (ValuesObject [])		= return ("#<nothing>");
-	toString (ValuesObject v)		= do
-		{
-		text <- printValues v;
-		return ("#<values: "++text++">");
-		};
 	toString (PairObject	hl tl)	= do
 		{
 		list <- printList hl tl;
@@ -424,6 +393,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		text <- printVector (toList v);
 		return ("#("++text++")");
 		};
+	toString VoidObject				= return "#<void>";
 	toString (InputPortObject _)	= return "#<input port>";
 	toString (OutputPortObject _)	= return "#<output port>";
 	toString (ProcedureObject _)	= return "#<procedure>";

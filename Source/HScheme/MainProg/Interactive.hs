@@ -53,7 +53,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?macrobindings :: Symbol -> Maybe (Macro m r m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
 		) =>
-	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),Object r m);
+	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),[Object r m]);
 	runObjectInEnvironment env obj =  do
 		{
 		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelObjectCommand obj;
@@ -74,13 +74,13 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?objType :: Type (Object r m),
 		?system :: System cm
 		) =>
-	 Object r m -> cm ();
-	printResult obj = if (isNullObject obj)
-	 then (return ())
-	 else do
+	 [Object r m] -> cm ();
+	printResult [] = return ();
+	printResult (obj:objs) =  do
 		{
 		str <- toString obj;
 		opWriteLnFlush (fsiCurrentOutputPort ?system) str;
+		printResult objs;
 		};
 
 	reportError ::

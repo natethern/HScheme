@@ -72,7 +72,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m (Object r m));
+	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
 	interpretTopLevelExpression obj = let {?objType = MkType} in do
 		{
 		rr <- assembleTopLevelExpression obj;

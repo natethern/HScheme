@@ -84,7 +84,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 LocationBindings cm r m;
 	baseBindings = concatenateList
 		[
-		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
+		addLocationBinding		(MkSymbol "<nothing>")			VoidObject,								-- nonstandard
 		addLocationBinding		(MkSymbol "<loop>")				loop,									-- test
 		addLocationBinding		(MkSymbol "<undefined>")		undefined,								-- test
 
@@ -264,9 +264,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,
-		addProcBinding	"apply"							applyP,
-		addProcBinding	"values"						valuesP,
-		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
+		addProcLBinding	"apply"							applyPL,
+		addProcLBinding	"values"						valuesPL,
+		addProcLBinding	"call-with-values"				callWithValuesPL,
 		addProcBinding	"throw"							lastResortThrowP,						-- nonstandard
 
 		-- 6.5 Eval
@@ -286,7 +286,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
-		addProcBinding	"call-with-current-continuation"	callCCP
+		addProcLBinding	"call-with-current-continuation"	callCCPL
 		];
 
 	monadGuardBindings ::
@@ -299,7 +299,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	monadGuardBindings = concatenateList
 		[
 		-- 6.4 Control Features
-		addProcBinding	"dynamic-wind"					dynamicWindP
+		addProcLBinding	"dynamic-wind"					dynamicWindPL
 		];
 
 	monadFixBindings ::
@@ -312,7 +312,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
-		addProcBinding	"call-with-result"				fixP									-- nonstandard
+		addProcLBinding	"call-with-result"				fixPL									-- nonstandard
 		];
 
 	evalBindings ::
@@ -327,7 +327,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	evalBindings remonad = concatenateList
 		[
 		-- 6.5 Eval
-		addProcBinding	"eval"							(evaluateP remonad)
+		addProcLBinding	"eval"							(evaluatePL remonad)
 		];
 
 	portBindings ::
@@ -341,8 +341,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		-- 6.6.1 Ports
 		addProcBinding	"input-port?"					isInputPortP,
 		addProcBinding	"output-port?"					isOutputPortP,
-		addProcBinding	"close-input-port"				inputPortCloseP,
-		addProcBinding	"close-output-port"				outputPortCloseP,
+		addProcNBinding	"close-input-port"				inputPortClosePN,
+		addProcNBinding	"close-output-port"				outputPortClosePN,
 
 		-- 6.6.2 Input
 		addProcBinding	"port-read"						portReadP,								-- nonstandard
@@ -368,18 +368,18 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding			"eq?"				eqP,
 
 		-- 6.3.2 Pairs and Lists
-		addProcBinding			"set-car!"			setCarP,
-		addProcBinding			"set-cdr!"			setCdrP,
+		addProcNBinding			"set-car!"			setCarPN,
+		addProcNBinding			"set-cdr!"			setCdrPN,
 
 		-- 6.3.5 Strings
-		addProcBinding			"string-set!"		stringSetP,
+		addProcNBinding			"string-set!"		stringSetPN,
 
 		-- Byte Arrays
-		addProcBinding			"byte-array-set!"	byteArraySetP,
+		addProcNBinding			"byte-array-set!"	byteArraySetPN,
 
 		-- 6.3.6 Vectors
-		addProcBinding			"vector-set!"		vectorSetP,
-		addProcBinding			"vector-fill!"		vectorFillP
+		addProcNBinding			"vector-set!"		vectorSetPN,
+		addProcNBinding			"vector-fill!"		vectorFillPN
 		];
 
 	systemPortBindings ::

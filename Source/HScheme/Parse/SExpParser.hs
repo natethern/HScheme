@@ -732,7 +732,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		case mobj of
 			{
 			Just obj -> return obj;
-			Nothing -> return eofObject;
+			Nothing -> return VoidObject;
 			};
 		};
 	}

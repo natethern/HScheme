@@ -294,10 +294,6 @@
 
 
 ; 6.4 Control Features
-(define call-with-values (lambda (producer consumer)
-	(apply consumer (values->list (producer)))
-))
-
 (define smap (lambda (proc a)
 	(case-match a ()
 		(() '())

@@ -158,6 +158,32 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 			};
 		};
 
+	convertPLToProcedure ::
+		(
+		BuildThrow m (Object r m) r,
+		ArgumentList r (Object r m) args,
+		?objType :: Type (Object r m)
+		) =>
+	 (args -> m [Object r m]) -> Procedure (Object r m) m;
+	convertPLToProcedure foo argObjs = do
+		{
+		args <- convertFromObjects argObjs;
+		foo args;
+		};
+
+	convertPNToProcedure ::
+		(
+		BuildThrow m (Object r m) r,
+		ArgumentList r (Object r m) args,
+		?objType :: Type (Object r m)
+		) =>
+	 (args -> m ()) -> Procedure (Object r m) m;
+	convertPNToProcedure foo = convertPLToProcedure (\args -> do
+		{
+		foo args;
+		return [];
+		});
+
 	convertToProcedure ::
 		(
 		BuildThrow m (Object r m) r,
@@ -166,10 +192,10 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		?objType :: Type (Object r m)
 		) =>
 	 (args -> m ret) -> Procedure (Object r m) m;
-	convertToProcedure foo objs = do
+	convertToProcedure foo = convertPLToProcedure (\args -> do
 		{
-		args <- convertFromObjects objs;
 		r <- foo args;
-		getObject r;
-		};
+		resultObj <- getObject r;
+		return [resultObj];
+		});
 	}

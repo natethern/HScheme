@@ -40,9 +40,7 @@ module Main where
 		?stdout :: FlushSink IO Word8
 		) =>
 	 Object r m -> IO ();
-	printResult obj = if (isNullObject obj)
-	 then (return ())
-	 else do
+	printResult obj = do
 		{
 		str <- toString obj;
 		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));

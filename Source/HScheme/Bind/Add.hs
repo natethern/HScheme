@@ -61,6 +61,30 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	addProcBinding name p b = addLocationBinding (MkSymbol name)
 	 (ProcedureObject (convertToProcedure p)) b;
 
+	addProcNBinding ::
+		(
+		Build cm r,
+		BuildThrow m (Object r m) r,
+		ArgumentList r (Object r m) args
+		) =>
+	 String ->
+	 ((?objType :: Type (Object r m)) => args -> m ()) ->
+	 LocationBindings cm r m;
+	addProcNBinding name p b = addLocationBinding (MkSymbol name)
+	 (ProcedureObject (convertPNToProcedure p)) b;
+
+	addProcLBinding ::
+		(
+		Build cm r,
+		BuildThrow m (Object r m) r,
+		ArgumentList r (Object r m) args
+		) =>
+	 String ->
+	 ((?objType :: Type (Object r m)) => args -> m [Object r m]) ->
+	 LocationBindings cm r m;
+	addProcLBinding name p b = addLocationBinding (MkSymbol name)
+	 (ProcedureObject (convertPLToProcedure p)) b;
+
 	convertToMacro ::
 		(
 		BuildThrow cm (Object r m) r,
@@ -71,7 +95,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		(
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
 		) =>
-	  args -> cm (ObjectSchemeExpression r m)) ->
+	  args -> cm (ListSchemeExpression r m)) ->
 	 Macro cm r m;
 	convertToMacro foo = MkMacro (\objs -> do
 		{
@@ -115,7 +139,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		(
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
 		) =>
-	  args -> cm (ObjectSchemeExpression r m)) ->
+	  args -> cm (ListSchemeExpression r m)) ->
 	 MacroBindings cm r m;
 	addMacroBinding name p b = addBinding (MkSymbol name) (convertToMacro p) b;
 
@@ -136,8 +160,6 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	 (
 		(
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
---		,?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
---		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 args -> cm (TopLevelObjectCommand r m)) ->
 	 TopLevelBindings cm r m;

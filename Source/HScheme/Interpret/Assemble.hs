@@ -22,9 +22,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.Assemble
 	(
-	SchemeExpression,ObjectSchemeExpression,
+	SchemeExpression,ObjectSchemeExpression,ListSchemeExpression,
 	Macro(..),remonadMacro,
-	assembleExpression
+	assembleExpression,assembleSingleExpression
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
@@ -36,11 +36,13 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	type ObjectSchemeExpression r m = SchemeExpression r m (m (Object r m));
 
+	type ListSchemeExpression r m = SchemeExpression r m (m [Object r m]);
+
 	newtype Macro cm r m = MkMacro
 		((
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
 		) =>
-	 [Object r m] -> cm (ObjectSchemeExpression r m));
+	 [Object r m] -> cm (ListSchemeExpression r m));
 
 	remonadMacro :: (forall a. cm1 a -> cm2 a) -> Macro cm1 r m -> Macro cm2 r m;
 	remonadMacro map (MkMacro tlm) = MkMacro (map . tlm);
@@ -63,7 +65,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		) =>
 	 m (Object r m) ->
 	 m [Object r m] ->
-	 m (Object r m);
+	 m [Object r m];
 	doApply mf margs = do
 		{
 		f <- mf;
@@ -85,7 +87,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		) =>
 	 ObjectSchemeExpression r m ->
 	 [ObjectSchemeExpression r m] ->
-	 ObjectSchemeExpression r m;
+	 ListSchemeExpression r m;
 	makeApply f args = fApply (fmap doApply f) (fmap execList (fExtract args));
 
 	assembleApplyExpression ::
@@ -96,11 +98,11 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 Object r m -> [Object r m] -> cm (ObjectSchemeExpression r m);
+	 Object r m -> [Object r m] -> cm (ListSchemeExpression r m);
 	assembleApplyExpression f arglist = do
 		{
-		fe <- assembleExpression f;
-		ae <- for assembleExpression arglist;
+		fe <- assembleSingleExpression f;
+		ae <- for assembleSingleExpression arglist;
 		return (makeApply fe ae);
 		};
 
@@ -112,8 +114,12 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 Object r m -> cm (ObjectSchemeExpression r m);
-	assembleExpression (SymbolObject sym) = return (fmap get (exprSymbol sym));
+	 Object r m -> cm (ListSchemeExpression r m);
+	assembleExpression (SymbolObject sym) = return (fmap (\loc -> do
+		{
+		obj <- get loc;
+		return [obj];
+		}) (exprSymbol sym));
 	assembleExpression (PairObject head tail) = do
 		{
 		h <- get head;
@@ -147,11 +153,26 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		};
 	assembleExpression a = case a of
 		{
-		BooleanObject _ -> return (return (return a));
-		NumberObject _ -> return (return (return a));
-		CharObject _ -> return (return (return a));
-		StringObject _ -> return (return (return a));
-		ByteArrayObject _ -> return (return (return a));
+		BooleanObject _ -> return (return (return [a]));
+		NumberObject _ -> return (return (return [a]));
+		CharObject _ -> return (return (return [a]));
+		StringObject _ -> return (return (return [a]));
+		ByteArrayObject _ -> return (return (return [a]));
 		_ -> throwArgError "cant-evaluate-form" [a];
+		};
+
+	assembleSingleExpression ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m)
+		) =>
+	 Object r m -> cm (ObjectSchemeExpression r m);
+	assembleSingleExpression obj = do
+		{
+		listExp <- assembleExpression obj;
+		return (fmap (\mlist -> mlist >>= singleValue) listExp);
 		};
 	}

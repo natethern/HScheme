@@ -39,7 +39,7 @@ module Org.Org.Semantic.HScheme.Core.Object where
 		envLoc :: SymbolBindings (r obj)
 		};
 
-	type Procedure obj m = [obj] -> m obj;
+	type Procedure obj m = [obj] -> m [obj];
 
 	type SRefArray r a = ArrayList (r a);
 
@@ -51,7 +51,7 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	 CharObject			Char								|
 	 ByteArrayObject	(SRefArray r Word8)					|
 	 StringObject		(SRefArray r Char)					|
-	 ValuesObject		[Object r m]						|
+	 VoidObject												|
 	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
 	 VectorObject		(SRefArray r (Object r m))			|
 	 InputPortObject 	(InputPort Word8 m)					|
@@ -69,15 +69,4 @@ module Org.Org.Semantic.HScheme.Core.Object where
 		pairObject = PairObject;
 		nilObject = NilObject;
 		};
-
-	mkValuesObject :: [Object r m] -> Object r m;
-	mkValuesObject [a] = a;
-	mkValuesObject a = ValuesObject a;
-
-	nullObject :: Object r m;
-	nullObject = mkValuesObject [];
-
-	isNullObject :: Object r m -> Bool;
-	isNullObject (ValuesObject []) = True;
-	isNullObject _ = False;
 	}

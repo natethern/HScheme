@@ -36,47 +36,40 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 	isOutputPortP (OutputPortObject _,()) = return True;
 	isOutputPortP (_,()) = return False;
 
-	inputPortCloseP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (InputPort Word8 m,()) -> m NullObjType;
-	inputPortCloseP (port,()) = do
-		{
-		ipClose port;
-		return MkNullObjType;
-		};
+	inputPortClosePN :: (Monad m) =>
+	 (InputPort Word8 m,()) -> m ();
+	inputPortClosePN (port,()) = ipClose port;
 
-	outputPortCloseP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (OutputPort Word8 m,()) -> m NullObjType;
-	outputPortCloseP (port,()) = do
-		{
-		opClose port;
-		return MkNullObjType;
-		};
+	outputPortClosePN :: (Monad m) =>
+	 (OutputPort Word8 m,()) -> m ();
+	outputPortClosePN (port,()) = opClose port;
 
 	-- 6.6.2 Input
 	isEOFObjectP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m Bool;
-	isEOFObjectP (obj,()) = return (isNullObject obj);
+	isEOFObjectP (VoidObject,()) = return True;
+	isEOFObjectP (_,()) = return False;
 	
 	portReadByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
+	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
 	portReadByteP (port,()) = do
 		{
 		mc <- ipRead port;
 		return (case mc of
 			{
-			Nothing -> Left MkNullObjType;	-- null object, which also happens to be eof object
+			Nothing -> Left MkVoidObjType;
 			Just c -> Right c;
 			});
 		};
 	
 	portPeekByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (InputPort Word8 m,()) -> m (Either NullObjType Word8);
+	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
 	portPeekByteP (port,()) = do
 		{
 		mc <- ipPeek port;
 		return (case mc of
 			{
-			Nothing -> Left MkNullObjType;	-- null object, which also happens to be eof object
+			Nothing -> Left MkVoidObjType;
 			Just c -> Right c;
 			});
 		};
@@ -87,26 +80,27 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 
 	-- 6.6.3 Output
 	portWriteByteP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Word8,(OutputPort Word8 m,())) -> m NullObjType;
+	 (Word8,(OutputPort Word8 m,())) -> m VoidObjType;
 	portWriteByteP (c,(port,())) = do
 		{
 		opWriteOne port c;
-		return MkNullObjType;
+		return MkVoidObjType;
 		};
 
 	-- conversion
 	parseUTF8P :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,()) -> m (Either NullObjType Char);
+	 (Procedure (Object r m) m,()) -> m (Either VoidObjType Char);
 	parseUTF8P (source,()) = do
 		{
 		mc <- parseUTF8Char (do
 			{
-			obj <- source [];
+			objs <- source [];
+			obj <- singleValue objs;
 			meb <- fromObject obj;
 			case meb of
 				{
 				SuccessResult (Right b) -> return (Just (b :: Word8));
-				SuccessResult (Left MkNullObjType) -> return Nothing;
+				SuccessResult (Left MkVoidObjType) -> return Nothing;
 				ExceptionResult mm -> do
 					{
 					mmObj <- getConvert mm;
@@ -117,7 +111,7 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 		return (case mc of
 			{
 			Just c -> Right c;
-			Nothing -> Left MkNullObjType;
+			Nothing -> Left MkVoidObjType;
 			});
 		};
 	}

@@ -59,19 +59,18 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	
 	-- NullObjType
 
-	data NullObjType = MkNullObjType;
+	data VoidObjType = MkVoidObjType;
 
-	instance MaybeA NullObjType (Object r m) where
+	instance MaybeA VoidObjType (Object r m) where
 		{
-		maybeConvert obj = if isNullObject obj
-		 then Just MkNullObjType
-		 else Nothing;
+		maybeConvert VoidObject = Just MkVoidObjType;
+		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) NullObjType where
+	instance ObjectSubtype r (Object r m) VoidObjType where
 		{
-		getObject MkNullObjType = return nullObject;
-		fromObject = getMaybeToMatch NonObjectExpected (return . maybeConvert);
+		getObject MkVoidObjType = return VoidObject;
+		fromObject = getMaybeToMatch EOFTypeExpected (return . maybeConvert);
 		};
 
 

@@ -49,4 +49,17 @@ module Org.Org.Semantic.HScheme.Core.Throw where
 	throwArgError :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
 	 String -> [Object r m] -> cm a;
 	throwArgError = throwSchemeError;
+
+	singleValue ::
+		(
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m)
+		) =>
+	 [Object r m] -> cm (Object r m);
+{-
+	singleValue [obj] = return obj;
+	singleValue list = throwArgError "single-value-expected" list;
+-}
+	singleValue (obj:_) = return obj;
+	singleValue [] = return VoidObject;
 	}

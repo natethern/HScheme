@@ -194,8 +194,8 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		?objType :: Type (Object r m)
 		) =>
 	 SchemePattern pm (Object r m) subject ->
-	 ObjectSchemeExpression r m ->
-	 SchemeExpression r m (subject -> pm (MatchMonad (Object r m) (m (Object r m))));	-- big stack o' monads
+	 SchemeExpression r m (m a) ->
+	 SchemeExpression r m (subject -> pm (MatchMonad (Object r m) (m a)));	-- big stack o' monads
 	patternBind (MkPattern syms func) bodyExpr = fmap (\valsmobj subject -> do
 		{
 	 	matchvals <- func subject;
@@ -231,8 +231,8 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		?objType :: Type (Object r m)
 		) =>
 	 Object r m ->
-	 ObjectSchemeExpression r m ->
-	 cm (SchemeExpression r m ([Object r m] -> m (Object r m)));
+	 SchemeExpression r m (m a) ->
+	 cm (SchemeExpression r m ([Object r m] -> m a));
 	makeLambda patternObj expr = do
 		{
 		pattern <- makeListPattern [] patternObj;

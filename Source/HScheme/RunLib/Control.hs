@@ -36,35 +36,60 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	 (Object r m,()) -> m Bool;
 	isProcedureP (obj,()) = isProcedure obj;
 
-	callCCP ::
+	applyPL :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Procedure (Object r m) m,([Object r m],())) -> m [Object r m];
+	applyPL (proc,(args,())) = proc args;
+
+	callCCPL ::
 		(
 		Scheme m r,
 		?objType :: Type (Object r m),
 		MonadCont m
 		) =>
-	 (Procedure (Object r m) m,()) -> m (Object r m);
-	callCCP (proc,()) = callCC (\cont -> proc
-	  [ProcedureObject (\args -> do
-	  	{
-	  	(resultArg,()) <- convertFromObjects args;
-	  	cont resultArg;
-	  	})]);
+	 (Procedure (Object r m) m,()) -> m [Object r m];
+	callCCPL (proc,()) = callCC (\cont -> proc [ProcedureObject cont]);
 
-	dynamicWindP ::
+	dynamicWindPL ::
 		(
 		Scheme m r,
 		?objType :: Type (Object r m),
 		MonadGuard m
 		) =>
 	 (Procedure (Object r m) m,(Procedure (Object r m) m,(Procedure (Object r m) m,()))) ->
-	 m (Object r m);
-	dynamicWindP (before,(proc,(after,()))) = bracket (before [] >> return ()) (after [] >> return ()) (proc []);
+	 m [Object r m];
+	dynamicWindPL (before,(proc,(after,()))) = bracket (before [] >> return ()) (after [] >> return ()) (proc []);
 
-	fixP ::
+	fixPL ::
 		(
 		?objType :: Type obj,
 		MonadFix m
 		) =>
-	 (Procedure obj m,()) -> m obj;
-	fixP (proc,()) = mfix (\a -> proc [a]);
+	 (Procedure obj m,()) -> m [obj];
+	fixPL (proc,()) = mfix proc;
+
+	valuesPL :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 [Object r m] -> m [Object r m];
+	valuesPL = return;
+
+	callWithValuesPL ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 (Procedure (Object r m) m,(Procedure (Object r m) m,())) -> m [Object r m];
+	callWithValuesPL (producer,(consumer,())) = do
+		{
+		vals <- producer [];
+		consumer vals;
+		};
+
+	lastResortThrowP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Object r m,()) -> m (Object r m);
+	lastResortThrowP (obj,()) = lastResortThrowObject obj;
+
+{--
+	catchM :: (Scheme m r,MonadException (Object r m) m,?objType :: Type (Object r m)) =>
+	 (Procedure (Object r m) m,()) -> m (Object r m);
+	catchM = catch;
+--}
 	}

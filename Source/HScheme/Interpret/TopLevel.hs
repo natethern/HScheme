@@ -42,7 +42,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		tleSyntaxes :: [(Symbol,Syntax r (Object r m))]
 		};
 
-	type TopLevelObjectCommand r m = TopLevelCommand r m (m (Object r m));
+	type TopLevelObjectCommand r m = TopLevelCommand r m (m [Object r m]);
 
 	newtype TopLevelMacro cm r m = MkTopLevelMacro (
 		(
@@ -96,7 +96,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
-	 Object r m -> cm (ObjectSchemeExpression r m);
+	 Object r m -> cm (ListSchemeExpression r m);
 	assembleTopLevelExpression obj = do
 		{
 		MkTopLevelCommand expr _ _ <- assembleTopLevelObjectCommand obj;
@@ -113,8 +113,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 a -> 
-	 (m (Object r m) -> a) ->
-	 (m (Object r m) -> a -> a) ->
+	 (m [Object r m] -> a) ->
+	 (m [Object r m] -> a -> a) ->
 	 [Object r m] ->
 	 cm (TopLevelCommand r m a);
 	begin none one conn [] = return (MkTopLevelCommand (return none) [] []);
@@ -143,8 +143,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 m a -> 
-	 (m (Object r m) -> m a) ->
-	 (m (Object r m) -> m a -> m a) ->
+	 (m [Object r m] -> m a) ->
+	 (m [Object r m] -> m a -> m a) ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m a));
 	assembleTopLevelExpressions none one conn objs = do
@@ -167,16 +167,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 cm (SchemeExpression r m (m [Object r m]));
 	assembleTopLevelExpressionsList = assembleTopLevelExpressions
 	 (return [])
-	 (\mr -> do
-	 	{
-		r <- mr;
-		return [r];
-	 	})
+	 id
 	 (\mr mrs -> do
 		{
 		r <- mr;
 		rs <- mrs;
-		return (r:rs);
+		return (r ++ rs);
 		});
 
 	assembleTopLevelExpressionsEat ::
@@ -197,12 +193,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 (\mr -> do
 	 	{
 		r <- mr;
-		eat r;
+		forDo eat r;
 	 	})
 	 (\mr mrs -> do
 		{
 		r <- mr;
-		eat r;
+		forDo eat r;
 		mrs;
 		});
 

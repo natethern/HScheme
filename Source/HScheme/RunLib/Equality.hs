@@ -67,7 +67,7 @@ module Org.Org.Semantic.HScheme.RunLib.Equality where
 	equal (VectorObject a) (VectorObject b) = sameSRefArray equal a b;
 	equal (ByteArrayObject a) (ByteArrayObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
 	equal (StringObject a) (StringObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
-	equal (ValuesObject a) (ValuesObject b) = sameList equal a b;
+	equal VoidObject VoidObject = return True;
 	equal _ _ = return False;
 
 	eqvRefList	:: (FullScheme m r,?objType :: Type (Object r m)) => 
@@ -91,13 +91,11 @@ module Org.Org.Semantic.HScheme.RunLib.Equality where
 	eqv (ByteArrayObject a) (ByteArrayObject b) = eqvRefList (toList a) (toList b);
 	eqv (StringObject a) (StringObject b) = eqvRefList (toList a) (toList b);
 	eqv (VectorObject a) (VectorObject b) = eqvRefList (toList a) (toList b);
-	eqv (ValuesObject a) (ValuesObject b) = sameList eqv a b;
 	eqv a b = equal a b;
 
 	eq :: (FullScheme m r,?objType :: Type (Object r m)) => 
 	 Object r m -> Object r m -> m Bool;
 	eq (NumberObject a) (NumberObject b) = return (eqNumber a b);
-	eq (ValuesObject a) (ValuesObject b) = sameList eq a b;
 	eq a b = eqv a b;
 
 	eqP ::  (FullScheme m r,?objType :: Type (Object r m)) => 
