@@ -84,9 +84,6 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 		fExtract (MkNextList ga tga) = liftF2 MkNextList ga (fExtract tga);
 		};
 
-	fixFunc :: (Functor t) => t (t a -> a) -> t a;
-	fixFunc t = fix (\p -> (fmap (\x -> x p) t));
-
 
 	-- MutualBindings
 
@@ -94,30 +91,9 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	 MkMutualBindings (t (f a)) (forall r. f r -> f (t v -> r));
 
 	applyMutualBindings :: (FunctorApplyReturn f) =>
-	 ((val -> r) -> a -> r) -> MutualBindings f a val -> f r -> f r;
-	applyMutualBindings map (MkMutualBindings bindValues abstracter) body =
---	 liftF2 (\tad rd -> rd (fixFunc tad)) (fExtract (fmap abstracter bindValues)) (abstracter body);
-	 liftF2 (foo1 map) (fExtract (fmap abstracter bindValues)) (abstracter body);
-
-	foo1 :: (Functor t) => ((v -> r) -> a -> r) ->
-	 t (t v -> a) -> (t v -> r) -> r;
-	foo1 map ttva tvr = error "recursive subst not defined";
-
-{--
-abstracter :: forall r. f r -> f (t v -> r)
-bindValues :: t (f a)
-body :: f r
-(fmap abstracter bindValues) :: t (f (t v -> a))
-(fExtract (fmap abstracter bindValues)) :: f (t (t v -> a))
-(abstracter body) :: f (t v -> r)
-foo1 :: t (t v -> a) -> (t v -> r) -> r
-map :: (v -> r) -> a -> r
-foo2 :: t (t v -> (v -> r) -> r) -> (t v -> r) -> r
-
-
-v = m loc
-a = m obj
---}
+	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) -> MutualBindings f a val -> f r -> f r;
+	applyMutualBindings fixer (MkMutualBindings bindValues abstracter) body =
+	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
 
 	makeMutualBindings :: (FunctorLambda sym val f) =>
 	 [(sym,f a)] -> MutualBindings f a val;
@@ -130,6 +106,6 @@ a = m obj
 		};
 
 	fSubstMapRecursive :: (FunctorLambda sym val f) =>
-	 ((val -> r) -> a -> r) -> [(sym,f a)] -> f r -> f r;
-	fSubstMapRecursive map bindings = applyMutualBindings map (makeMutualBindings bindings);
+	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) -> [(sym,f a)] -> f r -> f r;
+	fSubstMapRecursive fixer bindings = applyMutualBindings fixer (makeMutualBindings bindings);
 	}

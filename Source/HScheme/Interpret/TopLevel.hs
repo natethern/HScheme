@@ -214,8 +214,27 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		return (fSubstMapSeparate substMap binds body);
 		};
 
+	fixFunctor :: (Functor t) => t (t a -> a) -> t a;
+	fixFunctor t = fix (\p -> (fmap (\x -> x p) t));
+
+	mfixExFunctor :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t) =>
+	 t (t a -> m a) -> m (t a);
+	mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
+
+	foo :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
+	 t (t (m (ObjLocation r m)) -> m (Object r m)) ->
+	 m (t (m (ObjLocation r m)));
+	foo tt = error "recursive subst not defined";
+
+	fixer :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
+	 t (t (m (ObjLocation r m)) -> m (Object r m)) ->
+	 (t (m (ObjLocation r m)) -> m (Object r m)) ->
+	 m (Object r m);
+	fixer bindsT bodyT = (foo bindsT) >>= bodyT;
+
 	letRecursiveM ::
 		(
+		MonadFix m, FunctorApplyReturn m,
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
@@ -229,7 +248,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		{
 		binds <- compileBinds bindList;
 		body <- bodyM bodyObj;
-		return (fSubstMapRecursive substMap binds body);
+		return (fSubstMapRecursive fixer binds body);
 		};
 
 	assembleTopLevelObjectCommand ::
