@@ -36,7 +36,7 @@ module FullProcedures where
 	 Symbol -> Object r m -> m ();
 	setBang name obj = case (getBinding ?bindings name) of
 		{
-		Just loc -> setLocation loc obj;
+		Just loc -> set loc obj;
 		Nothing -> fail ((unSymbol name)++" not defined");
 		};
 	
@@ -58,7 +58,7 @@ module FullProcedures where
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
 	setCarP Type ((PairObject carLoc _),(obj,())) = do
 		{
-		setLocation carLoc obj;
+		set carLoc obj;
 		return MkArgNoneType;
 		};	
 	setCarP Type (_,(obj,())) = fail "not a pair";	
@@ -67,7 +67,7 @@ module FullProcedures where
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
 	setCdrP Type ((PairObject _ cdrLoc),(obj,())) = do
 		{
-		setLocation cdrLoc obj;
+		set cdrLoc obj;
 		return MkArgNoneType;
 		};	
 	setCdrP Type (_,(obj,())) = fail "not a pair";	

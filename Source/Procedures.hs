@@ -129,7 +129,7 @@ module Procedures where
 	makeRefList i c = do
 		{
 		rest <- makeRefList (i - 1) c;
-		first <- newReference c;
+		first <- new c;
 		return (first:rest);
 		};
 
@@ -160,7 +160,7 @@ module Procedures where
 	 Type (r ()) -> [Char] -> m (StringRefType r);
 	stringP Type cs = do	
 		{
-		rs <- makeList newReference cs;
+		rs <- makeList new cs;
 		return (MkStringRefType rs);
 		};
 
@@ -209,9 +209,9 @@ module Procedures where
 	 ObjLocation r m -> ObjLocation r m -> m String;
 	printList hl tl = do
 		{
-		head <- getLocation hl;
+		head <- get hl;
 		htext <- toString head;
-		tail <- getLocation tl;
+		tail <- get tl;
 		case tail of
 			{
 			NilObject -> return htext;
@@ -244,12 +244,12 @@ module Procedures where
 	printVector [] = return "";
 	printVector [ar] = do
 		{
-		a <- getLocation ar;
+		a <- get ar;
 		toString a;
 		};
 	printVector (ar:as) = do
 		{
-		a <- getLocation ar;
+		a <- get ar;
 		f <- toString a;
 		r <- printVector as;
 		return (f++" "++r);
@@ -282,7 +282,7 @@ module Procedures where
 	printString [] = return "";
 	printString (cr:cs) = do
 		{
-		c <- getLocation cr;
+		c <- get cr;
 		r <- printString cs;
 		return ((escapeChar c)++r);
 		};	

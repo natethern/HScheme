@@ -25,91 +25,45 @@ module Object where
 	import Port;
 	import Numerics;
 	import HBase;
-	
-	class
-		(
-		MonadCreatable m r,
-		MonadGettableReference m r
-		) => Location m r;
-	
-	instance
-		(
-		MonadCreatable m r,
-		MonadGettableReference m r
-		) => Location m r;
-	
-	newLocation :: (Location m r) => a -> m (r a);
-	newLocation = newReference;
-	getLocation :: (Location m r) => r a -> m a;
-	getLocation = get;
-{--	
-	class Location m r where
-		{
-		newLocation		:: forall a. a -> m (r a);
-		getLocation		:: forall a. r a -> m a;
-		};
---}
-	
-	
-	class
-		(
-		MonadCont m,
-		MonadIsA m x (Object r m),
-		MonadIsA m (Object r m) x,
-		MonadSingleException x m,
-		Location m r
-		) =>
-	 Scheme x m r;
-	
-	instance
-		(
-		MonadCont m,
-		MonadIsA m x (Object r m),
-		MonadIsA m (Object r m) x,
-		MonadSingleException x m,
-		Location m r
-		) =>
-	 Scheme x m r;
-	
-	class
-		(
-		Location m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
-		) =>
-	 SettableLocation m r;
-	
-	instance
-		(
-		Location m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
-		) =>
-	 SettableLocation m r;
 
-	sameLocation :: (SettableLocation m r) => r a -> r a -> m Bool;
-	sameLocation = getEqualReference;
-	setLocation :: (SettableLocation m r) => r a -> a -> m ();
-	setLocation = set;
-	
-{--	
-	class (Location m r) =>
-	 SettableLocation m r where
-		{
-		sameLocation	:: forall a. r a -> r a -> m Bool;
-		setLocation		:: forall a. r a -> a -> m ();
-		};
---}
-	class (Scheme x m r,SettableLocation m r) =>
+	class
+		(
+		MonadCont m,
+		MonadIsA m x (Object r m),
+		MonadIsA m (Object r m) x,
+		MonadSingleException x m,
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) =>
+	 Scheme x m r;
+
+	instance
+		(
+		MonadCont m,
+		MonadIsA m x (Object r m),
+		MonadIsA m (Object r m) x,
+		MonadSingleException x m,
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) =>
+	 Scheme x m r;
+
+	class
+		(
+		Scheme x m r,
+		MonadFullReference m r,
+		MonadEqualReference m r
+		) =>
 	 FullScheme x m r;
-	
+
 	instance
 		(
 		Scheme x m r,
-		SettableLocation m r
+		MonadFullReference m r,
+		MonadEqualReference m r
 		) =>
 	 FullScheme x m r;
-	
+
 	type ObjLocation r m = r (Object r m);
 
 	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ordered,Eq);
@@ -129,7 +83,7 @@ module Object where
 	 Bindings r m -> Symbol -> Object r m -> m (ObjLocation r m,Bindings r m);
 	newObjBinding bindings sym obj = do
 		{
-		loc <- newLocation obj;
+		loc <- new obj;
 		return (loc,newBinding bindings sym loc);
 		};
 
@@ -163,19 +117,19 @@ module Object where
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;
 	mkValuesObject a = ValuesObject a;
-	
+
 	nullObject = mkValuesObject [];
-	
+
 	isNullObject :: Object r m -> Bool;
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
-	
+
 	cons :: (Scheme x m r) =>
 	 Object r m -> Object r m -> m (Object r m);
 	cons head tail = do
 		{
-		h <- newLocation head;
-		t <- newLocation tail;
+		h <- new head;
+		t <- new tail;
 		return (PairObject h t);
 		};
 	}

@@ -42,8 +42,8 @@ module Equality where
 	sameRefList _ [] [] = return True;
 	sameRefList same (a:as) (b:bs) = do
 		{
-		ac <- getLocation a;
-		bc <- getLocation b;
+		ac <- get a;
+		bc <- get b;
 		s <- same ac bc;
 		if s then (sameRefList same as bs) else (return False);
 		};
@@ -58,13 +58,13 @@ module Equality where
 	equal (NumberObject a) (NumberObject b) = return (equalNumber a b);
 	equal (PairObject ah at) (PairObject bh bt) = do
 		{
-		ahc <- getLocation ah;
-		bhc <- getLocation bh;
+		ahc <- get ah;
+		bhc <- get bh;
 		s <- equal ahc bhc;
 		if s then do
 			{
-			atc <- getLocation at;
-			btc <- getLocation bt;
+			atc <- get at;
+			btc <- get bt;
 			equal atc btc;
 			} else (return False);
 		};
@@ -78,7 +78,7 @@ module Equality where
 	eqvRefList [] [] = return True;
 	eqvRefList (a:as) (b:bs) = do
 		{
-		s <- sameLocation a b;
+		s <- getEqualReference a b;
 		if s then (eqvRefList as bs) else (return False);
 		};
 	eqvRefList _ _ = return False;
@@ -88,8 +88,8 @@ module Equality where
 	eqv (NumberObject a) (NumberObject b) = return (eqvNumber a b);
 	eqv (PairObject ah at) (PairObject bh bt) = do
 		{
-		hs <- sameLocation ah bh;
-		if hs then (sameLocation at bt) else (return False);
+		hs <- getEqualReference ah bh;
+		if hs then (getEqualReference at bt) else (return False);
 		};
 	eqv (StringObject a) (StringObject b) = eqvRefList a b;
 	eqv (VectorObject a) (VectorObject b) = eqvRefList a b;

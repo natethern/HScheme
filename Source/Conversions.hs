@@ -306,8 +306,8 @@ module Conversions where
 		{
 		getMaybeConvert (PairObject hloc tloc) = do
 			{
-			h <- getLocation hloc;
-			t <- getLocation tloc;
+			h <- get hloc;
+			t <- get tloc;
 			mobjH <- getMaybeConvert h;
 			mobjT <- getMaybeConvert t;
 			return (do
@@ -528,7 +528,7 @@ module Conversions where
 			getRList [] = return [];
 			getRList (c:cs) = do
 				{
-				r <- newLocation c;
+				r <- new c;
 				rs <- getRList cs;
 				return (r:rs);
 				};
@@ -546,7 +546,7 @@ module Conversions where
 			readRList [] = return [];
 			readRList (r:rs) = do
 				{
-				c <- getLocation r;
+				c <- get r;
 				cs <- readRList rs;
 				return (c:cs);
 				};

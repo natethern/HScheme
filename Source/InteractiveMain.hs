@@ -34,7 +34,7 @@ module Main where
 
 	instance MonadCreatable IO Constant where
 		{
-		newReference a = return (MkConstant a);
+		new a = return (MkConstant a);
 		};
 
 	instance MonadGettableReference IO Constant where
@@ -42,8 +42,8 @@ module Main where
 		get (MkConstant a) = return a;
 		};
 
-	full :: Bool;
-	full = True;
+	getFull :: IO Bool;
+	getFull = return True;
 
 	doInteract :: 
 		(
@@ -56,7 +56,11 @@ module Main where
 	 (interact ioFullSystemInterface);
 
 	main :: IO ();
-	main = if full
-	 then doInteract (fullInteract :: Interact IORef)
-	 else doInteract (pureInteract :: Interact Constant);
+	main = do
+		{
+		full <- getFull;
+		if full
+		 then doInteract (fullInteract :: Interact IORef)
+		 else doInteract (pureInteract :: Interact Constant);
+		};
 	}

@@ -36,13 +36,21 @@ module SchemeCPS where
 		ExceptionError Exception		|
 		ObjError (SchemeCPSObject r p)	;
 
-	instance (Location (SchemeCPS r p) r) =>
+	instance
+		(
+		MonadCreatable (SchemeCPS r p) r,
+		MonadGettableReference (SchemeCPS r p) r
+		) =>
 	 MonadIsA (SchemeCPS r p) (SchemeCPSError r p) (SchemeCPSObject r p) where
 		{
 		getConvert = return . ObjError;
 		};
 
-	instance (Location (SchemeCPS r p) r) =>
+	instance
+		(
+		MonadCreatable (SchemeCPS r p) r,
+		MonadGettableReference (SchemeCPS r p) r
+		) =>
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
@@ -94,7 +102,7 @@ module SchemeCPS where
 		) =>
 	 MonadCreatable (SchemeCPS r (m p)) r where
 		{
-		newReference a = call ((newReference :: a -> m (r a)) a);
+		new a = call ((new :: a -> m (r a)) a);
 		};
 
 	instance

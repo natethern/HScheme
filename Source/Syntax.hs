@@ -47,19 +47,19 @@ module Syntax where
 	substitute [] x = return x;
 	substitute subs (PairObject hloc tloc) = do
 		{
-		head <- getLocation hloc;
+		head <- get hloc;
 		head' <- substitute subs head;
-		hloc' <- newLocation head';
-		tail <- getLocation tloc;
+		hloc' <- new head';
+		tail <- get tloc;
 		tail' <- substitute subs tail;
-		tloc' <- newLocation tail';
+		tloc' <- new tail';
 		return (PairObject hloc' tloc')
 		};
 	substitute subs (VectorObject (loc:locs)) = do
 		{
-		head <- getLocation loc;
+		head <- get loc;
 		head' <- substitute subs head;
-		loc' <- newLocation head';
+		loc' <- new head';
 		VectorObject locs' <- substitute subs (VectorObject locs);
 		return (VectorObject (loc':locs'));
 		};
@@ -75,16 +75,16 @@ module Syntax where
 	matchBinding literals NilObject _ = return Nothing;
 	matchBinding literals (PairObject phl ptl) (PairObject ahl atl) = do
 		{
-		ph <- getLocation phl;
-		ah <- getLocation ahl;
+		ph <- get phl;
+		ah <- get ahl;
 		mhmatch <- matchBinding literals ph ah;
 		case mhmatch of
 			{
 			Nothing -> return Nothing;
 			Just hmatch -> do
 				{
-				pt <- getLocation ptl;
-				at <- getLocation atl;
+				pt <- get ptl;
+				at <- get atl;
 				mtmatch <- matchBinding literals pt at;
 				case mtmatch of
 					{
@@ -110,14 +110,14 @@ module Syntax where
 	matchBindings literals NilObject [] = return (Just []);
 	matchBindings literals (PairObject phl ptl) (a1:as) = do
 		{
-		ph <- getLocation phl;
+		ph <- get phl;
 		mmatch1 <- matchBinding literals ph a1;
 		case mmatch1 of
 			{
 			Nothing -> return Nothing;
 			Just match1 -> do
 				{
-				pt <- getLocation ptl;
+				pt <- get ptl;
 				mmatchs <- matchBindings literals pt as;
 				case mmatchs of
 					{

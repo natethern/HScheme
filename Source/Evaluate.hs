@@ -38,14 +38,14 @@ module Evaluate where
 
 	evaluate (SymbolObject a) = case (getBinding ?bindings a) of
 		{
-		Just loc -> getLocation loc;
+		Just loc -> get loc;
 		Nothing -> fail ((unSymbol a)++" not defined");
 		};
 
 	evaluate (PairObject head tail) = do
 		{
-		h <- getLocation head;
-		t <- getLocation tail;
+		h <- get head;
+		t <- get tail;
 		f <- evaluate h;
 		applyEval f t;
 		};
@@ -78,9 +78,9 @@ module Evaluate where
 	evalList NilObject = return [];
 	evalList (PairObject al dl) = do
 		{
-		a <- getLocation al;
+		a <- get al;
 		ae <- evaluate a;
-		d <- getLocation dl;
+		d <- get dl;
 		de <- evalList d;
 		return (ae:de);
 		};
@@ -95,8 +95,8 @@ module Evaluate where
 	macroToList NilObject = return [];
 	macroToList (PairObject al dl) = do
 		{
-		a <- getLocation al;
-		d <- getLocation dl;
+		a <- get al;
+		d <- get dl;
 		de <- macroToList d;
 		return (a:de);
 		};

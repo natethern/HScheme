@@ -67,7 +67,7 @@ module Lambda where
 		foo bindings ((name,(object,())):binds) = do
 			{
 			result <- evaluate object with {?bindings=original};
-			loc <- newLocation result;
+			loc <- new result;
 			foo (newBinding bindings name loc) binds;
 			};
 		};
@@ -81,7 +81,7 @@ module Lambda where
 	accrueBindingsStar bindings ((name,(object,())):binds) = do
 		{
 		result <- evaluate object with {?bindings=bindings};
-		loc <- newLocation result;
+		loc <- new result;
 		accrueBindingsStar (newBinding bindings name loc) binds;
 		};
 	
@@ -128,7 +128,7 @@ module Lambda where
 	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m);
 	matchBinding bindings (SymbolObject name) arg = do
 		{
-		loc <- newLocation arg;
+		loc <- new arg;
 		return (newBinding bindings name loc);
 		};
 	matchBinding bindings NilObject arg = do
@@ -139,9 +139,9 @@ module Lambda where
 	matchBinding bindings (PairObject hloc tloc) arg = do
 		{
 		(argh,argt) <- convertFromObject arg;
-		head <- getLocation hloc;
+		head <- get hloc;
 		bindings' <- matchBinding bindings head argh;
-		tail <- getLocation tloc;
+		tail <- get tloc;
 		bindings'' <- matchBinding bindings' tail argt;
 		return bindings'';
 		};
@@ -151,7 +151,7 @@ module Lambda where
 	matchBindings bindings (SymbolObject name) args = do
 		{
 		argList <- getConvert args;
-		argListLoc <- newLocation argList;
+		argListLoc <- new argList;
 		return (newBinding bindings name argListLoc);
 		};
 	matchBindings bindings NilObject args = do
@@ -162,9 +162,9 @@ module Lambda where
 	matchBindings bindings (PairObject hloc tloc) args = do
 		{
 		(argh,argt) <- convertFromObjects args;
-		head <- getLocation hloc;
+		head <- get hloc;
 		bindings' <- matchBinding bindings head argh;
-		tail <- getLocation tloc;
+		tail <- get tloc;
 		bindings'' <- matchBindings bindings' tail argt;
 		return bindings'';
 		};

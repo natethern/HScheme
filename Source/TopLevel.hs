@@ -47,14 +47,14 @@ module TopLevel
 					{
 					PairObject thead ttail -> do
 						{
-						tt <- getLocation ttail;
+						tt <- get ttail;
 						case tt of
 							{
 							NilObject -> do
 								{
-								th <- getLocation thead;
+								th <- get thead;
 								result <- evaluate th with {?bindings=bindings};
-								loc <- newLocation result;
+								loc <- new result;
 								return (newBinding bindings name loc,MkArgNoneType);
 								};
 							_ -> fail "bad define form (too many arguments)";
@@ -96,8 +96,8 @@ module TopLevel
 			{
 			(PairObject head tail) -> do
 				{
-				h <- getLocation head;
-				t <- getLocation tail;
+				h <- get head;
+				t <- get tail;
 				(bindings',f) <- topLevelEvaluate bindings h;
 				topLevelApplyEval bindings' f t;
 				};
