@@ -35,6 +35,11 @@ module Full where
 		{
 		newLocation = newReference;
 		getLocation = get;
+		};
+
+	instance (MonadStandardReference m r,MonadEqualReference m r) => SettableLocation m r where
+		{
 		sameLocation = getEqualReference;
+		setLocation = set;
 		};
 	}

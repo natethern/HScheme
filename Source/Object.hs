@@ -29,7 +29,6 @@ module Object where
 	
 	class Location m r where
 		{
-		sameLocation	:: forall a. r a -> r a -> m Bool;
 		newLocation		:: forall a. a -> m (r a);
 		getLocation		:: forall a. r a -> m a;
 		};
@@ -41,7 +40,8 @@ module Object where
 		MonadIsA m (Object r m) x,
 		MonadError x m,
 		Location m r
-		) => Scheme x m r;
+		) =>
+	 Scheme x m r;
 	
 	instance
 		(
@@ -50,14 +50,25 @@ module Object where
 		MonadIsA m (Object r m) x,
 		MonadError x m,
 		Location m r
-		) => Scheme x m r;
+		) =>
+	 Scheme x m r;
 	
-	class (Location m r) => SettableLocation m r where
+	class (Location m r) =>
+	 SettableLocation m r where
 		{
-		setLocation :: forall a. r a -> a -> m ();
+		sameLocation	:: forall a. r a -> r a -> m Bool;
+		setLocation		:: forall a. r a -> a -> m ();
 		};
 	
-	class (Scheme x m r,SettableLocation m r) => FullScheme x m r;
+	class (Scheme x m r,SettableLocation m r) =>
+	 FullScheme x m r;
+	
+	instance
+		(
+		Scheme x m r,
+		SettableLocation m r
+		) =>
+	 FullScheme x m r;
 	
 	type ObjLocation r m = r (Object r m);
 

@@ -48,41 +48,12 @@ module Equality where
 		};
 	sameRefList _ _ _ = return False;
 	
-	eqvRefList	:: (Scheme x m r) => 
-	 [r a] -> [r a] -> m Bool;
-	eqvRefList [] [] = return True;
-	eqvRefList (a:as) (b:bs) = do
-		{
-		s <- sameLocation a b;
-		if s then (eqvRefList as bs) else (return False);
-		};
-	eqvRefList _ _ = return False;
-	
-	eqv :: (Scheme x m r) => 
-	 Object r m -> Object r m -> m Bool;
-	eqv NilObject NilObject = (return True);
-	eqv (BooleanObject a) (BooleanObject b) = return (a == b);
-	eqv (SymbolObject a) (SymbolObject b) = return (a == b);
-	eqv (NumberObject a) (NumberObject b) = return (eqvNumber a b);
-	eqv (CharObject a) (CharObject b) = return (a == b);
-	eqv (PairObject ah at) (PairObject bh bt) = do
-		{
-		hs <- sameLocation ah bh;
-		if hs then (sameLocation at bt) else (return False);
-		};
-	eqv (StringObject a) (StringObject b) = eqvRefList a b;
-	eqv (VectorObject a) (VectorObject b) = eqvRefList a b;
-	eqv (ValuesObject a) (ValuesObject b) = sameList eqv a b;
-	eqv _ _ = return False;
-	
-	eq :: (Scheme x m r) => 
-	 Object r m -> Object r m -> m Bool;
-	eq (NumberObject a) (NumberObject b) = return (eqNumber a b);
-	eq (ValuesObject a) (ValuesObject b) = sameList eq a b;
-	eq a b = eqv a b;
-	
 	equal :: (Scheme x m r) => 
 	 Object r m -> Object r m -> m Bool;
+	equal NilObject NilObject = (return True);
+	equal (BooleanObject a) (BooleanObject b) = return (a == b);
+	equal (SymbolObject a) (SymbolObject b) = return (a == b);
+	equal (CharObject a) (CharObject b) = return (a == b);
 	equal (NumberObject a) (NumberObject b) = return (equalNumber a b);
 	equal (PairObject ah at) (PairObject bh bt) = do
 		{
@@ -99,13 +70,42 @@ module Equality where
 	equal (VectorObject a) (VectorObject b) = sameRefList equal a b;
 	equal (StringObject a) (StringObject b) = sameRefList (\a b -> return (a == b)) a b;
 	equal (ValuesObject a) (ValuesObject b) = sameList equal a b;
-	equal a b = eqv a b;
+	equal _ _ = return False;
 	
-	eqS ::  (Scheme x m r) => 
+	eqvRefList	:: (FullScheme x m r) => 
+	 [r a] -> [r a] -> m Bool;
+	eqvRefList [] [] = return True;
+	eqvRefList (a:as) (b:bs) = do
+		{
+		s <- sameLocation a b;
+		if s then (eqvRefList as bs) else (return False);
+		};
+	eqvRefList _ _ = return False;
+	
+	eqv :: (FullScheme x m r) => 
+	 Object r m -> Object r m -> m Bool;
+	eqv (NumberObject a) (NumberObject b) = return (eqvNumber a b);
+	eqv (PairObject ah at) (PairObject bh bt) = do
+		{
+		hs <- sameLocation ah bh;
+		if hs then (sameLocation at bt) else (return False);
+		};
+	eqv (StringObject a) (StringObject b) = eqvRefList a b;
+	eqv (VectorObject a) (VectorObject b) = eqvRefList a b;
+	eqv (ValuesObject a) (ValuesObject b) = sameList eqv a b;
+	eqv a b = equal a b;
+	
+	eq :: (FullScheme x m r) => 
+	 Object r m -> Object r m -> m Bool;
+	eq (NumberObject a) (NumberObject b) = return (eqNumber a b);
+	eq (ValuesObject a) (ValuesObject b) = sameList eq a b;
+	eq a b = eqv a b;
+	
+	eqS ::  (FullScheme x m r) => 
 	 Type (r ()) -> (Object r m,Object r m) -> m Bool;
 	eqS Type (a,b) = eq a b;
 	
-	eqvS ::  (Scheme x m r) => 
+	eqvS ::  (FullScheme x m r) => 
 	 Type (r ()) -> (Object r m,Object r m) -> m Bool;
 	eqvS Type (a,b) = eqv a b;
 	
