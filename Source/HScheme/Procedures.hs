@@ -185,6 +185,10 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
+	stringCharsP :: (Scheme m r,?bindings :: Bindings r m) =>
+	 (SList Char,()) -> m [Char];
+	stringCharsP (MkSList cs,()) = return cs;
+
 	-- create a completely new string
 	stringAppendP :: (Scheme m r,?refType :: Type (r ())) =>
 	 [SList Char] -> m (SList Char);
@@ -225,6 +229,10 @@ module Org.Org.Semantic.HScheme.Procedures where
 		r <- getArrayRef i arr;
 		get r;
 		};
+
+	byteArrayBytesP :: (Scheme m r,?bindings :: Bindings r m) =>
+	 (SList Word8,()) -> m [Word8];
+	byteArrayBytesP (MkSList cs,()) = return cs;
 
 	-- create a completely new byte array
 	byteArrayAppendP :: (Scheme m r,?refType :: Type (r ())) =>

@@ -127,6 +127,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"string-length"					stringLengthP,
 		addProcBinding	"string-ref"					stringRefP,
 		addProcBinding	"string-append"					stringAppendP,
+		addProcBinding	"string-chars"					stringCharsP,
 
 		-- Byte Arrays (all nonstandard)
 		addProcBinding	"byte-array?"					isByteArrayP,
@@ -135,6 +136,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"byte-array-length"				byteArrayLengthP,
 		addProcBinding	"byte-array-ref"				byteArrayRefP,
 		addProcBinding	"byte-array-append"				byteArrayAppendP,
+		addProcBinding	"byte-array-bytes"				byteArrayBytesP,
 
 		-- Encoding (all nonstandard)
 		addProcBinding	"encode-utf8"					(encodeP encodeUTF8),

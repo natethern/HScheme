@@ -20,20 +20,28 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.FMapBindings where
+module Org.Org.Semantic.HScheme.FMapBindings(emptyBindings) where
 	{
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	emptyBindings :: (Scheme m r) => Bindings r m;
-	emptyBindings = toBindings empty where
+	fmapGetBinding ::
+	 FiniteMap Symbol (ObjLocation r m) -> Symbol -> Maybe (ObjLocation r m);
+	fmapGetBinding map sym = lookup sym map;
+
+	fmapNewBinding :: (Scheme m r) =>
+	 FiniteMap Symbol (ObjLocation r m) -> Symbol -> ObjLocation r m ->
+	 Bindings r m;
+	fmapNewBinding map sym loc = toBindings (addMapEntry (sym,loc) map);
+
+	toBindings :: (Scheme m r) =>
+	 FiniteMap Symbol (ObjLocation r m) -> Bindings r m;
+	toBindings map = MkBindings
 		{
-		toBindings :: (Scheme m r) =>
-		 FiniteMap Symbol (ObjLocation r m) -> Bindings r m;
-		toBindings map = MkBindings
-			{
-			getBinding = \sym -> lookup sym map,
-			newBinding = \sym loc -> toBindings (addMapEntry (sym,loc) map)
-			};
+		getBinding = fmapGetBinding map,
+		newBinding = fmapNewBinding map
 		};
+
+	emptyBindings :: (Scheme m r) => Bindings r m;
+	emptyBindings = toBindings empty;
 	}
