@@ -30,15 +30,15 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		(
 		Build cm r,
 		Scheme m r,
+		?load :: String -> cm [Object r m],
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
 		) =>
-	 PureSystemInterface cm m r ->
 	 (SList Char,()) -> cm (TopLevelObjectCommand cm r m);
-	loadT psi (MkSList filename,()) = do
+	loadT (MkSList filename,()) = do
 		{
-		readObjects <- psiReadFile psi filename;
+		readObjects <- ?load filename;
 		beginM readObjects;
 		};
 	}

@@ -22,22 +22,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.System where
 	{
-	import Org.Org.Semantic.HScheme.Core.Object;
 	import Org.Org.Semantic.HScheme.Core.Port;
 	import Org.Org.Semantic.HBase;
 
-	data PureSystemInterface cm m r = MkPureSystemInterface
+	data System m = MkSystem
 		{
-		psiReadFile	:: String -> cm [Object r m]
-		};
-
-	data FullSystemInterface cm m r = MkFullSystemInterface
-		{
-		fsiPure					:: PureSystemInterface cm m r,
-		fsiCurrentInputPort		:: InputPort Word8 cm,
-		fsiCurrentOutputPort	:: OutputPort Word8 cm,
-		fsiCurrentErrorPort		:: OutputPort Word8 cm,
-		fsiOpenInputFile		:: String -> cm (InputPort Word8 cm),
-		fsiOpenOutputFile		:: String -> cm (OutputPort Word8 cm)
+		fsiCurrentInputPort		:: InputPort Word8 m,
+		fsiCurrentOutputPort	:: OutputPort Word8 m,
+		fsiCurrentErrorPort		:: OutputPort Word8 m,
+		fsiOpenInputFile		:: String -> m (InputPort Word8 m),
+		fsiOpenOutputFile		:: String -> m (OutputPort Word8 m)
 		};
 	}

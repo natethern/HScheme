@@ -479,21 +479,6 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		return objects;
 		};
 
-	readFiles ::
-		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m)
-		) =>
-	 (String -> cm (InputPort Word8 cm)) ->
-	 [String] -> cm [Object r m];
-	readFiles oif [] = return [];
-	readFiles oif (name:names) = do
-		{
-		objs1 <- readWithProcs oif name;
-		objsr <- readFiles oif names;
-		return (objs1 ++ objsr);
-		};
-
 	portReadP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (InputPort Word8 m,()) -> m (Object r m);
 	portReadP (port,()) = do

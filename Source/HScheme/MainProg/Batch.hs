@@ -28,30 +28,9 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
-
-	printResult :: (Build cm r) =>
-	 OutputPort Word8 cm -> Object r m -> cm ();
-	printResult output obj = if (isNullObject obj)
-	 then (return ())
-	 else do
-		{
-		str <- toString obj;
-		opWriteList output (encodeUTF8 (str ++ "\n"));
-		};
-
-	reportError :: (Build cm r,?objType :: Type (Object r m)) =>
-	 OutputPort Word8 cm -> Object r m -> cm ();
-	reportError errPort errObj = do
-		{
-		text <- toString errObj;
-		opWriteList errPort (encodeUTF8 ("error: "++text++"\n"));
-		opFlush errPort;
-		};
 
 	class
 		(
@@ -79,6 +58,20 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		rsLift = id;
 		};
 
+	readFiles ::
+		(
+		Monad cm,
+		?load :: String -> cm [Object r m]
+		) =>
+	 [String] -> cm [Object r m];
+	readFiles [] = return [];
+	readFiles (name:names) = do
+		{
+		objs1 <- ?load name;
+		objsr <- readFiles names;
+		return (objs1 ++ objsr);
+		};
+
 	runProgram ::
 		(
 		RunnableScheme cm m r,
@@ -86,24 +79,21 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?load :: String -> cm [Object r m]
 		) =>
 	 (((Symbol -> Maybe (ObjLocation r m)) -> m ()) -> m ()) ->
-	 cm () ->
+	 (Object r m -> cm ()) ->
+	 (Object r m -> cm ()) ->
 	 [String] ->
 	 cm ();
-	runProgram mrun failproc filenames =
+	runProgram mrun outproc failproc filenames =
 	 catch (do
 		{
-		objects <- readFiles (fsiOpenInputFile ?system) filenames;
-		program <- interpretTopLevelExpressionsEat (\obj -> rsLift (printResult (fsiCurrentOutputPort ?system) obj)) objects;
+		objects <- readFiles filenames;
+		program <- interpretTopLevelExpressionsEat (\obj -> rsLift (outproc obj)) objects;
 		rsRun (mrun program);
 		})
-		(\errObj -> do
-		{
-		reportError (fsiCurrentErrorPort ?system) errObj;
 		failproc;
-		});
 
 	runProgramBindings ::
 		(
@@ -112,14 +102,15 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?load :: String -> cm [Object r m]
 		) =>
-	 cm () ->
+	 (Object r m -> cm ()) ->
+	 (Object r m -> cm ()) ->
 	 [String] ->
 	 Bindings r m ->
 	 cm ();
-	runProgramBindings failproc filenames bindings =
-	 runProgram mrun failproc filenames where
+	runProgramBindings outproc failproc filenames bindings =
+	 runProgram mrun outproc failproc filenames where
 		{
 		mrun lm = lm (getBinding bindings);
 		};
@@ -132,14 +123,15 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?load :: String -> cm [Object r m]
 		) =>
-	 cm () ->
+	 (Object r m -> cm ()) ->
+	 (Object r m -> cm ()) ->
 	 [String] ->
 	 Bindings r m ->
 	 cm ();
-	runProgramBindingsWithExit failproc filenames rootBindings =
-	 runProgram mrun failproc filenames where
+	runProgramBindingsWithExit outproc failproc filenames rootBindings =
+	 runProgram mrun outproc failproc filenames where
 		{
 		mrun lm = callCC (\exitFunc -> do
 			{

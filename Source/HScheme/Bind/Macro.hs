@@ -100,16 +100,16 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
+		?load :: String -> cm [Object r m],
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
 		) =>
-	 PureSystemInterface cm m r ->
 	 Binds Symbol (TopLevelMacro cm r m) ->
 	 Binds Symbol (TopLevelMacro cm r m);
-	systemMacroBindings psi = concatenateList
+	systemMacroBindings = concatenateList
 		[
 		-- 6.6.4 System Interface
-		addTopLevelMacroBinding	"load"	(loadT psi)
+		addTopLevelMacroBinding	"load"	loadT
 		];
 	}

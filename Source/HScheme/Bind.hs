@@ -44,11 +44,7 @@ module Org.Org.Semantic.HScheme.Bind
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		?objType :: Type (Object r m),
-	 	?system :: FullSystemInterface cm m r,
-		?stderr :: FlushSink cm Word8,
-		?stdout :: FlushSink cm Word8,
-		?stdin :: PeekSource cm (Maybe Word8)
+		?objType :: Type (Object r m)
 		) =>
 	 ((
 	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
@@ -75,7 +71,7 @@ module Org.Org.Semantic.HScheme.Bind
 		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
 		 macroBinds emptyBindings;
 		tlb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 systemMacroBindings (fsiPure ?system) (tlBinds emptyBindings);
+		 tlBinds emptyBindings;
 		} in
 	 let
 	 	{

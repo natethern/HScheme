@@ -309,16 +309,17 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		Scheme m r,
-		?objType :: Type (Object r m)
+		?objType :: Type (Object r m),
+		?system :: System m
 		) =>
-	 FullSystemInterface m m r -> Bindings r m -> cm (Bindings r m);
-	fullSystemBindings fsi = concatenateList
+	 Bindings r m -> cm (Bindings r m);
+	fullSystemBindings = concatenateList
 		[
 		-- 6.6.1 Ports
-		addProcBinding	"current-input-port"	(currentInputPortP fsi),
-		addProcBinding	"current-output-port"	(currentOutputPortP fsi),
-		addProcBinding	"current-error-port"	(currentErrorPortP fsi), -- nonstandard
-		addProcBinding	"open-input-file"		(openInputFileP fsi),
-		addProcBinding	"open-output-file"		(openOutputFileP fsi)
+		addProcBinding	"current-input-port"	currentInputPortP,
+		addProcBinding	"current-output-port"	currentOutputPortP,
+		addProcBinding	"current-error-port"	currentErrorPortP, -- nonstandard
+		addProcBinding	"open-input-file"		openInputFileP,
+		addProcBinding	"open-output-file"		openOutputFileP
 		];
 	}

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Imperative.IOSystem where
 	{
-	import Org.Org.Semantic.HScheme.Parse;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -60,24 +59,6 @@ module Org.Org.Semantic.HScheme.Imperative.IOSystem where
 		return (remonadInputPort remonad (handleInputPort h));
 		};
 
-	nameInPath :: String -> String -> String;
-	nameInPath path name@('/':_) = name;
-	nameInPath path name = path ++ "/" ++ name;
-
-	openFileReadWithPaths :: [String] -> String -> IO Handle;
-	openFileReadWithPaths [] name = fail ("file "++(show name)++" not found in paths");
-	openFileReadWithPaths (path:paths) name = catchSingle
-		(openFileRead (nameInPath path name))
-		(\_ -> openFileReadWithPaths paths name);
-
-	openInputFileWithPaths :: (Monad m) =>
-	 (forall a. IO a -> m a) -> [String] -> String -> m (InputPort Word8 m);
-	openInputFileWithPaths remonad paths name = do
-		{
-		h <- remonad (openFileReadWithPaths paths name);
-		return (remonadInputPort remonad (handleInputPort h));
-		};
-
 	openOutputFile :: (Monad m) =>
 	 (forall a. IO a -> m a) -> String -> m (OutputPort Word8 m);
 	openOutputFile remonad name = do
@@ -86,39 +67,16 @@ module Org.Org.Semantic.HScheme.Imperative.IOSystem where
 		return (remonadOutputPort remonad (handleOutputPort h));
 		};
 
-	ioPureSystemInterface ::
+	ioSystem ::
 		(
-		Scheme m r,
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m)
-		) =>
-	 (forall a. IO a -> cm a) -> [String] -> PureSystemInterface cm m r;
-	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (readWithProcs (openInputFileWithPaths remonad loadpaths));
-
-	ioQuietPureSystemInterface ::
-		(
-		Scheme m r,
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m)
-		) =>
-	 (forall a. IO a -> cm a) -> [String] -> PureSystemInterface cm m r;
-	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (readWithProcs (openInputFileWithPaths remonad loadpaths));
-
-	ioFullSystemInterface ::
-		(
-		Scheme m r,
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m),
+		Monad m,
 		?stdin :: PeekSource IO (Maybe Word8),
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 (forall a. IO a -> cm a) -> [String] -> FullSystemInterface cm m r;
-	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
+	 (forall a. IO a -> m a) -> System m;
+	ioSystem remonad = MkSystem
 		{
-		fsiPure = ioPureSystemInterface remonad loadpaths,
 		fsiCurrentInputPort		= remonadInputPort remonad stdInputPort,
 		fsiCurrentOutputPort	= remonadOutputPort remonad stdOutputPort,
 		fsiCurrentErrorPort		= remonadOutputPort remonad stdErrorPort,

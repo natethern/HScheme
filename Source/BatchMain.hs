@@ -100,6 +100,36 @@ module Main where
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
 
+	printResult ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stdout :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	printResult obj = if (isNullObject obj)
+	 then (return ())
+	 else do
+		{
+		str <- toString obj;
+		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
+		};
+
+	reportError ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stderr :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	reportError obj = do
+		{
+		text <- toString obj;
+		fsSinkList ?stderr (encodeUTF8 ("error: "++text++"\n"));
+		fsFlush ?stderr;
+		exitFailure;
+		};
+
 	main :: IO ();
 	main = ioRunProgram (do
 		{
@@ -122,57 +152,59 @@ module Main where
 				{
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-				 let {?system = ioFullSystemInterface id loadpaths;} in
-				 (mutualBind fullMacroBindings fullTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 let {?system = ioSystem rsLift} in
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemMacroBindings) (do
 					{
-					bindings <- (monadContFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
-					runProgramBindingsWithExit exitFailure (allFileNames "init.full.scm") bindings;
+					bindings <- (monadContFullBindings ++ fullSystemBindings) emptyBindings;
+					runProgramBindingsWithExit printResult reportError (allFileNames "init.full.scm") bindings;
 					}));
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IORef IO)} in
-				 let {?system = ioFullSystemInterface id loadpaths;} in
-				 (mutualBind fullMacroBindings fullTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 let {?system = ioSystem rsLift} in
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ systemMacroBindings) (do
 					{
-					bindings <- (monadFixFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
-					runProgramBindings exitFailure (allFileNames "init.full.scm") bindings;
+					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
+					runProgramBindings printResult reportError (allFileNames "init.full.scm") bindings;
 					}));
 				};
 			PureFlavour -> case whichmonad of
 				{
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
-				 let {?system = ioFullSystemInterface id loadpaths} in
-				 (mutualBind pureMacroBindings pureTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
 					{
 					bindings <- monadContPureBindings emptyBindings;
-					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
+					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst IO)} in
-				 let {?system = ioFullSystemInterface id loadpaths} in
-				 (mutualBind pureMacroBindings pureTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
 					{
 					bindings <- monadFixPureBindings emptyBindings;
-					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;
+					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
 				};
 			StrictPureFlavour -> case whichmonad of
 				{
 				CPSWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
-				 let {?system = ioFullSystemInterface id loadpaths} in
-				 (mutualBind pureMacroBindings pureTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
 					{
 					bindings <- monadContStrictPureBindings emptyBindings;
-					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
+					runProgramBindingsWithExit printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
 				IOWhichMonad ->
 				 let {?objType = Type::Type (Object IOConst IO)} in
-				 let {?system = ioFullSystemInterface id loadpaths} in
-				 (mutualBind pureMacroBindings pureTopLevelBindings (do
+				 let {?load = ioLoad loadpaths} in
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ systemMacroBindings) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
-					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;
+					runProgramBindings printResult reportError (allFileNames "init.pure.scm") bindings;
 					}));
 				};
 			};

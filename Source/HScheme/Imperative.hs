@@ -23,11 +23,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Imperative
 	(
 	module Org.Org.Semantic.HScheme.Imperative.IOSystem,
+	module Org.Org.Semantic.HScheme.Imperative.IOLoad,
 	module Org.Org.Semantic.HScheme.Imperative.SchemeIO,
 	module Org.Org.Semantic.HScheme.Imperative.SchemeCPS
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Imperative.SchemeCPS;
 	import Org.Org.Semantic.HScheme.Imperative.SchemeIO;
+	import Org.Org.Semantic.HScheme.Imperative.IOLoad;
 	import Org.Org.Semantic.HScheme.Imperative.IOSystem;
 	}

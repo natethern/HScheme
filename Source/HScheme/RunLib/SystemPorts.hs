@@ -25,28 +25,23 @@ module Org.Org.Semantic.HScheme.RunLib.SystemPorts where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	currentInputPortP :: (Build cm r) =>
-	 FullSystemInterface cm m r ->
-	 () -> cm (InputPort Word8 cm);
-	currentInputPortP fsi () = return (fsiCurrentInputPort fsi);
+	currentInputPortP :: (Monad m,?system :: System m) =>
+	 () -> m (InputPort Word8 m);
+	currentInputPortP () = return (fsiCurrentInputPort ?system);
 
-	currentOutputPortP :: (Build cm r) =>
-	 FullSystemInterface cm m r ->
-	 () -> cm (OutputPort Word8 cm);
-	currentOutputPortP fsi () = return (fsiCurrentOutputPort fsi);
+	currentOutputPortP :: (Monad m,?system :: System m) =>
+	 () -> m (OutputPort Word8 m);
+	currentOutputPortP () = return (fsiCurrentOutputPort ?system);
 
-	currentErrorPortP :: (Build cm r) =>
-	 FullSystemInterface cm m r ->
-	 () -> cm (OutputPort Word8 cm);
-	currentErrorPortP fsi () = return (fsiCurrentErrorPort fsi);
+	currentErrorPortP :: (Monad m,?system :: System m) =>
+	 () -> m (OutputPort Word8 m);
+	currentErrorPortP () = return (fsiCurrentErrorPort ?system);
 
-	openInputFileP :: (Build cm r) =>
-	 FullSystemInterface cm m r ->
-	 (SList Char,()) -> cm (InputPort Word8 cm);
-	openInputFileP fsi (MkSList name,()) = fsiOpenInputFile fsi name;
+	openInputFileP :: (Monad m,?system :: System m) =>
+	 (SList Char,()) -> m (InputPort Word8 m);
+	openInputFileP (MkSList name,()) = fsiOpenInputFile ?system name;
 
-	openOutputFileP :: (Build cm r) =>
-	 FullSystemInterface cm m r ->
-	 (SList Char,()) -> cm (OutputPort Word8 cm);
-	openOutputFileP fsi (MkSList name,()) = fsiOpenOutputFile fsi name;
+	openOutputFileP :: (Monad m,?system :: System m) =>
+	 (SList Char,()) -> m (OutputPort Word8 m);
+	openOutputFileP (MkSList name,()) = fsiOpenOutputFile ?system name;
 	}

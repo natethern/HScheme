@@ -114,6 +114,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/MainProg.hs	\
 	\
 	$(HIER)/Imperative/IOSystem.hs	\
+	$(HIER)/Imperative/IOLoad.hs	\
 	$(HIER)/Imperative/SchemeIO.hs	\
 	$(HIER)/Imperative/SchemeCPS.hs	\
 	$(HIER)/Imperative.hs	\
@@ -345,8 +346,6 @@ Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Throw.p
 Org/Org/Semantic/HScheme/Core/System.o Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/System.hs
 Org/Org/Semantic/HScheme/Core/System.o : Org/Org/Semantic/HScheme/Core/Port.hi
 Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
-Org/Org/Semantic/HScheme/Core/System.o : Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core.o Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core.hs
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
@@ -550,10 +549,6 @@ Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Core.p_hi
 Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Interpret.hi
 Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Parse.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/RunLib.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
 Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Bind.hi
 Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Bind.p_hi
 Org/Org/Semantic/HScheme/MainProg.o Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg.hs
@@ -562,8 +557,13 @@ Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.
 Org/Org/Semantic/HScheme/Imperative/IOSystem.o Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hs
 Org/Org/Semantic/HScheme/Imperative/IOSystem.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Imperative/IOSystem.o : Org/Org/Semantic/HScheme/Parse.hi
-Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.o Org/Org/Semantic/HScheme/Imperative/IOLoad.p_o : Org/Org/Semantic/HScheme/Imperative/IOLoad.hs
+Org/Org/Semantic/HScheme/Imperative/IOLoad.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hi
+Org/Org/Semantic/HScheme/Imperative/IOLoad.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.p_hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.o Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hs
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/Core.p_hi
@@ -577,6 +577,8 @@ Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Mai
 Org/Org/Semantic/HScheme/Imperative.o Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative.hs
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hi
 Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.p_hi
+Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/IOLoad.hi
+Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IOLoad.p_hi
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hi
 Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_hi
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hi

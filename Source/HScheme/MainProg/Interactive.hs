@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?system :: System cm
 		) =>
 	  Bindings r m -> m ();
 	interactiveLoop bindings = do
@@ -104,7 +104,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?system :: System cm
 		) =>
 	 Bindings r m ->
 	 String ->
@@ -132,7 +132,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?system :: FullSystemInterface cm m r
+		?system :: System cm
 		) =>
 	 Bindings r m ->
 	 String ->
