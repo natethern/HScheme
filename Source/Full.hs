@@ -20,16 +20,21 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Pure where
+module Full where
 	{
 	import Object;
+	import MoreRef;
+	import Ref;
 
-	data PureLocation a = MkPureLocation a;
-
-	instance (Monad m) => Location m PureLocation where
+	class (MonadReference m r) => MonadEqualReference m r where
 		{
-		newLocation a = return (MkPureLocation a);
-		getLocation (MkPureLocation a) = return a;
-		sameLocation (MkPureLocation a) (MkPureLocation b) = return False;
+		getEqualReference :: r a -> r a -> m Bool;
+		};
+
+	instance (MonadStandardReference m r,MonadEqualReference m r) => Location m r where
+		{
+		newLocation = newReference;
+		getLocation = get;
+		sameLocation = getEqualReference;
 		};
 	}

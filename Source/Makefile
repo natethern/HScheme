@@ -30,10 +30,11 @@ LDH				= $(HC) $(HCPACKAGES)
 LDFLAGS			=
 
 HC_SRCS			= \
-	Common/Ref.hs	\
-	Common/Subtype.hs	\
 	Common/Type.hs	\
+	Common/Subtype.hs	\
 	Common/LiftedMonad.hs	\
+	Common/Ref.hs	\
+	Common/MoreRef.hs	\
 	UnicodeDefs.hs	\
 	UnicodeData.hs	\
 	Unicode.hs	\
@@ -52,6 +53,7 @@ HC_SRCS			= \
 	FMapBindings.hs	\
 	SchemeCPS.hs	\
 	Pure.hs	\
+	Full.hs	\
 	Interactive.hs
 
 OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
