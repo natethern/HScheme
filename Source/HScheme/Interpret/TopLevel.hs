@@ -56,14 +56,14 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	instance FunctorApply (TopLevelCommand r obj m) where
 		{
-		fApply (MkTopLevelCommand ab binds1 syntax1) (MkTopLevelCommand a binds2 syntax2) = 
-		 MkTopLevelCommand (fApply ab a) (binds1 ++ binds2) (syntax1 ++ syntax2);
+		fapply (MkTopLevelCommand ab binds1 syntax1) (MkTopLevelCommand a binds2 syntax2) = 
+		 MkTopLevelCommand (fapply ab a) (binds1 ++ binds2) (syntax1 ++ syntax2);
 
-		fPassTo (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand ab binds2 syntax2) = 
-		 MkTopLevelCommand (fPassTo a ab) (binds1 ++ binds2) (syntax1 ++ syntax2);
+		fpassto (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand ab binds2 syntax2) = 
+		 MkTopLevelCommand (fpassto a ab) (binds1 ++ binds2) (syntax1 ++ syntax2);
 
-		fSeq (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand b binds2 syntax2) = 
-		 MkTopLevelCommand (fSeq a b) (binds1 ++ binds2) (syntax1 ++ syntax2);
+		fseq (MkTopLevelCommand a binds1 syntax1) (MkTopLevelCommand b binds2 syntax2) = 
+		 MkTopLevelCommand (fseq a b) (binds1 ++ binds2) (syntax1 ++ syntax2);
 		};
 
 	type TopLevelListCommand r obj m = TopLevelCommand r obj m (m [obj]);

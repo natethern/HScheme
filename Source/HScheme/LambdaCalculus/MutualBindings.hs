@@ -49,13 +49,13 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.MutualBindings
 	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
 	 MutualBindings f a val -> f r -> f r;
 	applyMutualBindingsSeparate separater (MkMutualBindings bindValues abstracter) body =
-	 liftF2 separater (fExtract bindValues) (abstracter body);
+	 liftF2 separater (fextract bindValues) (abstracter body);
 
 	applyMutualBindingsRecursive :: (FunctorApplyReturn f) =>
 	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
 	 MutualBindings f a val -> f r -> f r;
 	applyMutualBindingsRecursive fixer (MkMutualBindings bindValues abstracter) body =
-	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
+	 liftF2 fixer (fextract (fmap abstracter bindValues)) (abstracter body);
 
 	bindSeparate :: (FunctorApplyReturn f) =>
 	 (forall t. (ExtractableFunctor t) => t a -> (t v -> r) -> r) ->

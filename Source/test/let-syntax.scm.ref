@@ -1,3 +1,7 @@
 (outer inner)
 inner
 ((a . b) (cons (quote a) (quote b)))
+(inner-1 outer-1)
+(inner-2 inner-2)
+(outer-3 inner-3)
+(inner-4 inner-4)

@@ -39,11 +39,11 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.FixedList where
 
 	instance ExtractableFunctor ZeroList where
 		{
-		fExtract _ = return MkZeroList;
+		fextract _ = return MkZeroList;
 		};
 
 	instance (ExtractableFunctor t) => ExtractableFunctor (NextList t) where
 		{
-		fExtract ~(MkNextList ga tga) = liftF2 MkNextList ga (fExtract tga);
+		fextract ~(MkNextList ga tga) = liftF2 MkNextList ga (fextract tga);
 		};
 	}

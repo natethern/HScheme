@@ -158,7 +158,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			tryEach 
 			 (throwPatternNotMatchedError [arg])
 			 (fmap (\pcase -> pcase arg) pcases);
-			}) argExpr (fExtract sExprs));
+			}) argExpr (fextract sExprs));
 		};
 
 	syntaxRulesM ::
@@ -166,6 +166,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		MapObjects r obj,
 		Monad cm,
 		InterpretObject m r obj,
+--			?syntacticbindings :: SymbolBindings (Syntax r obj m),
+--			?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
 		?objType :: Type obj
 		) =>
 	 ([Symbol],[((Symbol,obj),(obj,()))]) -> cm (Syntax r obj m);
@@ -217,8 +219,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		SyntaxError cm obj,
 		Build cm r,
 		InterpretObject m r obj,
-		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj m)
+			?syntacticbindings :: SymbolBindings (Syntax r obj m),
+--			?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?objType :: Type obj
 		) =>
 	 obj -> cm (Syntax r obj m);
 	compileSyntax obj = do

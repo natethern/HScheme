@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.LambdaCalculus
 	(
 	module Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression,
-	module Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaExpression,
-	module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression,
+--	module Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaExpression,
+--	module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression,
 	module Org.Org.Semantic.HScheme.LambdaCalculus.LookupLambdaExpression,
 	module Org.Org.Semantic.HScheme.LambdaCalculus.TrackingLambdaExpression,
 	module Org.Org.Semantic.HScheme.LambdaCalculus.LambdaFunctorExpression,
@@ -37,7 +37,7 @@ module Org.Org.Semantic.HScheme.LambdaCalculus
 	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaFunctorExpression;
 	import Org.Org.Semantic.HScheme.LambdaCalculus.TrackingLambdaExpression;
 	import Org.Org.Semantic.HScheme.LambdaCalculus.LookupLambdaExpression;
-	import Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression;
-	import Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaExpression;
+--	import Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression;
+--	import Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaExpression;
 	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression;
 	}

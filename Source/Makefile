@@ -599,12 +599,6 @@ Org/Org/Semantic/HScheme/LambdaCalculus.o Org/Org/Semantic/HScheme/LambdaCalculu
 Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
 Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
 Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
-Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.hi
-Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.q_hi
-Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.p_hi
-Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.hi
-Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.q_hi
-Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.p_hi
 Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.hi
 Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.q_hi
 Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.p_hi

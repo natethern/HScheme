@@ -43,8 +43,8 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.TrackingLambdaFunctorExpression(T
 	instance (FunctorApply f,Eq sym,FunctorApply lambda) =>
 	 FunctorApply (TrackingLambdaFunctorExpression sym lambda f) where
 		{
-		fApply (MkExpression syms1 expr1) (MkExpression syms2 expr2) =
-		 MkExpression (union syms1 syms2) (liftF2 fApply expr1 expr2);
+		fapply (MkExpression syms1 expr1) (MkExpression syms2 expr2) =
+		 MkExpression (union syms1 syms2) (liftF2 fapply expr1 expr2);
 		};
 
 	instance (FunctorApplyReturn f,LambdaExpression sym val lambda) =>

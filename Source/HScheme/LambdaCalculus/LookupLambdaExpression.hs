@@ -26,41 +26,49 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.LookupLambdaExpression(LookupLamb
 	import Org.Org.Semantic.HBase;
 
 	-- list lengths always the same size
-	newtype LookupLambdaExpression sym val a = MkFuncSymbolExpression ((sym -> val) -> a);
+	newtype LookupLambdaExpression sym val a = MkExpression ((sym -> val) -> a);
 
 	instance HasReturn (LookupLambdaExpression sym val) where
 		{
-		return a = MkFuncSymbolExpression (const a);
+		return a = MkExpression (const a);
 		};
 
 	instance Functor (LookupLambdaExpression sym val) where
 		{
-		fmap map (MkFuncSymbolExpression func) =
+		fmap map (MkExpression func) =
 		 {-# SCC "fmap" #-}
-		 MkFuncSymbolExpression (map . func);
+		 MkExpression (map . func);
 		};
 
-	instance (Eq sym) => FunctorApply (LookupLambdaExpression sym val) where
+	instance FunctorApply (LookupLambdaExpression sym val) where
 		{
-		fApply (MkFuncSymbolExpression svab) (MkFuncSymbolExpression sva) = MkFuncSymbolExpression
+		fapply (MkExpression svab) (MkExpression sva) = MkExpression
 			(\sv -> svab sv (sva sv));
 		};
 
 	instance (Eq sym) => LambdaExpression sym val (LookupLambdaExpression sym val) where
 		{
-		exprSymbol sym = MkFuncSymbolExpression (\sv -> sv sym);
+		exprSymbol sym = MkExpression (\sv -> sv sym);
 
-		exprAbstract abssym (MkFuncSymbolExpression sva) = MkFuncSymbolExpression (\sv v -> sva (\s -> if s == abssym then v else sv s));
+		exprAbstract abssym (MkExpression sva) = MkExpression (\sv v -> sva (\s -> if s == abssym then v else sv s));
 
---		exprLet abssym (MkFuncSymbolExpression sva) (MkFuncSymbolExpression body)= MkFuncSymbolExpression
+--		exprLet abssym (MkExpression sva) (MkExpression body)= MkExpression
 --			(\sv -> body (\s -> if s == abssym then (sva sv) else sv s));
 
-		exprLetSym abssym sym (MkFuncSymbolExpression body)= MkFuncSymbolExpression
+		exprLetSym abssym sym (MkExpression body)= MkExpression
 			(\sv -> body (\s -> sv (if s == abssym then sym else s)));
 		};
 
 	instance (Eq sym) => RunnableLambdaExpression sym val (LookupLambdaExpression sym val) where
 		{
-		runLambda resolve (MkFuncSymbolExpression sva) = sva resolve;
+		runLambda resolve (MkExpression sva) = sva resolve;
+		};
+
+	unExpression :: LookupLambdaExpression sym val a -> (sym -> val) -> a;
+	unExpression (MkExpression sva) = sva;
+
+	instance Monad (LookupLambdaExpression sym val) where
+		{
+		mbind (MkExpression sva) afb = MkExpression (\sv -> unExpression (afb (sva sv)) sv);
 		};
 	}

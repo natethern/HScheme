@@ -44,8 +44,8 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression
 
 	instance (Eq sym) => FunctorApply (ListSymbolExpression sym val) where
 		{
-		fApply (MkListSymbolExpression [] func) rda = fmap (func []) rda;
-		fApply (MkListSymbolExpression (sym:syms) valsab) rda =
+		fapply (MkListSymbolExpression [] func) rda = fmap (func []) rda;
+		fapply (MkListSymbolExpression (sym:syms) valsab) rda =
 			MkListSymbolExpression (sym:syms') valsb where
 			{
 			MkListSymbolExpression syms' valsva = (exprAbstract sym rda);

@@ -60,7 +60,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		{
 		mm <- func a;
 		mms <- makeEllipsisPatternFunc' syms func as;
-		fExtract (do
+		fextract (do
 			{
 			objs <- mm;
 			objrs <- mms;

@@ -93,7 +93,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.full.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -111,7 +111,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -125,7 +125,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -153,7 +153,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.full.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -170,7 +170,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -184,7 +184,7 @@ module Main where
 						]) emptyBindings;
 					rsRun (do
 						{
-						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 						interactWithExit bindings commands;
 						});
 					});
@@ -210,7 +210,7 @@ module Main where
 						systemBindings id,
 						systemPortBindings
 						]) emptyBindings;
-					commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+					commands <- fextract (fmap readLoad (allFileNames "init.full.scm"));
 					interact bindings commands;
 					});
 				PureStdBindings ->
@@ -224,7 +224,7 @@ module Main where
 						evalBindings id,
 						portBindings
 						]) emptyBindings;
-					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+					commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 					interact bindings commands;
 					});
 				StrictPureStdBindings ->
@@ -235,7 +235,7 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+					commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
 					interact bindings commands;
 					});
 				};

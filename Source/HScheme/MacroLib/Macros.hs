@@ -316,18 +316,18 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 			Nothing -> return (assembleSymbolExpressionSingle sym);
 			}) varspecs;
 		return (liftF5 doCore
-		 (fExtract initExprs)
+		 (fextract initExprs)
 		 (absSyms testExpr)
 		 (absSyms lastExpr)
 		 (absSyms loopExpr)
-		 (absSyms (fmap fExtract (fExtract stepExprs)))
+		 (absSyms (fmap fextract (fextract stepExprs)))
 		 );
 		} where
 		{	
 		liftF5 :: (FunctorApply f) =>
 		 (a -> b -> c -> d -> e -> r) ->
 		 (f a -> f b -> f c -> f d -> f e -> f r);
-		liftF5 func fa fb fc fd fe = fApply (liftF4 func fa fb fc fd) fe;
+		liftF5 func fa fb fc fd fe = fapply (liftF4 func fa fb fc fd) fe;
 
 		doCore ::
 			(
@@ -343,7 +343,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		 m a;
 		doCore initProcs testProc lastProcs loopProcs stepProcs = do
 			{
-			vals <- fExtract initProcs;
+			vals <- fextract initProcs;
 			loopCore vals;
 			} where
 			{
@@ -380,7 +380,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	namedLetM (var,(bindlist,bodyObj)) = do
 		{
 		bodyExpr <- bodyM bodyObj;
-		bindvals <- fExtract (fmap (assembleExpressionSingle . fst . snd) bindlist);
+		bindvals <- fextract (fmap (assembleExpressionSingle . fst . snd) bindlist);
 		return
 		 (
 		 let
@@ -389,9 +389,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 			} in
 		 schemeExprLetRecursive [(var,fmap getObject exp)] (liftF2 (\objsf mobjs -> do
 			{
-			objs <- fExtract mobjs;
+			objs <- fextract mobjs;
 			objsf objs;
-			}) exp (fExtract bindvals))
+			}) exp (fextract bindvals))
 		 );
 		};
 

@@ -108,7 +108,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	 ObjectSchemeExpression r obj m ->
 	 [ObjectSchemeExpression r obj m] ->
 	 ListSchemeExpression r obj m;
-	makeApply f args = fApply (fmap doApply f) (fmap fExtract (fExtract args));
+	makeApply f args = fapply (fmap doApply f) (fmap fextract (fextract args));
 
 	assembleApplyExpression ::
 		(

@@ -45,7 +45,7 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression
 		exprAbstract :: sym -> f r -> f (val -> r);
 
 		exprLet :: sym -> f val -> f r -> f r;
-		exprLet sym valueExpr bodyExpr = fApply (exprAbstract sym bodyExpr) valueExpr;
+		exprLet sym valueExpr bodyExpr = fapply (exprAbstract sym bodyExpr) valueExpr;
 
 		exprLetSym :: sym -> sym -> f r -> f r;
 		exprLetSym abssym sym = exprLet abssym (exprSymbol sym);

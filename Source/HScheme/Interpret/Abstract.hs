@@ -118,8 +118,8 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 		 t (m obj) -> (t (r obj) -> m a) -> m a;
 		separater bindExprs absBody = do
 			{
-			objs <- fExtract bindExprs;
-			locs <- fExtract (fmap new objs);
+			objs <- fextract bindExprs;
+			locs <- fextract (fmap new objs);
 			absBody locs;
 			};
 		};
