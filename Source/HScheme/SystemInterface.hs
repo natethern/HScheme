@@ -101,14 +101,21 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		fsiOpenOutputFile		:: String -> cm (OutputPort Word8 cm)
 		};
 
-	loadT :: (Build cm r) =>
+	loadT ::
+		(
+		Build cm r,
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		) =>
 	 PureSystemInterface cm m r ->
-	 (SList Char,()) -> TopLevelAction cm r m;
-	loadT psi (MkSList filename,()) = MkTopLevelAction (\beg objs -> do
+	 (SList Char,()) -> cm (TopLevelExpression cm r m);
+	loadT psi (MkSList filename,()) = do
 		{
 		readObjects <- psiReadFile psi filename;
-		beg (readObjects ++ objs);
-		});
+		beginM readObjects;
+		};
 
 	currentInputPortP :: (Build cm r) =>
 	 FullSystemInterface cm m r ->
@@ -135,7 +142,15 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	 (SList Char,()) -> cm (OutputPort Word8 cm);
 	openOutputFileP fsi (MkSList name,()) = fsiOpenOutputFile fsi name;
 
-	systemMacroBindings :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	systemMacroBindings ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		) =>
 	 PureSystemInterface cm m r ->
 	 Binds Symbol (TopLevelMacro cm r m) ->
 	 Binds Symbol (TopLevelMacro cm r m);
@@ -145,7 +160,12 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		addTopLevelMacroBinding	"load"	(loadT psi)
 		];
 
-	fullSystemBindings :: (Build cm r,Scheme m r,?objType :: Type (Object r m)) =>
+	fullSystemBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
 	 FullSystemInterface m m r -> Bindings r m -> cm (Bindings r m);
 	fullSystemBindings fsi = concatenateList
 		[

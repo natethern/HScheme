@@ -22,119 +22,452 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.TopLevel
 	(
-{--	pureSetLoc,fullSetLoc,
-	defineT,
---}
---	topLevelEvaluate
+	TopLevelExp(..),TopLevelExpression,TopLevelMacro,
+	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
+	compileTopLevelExpression,
+	pureDefineT,fullDefineT,
+	beginM,bodyM,bodyListM,bodyListEat,
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Compile;
-	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.SymbolExpression;
+	import Org.Org.Semantic.HScheme.FunctorLambda;
 	import Org.Org.Semantic.HBase;
-{--
-	pureSetLoc :: (Scheme m r,?bindings :: Bindings r m) =>
-	 ObjLocation r m -> Object r m -> m ();
-	pureSetLoc _ newdef = throwArgError "cant-redefine" [newdef];
 
-	fullSetLoc :: (FullScheme m r,?bindings :: Bindings r m) =>
-	 ObjLocation r m -> Object r m -> m ();
-	fullSetLoc = set;
+	-- deep Haskell magic
+	data ThingySingle m f obj a = forall b. MkThingySingle
+	  ((b -> m obj) -> obj -> (a -> m obj))
+	  (f (a -> m obj) -> f (b -> m obj));
+
+	getThingySingle :: 
+		(
+		Build cm r,
+		Scheme m r
+		) =>
+	 Object r m -> cm (ThingySingle m (SchemeExpression r m) (Object r m) a);
+	-- b = a
+	getThingySingle NilObject = return (MkThingySingle (\f obj a -> do
+		{
+		mobj <- getMaybeConvert obj;
+		case mobj of
+			{
+			Nothing -> fail "too many arguments";
+			Just (_ :: ()) -> f a;
+			};
+		}) id);
+	-- b = p2 (p1 a)
+	getThingySingle (PairObject l1 l2) = do
+		{
+		o1 <- get l1;
+		o2 <- get l2;
+		MkThingySingle map1 bindSyms1 <- getThingySingle o1;
+		MkThingySingle map2 bindSyms2 <- getThingySingle o2;
+		return (MkThingySingle (\f obj a -> do
+			{
+			mobj <- getMaybeConvert obj;
+			case mobj of
+				{
+				Nothing -> fail "too few arguments";
+				Just (p1,p2) -> (map1 (map2 f p2) p1) a;
+				};
+			})
+		 (bindSyms2 . bindSyms1)
+		 );
+		};
+	-- b = (mloc,a)
+	getThingySingle (SymbolObject sym) = return (MkThingySingle (\bf obj a -> bf (new obj,a))
+	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
+	getThingySingle _ = fail "bad arg list in lambda";
+
+	data ThingyList m f obj a = forall b. MkThingyList
+	  ((b -> m obj) -> [obj] -> (a -> m obj))
+	  (f (a -> m obj) -> f (b -> m obj));
+
+	getThingyList :: 
+		(
+		Build cm r,
+		Scheme m r
+		) =>
+	 Object r m -> cm (ThingyList m (SchemeExpression r m) (Object r m) a);
+	-- b = a
+	getThingyList NilObject = return (MkThingyList (\f list a -> case list of
+		{
+		[] -> f a;
+		_ -> fail "too many arguments";
+		}) id);
+	-- b = p2 (p1 a)
+	getThingyList (PairObject l1 lr) = do
+		{
+		obj1 <- get l1;
+		objr <- get lr;
+		MkThingySingle map1 bindSyms1 <- getThingySingle obj1;
+		MkThingyList map2 bindSyms2 <- getThingyList objr;
+		return (MkThingyList (\f list a -> case list of
+			{
+			[] -> fail "too few arguments";
+			(p1:p2) -> (map1 (map2 f p2) p1) a;
+			})
+		(bindSyms2 . bindSyms1));
+		};
+	-- b = (mloc,a)
+	getThingyList (SymbolObject sym) = return (MkThingyList (\bf list a -> bf (do
+		{
+		obj <- getConvert list;
+		new obj;
+		},a))
+	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
+	getThingyList _ = fail "bad arg list in lambda";
+
+	makeLambda ::
+		(
+		Build cm r,
+		Scheme m r
+		) =>
+	 Object r m ->
+	 SchemeExpression r m (m (Object r m)) ->
+	 cm (SchemeExpression r m ([Object r m] -> m (Object r m)));
+	makeLambda params expr = do
+		{
+		MkThingyList map bindSyms <- getThingyList params;
+		return (fmap ((\ff list -> ff list ()) . map) (bindSyms (fmap (\f () -> f) expr)));
+		};
+
+	convertToLocationExpression :: (Scheme m r) =>
+	 SchemeExpression r m (m (Object r m)) ->
+	 SchemeExpression r m (m (ObjLocation r m));
+	convertToLocationExpression = fmap (\mvalue -> (do
+	 	{
+	 	value <- mvalue;
+	 	new value;
+	 	}));
+
+	convertToLocationBinding :: (Scheme m r) =>
+	 (Symbol,SchemeExpression r m (m (Object r m))) ->
+	 (Symbol,SchemeExpression r m (m (ObjLocation r m)));
+	convertToLocationBinding (sym,valueExpr) = (sym,convertToLocationExpression valueExpr);
+
+	data TopLevelExp cm r m a = MkTopLevelExpression
+		{
+		tleExpression :: SchemeExpression r m a,
+		tleInitialBindings :: [(Symbol,SchemeExpression r m (m (Object r m)))],
+		tleSyntaxes :: [(Symbol,Syntax cm r m)]
+		};
+
+	type TopLevelExpression cm r m = TopLevelExp cm r m (m (Object r m));
+
+	type TopLevelMacro cm r m = [Object r m] -> cm (TopLevelExpression cm r m);
+
+	lambdaM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 (Object r m,[Object r m]) ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	lambdaM (params,bodyObj) = do
+		{
+		body <- bodyM bodyObj;
+		proc <- makeLambda params body;
+		return (fmap (return . ProcedureObject) proc);
+		};
+
+	compileBinds ::
+		(
+		Build cm r,
+		Scheme m r,
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [(Symbol,(Object r m,()))] ->
+	 cm [(Symbol,SchemeExpression r m (m (Object r m)))];
+	compileBinds [] = return [];
+	compileBinds ((sym,(obj,())):bs) = do
+		{
+		expr <- compileExpression obj;
+		bcs <- compileBinds bs;
+		return ((sym,expr):bcs);
+		};
+
+	substMap :: (Scheme m r) =>
+	 (m (ObjLocation r m) -> m a) -> m (Object r m) -> m a;
+	substMap va mvalue = do
+		{
+	 	value <- mvalue;
+		loc <- new value;
+		va (return loc);
+		};
+
+	letSequentialM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 ([(Symbol,(Object r m,()))],[Object r m]) ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	letSequentialM (bindList,bodyObj) = do
+		{
+		binds <- compileBinds bindList;
+		body <- bodyM bodyObj;
+		return (fSubstMapSequential substMap binds body);
+		};
+
+	letSeparateM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 ([(Symbol,(Object r m,()))],[Object r m]) ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	letSeparateM (bindList,bodyObj) = do
+		{
+		binds <- compileBinds bindList;
+		body <- bodyM bodyObj;
+		return (fSubstMapSeparate substMap binds body);
+		};
+
+	letRecursiveM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 ([(Symbol,(Object r m,()))],[Object r m]) ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	letRecursiveM (bindList,bodyObj) = do
+		{
+		binds <- compileBinds bindList;
+		body <- bodyM bodyObj;
+		return (fSubstMapRecursive substMap binds body);
+		};
+
+	compileTopLevel ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 Object r m -> cm (TopLevelExpression cm r m);
+	compileTopLevel obj = do
+		{
+		mpair <- getMaybeConvert obj;
+		case mpair of
+			{
+			Just (sym,args) -> case getBinding ?toplevelbindings sym of
+				{
+				Just tlm -> tlm args;
+				Nothing -> compileExprTopLevel;
+				};
+			Nothing -> compileExprTopLevel;
+			};
+		} where
+		{
+		compileExprTopLevel = do
+			{
+			expr <- compileExpression obj;
+			return (MkTopLevelExpression expr [] []);
+			};
+		};
+
+	compileTopLevelExpression ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 Object r m -> cm (SchemeExpression r m (m (Object r m)));
+	compileTopLevelExpression obj = do
+		{
+		MkTopLevelExpression expr _ _ <- compileTopLevel obj;
+		return expr;
+		};
 
 	-- 5.2 Definitions
-	defineT :: (Scheme m r) =>
-	 ((?bindings :: Bindings r m) => ObjLocation r m -> Object r m -> m ()) ->
-	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,NullObjType);
-	defineT setLoc bindings (h,t) = let {?bindings=bindings} in case h of
-		{
-		SymbolObject name -> case t of
-			{
-			PairObject thead ttail -> do
-				{
-				tt <- get ttail;
-				case tt of
-					{
-					NilObject ->  do
-						{
-						th <- get thead;
-						result <- evaluate th;
-						case (getBinding bindings name) of
-							{
-							Nothing -> do
-								{
-								loc <- new result;
-							 	return (newBinding bindings name loc,MkNullObjType);
-							 	};
-							Just loc -> do
-								{
-								setLoc loc result;
-							 	return (bindings,MkNullObjType);
-								};
-							};
-						};
-					_ -> throwArgError "too-many-args-in-define" [tt];
-					};
-				};
-			NilObject -> throwSimpleError "too-few-args-in-define";
-			_ -> throwSimpleError "dotted-pair-define";
-			};
-		PairObject _ _ -> throwSimpleError "nyi-define";
-		_ -> throwSimpleError "bad-name-type-define";
-		};
-
-	topLevelApplyEval ::
+	pureDefineT ::
 		(
-		Scheme m r
-		) =>
-	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m,Object r m);
-	topLevelApplyEval bindings (TopLevelMacroObject f) arglist = do
-		{
-		f bindings arglist;
-		};
-	topLevelApplyEval bindings obj arglist = do
-		{
-		result <- let {?bindings=bindings;} in applyEval obj arglist;
-		return (bindings,result);
-		};
-
-	topLevelEvaluate ::
-		(
-		Scheme m r
-		) =>
-	 TopLevelMacro r m;
-	
-	topLevelEvaluate bindings a = do
-		{
-		case a of
-			{
-			(PairObject head tail) -> do
-				{
-				h <- get head;
-				t <- get tail;
-				(bindings',f) <- topLevelEvaluate bindings h;
-				topLevelApplyEval bindings' f t;
-				};
-			_ -> do
-				{
-				r <- let {?bindings = bindings} in evaluate a;
-				return (bindings,r);
-				};
-			};
-		};
---}
-{--
-	topLevelEvaluate ::
-		(
+		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
-	topLevelEvaluate bindings a = do
+	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	pureDefineT (sym,(val,())) = do
 		{
-		r <- let {?bindings = bindings} in evaluate a;
-		return (bindings,r);
+		valExpr <- compileExpression val;
+		return (MkTopLevelExpression (return' (return nullObject)) [(sym,valExpr)] []);
 		};
+
+	fullDefineT ::
+		(
+		Build cm r,
+		FullScheme m r,
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	fullDefineT (sym,(val,())) = do
+		{
+		valExpr <- compileExpression val;
+		return (MkTopLevelExpression 
+		 (liftF2 (\mloc mval -> do
+		 	{
+		 	loc <- mloc;
+		 	val <- mval;
+		 	set loc val;
+		 	return nullObject;
+		 	}) (fSymbol sym) valExpr)
+		 [(sym,return' (return (error "unassigned symbol")))] []);
+		};
+
+	begin ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 a -> 
+	 (m (Object r m) -> a -> a) ->
+	 [Object r m] ->
+	 cm (TopLevelExp cm r m a);
+	begin none conn [] = return (MkTopLevelExpression (return' none) [] []);
+	begin none conn (obj:objs) = do
+		{
+		(MkTopLevelExpression expr1 binds1 syntax1) <- compileTopLevel obj;
+		(MkTopLevelExpression exprr bindsr syntaxr) <- let
+		 {?syntacticbindings = newBinds ?syntacticbindings syntax1} in
+		 begin none conn objs;
+		return (MkTopLevelExpression (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
+		};
+
+	beginM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] ->
+	 cm (TopLevelExpression cm r m);
+	beginM = begin (return nullObject) (>>);
+
+	body ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 m a -> 
+	 (m (Object r m) -> m a -> m a) ->
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m a));
+	body none conn objs = do
+		{
+		MkTopLevelExpression expr binds _ <- begin none conn objs;
+--		return (fSubstMapRecursive substMap binds expr);
+		return (fSubstMapSequential substMap binds expr);
+		};
+
+	bodyM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	bodyM = body (return nullObject) (>>);
+
+	bodyList ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m [Object r m]));
+	bodyList = body
+	 (return [])
+	 (\mr mrs -> do
+		{
+		r <- mr;
+		rs <- mrs;
+		return (r:rs);
+		});
+
+	fmap' :: (Monad f) => (a -> b) -> (f a -> f b);
+	fmap' map fa = fa >>= (return . map);
+
+	bodyListM ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m (Object r m)));
+	bodyListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (bodyList obj);
+
+	bodyListEat ::
+		(
+		Build cm r,
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 (Object r m -> m ()) ->
+	 [Object r m] ->
+	 cm (SchemeExpression r m (m ()));
+	bodyListEat eat = body
+	 (return ())
+	 (\mr mrs -> do
+		{
+		r <- mr;
+		eat r;
+		mrs;
+		});
+
+{--
+top-level: define, load, define-syntax
+macro: quote, lambda, if, let, let*, syntax-rules, case-match, letrec, begin, set!
+
+
+(let ((a b))
+	(let ((f (lambda (x) (list x a))))
+		(f obj)
+	)
+)
+
+(define f (lambda () a))
+(let ((a 'b))
+ (f)
+)
 --}
 	}

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Syntax where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Bindings;
@@ -216,16 +217,15 @@ module Org.Org.Semantic.HScheme.Syntax where
 	defineSyntaxT ::
 		(
 		BuildThrow cm (Object r m) r,
+		Monad m,
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> TopLevelAction cm r m;
-	defineSyntaxT (sym,(obj,())) = MkTopLevelAction (\beg objs -> do
+	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = Type} in compileSyntax obj;
-		let
-			{
-			?syntacticbindings = newBinding ?syntacticbindings sym syntax;
-			} in beg objs
-		});
+		return (MkTopLevelExpression (return' (return nullObject)) []
+		 [(sym,syntax)]);
+		};
 	}

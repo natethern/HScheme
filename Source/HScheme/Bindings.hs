@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Bindings where
 	{
 	import Org.Org.Semantic.HScheme.ArgumentList;
+	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Compile;
 --	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
@@ -61,13 +62,13 @@ module Org.Org.Semantic.HScheme.Bindings where
 		ArgumentList cm m r args,
 		?objType :: Type (Object r m)
 		) =>
-	 (args -> TopLevelAction cm r m) ->
+	 (args -> cm (TopLevelExpression cm r m)) ->
 	 (TopLevelMacro cm r m);
-	convertToTopLevelMacro foo argObjs = MkTopLevelAction (\beg restObjs -> do
+	convertToTopLevelMacro foo argObjs = do
 		{
 		args <- convertFromObjects argObjs;
-		unTopLevelAction (foo args) beg restObjs;
-		});
+		foo args;
+		};
 
 	addMacroBinding ::
 		(
@@ -86,9 +87,9 @@ module Org.Org.Semantic.HScheme.Bindings where
 		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> TopLevelAction cm r m) ->
-	 Binds Symbol ([Object r m] -> TopLevelAction cm r m) ->
-	 Binds Symbol ([Object r m] -> TopLevelAction cm r m);
+	 (args -> cm (TopLevelExpression cm r m)) ->
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;
 
 	exitFuncProc :: (Monad m) => (a -> m b) -> (a -> m ());

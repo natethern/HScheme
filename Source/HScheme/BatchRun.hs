@@ -26,6 +26,7 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 	import Org.Org.Semantic.HScheme.SystemInterface;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;

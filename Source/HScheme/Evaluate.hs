@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Evaluate where
 	{
+	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
@@ -85,13 +86,14 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	evaluate ::
 		(
 		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
 		?syntacticbindings :: Binds Symbol (Syntax m r m),
 		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>
 	 Bindings r m -> Object r m -> m (Object r m);
 	evaluate bindings obj = do
 		{
-		rr <- compile obj;
+		rr <- compileTopLevelExpression obj;
 		runSymbolExpression (getSymbolBinding bindings) rr;
 		};
 
@@ -106,7 +108,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	 Bindings r m -> [Object r m] -> m ();
 	evalObjects eat bindings objs = do	
 		{
-		rr <- beginListEat eat objs;
+		rr <- bodyListEat eat objs;
 		runSymbolExpression (getSymbolBinding bindings) rr;
 		};
 
@@ -114,6 +116,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		(
 		Scheme m r,
 		?bindings		:: Bindings r m,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
 		?syntacticbindings :: Binds Symbol (Syntax m r m),
 		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>

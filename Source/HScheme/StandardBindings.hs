@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	import Org.Org.Semantic.HScheme.NumericProcedures;
 	import Org.Org.Semantic.HScheme.Macros;
 	import Org.Org.Semantic.HScheme.Procedures;
---	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.TopLevel;
 --	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Bindings;
@@ -81,34 +81,53 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	 Binds Symbol (Macro cm r m);
 	pureMacroBindings = concatenateList
 		[
-		macroBindings,
+		macroBindings
 
 		-- 4.2.3 Sequencing
-		addMacroBinding	"begin"					beginM,
-		addMacroBinding	"begin-list"			beginListM
+--		,addMacroBinding	"begin"					beginM
+--		,addMacroBinding	"begin-list"			beginListM
 		];
 
-	topLevelBindings ::
+	commonTopLevelBindings ::
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m),
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (TopLevelMacro cm r m) ->
 	 Binds Symbol (TopLevelMacro cm r m);
-	topLevelBindings = concatenateList
+	commonTopLevelBindings = concatenateList
 		[
+		-- 4.2.3 Sequencing
+		addMacroBinding	"begin"					beginM,
+
 		-- 4.3.2 Pattern Language
 --		addSyntaxMakerMacroBinding	"syntax-rules"			syntaxRulesM,
 
-		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"			defineT,
---		addTopLevelMacroBinding	"define"			(defineT pureSetLoc),
-
 		-- 5.3 Syntax Definitions
 		addTopLevelMacroBinding	"define-syntax"		defineSyntaxT
+		];
+
+	pureTopLevelBindings ::
+		(
+		Scheme m r,
+		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
+		) =>
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
+	pureTopLevelBindings = concatenateList
+		[
+		commonTopLevelBindings,
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"			pureDefineT
 		];
 
 	commonStrictPureBindings ::

@@ -22,7 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Object where
 	{
-	import Org.Org.Semantic.HScheme.SymbolExpression;
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
@@ -92,7 +91,9 @@ module Org.Org.Semantic.HScheme.Object where
 		getBinding :: sym -> Maybe a
 		};
 
-	type SchemeExpression r m = SymbolExpression Symbol (m (ObjLocation r m));
+	newBinds :: Binds sym a -> [(sym,a)] -> Binds sym a;
+	newBinds b [] = b;
+	newBinds b ((sym,a):r) = newBinding (newBinds b r) sym a;
 
 	type Bindings r m = Binds Symbol (ObjLocation r m);
 
@@ -104,21 +105,8 @@ module Org.Org.Semantic.HScheme.Object where
 		return (loc,newBinding bindings sym loc);
 		};
 
-	type Procedure r m =
---	 SchemeExpression r m
-	  ([Object r m] -> m (Object r m));
-{--
-	type Macro r m =
-	 Bindings r m -> Object r m -> m (Object r m);
-	type TopLevelMacro r m =
-	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
-	type Syntax r m =
-	 [Object r m] -> m (Object r m);
+	type Procedure r m = ([Object r m] -> m (Object r m));
 
-	data Syntactic r m =
-	 SyntaxSyntactic (Syntax r m) |
-	 MacroSyntactic (Syn
---}
 	type SRefArray r a = ArrayList (r a);
 
 	data Object r m =

@@ -32,6 +32,25 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
+	fullTopLevelBindings ::
+		(
+		FullScheme m r,
+		BuildThrow cm (Object r m) r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?objType :: Type (Object r m)
+		) =>
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
+	fullTopLevelBindings = concatenateList
+		[
+		commonTopLevelBindings,
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"			fullDefineT
+		];
+
 	fullMacroBindings ::
 		(
 		FullScheme m r,
@@ -49,9 +68,6 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 
 		-- 4.1.6 Assignments
 		addMacroBinding			"set!"				setBangM
-
-		-- 5.2 Definitions
---		,addTopLevelMacroBinding	"define"			(defineT fullSetLoc),
 		];
 
 	simpleFullBindings ::
