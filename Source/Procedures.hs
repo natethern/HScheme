@@ -42,6 +42,16 @@ module Procedures where
 	lambda :: (Scheme x m r) => Object r m -> Object r m -> m (Object r m);
 	lambda flist expr = return (ProcedureObject (bindArgList flist (evaluate expr)));
 --}
+
+	isProcedure :: (Scheme x m r) =>
+	 Object r m -> m Bool;
+	isProcedure (ProcedureObject _) = return True;
+	isProcedure _ = return False;
+
+	isProcedureS :: (Scheme x m r) =>
+	 Type (r ()) -> Object r m -> m Bool;
+	isProcedureS Type = isProcedure;
+
 	car :: (Scheme x m r) =>
 	 Object r m -> m (Object r m);
 	car (PairObject a _) = getLocation a;

@@ -39,6 +39,7 @@ module StandardBindings where
 		addProcBinding "values" valuesS,
 		addProcBinding "current-environment" currentEnvironmentS,
 		addProcBinding "eval" evaluateS,
-		addProcBinding "equal?" equalS
+		addProcBinding "equal?" equalS,
+		addProcBinding "procedure?" isProcedureS
 		];
 	}

@@ -168,27 +168,32 @@ module SExpParser where
 			};
 		};
 
+	specialCharP :: (Scheme x m r) => String -> TextParser m (Maybe (Object r m));
+	specialCharP str = do
+		{
+		nextC;
+		mh2 <- expressionP;
+		case mh2 of
+			{
+			Nothing -> fail ("unexpected EOF after "++str);
+			Just h2 -> do
+				{					
+				tail <- mlift (cons (h2,NilObject));
+				qf <- mlift (cons (SymbolObject str,tail));
+				return (Just qf);
+				};
+			};
+		};
+
 	quotedP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
 	quotedP = do
 		{
 		mc <- currentC;
 		case mc of
 			{
-			Just '\'' -> do
-				{
-				nextC;
-				mh2 <- expressionP;
-				case mh2 of
-					{
-					Nothing -> fail "unexpected EOF after quote";
-					Just h2 -> do
-						{					
-						tail <- mlift (cons (h2,NilObject));
-						qf <- mlift (cons (SymbolObject "quote",tail));
-						return (Just qf);
-						};
-					};
-				};
+			Just '\'' -> specialCharP "quote";
+			Just '`' -> specialCharP "quasiquote";
+			Just ',' -> specialCharP "unquote";
 			_ -> return Nothing;
 			};
 		};

@@ -53,14 +53,14 @@ module Main where
 		};
 
 	printeval :: (SemiLiftedMonad IO m,Scheme x m r) =>
-	 Bindings r m -> [Object r m] -> m ();
-	printeval _ [] = return ();
+	 Bindings r m -> [Object r m] -> m (Bindings r m);
+	printeval bindings [] = return bindings;
 	printeval bindings (obj:objs) = do
 		{
-		result <- evaluate obj with {?bindings = bindings};
+		(newBindings,result) <- defineEvaluate bindings obj;
 		str <- printS Type result;
 		call (putStrLn str);
-		printeval bindings objs;	
+		printeval newBindings objs;	
 		};
 
 	toList :: Maybe a -> [a];
@@ -71,7 +71,7 @@ module Main where
 	 Type (r ()) -> m (Maybe Char) -> Bindings r m -> m a;
 	interactiveLoop t reader bindings = do
 		{
-		catchError (do
+		newBindings <- catchError (do
 			{
 			ref <- call (do
 				{
@@ -86,8 +86,9 @@ module Main where
 			errObj <- getConvert error;
 			errText <- printS t errObj;
 			call (putStrLn ("error: "++errText));
+			return bindings;
 			});
-		interactiveLoop t reader bindings;
+		interactiveLoop t reader newBindings;
 		};
 
 	readString :: (SemiLiftedMonad IO m) =>

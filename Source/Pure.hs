@@ -24,7 +24,7 @@ module Pure where
 	{
 	import Object;
 
-	data PureLocation a = MkPureLocation a;
+	newtype PureLocation a = MkPureLocation a;
 
 	instance (Monad m) => Location m PureLocation where
 		{

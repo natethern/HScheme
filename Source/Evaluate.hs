@@ -125,21 +125,54 @@ module Evaluate where
 		f args;
 		};
 	applyEval _ _ = fail "wrong type to apply";
-{--
+
+	defineTail ::
+		(
+		Scheme x m r
+		) =>
+	 Bindings r m -> Object r m -> m (Bindings r m);
+	defineTail bindings (PairObject head tail) = do
+		{
+		h <- getLocation head;
+		case h of
+			{
+			SymbolObject name -> do
+				{
+				t <- getLocation tail;
+				case t of
+					{
+					PairObject thead ttail -> do
+						{
+						tt <- getLocation ttail;
+						case tt of
+							{
+							NilObject -> do
+								{
+								th <- getLocation thead;
+								loc <- newLocation th;
+								return (newBinding bindings name loc);
+								};
+							_ -> fail "bad define form (too many arguments)";
+							};
+						};
+					NilObject -> fail "bad define form (only one argument)";
+					_ -> fail "bad define form (dotted pair)";
+					};
+				};
+			PairObject _ _ -> fail "this define form NYI";
+			_ -> fail "bad define form (wrong type for label)";
+			};
+		};
+	defineTail bindings NilObject = fail "bad define form (no arguments)";
+	defineTail bindings _ = fail "bad define form (dotted pair)";
+
 	defineEvaluate ::
 		(
 		Scheme x m r
 		) =>
 	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
 	
-
-	defineEvaluate (PairObject head tail) = do
-		{
-		h <- getLocation head;
-		t <- getLocation tail;
-		f <- evaluate h;
-		applyEval f t;
-		};
+-- Bad define placement
 	
 	defineEvaluate bindings a = do
 		{
@@ -150,10 +183,18 @@ module Evaluate where
 				h <- getLocation head;
 				case h of
 					{
-					SymbolObject "define" ->
-				t <- getLocation tail;
-				f <- evaluate h;
-				applyEval f t;
+					SymbolObject "define" -> do
+						{
+						t <- getLocation tail;
+						newBindings <- defineTail bindings t;
+						return (newBindings,nullObject);
+						};
+					_ -> do
+						{
+						r <- evaluate a with {?bindings = bindings};
+						return (bindings,r);
+						};
+					};
 				};
 			_ -> do
 				{
@@ -162,5 +203,5 @@ module Evaluate where
 				};
 			};
 		};
---}
+
 	}
