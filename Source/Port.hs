@@ -22,41 +22,22 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Port where
 	{
-	import Conversions;
-	import Object;
-	import Type;
-
-	portWriteCharS :: (Scheme x m r) =>
-	 Type (r ()) -> (Char,(OutputPort m,())) -> m ArgNoneType;
-	portWriteCharS Type (c,(port,())) = do
+	data (Monad m) => InputPort c m = MkInputPort
 		{
-		opWrite port (Just c);
-		return MkArgNoneType;
+		ipRead	:: m (Maybe c),
+		ipPeek	:: m (Maybe c),
+		ipReady	:: m Bool,
+		ipClose	:: m ()
 		};
 
-	outputPortCloseS :: (Scheme x m r) =>
-	 Type (r ()) -> (OutputPort m,()) -> m ArgNoneType;
-	outputPortCloseS Type (port,()) = do
+	data (Monad m) => OutputPort c m = MkOutputPort
 		{
-		opWrite port Nothing;
-		return MkArgNoneType;
+		opWrite	:: Maybe c -> m ()
 		};
 
-	inputPortCloseS :: (Scheme x m r) =>
-	 Type (r ()) -> (InputPort m,()) -> m ArgNoneType;
-	inputPortCloseS Type (port,()) = do
-		{
-		ipClose port;
-		return MkArgNoneType;
-		};
+	opWriteOne :: (Monad m) => OutputPort c m -> c -> m ();
+	opWriteOne port c = opWrite port (Just c);
 
-	isInputPortS :: (Scheme x m r) =>
-	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isInputPortS Type (InputPortObject _,()) = return True;
-	isInputPortS Type (_,()) = return False;
-
-	isOutputPortS :: (Scheme x m r) =>
-	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isOutputPortS Type (OutputPortObject _,()) = return True;
-	isOutputPortS Type (_,()) = return False;
+	opClose :: (Monad m) => OutputPort c m -> m ();
+	opClose port = opWrite port Nothing;
 	}

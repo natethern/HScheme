@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Object where
 	{
+	import Port;
 	import Numerics;
 	import MonadCont;
 	import MonadError;
@@ -100,19 +101,6 @@ module Object where
 	type Syntax r m =
 	 [Object r m] -> m (Object r m);
 
-	data (Monad m) => InputPort m = MkInputPort
-		{
-		ipRead	:: m (Maybe Char),
-		ipPeek	:: m (Maybe Char),
-		ipReady	:: m Bool,
-		ipClose	:: m ()
-		};
-
-	data (Monad m) => OutputPort m = MkOutputPort
-		{
-		opWrite	:: Maybe Char -> m ()
-		};
-
 	data Object r m =
 	 NilObject												|
 	 BooleanObject		Bool								|
@@ -123,8 +111,8 @@ module Object where
 	 ValuesObject		[Object r m]						|
 	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
 	 VectorObject		[ObjLocation r m]					|
-	 InputPortObject 	(InputPort m)						|
-	 OutputPortObject 	(OutputPort m)						|
+	 InputPortObject 	(InputPort Char m)					|
+	 OutputPortObject 	(OutputPort Char m)					|
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
 	 SyntaxObject		(Syntax r m)						|

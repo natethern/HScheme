@@ -39,8 +39,9 @@ HC_SRCS			= \
 	UnicodeDefs.hs	\
 	UnicodeData.hs	\
 	Unicode.hs	\
-	Parser.hs	\
 	Numerics.hs	\
+	Port.hs	\
+	InputPortParser.hs	\
 	\
 	Object.hs	\
 	Conversions.hs	\
@@ -49,7 +50,7 @@ HC_SRCS			= \
 	Evaluate.hs	\
 	Procedures.hs	\
 	Lambda.hs	\
-	Port.hs	\
+	PortProcedures.hs	\
 	Equality.hs	\
 	\
 	Bindings.hs	\
@@ -135,26 +136,30 @@ UnicodeData.o : UnicodeDefs.hi
 Unicode.o : Unicode.hs
 Unicode.o : UnicodeDefs.hi
 Unicode.o : UnicodeData.hi
-Parser.o : Parser.hs
 Numerics.o : Numerics.hs
+Port.o : Port.hs
+InputPortParser.o : InputPortParser.hs
+InputPortParser.o : Common/LiftedMonad.hi
+InputPortParser.o : Port.hi
 Object.o : Object.hs
 Object.o : Common/Subtype.hi
 Object.o : Numerics.hi
+Object.o : Port.hi
 Conversions.o : Conversions.hs
 Conversions.o : Common/Type.hi
 Conversions.o : Common/Subtype.hi
 Conversions.o : Numerics.hi
+Conversions.o : Port.hi
 Conversions.o : Object.hi
 SExpChars.o : SExpChars.hs
 SExpChars.o : Unicode.hi
-SExpChars.o : Parser.hi
 SExpParser.o : SExpParser.hs
 SExpParser.o : Common/Type.hi
 SExpParser.o : Common/Subtype.hi
 SExpParser.o : Common/LiftedMonad.hi
 SExpParser.o : Unicode.hi
 SExpParser.o : SExpChars.hi
-SExpParser.o : Parser.hi
+SExpParser.o : InputPortParser.hi
 SExpParser.o : Object.hi
 SExpParser.o : Conversions.hi
 SExpParser.o : Procedures.hi
@@ -174,10 +179,11 @@ Lambda.o : Object.hi
 Lambda.o : Conversions.hi
 Lambda.o : Procedures.hi
 Lambda.o : Evaluate.hi
-Port.o : Port.hs
-Port.o : Common/Type.hi
-Port.o : Object.hi
-Port.o : Conversions.hi
+PortProcedures.o : PortProcedures.hs
+PortProcedures.o : Common/Type.hi
+PortProcedures.o : Port.hi
+PortProcedures.o : Object.hi
+PortProcedures.o : Conversions.hi
 Equality.o : Equality.hs
 Equality.o : Common/Type.hi
 Equality.o : Numerics.hi
@@ -201,7 +207,7 @@ StandardBindings.o : Procedures.hi
 StandardBindings.o : NumericProcedures.hi
 StandardBindings.o : Equality.hi
 StandardBindings.o : Lambda.hi
-StandardBindings.o : Port.hi
+StandardBindings.o : PortProcedures.hi
 FMapBindings.o : FMapBindings.hs
 FMapBindings.o : Object.hi
 FullProcedures.o : FullProcedures.hs
@@ -218,6 +224,7 @@ FullStandardBindings.o : Equality.hi
 IOBindings.o : IOBindings.hs
 IOBindings.o : Common/Type.hi
 IOBindings.o : Common/LiftedMonad.hi
+IOBindings.o : Port.hi
 IOBindings.o : Object.hi
 IOBindings.o : Conversions.hi
 IOBindings.o : Bindings.hi
@@ -239,19 +246,20 @@ Full.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
-Interactive.o : FMapBindings.hi
 Interactive.o : Common/LiftedMonad.hi
-Interactive.o : Parser.hi
+Interactive.o : Port.hi
+Interactive.o : InputPortParser.hi
 Interactive.o : Object.hi
 Interactive.o : Conversions.hi
 Interactive.o : Evaluate.hi
 Interactive.o : Procedures.hi
-Interactive.o : Port.hi
-Interactive.o : StandardBindings.hi
+Interactive.o : PortProcedures.hi
 Interactive.o : Bindings.hi
+Interactive.o : StandardBindings.hi
 Interactive.o : SExpParser.hi
 Interactive.o : FullStandardBindings.hi
 Interactive.o : IOBindings.hi
+Interactive.o : FMapBindings.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : Common/Type.hi
 InteractiveMain.o : Pure.hi

@@ -26,11 +26,12 @@ module IOBindings where
 	import Bindings;
 	import Conversions;
 	import Object;
+	import Port;
 	import LiftedMonad;
-	import IO;
 	import Type;
+	import IO;
 
-	handleInputPort :: (SemiLiftedMonad IO m) => Handle -> InputPort m;
+	handleInputPort :: (SemiLiftedMonad IO m) => Handle -> InputPort Char m;
 	handleInputPort h = MkInputPort
 		{
 		ipRead = call (do
@@ -55,7 +56,7 @@ module IOBindings where
 		ipClose = call (hClose h)
 		};
 
-	handleOutputPort :: (SemiLiftedMonad IO m) => Handle -> OutputPort m;
+	handleOutputPort :: (SemiLiftedMonad IO m) => Handle -> OutputPort Char m;
 	handleOutputPort h = MkOutputPort
 		{
 		opWrite = \mc -> call (case mc of
@@ -68,16 +69,22 @@ module IOBindings where
 	eofObject :: (Scheme x m r) => Object r m;
 	eofObject = nullObject;
 
+	stdinPort :: (SemiLiftedMonad IO m) => InputPort Char m;
+	stdinPort = handleInputPort stdin;
+
+	stdoutPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
+	stdoutPort = handleOutputPort stdout;
+
 	stdinS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> () -> m (InputPort m);
-	stdinS Type () = return (handleInputPort stdin);
+	 Type (r ()) -> () -> m (InputPort Char m);
+	stdinS Type () = return stdinPort;
 
 	stdoutS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> () -> m (OutputPort m);
-	stdoutS Type () = return (handleOutputPort stdout);
+	 Type (r ()) -> () -> m (OutputPort Char m);
+	stdoutS Type () = return stdoutPort;
 
 	openInputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> (StringType,()) -> m (InputPort m);
+	 Type (r ()) -> (StringType,()) -> m (InputPort Char m);
 	openInputFileS Type (MkStringType name,()) = do
 		{
 		h <- call (openFile name ReadMode);
@@ -85,7 +92,7 @@ module IOBindings where
 		};
 
 	openOutputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> (StringType,()) -> m (OutputPort m);
+	 Type (r ()) -> (StringType,()) -> m (OutputPort Char m);
 	openOutputFileS Type (MkStringType name,()) = do
 		{
 		h <- call (openFile name WriteMode);

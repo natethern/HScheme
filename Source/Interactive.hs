@@ -22,36 +22,25 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Interactive where
 	{
+	import FMapBindings;
 	import IOBindings;
 	import FullStandardBindings;
 	import SExpParser;
-	import Bindings;
 	import StandardBindings;
-	import Port;
+	import Bindings;
+	import PortProcedures;
 	import Procedures;
 	import Evaluate;
 	import Conversions;
 	import Object;
-	import Parser;
+	import InputPortParser;
+	import Port;
 	import LiftedMonad;
-	import FMapBindings;
-	import MonadError;
-	import MonadCont;
-	import IO;
 	import Subtype;
 	import Type;
-
-	clearToReturn :: (Monad m) => m (Maybe Char) -> m ();
-	clearToReturn reader = do
-		{
-		mc <- reader;
-		case mc of
-			{
-			Nothing -> return ();
-			(Just '\n') -> return ();
-			_ -> clearToReturn reader;
-			};
-		};
+	import IO;
+	import MonadError;
+	import MonadCont;
 
 	printeval :: (SemiLiftedMonad IO m,Scheme x m r) =>
 	 Bindings r m -> [Object r m] -> m (Bindings r m);
@@ -69,7 +58,7 @@ module Interactive where
 	toList (Just a) = [a];
 
 	interactiveLoop :: (SemiLiftedMonad IO m,Scheme x m r) =>
-	 Type (r ()) -> m (Maybe Char) -> Bindings r m -> m a;
+	 Type (r ()) -> InputPort Char m -> Bindings r m -> m a;
 	interactiveLoop t reader bindings = do
 		{
 		newBindings <- catchError (do
@@ -83,21 +72,13 @@ module Interactive where
 			printeval bindings (toList mobject);
 			}) (\error -> do
 			{
-			clearToReturn reader;
+			runParser reader restOfLineP;
 			errObj <- getConvert error;
 			(MkStringType errText) <- toStringS t (errObj,());
 			call (putStrLn ("error: "++errText));
 			return bindings;
 			});
 		interactiveLoop t reader newBindings;
-		};
-
-	readString :: (SemiLiftedMonad IO m) =>
-	 m (Maybe Char);
-	readString = do
-		{
-		c <- call getChar;
-		return (Just c);
 		};
 
 	pureInteract ::
@@ -112,10 +93,10 @@ module Interactive where
 		 (addProcBinding "exit" (exitFuncProc exitFunc))
 		 monadicStdBindings emptyBindings;
 		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
-		objs <- runParser (ipRead port)  (expressionsP t);
+		objs <- runParser port  (expressionsP t);
 		inputPortCloseS t (port,());
 		bindings' <- printeval bindings objs;
-		interactiveLoop t readString bindings';
+		interactiveLoop t stdinPort bindings';
 		});
 
 	fullInteract ::
@@ -133,9 +114,9 @@ module Interactive where
 		 	addProcBinding "exit" (exitFuncProc exitFunc)
 		 	] emptyBindings;
 		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
-		objs <- runParser (ipRead port)  (expressionsP t);
+		objs <- runParser port  (expressionsP t);
 		inputPortCloseS t (port,());
 		bindings' <- printeval bindings objs;
-		interactiveLoop t readString bindings';
+		interactiveLoop t stdinPort bindings';
 		});
 	}

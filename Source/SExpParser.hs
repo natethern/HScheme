@@ -25,29 +25,32 @@ module SExpParser where
 	import Procedures;
 	import Conversions;
 	import Object;
-	import Parser;
+	import InputPortParser;
 	import SExpChars;
 	import Unicode;
 	import LiftedMonad;
 	import Subtype;
 	import Type;
 
-	type TextParser = Parser (Maybe Char);
+	type TextParser = Parser Char;
 
 	isJust :: (a -> Bool) -> (Maybe a) -> Maybe a;
 	isJust test Nothing = Nothing;
 	isJust test (Just a) = if test a then Just a else Nothing;
 
-	commentP :: (Monad m) => TextParser m ();
-	commentP = do
+	restOfLineP :: (Monad m) => TextParser m ();
+	restOfLineP = do
 		{
-		nextC;
 		mc <- currentC;
 		case mc of
 			{
 			Just c -> if isLineBreak c
 			 then return ()
-			 else commentP;
+			 else do
+				{
+				nextC;
+				restOfLineP;
+				};
 			Nothing -> return ();
 			};
 		};
@@ -61,7 +64,8 @@ module SExpParser where
 			{
 			Just ';' -> do
 				{
-				commentP;
+				nextC;
+				restOfLineP;
 				whitespaceP;
 				return True;
 				};
@@ -80,18 +84,13 @@ module SExpParser where
 	tokenEndP :: (Monad m) => TextParser m Bool;
 	tokenEndP = do
 		{
-		ws <- whitespaceP;
-		if ws
-		 then (return True)
-		 else do
+		mc <- currentC;
+		case mc of
 			{
-			mc <- currentC;
-			case mc of
-				{
-				Nothing -> return True;
-				Just ')' -> return True;
-				Just _ -> return False;
-				};
+			Nothing -> return True;
+			Just ')' -> return True;
+			Just ';' -> return True;
+			Just c -> return (isWhitespace c);
 			};
 		};
 

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Conversions where
 	{
 	import Object;
+	import Port;
 	import Numerics;
 	import Subtype;
 	import Type;
@@ -407,34 +408,34 @@ module Conversions where
 	
 	-- InputPort
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (InputPort m) where
+	instance (Scheme x m r) => MonadIsA m (Object r m) (InputPort Char m) where
 		{
 		getConvert = return . InputPortObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (InputPort m) (Object r m) where
+	instance (Scheme x m r) => MonadMaybeA m (InputPort Char m) (Object r m) where
 		{
 		getMaybeConvert (InputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (InputPort m);
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (InputPort Char m);
 
 	
 	-- OutputPort
 
-	instance (Scheme x m r) => MonadIsA m (Object r m) (OutputPort m) where
+	instance (Scheme x m r) => MonadIsA m (Object r m) (OutputPort Char m) where
 		{
 		getConvert = return . OutputPortObject;
 		};
 
-	instance (Scheme x m r) => MonadMaybeA m (OutputPort m) (Object r m) where
+	instance (Scheme x m r) => MonadMaybeA m (OutputPort Char m) (Object r m) where
 		{
 		getMaybeConvert (OutputPortObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Scheme x m r) => MonadSubtype m (Object r m) (OutputPort m);
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (OutputPort Char m);
 
 
 	-- String

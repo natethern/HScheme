@@ -20,54 +20,44 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Parser where
+module InputPortParser where
 	{
-	data Parser c m a = MkParser (m c -> c -> m (a,c));
+	import Port;
+	import LiftedMonad;
 	
-	unParser (MkParser f) = f;
+	data Parser c m a = MkParser {unParser :: InputPort c m -> m a};
 	
 	instance (Monad m) => Monad (Parser c m) where
 		{
-		return a = MkParser(\_ c -> return (a,c));
+		return a = MkParser(\_ -> return a);
 		
-		(MkParser ma) >>= mbf = MkParser(\source c -> do
+		(MkParser ma) >>= mbf = MkParser(\source -> do
 			{
-			(a,c') <- ma source c;
-			unParser (mbf a) source c';
+			a <- ma source;
+			unParser (mbf a) source;
 			});
 		
-		fail s = MkParser (\_ _ -> fail s);
+		fail s = MkParser (\_ -> fail s);
 		};
 	
+	instance (Monad m) => SemiLiftedMonad m (Parser c m) where
+		{
+		call ma = MkParser (\_ -> ma);
+		};
+
 	mlift :: (Monad m) => m a -> Parser c m a;
-	mlift ma = MkParser (\_ c -> do
-		{
-		a <- ma;
-		return (a,c);
-		});
+	mlift = call;
+
+	runParser :: (Monad m) => InputPort c m -> Parser c m a -> m a;
+	runParser source (MkParser parser) = parser source;
+
+	currentC :: (Monad m) => Parser c m (Maybe c);
+	currentC = MkParser ipPeek;
 	
-	runParser :: (Monad m) => m c -> Parser c m a -> m a;
-	runParser source (MkParser parser) = do
+	nextC :: (Monad m) => Parser c m ();
+	nextC = MkParser (\port -> do
 		{
-		c <- source;
-		(a,mc) <- parser source c;
-		return a;
-		};
-	
-	currentC :: (Monad m) => Parser c m c;
-	currentC = MkParser (\_ c -> return (c,c));
-	
-	nextC :: (Monad m) => Parser (Maybe c) m ();
-	nextC = MkParser (\source c -> do
-		{
-		case c of
-			{
-			Just _ -> do
-				{
-				c' <- source;
-				return ((),c');
-				};
-			Nothing -> return ((),c);
-			};
+		ipRead port;
+		return ();
 		});
 	}
