@@ -26,8 +26,39 @@ module Main where
 	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase.Protocol.CGI;
 	import Org.Org.Semantic.HBase;
+	import System.Exit;
 
 	type CPS r = SchemeCPS r (IO ());
+
+	printResult ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stdout :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	printResult obj = if (isNullObject obj)
+	 then (return ())
+	 else do
+		{
+		str <- toString obj;
+		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
+		};
+
+	reportError ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stderr :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	reportError obj = do
+		{
+		text <- toString obj;
+		fsSinkList ?stderr (encodeUTF8 ("error: "++text++"\n"));
+		fsFlush ?stderr;
+		exitFailure;
+		};
 
 	printError :: (Show a) =>
 	 a -> IO ();
@@ -39,35 +70,17 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> IO ();
-	fixPureInterpret source = let {?objType = Type::Type (Object IORef IO)} in do
+	fixPureInterpret source =
+	 let {?objType = Type::Type (Object IORef IO)} in
+	 let {?binder = setBinder} in
+	 let {?read = ioRead ["."]} in
+	 mutualBind pureMacroBindings pureTopLevelBindings (do
 		{
-		bindings <- concatenateList
-			[
-			monadFixPureBindings,
-			pureSystemBindings (ioPureSystemInterface id ["."])
-			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "init.pure.scm";
-		parseEvalFromString (printResult stdOutputPort) bindings' source;
-		return ();
-		};
-
-	contPureInterpret ::
-		(
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 String -> CPS IOConst ();
-	contPureInterpret source = let {?objType = Type::Type (Object IORef (CPS IORef))} in do
-		{
-		bindings <- concatenateList
-			[
-			monadContPureBindings,
-			pureSystemBindings (ioPureSystemInterface (lift . lift) ["."])
-			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "init.pure.scm";
-		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
-		return ();
-		};
+		bindings <- monadFixPureBindings emptyBindings;
+		initObjects <- readFiles ["init.pure.scm"];
+		progObjects <- parseAllFromString source;
+		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		});
 
 	fixFullInterpret ::
 		(
@@ -75,35 +88,53 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 String -> IO ();
-	fixFullInterpret source = let {?objType = Type::Type (Object IORef IO)} in do
+	fixFullInterpret source =
+	 let {?objType = Type::Type (Object IORef IO)} in
+	 let {?binder = setBinder} in
+	 let {?read = ioRead ["."]} in
+	 mutualBind fullMacroBindings fullTopLevelBindings (do
 		{
-		bindings <- concatenateList
-			[
-			monadFixFullBindings,
-			pureSystemBindings (ioQuietPureSystemInterface id ["."])
-			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "init.full.scm";
-		parseEvalFromString (printResult stdOutputPort) bindings' source;
-		return ();
-		};
+		bindings <- monadFixFullBindings emptyBindings;
+		initObjects <- readFiles ["init.full.scm"];
+		progObjects <- parseAllFromString source;
+		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		});
+
+	contPureInterpret ::
+		(
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
+	 String -> IO ();
+	contPureInterpret source =
+	 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+	 let {?binder = setBinder} in
+	 let {?read = ioRead ["."]} in
+	 mutualBind pureMacroBindings pureTopLevelBindings (do
+		{
+		bindings <- monadContPureBindings emptyBindings;
+		initObjects <- readFiles ["init.pure.scm"];
+		progObjects <- parseAllFromString source;
+		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		});
 
 	contFullInterpret ::
 		(
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 String -> CPS IORef ();
-	contFullInterpret source = let {?objType = Type::Type (Object IORef (CPS IORef))} in do
+	 String -> IO ();
+	contFullInterpret source =
+	 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+	 let {?binder = setBinder} in
+	 let {?read = ioRead ["."]} in
+	 mutualBind fullMacroBindings fullTopLevelBindings (do
 		{
-		bindings <- concatenateList
-			[
-			monadContFullBindings,
-			pureSystemBindings (ioQuietPureSystemInterface (lift . lift) ["."])
-			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "init.full.scm";
-		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
-		return ();
-		};
+		bindings <- monadContFullBindings emptyBindings;
+		initObjects <- readFiles ["init.full.scm"];
+		progObjects <- parseAllFromString source;
+		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		});
 
 	isFull :: QueryParameters -> Bool;
 	isFull params = case findQueryParameter (encodeLatin1 "flavour") params of
@@ -111,10 +142,6 @@ module Main where
 		Just [0x70,0x75,0x72,0x65] -> False;
 		_ -> True;
 		};
-
-	runCPS ::
-	 CPS r () -> IO ();
-	runCPS cps = runContinuationPass (fail . show) return cps;
 
 	main :: IO ();
 	main = ioRunProgram (catchSingle (do
@@ -129,8 +156,8 @@ module Main where
 		case findQueryParameter (encodeLatin1 "monad") params of
 			{
 			Just [0x63,0x6F,0x6E,0x74] -> if (isFull params)
-			 then runCPS (contFullInterpret source)
-			 else runCPS (contPureInterpret source);
+			 then contFullInterpret source
+			 else contPureInterpret source;
 			_ -> if (isFull params)
 			 then fixFullInterpret source
 			 else fixPureInterpret source;
