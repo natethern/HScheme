@@ -22,20 +22,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Lambda where
 	{
+	import Org.Org.Semantic.HScheme.ArgumentList;
 	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Evaluate;
-	import Org.Org.Semantic.HScheme.Procedures;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
 	-- 4.2.3 Sequencing
-	begin ::
-		(
-		Scheme m r
-		) =>
+	begin :: (Scheme m r) =>
 	 Bindings r m -> [Object r m] -> m (Object r m);
-	begin bindings objs@[] = typedThrowSimpleError (getObjectsRType objs) "too-few-ags-in-begin";
+	begin bindings objs@[] = let {?bindings=bindings} in throwSimpleError "too-few-args-in-begin";
 	begin bindings [obj] = do
 		{
 		(_,result) <- topLevelEvaluate bindings obj;
@@ -133,18 +130,19 @@ module Org.Org.Semantic.HScheme.Lambda where
 		};
 	matchBinding bindings NilObject arg = do
 		{
-		() <- convertFromObject arg;
+		() <- let {?bindings=bindings} in convertFromObject arg;
 		return bindings;
 		};
 	matchBinding bindings (PairObject hloc tloc) arg = do
 		{
-		(argh,argt) <- convertFromObject arg;
+		(argh,argt) <- let {?bindings=bindings} in convertFromObject arg;
 		head <- get hloc;
 		bindings' <- matchBinding bindings head argh;
 		tail <- get tloc;
 		bindings'' <- matchBinding bindings' tail argt;
 		return bindings'';
 		};
+	matchBinding bindings _ arg = let {?bindings=bindings} in throwSimpleError "no-match-to-bindings";
 
 	matchBindings :: (Scheme m r) =>
 	 Bindings r m -> Object r m -> [Object r m] -> m (Bindings r m);
@@ -156,26 +154,27 @@ module Org.Org.Semantic.HScheme.Lambda where
 		};
 	matchBindings bindings NilObject args = do
 		{
-		() <- convertFromObjects args;
+		() <- let {?bindings=bindings} in convertFromObjects args;
 		return bindings;
 		};
 	matchBindings bindings (PairObject hloc tloc) args = do
 		{
-		(argh,argt) <- convertFromObjects args;
+		(argh,argt) <- let {?bindings=bindings} in convertFromObjects args;
 		head <- get hloc;
 		bindings' <- matchBinding bindings head argh;
 		tail <- get tloc;
 		bindings'' <- matchBindings bindings' tail argt;
 		return bindings'';
 		};
+	matchBindings bindings _ args = let {?bindings=bindings} in throwSimpleError "no-match-to-bindings";
 
 	mergeBindings :: Bindings r m -> Bindings r m -> Bindings r m;
-	mergeBindings first second = MkBindings
+	mergeBindings b1 b2 = MkBindings
 		{
-		newBinding = \sym loc -> mergeBindings (newBinding first sym loc) second,
-		getBinding = \sym -> case (getBinding first sym) of
+		newBinding = \sym loc -> mergeBindings (newBinding b1 sym loc) b2,
+		getBinding = \sym -> case (getBinding b1 sym) of
 			{
-			Nothing -> getBinding second sym;
+			Nothing -> getBinding b2 sym;
 			r -> r;
 			}
 		};

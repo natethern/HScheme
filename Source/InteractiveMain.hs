@@ -28,35 +28,6 @@ module Main where
 
 	type CPS r = SchemeCPS r (IO ());
 
-	instance Show (SchemeCPSError IORef (IO ())) where
-		{
-		show (StringError s) = s;
-		show (ExceptionError ex) = show ex;
-		show (ObjError ex) = "Scheme object error";
-		};
-
-	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadThrow (Object r IO) IO where
-		{
-		throw obj = do
-			{
-			text <- toString obj;
-			fail text;
-			};
-		};
-
-	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadException (Object r IO) IO where
-		{
-		catch foo cc = catchSingle foo (\ex -> do
-			{
-			obj <- getConvert (MkSymbol "failure",MkSList (show ex));
-			cc obj;
-			});
-		};
-
-	type Interact m r = FullSystemInterface m r -> m ();
-
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
 
 	data SchemeWhichMonad = IOWhichMonad | CPSWhichMonad;
@@ -112,44 +83,86 @@ module Main where
 		return (f,m,paths,(file:files));
 		};
 
-	cpsInteract :: 
-		(
-		MonadGettableReference IO r,
-		MonadCreatable IO r,
-		?refType :: Type (r ())
-		) =>
-	 [String] -> (Interact (CPS r) r) -> IO ();
-	cpsInteract loadpaths interact = runContinuationPass
-	 (\_ -> fail "error in catch code!")
-	 return
-	 (interact (ioFullSystemInterface lift loadpaths));
+	cpsInteract :: (?refType :: Type (r ())) =>
+	 CPS r () -> IO ();
+	cpsInteract ma = runContinuationPass
+	 (\_ -> fail "error in catch code!") return ma;
 
 	defaultFlavour :: SchemeFlavour;
 	defaultFlavour = FullFlavour;
+
+	withRefType ::
+	 t -> ((?refType :: t) => a) -> a;
+	withRefType t a = let {?refType = t} in a;
 
 	main :: IO ();
 	main = do
 		{
 		args <- getArgs;
 		(mflavour,mwm,paths,files) <- parseArgs args;
-		let {loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"]};
-		let {flavour = unJust defaultFlavour mflavour};
-		let {whichmonad = unJust (case flavour of
+		let
 			{
-			FullFlavour -> CPSWhichMonad;
-			_ -> IOWhichMonad;
-			}) mwm};
+			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
+			flavour = unJust defaultFlavour mflavour;
+			whichmonad = unJust (case flavour of
+				{
+				FullFlavour -> CPSWhichMonad;
+				_ -> IOWhichMonad;
+				}) mwm;
+			};
 		case flavour of
 			{
-			FullFlavour -> let {?refType = Type} in cpsInteract loadpaths (fullInteract :: Interact (CPS IORef) IORef);
-			PureFlavour -> let {?refType = Type} in (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
-			StrictPureFlavour -> let {?refType = Type} in (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
+			FullFlavour -> withRefType ioRefType (case whichmonad of
+				{
+				CPSWhichMonad -> cpsInteract (do
+					{
+					let {fsi=ioFullSystemInterface lift loadpaths;};
+					bindings <- (monadContFullBindings ++ fullSystemBindings fsi) emptyBindings;
+					interactWithExit fsi bindings "init.full.scm";
+					});
+				IOWhichMonad -> do
+					{
+					let {fsi=ioFullSystemInterface id loadpaths;};
+					bindings <- (monadFixFullBindings ++ fullSystemBindings fsi) emptyBindings;
+					interact fsi bindings "init.full.scm";
+					};
+				});
+			PureFlavour -> withRefType ioConstType (case whichmonad of
+				{
+				CPSWhichMonad -> cpsInteract (do
+					{
+					let {fsi=ioFullSystemInterface lift loadpaths;};
+					bindings <- (monadContPureBindings ++ pureSystemBindings (fsiPure fsi)) emptyBindings;
+					interactWithExit fsi bindings "init.pure.scm";
+					});
+				IOWhichMonad -> do
+					{
+					let {fsi=ioFullSystemInterface id loadpaths;};
+					bindings <- (monadFixPureBindings ++ pureSystemBindings (fsiPure fsi)) emptyBindings;
+					interact fsi bindings "init.pure.scm";
+					};
+				});
+			StrictPureFlavour -> withRefType ioConstType (case whichmonad of
+				{
+				CPSWhichMonad -> cpsInteract (do
+					{
+					let {fsi=ioFullSystemInterface lift loadpaths;};
+					bindings <- monadContStrictPureBindings emptyBindings;
+					interactWithExit fsi bindings "init.pure.scm";
+					});
+				IOWhichMonad -> do
+					{
+					let {fsi=ioFullSystemInterface id loadpaths;};
+					bindings <- monadFixStrictPureBindings emptyBindings;
+					interact fsi bindings "init.pure.scm";
+					};
+				});
 			};
 		};
 
 
 {-- for profiling
-	rep :: Integer -> IO () -> IO ();
+	rep :: Int -> IO () -> IO ();
 	rep 0 f = return ();
 	rep n f = do
 		{

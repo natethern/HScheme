@@ -115,15 +115,12 @@ module Org.Org.Semantic.HScheme.Object where
 	mkValuesObject [a] = a;
 	mkValuesObject a = ValuesObject a;
 
+	nullObject :: Object r m;
 	nullObject = mkValuesObject [];
 
 	isNullObject :: Object r m -> Bool;
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
-
-	typedThrowObject :: (Scheme m r) =>
-	 Type (r ()) -> Object r m -> m a;
-	typedThrowObject _ = throw;
 
 	getObjectRType :: Object r m -> Type (r ());
 	getObjectRType _ = Type;

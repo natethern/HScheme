@@ -25,21 +25,8 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase;
-	import System.Environment;
-	import Numeric;
 
-	type M = ShowExceptionMonad IO;
-
-	type ConstantRef = Constant M;
-
-	type CPS r = SchemeCPS r (M ());
-
-	instance Show (SchemeCPSError r (M ())) where
-		{
-		show (StringError s) = s;
-		show (ExceptionError ex) = show ex;
-		show (ObjError ex) = "Scheme object error";
-		};
+	type CPS r = SchemeCPS r (IO ());
 
 	printError :: (Show a) =>
 	 a -> IO ();
@@ -47,56 +34,56 @@ module Main where
 
 	fixPureInterpret ::
 	 String -> IO ();
-	fixPureInterpret source = do
+	fixPureInterpret source = let {?refType = ioConstType} in do
 		{
-		(bindings :: Bindings (Constant IO) m) <- chainList
+		bindings <- concatenateList
 			[
 			monadFixPureBindings,
-			pureSystemBindings (ioPureSystemInterface id)
+			pureSystemBindings (ioPureSystemInterface id ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id) bindings "Prelude.pure.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "Prelude.pure.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
 
 	contPureInterpret ::
-	 String -> CPS ConstantRef ();
-	contPureInterpret source = do
+	 String -> CPS IOConst ();
+	contPureInterpret source = let {?refType = ioConstType} in do
 		{
-		(bindings :: Bindings ConstantRef (CPS ConstantRef)) <- chainList
+		bindings <- concatenateList
 			[
 			monadContPureBindings,
-			pureSystemBindings (ioPureSystemInterface (lift . lift))
+			pureSystemBindings (ioPureSystemInterface (lift . lift) ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift)) bindings "Prelude.pure.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "Prelude.pure.scm";
 		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};
 
 	fixFullInterpret ::
 	 String -> IO ();
-	fixFullInterpret source = do
+	fixFullInterpret source = let {?refType = ioRefType} in do
 		{
-		(bindings :: Bindings IORef m) <- chainList
+		bindings <- concatenateList
 			[
 			monadFixFullBindings,
-			pureSystemBindings (ioQuietPureSystemInterface id)
+			pureSystemBindings (ioQuietPureSystemInterface id ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id) bindings "Prelude.full.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "Prelude.full.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
 
 	contFullInterpret ::
 	 String -> CPS IORef ();
-	contFullInterpret source = do
+	contFullInterpret source = let {?refType = ioRefType} in do
 		{
-		(bindings :: Bindings IORef (CPS IORef)) <- chainList
+		bindings <- concatenateList
 			[
 			monadContFullBindings,
-			pureSystemBindings (ioQuietPureSystemInterface (lift . lift))
+			pureSystemBindings (ioQuietPureSystemInterface (lift . lift) ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift)) bindings "Prelude.full.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "Prelude.full.scm";
 		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};
@@ -109,36 +96,29 @@ module Main where
 		};
 
 	runCPS ::
-	 CPS r () -> M ();
-	runCPS cps = runContinuationPass (\s -> throwX (MkShowException (show s))) return cps;
+	 CPS r () -> IO ();
+	runCPS cps = runContinuationPass (fail . show) return cps;
 
 	main :: IO ();
-	main = catch (do
+	main = catchSingle (do
 		{
 		putStrLn "Content-Type: text/plain\n";
-		xio <- unExceptionMonad (do
+		text <- getHandleContents stdin;
+		params <- exToFail (readParseOrThrow text);
+		source <- case findQueryParameter (encodeLatin1 "input") params of
 			{
-			text <- lift (getHandleContents stdin);
-			params <- mapShowException (readParseX text);
-			source <- case findQueryParameter (encodeLatin1 "input") params of
-				{
-				Just sourceBytes -> return (decodeLatin1 sourceBytes);
-				Nothing -> throwX (MkShowException "no input");
-				};
-			case findQueryParameter (encodeLatin1 "monad") params of
-				{
-				Just [0x63,0x6F,0x6E,0x74] -> if (isFull params)
-				 then runCPS (contFullInterpret source)
-				 else runCPS (contPureInterpret source);
-				_ -> if (isFull params)
-				 then lift (fixFullInterpret source)
-				 else lift (fixPureInterpret source);
-				};
-			});
-		case xio of
-			{
-			ExceptionExceptionResult s -> printError s;
-			_ -> return ();
+			Just sourceBytes -> return (decodeLatin1 sourceBytes);
+			Nothing -> fail "no input";
 			};
-		}) (\(err :: IOException) -> printError err);
+		case findQueryParameter (encodeLatin1 "monad") params of
+			{
+			Just [0x63,0x6F,0x6E,0x74] -> if (isFull params)
+			 then runCPS (contFullInterpret source)
+			 else runCPS (contPureInterpret source);
+			_ -> if (isFull params)
+			 then fixFullInterpret source
+			 else fixPureInterpret source;
+			};
+		})
+		printError;
 	}

@@ -145,10 +145,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		};
 	matchBindings literals _ _ = return Nothing;
 
-	caseMatch ::
-		(
-		Scheme m r
-		) =>
+	caseMatch :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
 	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
 	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
@@ -171,7 +168,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		let {?bindings = bindings;} in evaluate expr;
 		};
 
-	syntaxRulesM :: (Scheme m r,?refType :: Type (r ())) =>
+	syntaxRulesM :: (Scheme m r,?bindings :: Bindings r m) =>
 	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
 	syntaxRulesM (literals,rules) = return (\args -> let
 		{

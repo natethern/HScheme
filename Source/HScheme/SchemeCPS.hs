@@ -35,6 +35,13 @@ module Org.Org.Semantic.HScheme.SchemeCPS where
 		ExceptionError Exception		|
 		ObjError (SchemeCPSObject r p)	;
 
+	instance Show (SchemeCPSError r p) where
+		{
+		show (StringError s) = s;
+		show (ExceptionError ex) = show ex;
+		show (ObjError ex) = "Scheme object error";
+		};
+
 	instance MonadThrow (SchemeCPSObject r p) (SchemeCPS r p) where
 		{
 		throw = throw . ObjError;

@@ -32,19 +32,19 @@ module Org.Org.Semantic.HScheme.TopLevel
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	pureSetLoc :: (Scheme m r) =>
+	pureSetLoc :: (Scheme m r,?bindings :: Bindings r m) =>
 	 ObjLocation r m -> Object r m -> m ();
 	pureSetLoc _ newdef = throwArgError "cant-redefine" [newdef];
 
-	fullSetLoc :: (FullScheme m r) =>
+	fullSetLoc :: (FullScheme m r,?bindings :: Bindings r m) =>
 	 ObjLocation r m -> Object r m -> m ();
 	fullSetLoc = set;
 
 	-- 5.2 Definitions
 	defineT :: (Scheme m r) =>
-	 (ObjLocation r m -> Object r m -> m ()) ->
+	 ((?bindings :: Bindings r m) => ObjLocation r m -> Object r m -> m ()) ->
 	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,NullObjType);
-	defineT setLoc bindings (h,t) = case h of
+	defineT setLoc bindings (h,t) = let {?bindings=bindings} in case h of
 		{
 		SymbolObject name -> case t of
 			{
@@ -56,7 +56,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 					NilObject ->  do
 						{
 						th <- get thead;
-						result <- let {?bindings=bindings} in evaluate th;
+						result <- evaluate th;
 						case (getBinding bindings name) of
 							{
 							Nothing -> do
@@ -74,13 +74,13 @@ module Org.Org.Semantic.HScheme.TopLevel
 					_ -> throwArgError "too-many-args-in-define" [tt];
 					};
 				};
-			NilObject -> typedThrowSimpleError (getObjectRType t) "too-few-args-in-define";
-			_ -> typedThrowSimpleError (getObjectRType t) "dotted-pair-define";
+			NilObject -> throwSimpleError "too-few-args-in-define";
+			_ -> throwSimpleError "dotted-pair-define";
 			};
-		PairObject _ _ -> typedThrowSimpleError (getObjectRType h) "nyi-define";
-		_ -> typedThrowSimpleError (getObjectRType h) "bad-name-type-define";
+		PairObject _ _ -> throwSimpleError "nyi-define";
+		_ -> throwSimpleError "bad-name-type-define";
 		};
-	
+
 	topLevelApplyEval ::
 		(
 		Scheme m r
@@ -120,18 +120,4 @@ module Org.Org.Semantic.HScheme.TopLevel
 				};
 			};
 		};
-{--
-	topLevelEvaluateList ::
-		(
-		Scheme m r
-		) =>
-	 Bindings r m -> [Object r m] -> m (Bindings r m);
-	
-	topLevelEvaluateList bindings [] = return bindings;
-	topLevelEvaluateList bindings (obj:objs) = do
-		{
-		(bindings',_) <- topLevelEvaluate bindings obj;
-		topLevelEvaluateList bindings' objs;
-		};
---}
 	}

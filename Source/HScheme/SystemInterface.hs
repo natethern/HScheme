@@ -48,11 +48,14 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		};
 
 	doEval :: (Scheme m r) =>
-	 (Object r m -> m ()) -> Bindings r m -> Object r m -> m (Bindings r m);
+	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
+	 Bindings r m ->
+	 Object r m ->
+	 m (Bindings r m);
 	doEval foo bindings obj = do
 		{
 		(bindings',result) <- topLevelEvaluate bindings obj;
-		foo result;
+		let {?bindings = bindings'} in foo result;
 		return bindings';	
 		};
 
@@ -67,11 +70,14 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		};
 
 	printeval :: (Scheme m r) =>
-	 OutputPort Word8 m -> Bindings r m -> Object r m -> m (Bindings r m);
+	 ((?bindings :: Bindings r m) => OutputPort Word8 m) ->
+	 Bindings r m ->
+	 Object r m ->
+	 m (Bindings r m);
 	printeval output bindings obj = doEval (printResult output) bindings obj;
 
 	evalObjects :: (Scheme m r) =>
-	 (Object r m -> m ()) ->
+	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
 	 Bindings r m ->
 	 [Object r m] ->
 	 m (Bindings r m);
@@ -82,25 +88,25 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		evalObjects foo bindings' objs;
 		};
 
-	parseEvalFromString :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m -> m ()) ->
+	parseEvalFromString :: (Scheme m r) =>
+	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
 	 Bindings r m ->
 	 String ->
 	 m (Bindings r m);
 	parseEvalFromString foo bindings text = do	
 		{
-		objs <- parseAllFromString text;
+		objs <- let {?bindings=bindings} in parseAllFromString text;
 		evalObjects foo bindings objs;
 		};
 
 	parseEvalFromPortByLine :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m -> m ()) ->
+	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
 	 Bindings r m ->
 	 InputPort Word8 m ->
 	 m (Bindings r m);
 	parseEvalFromPortByLine foo bindings input = do	
 		{
-		mobject <- parseFromPort input;
+		mobject <- let {?bindings=bindings} in parseFromPort input;
 		case mobject of
 			{
 			Nothing -> return bindings;
@@ -112,20 +118,20 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 			};
 		};
 
-	parseEvalFromPortBulk :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m -> m ()) ->
+	parseEvalFromPortBulk :: (Scheme m r) =>
+	 ((?bindings :: Bindings r m) => Object r m -> m ()) ->
 	 Bindings r m ->
 	 InputPort Word8 m ->
 	 m (Bindings r m);
 	parseEvalFromPortBulk foo bindings input = do	
 		{
-		text <- accumulateSource (parseUTF8Char (ipRead input));
+		text <- accumulateSource (let {?bindings=bindings} in parseUTF8Char (ipRead input));
 		parseEvalFromString foo bindings text;
 		};
 
-	loadBindingsWithProcs :: (Scheme m r,?refType :: Type (r ())) =>
+	loadBindingsWithProcs :: (Scheme m r) =>
 	 (String -> m (InputPort Word8 m)) ->
-	 OutputPort Word8 m ->
+	 ((?bindings :: Bindings r m) => OutputPort Word8 m) ->
 	 Bindings r m -> String -> m (Bindings r m);
 	loadBindingsWithProcs oif output bindings name = do
 		{
@@ -171,7 +177,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	pureSystemBindings :: (Scheme m r) =>
 	 PureSystemInterface m r -> Bindings r m -> m (Bindings r m);
-	pureSystemBindings psi = chainList
+	pureSystemBindings psi = concatenateList
 		[
 		-- 6.6.4 System Interface
 		addTopLevelMacroBinding	"load"	(loadT psi)
@@ -179,7 +185,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	fullSystemBindings :: (Scheme m r) =>
 	 FullSystemInterface m r -> Bindings r m -> m (Bindings r m);
-	fullSystemBindings fsi = chainList
+	fullSystemBindings fsi = concatenateList
 		[
 		pureSystemBindings (fsiPure fsi),
 

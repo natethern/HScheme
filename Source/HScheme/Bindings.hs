@@ -22,7 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Bindings where
 	{
-	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.ArgumentList;
+--	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
@@ -33,8 +34,8 @@ module Org.Org.Semantic.HScheme.Bindings where
 	 Symbol -> Object r m -> Bindings r m -> m (Bindings r m);
 	addBinding name obj b = do
 		{
-		(_,b) <- newObjBinding b name obj;
-		return b;
+		(_,b') <- newObjBinding b name obj;
+		return b';
 		};
 
 	addProcBinding ::
@@ -89,9 +90,4 @@ module Org.Org.Semantic.HScheme.Bindings where
 		exitFunc a;
 		return ();
 		};
-
-	chain :: (Monad m) => (a -> m b) -> (b -> m c) -> (a -> m c);
-	chain p1 p2 a = (p1 a) >>= p2;
-
-	chainList list = foldl chain return list;
 	}

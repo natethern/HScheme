@@ -67,8 +67,8 @@ module Org.Org.Semantic.HScheme.Equality where
 			} else (return False);
 		};
 	equal (VectorObject a) (VectorObject b) = sameSRefArray equal a b;
-	equal (ByteArrayObject a) (ByteArrayObject b) = sameSRefArray (\a b -> return (a == b)) a b;
-	equal (StringObject a) (StringObject b) = sameSRefArray (\a b -> return (a == b)) a b;
+	equal (ByteArrayObject a) (ByteArrayObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
+	equal (StringObject a) (StringObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
 	equal (ValuesObject a) (ValuesObject b) = sameList equal a b;
 	equal _ _ = return False;
 

@@ -27,146 +27,6 @@ module Org.Org.Semantic.HScheme.Conversions where
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
-	typedThrowSchemeError :: (Scheme m r,MonadIsA m (Object r m) rest) =>
-	 Type (r ()) -> String -> rest -> m a;
-	typedThrowSchemeError t name rest = do
-		{
-		errorObj <- getConvert (MkSymbol name,rest);
-		typedThrowObject t errorObj;
-		};
-
-	typedThrowSimpleError :: (Scheme m r) =>
-	 Type (r ()) -> String -> m a;
-	typedThrowSimpleError t name = typedThrowSchemeError t name ([] :: [NullObjType]);
-
-	throwArgError :: (Scheme m r) =>
-	 String -> [Object r m] -> m a;
-	throwArgError name objs = typedThrowSchemeError (getObjectsRType objs) name objs;
-
-	throwSchemeError :: (Scheme m r,MonadIsA m (Object r m) rest,?refType :: Type (r ())) =>
-	 String -> rest -> m a;
-	throwSchemeError = typedThrowSchemeError ?refType;
-
-	throwSimpleError :: (Scheme m r,?refType :: Type (r ())) =>
-	 String -> m a;
-	throwSimpleError = typedThrowSimpleError ?refType;
-
-	class (Scheme m r) => ArgumentList m r a where
-		{
-		convertFromObjects :: [Object r m] -> m a;
-		};
-
-	instance (Scheme m r) => ArgumentList m r () where
-		{
-		convertFromObjects [] = return ();
-		convertFromObjects (_:_) = typedThrowSimpleError (Type :: Type (r ())) "too-many-args";
-		};
-
-	convertFromObject :: (Scheme m r,MonadMaybeA m to (Object r m)) =>
-	 (Object r m) -> m to;
-	convertFromObject from = do
-		{
-		mto <- getMaybeConvert from;
-		case mto of
-			{
-			Just to -> return to;
-			Nothing -> throwArgError "wrong-type-arg" [from];
-			};
-		};
-
-	instance
-		(
-		MonadMaybeA m a (Object r m),
-		ArgumentList m r b
-		) =>
-	 ArgumentList m r (a,b) where
-		{
-		convertFromObjects [] = typedThrowSimpleError (Type :: Type (r ())) "too-few-args";
-		convertFromObjects (obj:objs) = do
-			{
-			a <- convertFromObject obj;
-			b <- convertFromObjects objs;
-			return (a,b);
-			};
-		};
-
-	instance
-		(
-		Scheme m r,
-		MonadMaybeA m a (Object r m)
-		) =>
-	 ArgumentList m r (Maybe a) where
-		{
-		convertFromObjects [] = return Nothing;
-		convertFromObjects [obj] = do
-			{
-			a <- convertFromObject obj;
-			return (Just a);
-			};
-		convertFromObjects _ = typedThrowSimpleError (Type :: Type (r ())) "too-many-args";
-		};
-
-	instance
-		(
-		Scheme m r,
-		MonadMaybeA m a (Object r m)
-		) =>
-	 ArgumentList m r [a] where
-		{
-		convertFromObjects [] = return [];
-		convertFromObjects (obj:objs) = do
-			{
-			a <- convertFromObject obj;
-			as <- convertFromObjects objs;
-			return (a:as);
-			};
-		};
-	
-	convertToProcedure ::
-		(
-		ArgumentList m r args,
-		MonadIsA m (Object r m) ret
-		) =>
-	 ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
-	
-	convertToProcedure foo bindings obj = do
-		{
-		args <- convertFromObjects obj;
-		r <- let {?bindings=bindings;} in foo args;
-		getConvert r;
-		};
-	
-	convertToMacro ::
-		(
-		Scheme m r,
-		MonadMaybeA m args (Object r m),
-		MonadIsA m (Object r m) ret
-		) =>
-	 ((?bindings :: Bindings r m) => args -> m ret) -> Macro r m;
-	
-	convertToMacro foo bindings obj = do
-		{
-		args <- convertFromObject obj;
-		r <- let {?bindings=bindings;} in foo args;
-		getConvert r;
-		};
-	
-	convertToTopLevelMacro ::
-		(
-		Scheme m r,
-		MonadMaybeA m args (Object r m),
-		MonadIsA m (Object r m) ret
-		) =>
-	 (Bindings r m -> args -> m (Bindings r m,ret)) -> TopLevelMacro r m;
-	
-	convertToTopLevelMacro foo bindings obj = do
-		{
-		args <- convertFromObject obj;
-		(bindings',r) <- foo bindings args;
-		result <- getConvert r;
-		return (bindings',result);
-		};
-
 	
 	-- NullObjType
 
@@ -699,8 +559,8 @@ module Org.Org.Semantic.HScheme.Conversions where
 		{
 		getConvert (MkSList list) = do
 			{
-			array <- makeSRefArray list;
-			return (ByteArrayObject array);
+			arr <- makeSRefArray list;
+			return (ByteArrayObject arr);
 			};
 		};
 
@@ -759,8 +619,8 @@ module Org.Org.Semantic.HScheme.Conversions where
 		{
 		getConvert (MkSList list) = do
 			{
-			array <- makeSRefArray list;
-			return (StringObject array);
+			arr <- makeSRefArray list;
+			return (StringObject arr);
 			};
 		};
 

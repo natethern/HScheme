@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.PortProcedures where
 	{
+	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.Port;
@@ -100,15 +101,15 @@ module Org.Org.Semantic.HScheme.PortProcedures where
 		};
 
 	-- conversion
-	handleUTF8Error :: (Scheme m r,?refType :: Type (r ())) =>
+	handleUTF8Error :: (Scheme m r,?bindings :: Bindings r m) =>
 	 UTF8Error -> m a;
 	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
 
-	parseUTF8Char :: (Scheme m r,?refType :: Type (r ())) =>
+	parseUTF8Char :: (Scheme m r,?bindings :: Bindings r m) =>
 	 m (Maybe Word8) -> m (Maybe Char);
-	parseUTF8Char source = runExceptionMonad handleUTF8Error (parseUTF8 source);
+	parseUTF8Char source = exRun handleUTF8Error (parseUTF8 source);
 
-	parseUTF8P :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
+	parseUTF8P :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Procedure r m,()) -> m (Either NullObjType Char);
 	parseUTF8P (source,()) = do
 		{

@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.SExpParser where
 	{
 	import Org.Org.Semantic.HScheme.PortProcedures;
-	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.Port;
@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 m t -> RecoverableStreamParser m t a -> m a;
 	runParser = runRecoverableStreamParser;
 
-	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
+	runParserString :: (Scheme m r,?bindings :: Bindings r m) =>
 	 [c] -> RecoverableListParser c m a -> m ([c],a);
 	runParserString text parser = do
 		{
@@ -285,7 +285,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			}) ||| (do
 			{
 			isCharacterParse 'f';
-			return (BooleanObject True);
+			return (BooleanObject False);
 			}) ||| (do
 			{
 			isCharacterParse '\\';
@@ -299,8 +299,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 				vector <- vectorContentsParse;
 				optionalWhitespaceParse;
 				isCharacterParse ')';
-				array <- plift (makeSRefArray vector);
-				return (VectorObject array);
+				arr <- plift (makeSRefArray vector);
+				return (VectorObject arr);
 				});
 			}) ||| (do
 			{
@@ -311,8 +311,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 				bytes <- byteArrayContentsParse;
 				optionalWhitespaceParse;
 				isCharacterParse ')';
-				array <- plift (makeSRefArray bytes);
-				return (ByteArrayObject array);
+				arr <- plift (makeSRefArray bytes);
+				return (ByteArrayObject arr);
 				});
 			}));
 		};
@@ -418,15 +418,15 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 m (Maybe Char) -> m (Maybe (Object r m));
 	parseFromCharSource source = runParser source expressionOrEndParse;
 
-	parseFromPort :: (Scheme m r,?refType :: Type (r ())) =>
+	parseFromPort :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
 	 InputPort Word8 m -> m (Maybe (Object r m));
 	parseFromPort port = parseFromCharSource (parseUTF8Char (ipRead port));
 
-	parseFromString :: (Scheme m r,?refType :: Type (r ())) =>
+	parseFromString :: (Scheme m r,?bindings :: Bindings r m) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
 
-	parseAllFromString :: (Scheme m r,?refType :: Type (r ())) =>
+	parseAllFromString :: (Scheme m r,?bindings :: Bindings r m) =>
 	 String ->
 	 m [Object r m];
 	parseAllFromString text = do	
@@ -435,7 +435,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return objs;
 		};
 
-	portReadP :: (Scheme m r,?refType :: Type (r ())) =>
+	portReadP :: (Scheme m r,?bindings :: Bindings r m,?refType :: Type (r ())) =>
 	 (InputPort Word8 m,()) -> m (Object r m);
 	portReadP (port,()) = do
 		{		

@@ -41,8 +41,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 	ifM (cond,(thenClause,mElseClause)) = do
 		{
 		isObj <- evaluate cond;
-		is <- getConvert isObj;
-		if is
+		isVal <- getConvert isObj;
+		if isVal
 		 then evaluate thenClause
 		 else case mElseClause of
 			{
@@ -116,7 +116,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (Char -> a) -> (Char,()) -> m a;
 	charFuncP f (c,()) = return (f c);
 
-	integerToCharP :: (Scheme m r,?refType :: Type (r ())) =>
+	integerToCharP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Integer,()) -> m Char;
 	integerToCharP (i,()) = case nthFromStart i of
 		{
@@ -135,9 +135,9 @@ module Org.Org.Semantic.HScheme.Procedures where
 	makeRefList 0 _ = return [];
 	makeRefList i c = do
 		{
-		rest <- makeRefList (i - 1) c;
-		first <- new c;
-		return (first:rest);
+		refs <- makeRefList (i - 1) c;
+		ref <- new c;
+		return (ref:refs);
 		};
 
 	makeStringP :: (Scheme m r,?refType :: Type (r ())) =>
@@ -152,17 +152,17 @@ module Org.Org.Semantic.HScheme.Procedures where
 		rs <- makeRefList i c;
 		return (MkSRefList rs);
 		};
-
+{--
 	makeList :: (Monad m) =>
 	 (a -> m b) -> [a] -> m [b];
 	makeList f [] = return [];
 	makeList f (a:as) = do
 		{
-		rest <- makeList f as;
-		first <- f a;
-		return (first:rest);
+		items <- makeList f as;
+		item <- f a;
+		return (item:items);
 		};
-
+--}
 	stringP :: (Scheme m r,?refType :: Type (r ())) =>
 	 [Char] -> m (SList Char);
 	stringP cs = return (MkSList cs);
@@ -171,13 +171,13 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (SRefArray r Char,()) -> m Int;
 	stringLengthP (s,()) = return (length s);
 
-	getArrayRef :: (Scheme m r,?refType :: Type (r ())) =>
+	getArrayRef :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Integer -> ArrayList a -> m a;
 	getArrayRef i _ | i < 0 = throwSimpleError "out-of-range";
 	getArrayRef i arr | i >= convertFromInt (length arr) = throwSimpleError "out-of-range";
 	getArrayRef i arr = return (arr !! (convertToInt i));
 
-	stringRefP :: (Scheme m r,?refType :: Type (r ())) =>
+	stringRefP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (SRefArray r Char,(Integer,())) -> m Char;
 	stringRefP (arr,(i,())) = do
 		{
@@ -218,7 +218,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 (SRefArray r Word8,()) -> m Int;
 	byteArrayLengthP (s,()) = return (length s);
 
-	byteArrayRefP :: (Scheme m r,?refType :: Type (r ())) =>
+	byteArrayRefP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (SRefArray r Word8,(Integer,())) -> m Word8;
 	byteArrayRefP (arr,(i,())) = do
 		{
@@ -270,13 +270,9 @@ module Org.Org.Semantic.HScheme.Procedures where
 	valuesToListP (ValuesObject list,()) = return list;
 	valuesToListP (obj,()) = return [obj];
 
-	throwP :: (Scheme m r,?refType :: Type (r ())) =>
-	 (Object r m,[Object r m]) -> m (Object r m);
-	throwP (obj,objs) = do
-		{
-		errorObj <- getConvert (obj:objs);
-		typedThrowObject ?refType errorObj;
-		};
+	lastResortThrowP :: (Scheme m r,?bindings :: Bindings r m) =>
+	 (Object r m,()) -> m (Object r m);
+	lastResortThrowP (obj,()) = lastResortThrowObject obj;
 
 {--
 	catchM :: (Scheme m r,MonadException (Object r m) m,?refType :: Type (r ())) =>

@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 
 	simpleFullBindings :: (FullScheme m r) =>
 	 Bindings r m -> m (Bindings r m);
-	simpleFullBindings = chainList
+	simpleFullBindings = concatenateList
 		[
 		commonPureBindings,
 
@@ -59,18 +59,10 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 
 	monadFixFullBindings :: (FullScheme m r,MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadFixFullBindings = chainList
-		[
-		simpleFullBindings,
-		monadFixBindings
-		];
+	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
 
 	-- this one is closest to R5RS
 	monadContFullBindings :: (FullScheme m r,MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadContFullBindings = chainList
-		[
-		simpleFullBindings,
-		monadContBindings
-		];
+	monadContFullBindings = simpleFullBindings ++ monadContBindings;
 	}

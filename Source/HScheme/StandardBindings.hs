@@ -33,14 +33,13 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.Object;
-	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
 	loop :: a;
 	loop = loop;
 
 	commonStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	commonStrictPureBindings = chainList
+	commonStrictPureBindings = concatenateList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
 		addBinding		(MkSymbol "<loop>")				loop,									-- test
@@ -149,7 +148,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"apply"							applyP,
 		addProcBinding	"values"						valuesP,
 		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
-		addProcBinding	"throw"							throwP,									-- nonstandard
+		addProcBinding	"throw"							lastResortThrowP,						-- nonstandard
 
 		-- 6.5 Eval
 		addProcBinding	"eval"							evaluateP,
@@ -161,7 +160,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		];
 
 	simpleStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	simpleStrictPureBindings = chainList
+	simpleStrictPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
 
@@ -170,7 +169,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		];
 
 	commonPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	commonPureBindings = chainList
+	commonPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
 
@@ -195,7 +194,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		];
 
 	simplePureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	simplePureBindings = chainList
+	simplePureBindings = concatenateList
 		[
 		commonPureBindings,
 
@@ -204,14 +203,14 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		];
 
 	monadContBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
-	monadContBindings = chainList
+	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-current-continuation"	callCCP
 		];
 
 	monadFixBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
-	monadFixBindings = chainList
+	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-result"				fixP									-- nonstandard
@@ -219,17 +218,17 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 	monadFixStrictPureBindings :: (Scheme m r,MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadFixStrictPureBindings = chainList [simpleStrictPureBindings,monadFixBindings];
+	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
 
 	monadContStrictPureBindings :: (Scheme m r,MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadContStrictPureBindings = chainList [simpleStrictPureBindings,monadContBindings];
+	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
 
 	monadFixPureBindings :: (Scheme m r,MonadFix m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadFixPureBindings = chainList [simplePureBindings,monadFixBindings];
+	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
 
 	monadContPureBindings :: (Scheme m r,MonadCont m) =>
 	 Bindings r m -> m (Bindings r m);
-	monadContPureBindings = chainList [simplePureBindings,monadContBindings];
+	monadContPureBindings = simplePureBindings ++ monadContBindings;
 	}

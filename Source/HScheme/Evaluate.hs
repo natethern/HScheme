@@ -27,6 +27,62 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	import Org.Org.Semantic.HBase;
 
 
+	-- throw, etc.
+
+	lastResortThrowObject :: (Scheme m r,?bindings :: Bindings r m) =>
+	 Object r m -> m a;
+	lastResortThrowObject = throw;
+
+	throwObject :: (Scheme m r,?bindings :: Bindings r m) =>
+	 Object r m -> m a;
+	throwObject obj = lastResortThrowObject obj;
+{--	case getBinding ?bindings (MkSymbol "throw") of
+		{
+		Nothing -> lastResortThrowObject obj;
+		Just loc -> do
+			{
+			throwObj <- get loc;
+			case throwObj of
+				{
+				(ProcedureObject proc) -> do
+					{
+					proc ?bindings [obj];
+					lastResortThrowObject (SymbolObject (MkSymbol "no-throw"));
+					};
+				_ -> do
+					{
+					objList <- getConvert (MkSymbol "throw-not-procedure",(throwObj,()));
+					lastResortThrowObject objList;
+					};
+				};
+			};
+		};
+--}
+	throwSchemeError :: (Scheme m r,?bindings :: Bindings r m,MonadIsA m (Object r m) rest) =>
+	 String -> rest -> m a;
+	throwSchemeError name errRest = do
+		{
+		errorObj <- getConvert (MkSymbol name,errRest);
+		throwObject errorObj;
+		};
+
+	throwSimpleError :: (Scheme m r,?bindings :: Bindings r m) =>
+	 String -> m a;
+	throwSimpleError name = do -- throwSchemeError name ();
+		{
+		errorObj <- getConvert (MkSymbol name,());
+		throwObject errorObj;
+		};
+
+	throwArgError :: (Scheme m r,?bindings :: Bindings r m) =>
+	 String -> [Object r m] -> m a;
+	throwArgError name objs = do -- throwSchemeError name objs;
+		{
+		errorObj <- getConvert (MkSymbol name,objs);
+		throwObject errorObj;
+		};
+
+
 	-- 6.5 Eval
 
 	isNil :: Object r m -> Bool;
