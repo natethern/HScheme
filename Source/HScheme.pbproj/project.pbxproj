@@ -111,6 +111,7 @@
 				ABAD36C004A4029400A80103,
 				ABAD37B404A40F0D00A80103,
 				ABAD37B504A40F3E00A80103,
+				ABC8301704C8719700A80103,
 			);
 		};
 		ABAD36BE04A4025C00A80103 = {
@@ -890,6 +891,35 @@
 			isa = PBXFileReference;
 			path = vector.scm.ref;
 			refType = 4;
+		};
+		ABC8301704C8719700A80103 = {
+			buildArgumentsString = "./make $ACTION$PRODUCT_NAME$STYLE";
+			buildPhases = (
+			);
+			buildSettings = {
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = postinstall;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/sudo;
+			dependencies = (
+				ABC8301804C871BD00A80103,
+			);
+			isa = PBXLegacyTarget;
+			name = Install;
+			passBuildSettingsInEnvironment = 1;
+			productName = Install;
+			settingsToExpand = 6;
+			settingsToPassInEnvironment = 287;
+			settingsToPassOnCommandLine = 280;
+		};
+		ABC8301804C871BD00A80103 = {
+			isa = PBXTargetDependency;
+			target = ABAD36C004A4029400A80103;
 		};
 		ABC9354304B3FD4A00A80103 = {
 			fileEncoding = 4;
