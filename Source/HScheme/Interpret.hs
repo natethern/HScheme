@@ -20,24 +20,18 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
+module Org.Org.Semantic.HScheme.Interpret
 	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
+	module Org.Org.Semantic.HScheme.Interpret.FunctorLambda,
+	module Org.Org.Semantic.HScheme.Interpret.SymbolExpression,
+	module Org.Org.Semantic.HScheme.Interpret.Assemble,
+	module Org.Org.Semantic.HScheme.Interpret.TopLevel,
+	module Org.Org.Semantic.HScheme.Interpret.Evaluate
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HScheme.Interpret.Evaluate;
+	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
+	import Org.Org.Semantic.HScheme.Interpret.Assemble;
+	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
+	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	}

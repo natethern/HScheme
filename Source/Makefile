@@ -66,40 +66,58 @@ LDFLAGS			=
 # Sources
 
 LIB_HC_SRCS			= \
-	$(HIER)/Numerics.hs	\
-	$(HIER)/Port.hs	\
-	$(HIER)/FunctorLambda.hs	\
-	$(HIER)/SymbolExpression.hs	\
-	$(HIER)/InputPortParser.hs	\
+	$(HIER)/Core/Numerics.hs	\
+	$(HIER)/Core/Port.hs	\
+	$(HIER)/Core/Build.hs	\
+	$(HIER)/Core/Object.hs	\
+	$(HIER)/Core/Conversions.hs	\
+	$(HIER)/Core/Throw.hs	\
+	$(HIER)/Core/Stream.hs	\
+	$(HIER)/Core/System.hs	\
+	$(HIER)/Core.hs	\
 	\
-	$(HIER)/Object.hs	\
-	$(HIER)/Conversions.hs	\
-	$(HIER)/Compile.hs	\
-	$(HIER)/Evaluate.hs	\
-	$(HIER)/TopLevel.hs	\
-	$(HIER)/SystemInterface.hs	\
-	$(HIER)/Macros.hs	\
-	$(HIER)/Procedures.hs	\
-	$(HIER)/Lambda.hs	\
-	$(HIER)/PortProcedures.hs	\
-	$(HIER)/Equality.hs	\
-	$(HIER)/SExpChars.hs	\
-	$(HIER)/SExpParser.hs	\
-	$(HIER)/Syntax.hs	\
+	$(HIER)/Interpret/FunctorLambda.hs	\
+	$(HIER)/Interpret/SymbolExpression.hs	\
+	$(HIER)/Interpret/Assemble.hs	\
+	$(HIER)/Interpret/TopLevel.hs	\
+	$(HIER)/Interpret/Evaluate.hs	\
+	$(HIER)/Interpret.hs	\
 	\
-	$(HIER)/ArgumentList.hs	\
-	$(HIER)/Bindings.hs	\
-	$(HIER)/NumericProcedures.hs	\
-	$(HIER)/StandardBindings.hs	\
-	$(HIER)/FMapBindings.hs	\
-	$(HIER)/FullProcedures.hs	\
-	$(HIER)/FullStandardBindings.hs	\
-	$(HIER)/IOBindings.hs	\
+	$(HIER)/MacroLib/Syntax.hs	\
+	$(HIER)/MacroLib/Macros.hs	\
+	$(HIER)/MacroLib/Load.hs	\
+	$(HIER)/MacroLib.hs	\
 	\
-	$(HIER)/SchemeIO.hs	\
-	$(HIER)/SchemeCPS.hs	\
-	$(HIER)/Interactive.hs	\
-	$(HIER)/BatchRun.hs	\
+	$(HIER)/Parse/SExpChars.hs	\
+	$(HIER)/Parse/SExpParser.hs	\
+	$(HIER)/Parse.hs	\
+	\
+	$(HIER)/RunLib/ArgumentList.hs	\
+	$(HIER)/RunLib/Equality.hs	\
+	$(HIER)/RunLib/Control.hs	\
+	$(HIER)/RunLib/NumericProcedures.hs	\
+	$(HIER)/RunLib/PortProcedures.hs	\
+	$(HIER)/RunLib/Procedures.hs	\
+	$(HIER)/RunLib/FullProcedures.hs	\
+	$(HIER)/RunLib/SystemPorts.hs	\
+	$(HIER)/RunLib.hs	\
+	\
+	$(HIER)/Bind/Add.hs	\
+	$(HIER)/Bind/Macro.hs	\
+	$(HIER)/Bind/TopLevel.hs	\
+	$(HIER)/Bind/Run.hs	\
+	$(HIER)/Bind/FMapBindings.hs	\
+	$(HIER)/Bind.hs	\
+	\
+	$(HIER)/MainProg/Interactive.hs	\
+	$(HIER)/MainProg/Batch.hs	\
+	$(HIER)/MainProg.hs	\
+	\
+	$(HIER)/Imperative/IOSystem.hs	\
+	$(HIER)/Imperative/SchemeIO.hs	\
+	$(HIER)/Imperative/SchemeCPS.hs	\
+	$(HIER)/Imperative.hs	\
+	\
 	$(HIER).hs
 
 HC_SRCS		= $(LIB_HC_SRCS) BatchMain.hs InteractiveMain.hs CGIMain.hs
@@ -290,318 +308,289 @@ $(HROOT):
 	cd Org/Org/; ln -s ../../ Semantic
 
 # DO NOT DELETE: Beginning of Haskell dependencies
-Org/Org/Semantic/HScheme/Numerics.o Org/Org/Semantic/HScheme/Numerics.p_o : Org/Org/Semantic/HScheme/Numerics.hs
-Org/Org/Semantic/HScheme/Port.o Org/Org/Semantic/HScheme/Port.p_o : Org/Org/Semantic/HScheme/Port.hs
-Org/Org/Semantic/HScheme/FunctorLambda.o Org/Org/Semantic/HScheme/FunctorLambda.p_o : Org/Org/Semantic/HScheme/FunctorLambda.hs
-Org/Org/Semantic/HScheme/SymbolExpression.o Org/Org/Semantic/HScheme/SymbolExpression.p_o : Org/Org/Semantic/HScheme/SymbolExpression.hs
-Org/Org/Semantic/HScheme/SymbolExpression.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
-Org/Org/Semantic/HScheme/SymbolExpression.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
-Org/Org/Semantic/HScheme/InputPortParser.o Org/Org/Semantic/HScheme/InputPortParser.p_o : Org/Org/Semantic/HScheme/InputPortParser.hs
-Org/Org/Semantic/HScheme/InputPortParser.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/InputPortParser.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/Object.o Org/Org/Semantic/HScheme/Object.p_o : Org/Org/Semantic/HScheme/Object.hs
-Org/Org/Semantic/HScheme/Object.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme/Object.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme/Object.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/Object.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/Conversions.o Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Conversions.hs
-Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Compile.o Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/Compile.hs
-Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
-Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
-Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
-Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
-Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Evaluate.o Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/Evaluate.hs
-Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
-Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
-Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/Evaluate.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/TopLevel.o Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/TopLevel.hs
-Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
-Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
-Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
-Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
-Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/TopLevel.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/SystemInterface.hs
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/SExpParser.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/SExpParser.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/PortProcedures.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/Macros.o Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/Macros.hs
-Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
-Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
-Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
-Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
-Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/Procedures.o Org/Org/Semantic/HScheme/Procedures.p_o : Org/Org/Semantic/HScheme/Procedures.hs
-Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme/Procedures.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Procedures.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Procedures.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/Procedures.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/Lambda.o Org/Org/Semantic/HScheme/Lambda.p_o : Org/Org/Semantic/HScheme/Lambda.hs
-Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Lambda.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Lambda.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/ArgumentList.hi
-Org/Org/Semantic/HScheme/Lambda.p_o : Org/Org/Semantic/HScheme/ArgumentList.p_hi
-Org/Org/Semantic/HScheme/PortProcedures.o Org/Org/Semantic/HScheme/PortProcedures.p_o : Org/Org/Semantic/HScheme/PortProcedures.hs
-Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/PortProcedures.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/PortProcedures.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/PortProcedures.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/PortProcedures.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/Equality.o Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Equality.hs
-Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/SExpChars.o Org/Org/Semantic/HScheme/SExpChars.p_o : Org/Org/Semantic/HScheme/SExpChars.hs
-Org/Org/Semantic/HScheme/SExpParser.o Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/SExpParser.hs
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpChars.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/SExpChars.p_hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/PortProcedures.hi
-Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
-Org/Org/Semantic/HScheme/Syntax.o Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Syntax.hs
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/ArgumentList.o Org/Org/Semantic/HScheme/ArgumentList.p_o : Org/Org/Semantic/HScheme/ArgumentList.hs
-Org/Org/Semantic/HScheme/ArgumentList.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/ArgumentList.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/ArgumentList.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/ArgumentList.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/Bindings.o Org/Org/Semantic/HScheme/Bindings.p_o : Org/Org/Semantic/HScheme/Bindings.hs
-Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Bindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/Bindings.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/Bindings.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/ArgumentList.hi
-Org/Org/Semantic/HScheme/Bindings.p_o : Org/Org/Semantic/HScheme/ArgumentList.p_hi
-Org/Org/Semantic/HScheme/NumericProcedures.o Org/Org/Semantic/HScheme/NumericProcedures.p_o : Org/Org/Semantic/HScheme/NumericProcedures.hs
-Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme/NumericProcedures.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/NumericProcedures.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/StandardBindings.hs
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Macros.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Macros.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/NumericProcedures.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/NumericProcedures.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Equality.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Equality.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Lambda.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Lambda.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/PortProcedures.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Syntax.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Syntax.p_hi
-Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/SExpParser.hi
-Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/SExpParser.p_hi
-Org/Org/Semantic/HScheme/FMapBindings.o Org/Org/Semantic/HScheme/FMapBindings.p_o : Org/Org/Semantic/HScheme/FMapBindings.hs
-Org/Org/Semantic/HScheme/FMapBindings.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/FMapBindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/FullProcedures.o Org/Org/Semantic/HScheme/FullProcedures.p_o : Org/Org/Semantic/HScheme/FullProcedures.hs
-Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/FullProcedures.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/FullProcedures.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/FullProcedures.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/FullProcedures.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/FullStandardBindings.hs
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/StandardBindings.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/StandardBindings.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/FullProcedures.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/FullProcedures.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Macros.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/Macros.p_hi
-Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Equality.hi
-Org/Org/Semantic/HScheme/FullStandardBindings.p_o : Org/Org/Semantic/HScheme/Equality.p_hi
-Org/Org/Semantic/HScheme/IOBindings.o Org/Org/Semantic/HScheme/IOBindings.p_o : Org/Org/Semantic/HScheme/IOBindings.hs
-Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/IOBindings.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/IOBindings.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/IOBindings.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-Org/Org/Semantic/HScheme/IOBindings.p_o : Org/Org/Semantic/HScheme/SystemInterface.p_hi
-Org/Org/Semantic/HScheme/SchemeIO.o Org/Org/Semantic/HScheme/SchemeIO.p_o : Org/Org/Semantic/HScheme/SchemeIO.hs
-Org/Org/Semantic/HScheme/SchemeIO.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/SchemeIO.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/SchemeIO.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/SchemeIO.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/SchemeIO.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/SchemeIO.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/SchemeCPS.o Org/Org/Semantic/HScheme/SchemeCPS.p_o : Org/Org/Semantic/HScheme/SchemeCPS.hs
-Org/Org/Semantic/HScheme/SchemeCPS.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/SchemeCPS.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Interactive.o Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Interactive.hs
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/PortProcedures.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SExpParser.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/SExpParser.p_hi
-Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-Org/Org/Semantic/HScheme/Interactive.p_o : Org/Org/Semantic/HScheme/SystemInterface.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/BatchRun.hs
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/SystemInterface.p_hi
-Org/Org/Semantic/HScheme/BatchRun.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme/BatchRun.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
+Org/Org/Semantic/HScheme/Core/Numerics.o Org/Org/Semantic/HScheme/Core/Numerics.p_o : Org/Org/Semantic/HScheme/Core/Numerics.hs
+Org/Org/Semantic/HScheme/Core/Port.o Org/Org/Semantic/HScheme/Core/Port.p_o : Org/Org/Semantic/HScheme/Core/Port.hs
+Org/Org/Semantic/HScheme/Core/Build.o Org/Org/Semantic/HScheme/Core/Build.p_o : Org/Org/Semantic/HScheme/Core/Build.hs
+Org/Org/Semantic/HScheme/Core/Object.o Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Object.hs
+Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
+Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
+Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Port.hi
+Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
+Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Conversions.hs
+Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Port.hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Throw.o Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Throw.hs
+Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Conversions.hi
+Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Conversions.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Stream.hs
+Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Throw.hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Throw.p_hi
+Org/Org/Semantic/HScheme/Core/System.o Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/System.hs
+Org/Org/Semantic/HScheme/Core/System.o : Org/Org/Semantic/HScheme/Core/Port.hi
+Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
+Org/Org/Semantic/HScheme/Core/System.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core.o Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core.hs
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Port.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Conversions.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Conversions.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Throw.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Throw.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Stream.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Stream.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/System.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/System.p_hi
+Org/Org/Semantic/HScheme/Interpret/FunctorLambda.o Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hs
+Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hs
+Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.o Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : Org/Org/Semantic/HScheme/Interpret/Assemble.hs
+Org/Org/Semantic/HScheme/Interpret/Assemble.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/TopLevel.hs
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o : Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.o Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : Org/Org/Semantic/HScheme/Interpret/Evaluate.hs
+Org/Org/Semantic/HScheme/Interpret/Evaluate.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.o : Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.o : Org/Org/Semantic/HScheme/Interpret/TopLevel.hi
+Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : Org/Org/Semantic/HScheme/Interpret/TopLevel.p_hi
+Org/Org/Semantic/HScheme/Interpret.o Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret.hs
+Org/Org/Semantic/HScheme/Interpret.o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
+Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : Org/Org/Semantic/HScheme/Interpret/TopLevel.hi
+Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/TopLevel.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : Org/Org/Semantic/HScheme/Interpret/Evaluate.hi
+Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/Evaluate.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : Org/Org/Semantic/HScheme/MacroLib/Syntax.hs
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Macros.o Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : Org/Org/Semantic/HScheme/MacroLib/Macros.hs
+Org/Org/Semantic/HScheme/MacroLib/Macros.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Macros.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Load.o Org/Org/Semantic/HScheme/MacroLib/Load.p_o : Org/Org/Semantic/HScheme/MacroLib/Load.hs
+Org/Org/Semantic/HScheme/MacroLib/Load.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MacroLib/Load.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Load.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MacroLib/Load.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib.o Org/Org/Semantic/HScheme/MacroLib.p_o : Org/Org/Semantic/HScheme/MacroLib.hs
+Org/Org/Semantic/HScheme/MacroLib.o : Org/Org/Semantic/HScheme/MacroLib/Syntax.hi
+Org/Org/Semantic/HScheme/MacroLib.p_o : Org/Org/Semantic/HScheme/MacroLib/Syntax.p_hi
+Org/Org/Semantic/HScheme/MacroLib.o : Org/Org/Semantic/HScheme/MacroLib/Macros.hi
+Org/Org/Semantic/HScheme/MacroLib.p_o : Org/Org/Semantic/HScheme/MacroLib/Macros.p_hi
+Org/Org/Semantic/HScheme/MacroLib.o : Org/Org/Semantic/HScheme/MacroLib/Load.hi
+Org/Org/Semantic/HScheme/MacroLib.p_o : Org/Org/Semantic/HScheme/MacroLib/Load.p_hi
+Org/Org/Semantic/HScheme/Parse/SExpChars.o Org/Org/Semantic/HScheme/Parse/SExpChars.p_o : Org/Org/Semantic/HScheme/Parse/SExpChars.hs
+Org/Org/Semantic/HScheme/Parse/SExpParser.o Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : Org/Org/Semantic/HScheme/Parse/SExpParser.hs
+Org/Org/Semantic/HScheme/Parse/SExpParser.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Parse/SExpParser.o : Org/Org/Semantic/HScheme/Parse/SExpChars.hi
+Org/Org/Semantic/HScheme/Parse/SExpParser.p_o : Org/Org/Semantic/HScheme/Parse/SExpChars.p_hi
+Org/Org/Semantic/HScheme/Parse.o Org/Org/Semantic/HScheme/Parse.p_o : Org/Org/Semantic/HScheme/Parse.hs
+Org/Org/Semantic/HScheme/Parse.o : Org/Org/Semantic/HScheme/Parse/SExpChars.hi
+Org/Org/Semantic/HScheme/Parse.p_o : Org/Org/Semantic/HScheme/Parse/SExpChars.p_hi
+Org/Org/Semantic/HScheme/Parse.o : Org/Org/Semantic/HScheme/Parse/SExpParser.hi
+Org/Org/Semantic/HScheme/Parse.p_o : Org/Org/Semantic/HScheme/Parse/SExpParser.p_hi
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.o Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.hs
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/Equality.o Org/Org/Semantic/HScheme/RunLib/Equality.p_o : Org/Org/Semantic/HScheme/RunLib/Equality.hs
+Org/Org/Semantic/HScheme/RunLib/Equality.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/Equality.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/Control.o Org/Org/Semantic/HScheme/RunLib/Control.p_o : Org/Org/Semantic/HScheme/RunLib/Control.hs
+Org/Org/Semantic/HScheme/RunLib/Control.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/Control.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/Control.o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.hi
+Org/Org/Semantic/HScheme/RunLib/Control.p_o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_hi
+Org/Org/Semantic/HScheme/RunLib/NumericProcedures.o Org/Org/Semantic/HScheme/RunLib/NumericProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/NumericProcedures.hs
+Org/Org/Semantic/HScheme/RunLib/NumericProcedures.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/NumericProcedures.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.o Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/PortProcedures.hs
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/Procedures.o Org/Org/Semantic/HScheme/RunLib/Procedures.p_o : Org/Org/Semantic/HScheme/RunLib/Procedures.hs
+Org/Org/Semantic/HScheme/RunLib/Procedures.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/Procedures.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/FullProcedures.o Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/FullProcedures.hs
+Org/Org/Semantic/HScheme/RunLib/FullProcedures.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib/FullProcedures.o : Org/Org/Semantic/HScheme/RunLib/Procedures.hi
+Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/Procedures.p_hi
+Org/Org/Semantic/HScheme/RunLib/SystemPorts.o Org/Org/Semantic/HScheme/RunLib/SystemPorts.p_o : Org/Org/Semantic/HScheme/RunLib/SystemPorts.hs
+Org/Org/Semantic/HScheme/RunLib/SystemPorts.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/RunLib/SystemPorts.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/RunLib.o Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib.hs
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/ArgumentList.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/Equality.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/Equality.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/Control.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/Control.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/NumericProcedures.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/NumericProcedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/PortProcedures.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/Procedures.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/Procedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/FullProcedures.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/FullProcedures.p_hi
+Org/Org/Semantic/HScheme/RunLib.o : Org/Org/Semantic/HScheme/RunLib/SystemPorts.hi
+Org/Org/Semantic/HScheme/RunLib.p_o : Org/Org/Semantic/HScheme/RunLib/SystemPorts.p_hi
+Org/Org/Semantic/HScheme/Bind/Add.o Org/Org/Semantic/HScheme/Bind/Add.p_o : Org/Org/Semantic/HScheme/Bind/Add.hs
+Org/Org/Semantic/HScheme/Bind/Add.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind/Add.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind/Add.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind/Add.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/Bind/Add.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/Bind/Add.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Bind/Macro.o Org/Org/Semantic/HScheme/Bind/Macro.p_o : Org/Org/Semantic/HScheme/Bind/Macro.hs
+Org/Org/Semantic/HScheme/Bind/Macro.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind/Macro.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind/Macro.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind/Macro.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/Bind/Macro.o : Org/Org/Semantic/HScheme/MacroLib.hi
+Org/Org/Semantic/HScheme/Bind/Macro.p_o : Org/Org/Semantic/HScheme/MacroLib.p_hi
+Org/Org/Semantic/HScheme/Bind/Macro.o : Org/Org/Semantic/HScheme/Bind/Add.hi
+Org/Org/Semantic/HScheme/Bind/Macro.p_o : Org/Org/Semantic/HScheme/Bind/Add.p_hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.o Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/Bind/TopLevel.hs
+Org/Org/Semantic/HScheme/Bind/TopLevel.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.o : Org/Org/Semantic/HScheme/MacroLib.hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/MacroLib.p_hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.o : Org/Org/Semantic/HScheme/Bind/Add.hi
+Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/Bind/Add.p_hi
+Org/Org/Semantic/HScheme/Bind/Run.o Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Bind/Run.hs
+Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Bind/Add.hi
+Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Bind/Add.p_hi
+Org/Org/Semantic/HScheme/Bind/FMapBindings.o Org/Org/Semantic/HScheme/Bind/FMapBindings.p_o : Org/Org/Semantic/HScheme/Bind/FMapBindings.hs
+Org/Org/Semantic/HScheme/Bind/FMapBindings.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind/FMapBindings.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind.o Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind.hs
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/Add.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/Add.p_hi
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/Macro.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/Macro.p_hi
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/TopLevel.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/TopLevel.p_hi
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/Run.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/Run.p_hi
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/FMapBindings.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/FMapBindings.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/MainProg/Interactive.hs
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : Org/Org/Semantic/HScheme/Bind.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.hs
+Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : Org/Org/Semantic/HScheme/Bind.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme/MainProg.o Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg.hs
+Org/Org/Semantic/HScheme/MainProg.o : Org/Org/Semantic/HScheme/MainProg/Batch.hi
+Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.p_hi
+Org/Org/Semantic/HScheme/Imperative/IOSystem.o Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hs
+Org/Org/Semantic/HScheme/Imperative/IOSystem.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative/IOSystem.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/Imperative/IOSystem.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.o Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hs
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hs
+Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative.o Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative.hs
+Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hi
+Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.p_hi
+Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hi
+Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_hi
+Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hi
+Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_hi
 Org/Org/Semantic/HScheme.o Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme.hs
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Numerics.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Port.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Port.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Object.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Object.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Conversions.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Compile.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Evaluate.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/TopLevel.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/TopLevel.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/SystemInterface.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Procedures.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Procedures.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/ArgumentList.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/ArgumentList.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Bindings.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/StandardBindings.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/StandardBindings.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/FMapBindings.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/FMapBindings.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/FullStandardBindings.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/FullStandardBindings.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/IOBindings.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/IOBindings.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SchemeIO.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/SchemeIO.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SchemeCPS.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/SchemeCPS.p_hi
-Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/BatchRun.hi
-Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/BatchRun.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/MacroLib.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/MacroLib.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Bind.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/MainProg.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/MainProg.p_hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Imperative.hi
+Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/Imperative.p_hi
 BatchMain.o BatchMain.p_o : BatchMain.hs
 BatchMain.o : Org/Org/Semantic/HScheme.hi
 BatchMain.p_o : Org/Org/Semantic/HScheme.p_hi

@@ -20,24 +20,25 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.MacroLib.Load where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+
+	loadT ::
+		(
+		Build cm r,
+		Scheme m r,
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		) =>
+	 PureSystemInterface cm m r ->
+	 (SList Char,()) -> cm (TopLevelObjectCommand cm r m);
+	loadT psi (MkSList filename,()) = do
+		{
+		readObjects <- psiReadFile psi filename;
+		beginM readObjects;
+		};
 	}

@@ -20,24 +20,46 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.Core.Build where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+
+	class
+		(
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) =>
+	 Build m r;
+
+	instance
+		(
+		MonadCreatable m r,
+		MonadGettableReference m r
+		) =>
+	 Build m r;
+
+	class
+		(
+		Build m r,
+		MonadThrow obj m
+		) =>
+	 BuildThrow m obj r;
+
+	instance
+		(
+		Build m r,
+		MonadThrow obj m
+		) =>
+	 BuildThrow m obj r;
+
+
+	-- throw, etc.
+
+	lastResortThrowObject :: (MonadThrow obj m,?objType :: Type obj) =>
+	 obj -> m a;
+	lastResortThrowObject = throw;
+
+	throwObject :: (MonadThrow obj m,?objType :: Type obj) =>
+	 obj -> m a;
+	throwObject = lastResortThrowObject;
 	}

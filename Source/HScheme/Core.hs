@@ -20,24 +20,24 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
+module Org.Org.Semantic.HScheme.Core
 	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
+	module Org.Org.Semantic.HScheme.Core.Numerics,
+	module Org.Org.Semantic.HScheme.Core.Port,
+	module Org.Org.Semantic.HScheme.Core.Build,
+	module Org.Org.Semantic.HScheme.Core.Object,
+	module Org.Org.Semantic.HScheme.Core.Conversions,
+	module Org.Org.Semantic.HScheme.Core.Throw,
+	module Org.Org.Semantic.HScheme.Core.Stream,
+	module Org.Org.Semantic.HScheme.Core.System
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HScheme.Core.System;
+	import Org.Org.Semantic.HScheme.Core.Stream;
+	import Org.Org.Semantic.HScheme.Core.Throw;
+	import Org.Org.Semantic.HScheme.Core.Conversions;
+	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Build;
+	import Org.Org.Semantic.HScheme.Core.Port;
+	import Org.Org.Semantic.HScheme.Core.Numerics;
 	}

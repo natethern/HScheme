@@ -20,24 +20,21 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.Core.Stream where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HScheme.Core.Throw;
+	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Build;
+	import Org.Org.Semantic.HBase;
+
+	eofObject :: (Scheme m r) => Object r m;
+	eofObject = nullObject;
+
+	handleUTF8Error :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 UTF8Error -> cm a;
+	handleUTF8Error err = throwSchemeError "bad-utf8-parse" [show err];
+
+	parseUTF8Char :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 cm (Maybe Word8) -> cm (Maybe Char);
+	parseUTF8Char source = exRun handleUTF8Error (parseUTF8 source);
 	}

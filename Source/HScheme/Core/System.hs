@@ -20,24 +20,24 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.Core.System where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Port;
+	import Org.Org.Semantic.HBase;
+
+	data PureSystemInterface cm m r = MkPureSystemInterface
+		{
+		psiReadFile	:: String -> cm [Object r m]
+		};
+
+	data FullSystemInterface cm m r = MkFullSystemInterface
+		{
+		fsiPure					:: PureSystemInterface cm m r,
+		fsiCurrentInputPort		:: InputPort Word8 cm,
+		fsiCurrentOutputPort	:: OutputPort Word8 cm,
+		fsiCurrentErrorPort		:: OutputPort Word8 cm,
+		fsiOpenInputFile		:: String -> cm (InputPort Word8 cm),
+		fsiOpenOutputFile		:: String -> cm (OutputPort Word8 cm)
+		};
 	}

@@ -20,24 +20,30 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.Core.Numerics where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
-	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+	
+	type Number = Complex Rational;
+	
+	equalNumber :: Number -> Number -> Bool;
+	equalNumber = (==);
+	
+	eqvNumber :: Number -> Number -> Bool;
+	eqvNumber = (==);
+	
+	eqNumber :: Number -> Number -> Bool;
+	eqNumber = (==);
+	
+	isExactN :: Number -> Bool;
+	isExactN = const True;
+
+	showRational :: Rational -> String;
+	showRational r | (denominator r ==1) = show (numerator r);
+	showRational r = (show (numerator r)) ++"%"++ (show (denominator r));
+
+	showNumber :: Number -> String;
+	showNumber (r :+ i) | i == zero = showRational r;
+	showNumber (r :+ i) | r == zero = (showRational i) ++ "i";
+	showNumber (r :+ i) = (showRational r) ++ "+" ++ (showRational i) ++ "i";
 	}

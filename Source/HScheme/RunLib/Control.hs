@@ -20,24 +20,40 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme
-	(
-	module Org.Org.Semantic.HScheme.Core,
-	module Org.Org.Semantic.HScheme.Interpret,
-	module Org.Org.Semantic.HScheme.MacroLib,
-	module Org.Org.Semantic.HScheme.Parse,
-	module Org.Org.Semantic.HScheme.RunLib,
-	module Org.Org.Semantic.HScheme.Bind,
-	module Org.Org.Semantic.HScheme.MainProg,
-	module Org.Org.Semantic.HScheme.Imperative
-	) where
+module Org.Org.Semantic.HScheme.RunLib.Control where
 	{
-	import Org.Org.Semantic.HScheme.Imperative;
-	import Org.Org.Semantic.HScheme.MainProg;
-	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Parse;
-	import Org.Org.Semantic.HScheme.MacroLib;
-	import Org.Org.Semantic.HScheme.Interpret;
+	import Org.Org.Semantic.HScheme.RunLib.ArgumentList;
 	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+
+	-- 6.4 Control Features
+	isProcedure :: (Scheme m r) =>
+	 Object r m -> m Bool;
+	isProcedure (ProcedureObject _) = return True;
+	isProcedure _ = return False;
+
+	isProcedureP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Object r m,()) -> m Bool;
+	isProcedureP (obj,()) = isProcedure obj;
+	
+	callCCP ::
+		(
+		Scheme m r,?objType :: Type (Object r m),
+		MonadCont m
+		) =>
+	 (Procedure r m,()) -> m (Object r m);
+	callCCP (proc,()) = callCC (\cont -> proc
+	  [ProcedureObject (\args -> do
+	  	{
+	  	(resultArg,()) <- convertFromObjects args;
+	  	cont resultArg;
+	  	})]);
+	
+	fixP ::
+		(
+		Scheme m r,?objType :: Type (Object r m),
+		MonadFix m
+		) =>
+	 (Procedure r m,()) -> m (Object r m);
+	fixP (proc,()) = mfix (\a -> proc [a]);
 	}
