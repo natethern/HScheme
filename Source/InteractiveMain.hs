@@ -26,16 +26,6 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
-{-
-	cpsInteract :: (?refType :: Type (r ())) =>
-	 CPS r () -> IO ();
-	cpsInteract ma = runContinuationPass
-	 (\_ -> fail "error in catch code!") return ma;
-
-	withRefType ::
-	 t -> ((?refType :: t) => a) -> a;
-	withRefType t a = let {?refType = t} in a;
--}
 	type CPS r = SchemeCPS r (IO ());
 	type GCPS r = SchemeGCPS r (IO ());
 
@@ -94,26 +84,35 @@ module Main where
 			 case flavour of
 				{
 				FullStdBindings ->
-				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.full.scm");
-					rsRun (interactWithExit bindings "");
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				PureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.pure.scm");
-					rsRun (interactWithExit bindings "");
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				StrictPureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.pure.scm");
-					rsRun (interactWithExit bindings "");
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				};
 			CPSWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
@@ -123,26 +122,35 @@ module Main where
 			 case flavour of
 				{
 				FullStdBindings ->
-				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.full.scm");
-					rsRun (interactWithExit bindings "" :: CPS IORef ());
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				PureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.pure.scm");
-					rsRun (interactWithExit bindings "");
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				StrictPureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
---					objects <- readFiles (allFileNames "init.pure.scm");
-					rsRun (interactWithExit bindings "");
-					}));
+					rsRun (do
+						{
+						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+						interactWithExit bindings commands;
+						});
+					});
 				};
 			IOWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef IO)} in
@@ -152,26 +160,26 @@ module Main where
 			 case flavour of
 				{
 				FullStdBindings ->
-				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ fullSystemBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					interact bindings "";
-					}));
+					commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
+					interact bindings commands;
+					});
 				PureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadFixPureBindings ++ monadGuardBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					interact bindings "";
-					}));
+					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+					interact bindings commands;
+					});
 				StrictPureStdBindings ->
-				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					interact bindings "";
-					}));
+					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
+					interact bindings commands;
+					});
 				};
 			IdentityWhichMonad -> fail "can't use pure monad for interaction";
 			};

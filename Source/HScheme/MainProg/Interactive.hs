@@ -30,7 +30,23 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	interpretInteractive ::
+	runTopLevelInEnvironment ::
+		(
+		FullScheme m r,
+		?objType :: Type (Object r m),
+		?macrobindings :: Bindings Symbol (Macro m r m),
+		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		) =>
+	 Environment r (Object r m) -> TopLevelCommand r m (m a) -> m (Environment r (Object r m),a);
+	runTopLevelInEnvironment
+	 (MkEnvironment synbindings runbindings) (MkTopLevelCommand expr newbinds newsyntaxes) = do
+		{
+		let {boundExpr = exprConstMapLet (getBinding runbindings) (interactiveBind newbinds expr)};
+		(result,allnewbinds) <- runLambda (\_ -> error "undefined symbol") (schemeExprLetNewRefs (exprFreeSymbols boundExpr) boundExpr);
+		return (MkEnvironment (newBindings synbindings newsyntaxes) (newBindings runbindings allnewbinds),result);
+		};
+
+	runObjectInEnvironment ::
 		(
 		FullScheme m r,
 		?objType :: Type (Object r m),
@@ -38,15 +54,10 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
 		) =>
 	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),Object r m);
-	interpretInteractive (MkEnvironment synbindings runbindings) obj = let
+	runObjectInEnvironment env obj =  do
 		{
-		?syntacticbindings = synbindings;
-		} in do
-		{
-		(MkTopLevelCommand expr newbinds newsyntaxes) <- assembleTopLevelObjectCommand obj;
-		let {boundExpr = exprConstMapLet (getBinding runbindings) (interactiveBind newbinds expr)};
-		(result,allnewbinds) <- runLambda (\_ -> error "undefined symbol") (schemeExprLetNewRefs (exprFreeSymbols boundExpr) boundExpr);
-		return (MkEnvironment (newBindings synbindings newsyntaxes) (newBindings runbindings allnewbinds),result);
+		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelObjectCommand obj;
+		runTopLevelInEnvironment env tlCommand;
 		};
 
 	opWriteLnFlush :: (Monad m) =>
@@ -112,7 +123,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 				Nothing -> return Nothing;
 				Just obj -> do
 					{
-					(environment',result) <- interpretInteractive environment obj;
+					(environment',result) <- runObjectInEnvironment environment obj;
 					printResult result;
 					return (Just environment');
 					};
@@ -139,6 +150,20 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 			};
 		};
 
+	envProc ::
+		(
+		FullScheme m r,
+		?objType :: Type (Object r m),
+		?macrobindings :: Bindings Symbol (Macro m r m),
+		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		) =>
+	 TopLevelCommand r m (m a) -> Environment r (Object r m) -> m (Environment r (Object r m));
+	envProc command env = do
+		{
+		(env',_) <- runTopLevelInEnvironment env command;
+		return env';
+		};
+
 	interact ::
 		(
 		FullScheme m r,
@@ -151,12 +176,13 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
-	 String -> m ();
-	interact bindings filename =
+	 [TopLevelObjectCommand r m] ->
+	 m ();
+	interact bindings commands =
 	 catch (do
 		{
---		bindings' <- psiLoadBindings (fsiPure ?system) bindings filename;
-		interactiveLoop (MkEnvironment ?syntacticbindings bindings);
+		env' <- concatenateList (fmap envProc commands) (MkEnvironment ?syntacticbindings bindings);
+		interactiveLoop env';
 		})
 	 (\errObj -> do
 		{
@@ -176,24 +202,21 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
-	 String ->
+	 [TopLevelObjectCommand r m] ->
 	 m ();
-	interactWithExit rootBindings filename = callCC (\exitFunc -> do
+	interactWithExit rootBindings commands = callCC (\exitFunc -> do
 		{
 		bindings <- concatenateList
 			[
 			addProcBinding "exit" (exitFuncProc exitFunc)
 			] rootBindings;
-		bindings' <-
-		 catch (
-		 return bindings
---		 psiLoadBindings (fsiPure ?system) bindings filename
-		 )
+		env' <- catch
+		 (concatenateList (fmap envProc commands) (MkEnvironment ?syntacticbindings bindings))
 		 (\errObj -> do
 			{
 			reportError errObj;
 			exitFunc ();
 			});
-		interactiveLoop (MkEnvironment ?syntacticbindings bindings');
+		interactiveLoop env';
 		});
 	}
