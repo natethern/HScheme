@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.Assemble
 	(
 	SchemeExpression,
-	Macro,Syntax,
+	Syntax,Macro(..),
 	assembleExpression
 	) where
 	{
@@ -34,8 +34,14 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	type SchemeExpression r m = SymbolExpression Symbol (m (ObjLocation r m));
 
-	type Macro cm r m = [Object r m] -> cm (SchemeExpression r m (m (Object r m)));
 	type Syntax cm r m = [Object r m] -> cm (Object r m);
+
+	newtype Macro cm r m = MkMacro
+		((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] -> cm (SchemeExpression r m (m (Object r m))));
 
 	-- as fProductList
 	execList :: (Monad m) =>
@@ -119,7 +125,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 						};
 					Nothing -> case getBinding ?macrobindings sym of
 						{
-						Just macro -> macro arglist;
+						Just (MkMacro macro) -> macro arglist;
 						Nothing -> assembleApplyExpression h arglist;
 						};
 					};

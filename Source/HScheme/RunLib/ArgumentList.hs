@@ -105,19 +105,6 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 			};
 		};
 
-	convertToMacro ::
-		(
-		ArgumentList cm m r args,
-		?objType :: Type (Object r m)
-		) =>
-	 (args -> cm result) ->
-	 ([Object r m] -> cm result);
-	convertToMacro foo objs = do
-		{
-		args <- convertFromObjects objs;
-		foo args;
-		};
-
 	convertToProcedure ::
 		(
 		ArgumentList m m r args,
@@ -127,7 +114,8 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	 (args -> m ret) -> Procedure r m;
 	convertToProcedure foo objs = do
 		{
-		r <- convertToMacro foo objs;
+		args <- convertFromObjects objs;
+		r <- foo args;
 		getConvert r;
 		};
 	}

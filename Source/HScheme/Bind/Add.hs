@@ -55,18 +55,39 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	addProcBinding name p b = addLocationBinding (MkSymbol name)
 	 (ProcedureObject (convertToProcedure p)) b;
 
+	convertToMacro ::
+		(
+		ArgumentList cm m r args,
+		?objType :: Type (Object r m)
+		) =>
+	 ((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	  args -> cm (SchemeExpression r m (m (Object r m)))) ->
+	 (Macro cm r m);
+	convertToMacro foo = MkMacro (\objs -> do
+		{
+		args <- convertFromObjects objs;
+		foo args;
+		});
+
 	convertToTopLevelMacro ::
 		(
 		ArgumentList cm m r args,
 		?objType :: Type (Object r m)
 		) =>
-	 (args -> cm (TopLevelObjectCommand cm r m)) ->
+	 ((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 args -> cm (TopLevelObjectCommand cm r m)) ->
 	 (TopLevelMacro cm r m);
-	convertToTopLevelMacro foo argObjs = do
+	convertToTopLevelMacro foo = MkTopLevelMacro (\argObjs -> do
 		{
 		args <- convertFromObjects argObjs;
 		foo args;
-		};
+		});
 
 	addMacroBinding ::
 		(
@@ -74,9 +95,13 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> cm result) ->
-	 Binds Symbol ([Object r m] -> cm result) ->
-	 Binds Symbol ([Object r m] -> cm result);
+	 ((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	  args -> cm (SchemeExpression r m (m (Object r m)))) ->
+	 Binds Symbol (Macro cm r m) ->
+	 Binds Symbol (Macro cm r m);
 	addMacroBinding name p b = addBinding (MkSymbol name) (convertToMacro p) b;
 
 	addTopLevelMacroBinding ::
@@ -85,7 +110,11 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> cm (TopLevelObjectCommand cm r m)) ->
+	 ((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 args -> cm (TopLevelObjectCommand cm r m)) ->
 	 Binds Symbol (TopLevelMacro cm r m) ->
 	 Binds Symbol (TopLevelMacro cm r m);
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;

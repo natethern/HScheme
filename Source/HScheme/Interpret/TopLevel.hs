@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	(
-	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro,
+	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro(..),
 	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
 	assembleTopLevelExpression,assembleTopLevelExpressionsEat,
 	pureDefineT,fullDefineT,
@@ -156,7 +156,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	type TopLevelObjectCommand cm r m = TopLevelCommand cm r m (m (Object r m));
 
-	type TopLevelMacro cm r m = [Object r m] -> cm (TopLevelObjectCommand cm r m);
+	newtype TopLevelMacro cm r m = MkTopLevelMacro ((
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
+		) =>
+	 [Object r m] -> cm (TopLevelObjectCommand cm r m));
 
 	lambdaM ::
 		(
@@ -268,7 +272,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 			{
 			Just (sym,args) -> case getBinding ?toplevelbindings sym of
 				{
-				Just tlm -> tlm args;
+				Just (MkTopLevelMacro tlm) -> tlm args;
 				Nothing -> compileExprTopLevel;
 				};
 			Nothing -> compileExprTopLevel;

@@ -33,8 +33,6 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (Macro cm r m) ->
@@ -61,8 +59,6 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (Macro cm r m) ->
@@ -81,8 +77,6 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (Macro cm r m) ->
@@ -93,23 +87,5 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 		-- 4.1.6 Assignments
 		addMacroBinding			"set!"				setBangM
-		];
-
-	systemMacroBindings ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?load :: String -> cm [Object r m],
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
-		) =>
-	 Binds Symbol (TopLevelMacro cm r m) ->
-	 Binds Symbol (TopLevelMacro cm r m);
-	systemMacroBindings = concatenateList
-		[
-		-- 6.6.4 System Interface
-		addTopLevelMacroBinding	"load"	loadT
 		];
 	}

@@ -33,8 +33,6 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (TopLevelMacro cm r m) ->
@@ -42,7 +40,7 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 	commonTopLevelBindings = concatenateList
 		[
 		-- 4.2.3 Sequencing
-		addMacroBinding	"begin"					beginM,
+		addTopLevelMacroBinding	"begin"					beginM,
 
 		-- 4.3.2 Pattern Language
 --		addSyntaxMakerMacroBinding	"syntax-rules"			syntaxRulesM,
@@ -56,8 +54,6 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (TopLevelMacro cm r m) ->
@@ -75,8 +71,6 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m)
 		) =>
 	 Binds Symbol (TopLevelMacro cm r m) ->
@@ -87,5 +81,21 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 		-- 5.2 Definitions
 		addTopLevelMacroBinding	"define"			fullDefineT
+		];
+
+	systemTopLevelBindings ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?load :: String -> cm [Object r m],
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		) =>
+	 Binds Symbol (TopLevelMacro cm r m) ->
+	 Binds Symbol (TopLevelMacro cm r m);
+	systemTopLevelBindings = concatenateList
+		[
+		-- 6.6.4 System Interface
+		addTopLevelMacroBinding	"load"	loadT
 		];
 	}
