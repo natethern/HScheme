@@ -80,9 +80,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	setBangM (sym,(obj,())) = do
 		{
 		expr <- assembleExpression obj;
-		return (liftF2 (\mloc mval -> do
+		return (liftF2 (\loc mval -> do
 			{
-			loc <- mloc;
 			val <- mval;
 			set loc val;
 			return nullObject;

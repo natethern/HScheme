@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type SchemeExpression r m = SymbolExpression Symbol (m (ObjLocation r m));
+	type SchemeExpression r m = SymbolExpression Symbol (ObjLocation r m);
 
 	type ObjectSchemeExpression r m = SchemeExpression r m (m (Object r m));
 
@@ -111,11 +111,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm (ObjectSchemeExpression r m);
-	assembleExpression (SymbolObject sym) = return (fmap (\mloc -> do
-		{
-		loc <- mloc;
-		get loc;
-		}) (fSymbol sym));
+	assembleExpression (SymbolObject sym) = return (fmap get (fSymbol sym));
 	assembleExpression (PairObject head tail) = do
 		{
 		h <- get head;

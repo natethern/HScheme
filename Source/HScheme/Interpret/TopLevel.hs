@@ -76,9 +76,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		 (bindSyms2 . bindSyms1)
 		 );
 		};
-	-- b = (mloc,a)
-	getThingySingle (SymbolObject sym) = return (MkThingySingle (\bf obj a -> bf (new obj,a))
-	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
+	-- b = (loc,a)
+	getThingySingle (SymbolObject sym) = return (MkThingySingle (\bf obj a -> do
+		{
+		loc <- new obj;
+		bf (loc,a)
+		})
+	 (\ps -> fmap (\f (loc,a) -> f loc a) (fAbstract sym ps)));
 	getThingySingle obj = throwArgError "bad-lambda-arg-list" [obj];
 
 	data ThingyList m f obj a = forall b. MkThingyList
@@ -112,13 +116,14 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 			})
 		(bindSyms2 . bindSyms1));
 		};
-	-- b = (mloc,a)
-	getThingyList (SymbolObject sym) = return (MkThingyList (\bf list a -> bf (do
+	-- b = (loc,a)
+	getThingyList (SymbolObject sym) = return (MkThingyList (\bf list a -> do
 		{
 		obj <- getConvert list;
-		new obj;
-		},a))
-	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
+		loc <- new obj;
+		bf (loc,a);
+		})
+	 (\ps -> fmap (\f (loc,a) -> f loc a) (fAbstract sym ps)));
 	getThingyList obj = throwArgError "bad-lambda-arg-list" [obj];
 
 	makeLambda ::
@@ -170,12 +175,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		};
 
 	substMap :: (Scheme m r) =>
-	 (m (ObjLocation r m) -> m a) -> m (Object r m) -> m a;
+	 (ObjLocation r m -> m a) -> m (Object r m) -> m a;
 	substMap va mvalue = do
 		{
 	 	value <- mvalue;
 		loc <- new value;
-		va (return loc);
+		va loc;
 		};
 
 	letSequentialM ::
@@ -222,13 +227,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
 
 	foo :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
-	 t (t (m (ObjLocation r m)) -> m (Object r m)) ->
-	 m (t (m (ObjLocation r m)));
+	 t (t (ObjLocation r m) -> m (Object r m)) ->
+	 m (t (ObjLocation r m));
 	foo tt = error "recursive subst not defined";
 
 	fixer :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
-	 t (t (m (ObjLocation r m)) -> m (Object r m)) ->
-	 (t (m (ObjLocation r m)) -> m (Object r m)) ->
+	 t (t (ObjLocation r m) -> m (Object r m)) ->
+	 (t (ObjLocation r m) -> m (Object r m)) ->
 	 m (Object r m);
 	fixer bindsT bodyT = (foo bindsT) >>= bodyT;
 
@@ -327,9 +332,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		{
 		valExpr <- assembleExpression val;
 		return (MkTopLevelCommand 
-		 (liftF2 (\mloc mval -> do
+		 (liftF2 (\loc mval -> do
 		 	{
-		 	loc <- mloc;
 		 	val <- mval;
 		 	set loc val;
 		 	return nullObject;

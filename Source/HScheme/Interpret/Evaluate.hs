@@ -33,16 +33,20 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	isNil NilObject = True;
 	isNil _ = False;
 
+	getBadLoc :: Symbol -> ObjLocation r m;
+--	getBadLoc sym = throwArgError "unbound-symbol" ([SymbolObject sym]);
+	getBadLoc sym = error ("unbound-symbol" ++ (show sym));
+
 	getLoc ::
 		(
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 (Symbol -> Maybe (ObjLocation r m)) -> Symbol -> m (ObjLocation r m);
+	 (Symbol -> Maybe (ObjLocation r m)) -> Symbol -> ObjLocation r m;
 	getLoc getter sym = case (getter sym) of
 		{
-		Just loc -> return loc;
-		Nothing -> throwArgError "unbound-symbol" ([SymbolObject sym]);
+		Just loc -> loc;
+		Nothing -> getBadLoc sym;
 		};
 {--
 	getSymbolBinding ::
