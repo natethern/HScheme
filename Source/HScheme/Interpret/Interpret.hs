@@ -73,7 +73,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m (Object r m));
-	interpretTopLevelExpression obj = let {?objType = Type} in do
+	interpretTopLevelExpression obj = let {?objType = MkType} in do
 		{
 		rr <- assembleTopLevelExpression obj;
 		bindExpression rr;
@@ -90,7 +90,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		) =>
 	 (Object r m -> m ()) ->
 	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ());
-	interpretTopLevelExpressionsEat eat objs = let {?objType = Type} in do	
+	interpretTopLevelExpressionsEat eat objs = let {?objType = MkType} in do	
 		{
 		rr <- assembleTopLevelExpressionsEat eat objs;
 		bindExpression rr;
@@ -106,7 +106,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]);
-	interpretTopLevelExpressionsList objs = let {?objType = Type} in do	
+	interpretTopLevelExpressionsList objs = let {?objType = MkType} in do	
 		{
 		rr <- assembleTopLevelExpressionsList objs;
 		bindExpression rr;

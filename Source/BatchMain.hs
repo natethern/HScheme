@@ -24,7 +24,6 @@ module Main where
 	{
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
-	import System.Exit;
 
 	type CPS r = SchemeCPS r (IO ());
 
@@ -128,21 +127,6 @@ module Main where
 		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
 		};
 
-	reportError ::
-		(
-		Build IO r,
-		?objType :: Type (Object r m),
-		?stderr :: FlushSink IO Word8
-		) =>
-	 Object r m -> IO ();
-	reportError obj = do
-		{
-		text <- toString obj;
-		fsSinkList ?stderr (encodeUTF8 ("error: "++text++"\n"));
-		fsFlush ?stderr;
-		exitFailure;
-		};
-
 	main :: IO ();
 	main = ioRunProgram (do
 		{
@@ -170,7 +154,7 @@ module Main where
 		case whichmonad of
 			{
 			CPSWhichMonad ->
-			 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = ioRead loadpaths} in
 			 case flavour of
@@ -181,25 +165,25 @@ module Main where
 					{
 					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
-					runObjectsWithExit printResult reportError objects bindings;
+					runObjectsWithExit printResult objects bindings;
 					}));
 				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult reportError objects bindings;
+					runObjectsWithExit printResult objects bindings;
 					}));
 				StrictPureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult reportError objects bindings;
+					runObjectsWithExit printResult objects bindings;
 					}));
 				};
 			IOWhichMonad ->
-			 let {?objType = Type::Type (Object IORef IO)} in
+			 let {?objType = MkType::Type (Object IORef IO)} in
 			 let {?binder = setBinder} in
 			 let {?read = ioRead loadpaths} in
 			 case flavour of
@@ -210,25 +194,25 @@ module Main where
 					{
 					bindings <- (monadFixFullBindings ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
-					runObjects printResult reportError objects bindings;
+					runObjects printResult objects bindings;
 					}));
 				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- monadFixPureBindings emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult reportError objects bindings;
+					runObjects printResult objects bindings;
 					}));
 				StrictPureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult reportError objects bindings;
+					runObjects printResult objects bindings;
 					}));
 				};
 			IdentityWhichMonad ->
-			 let {?objType = Type::Type (Object IdentityConst Identity)} in
+			 let {?objType = MkType::Type (Object IdentityConst Identity)} in
 			 let {?binder = recursiveBinder} in
 			 let {?read = ioRead loadpaths} in
 			 case flavour of
@@ -239,14 +223,14 @@ module Main where
 					{
 					bindings <- monadFixPureBindings emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult reportError objects bindings;
+					runObjects printResult objects bindings;
 					}));
 				StrictPureStdBindings -> 
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjects printResult reportError objects bindings;
+					runObjects printResult objects bindings;
 					}));
 				};
 			};

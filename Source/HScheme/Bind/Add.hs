@@ -89,6 +89,9 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		foo args;
 		});
 
+	type MacroBindings cm r m = (?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)) =>
+	 SymbolBindings (Macro cm r m) -> SymbolBindings (Macro cm r m);
+
 	addMacroBinding ::
 		(
 		ArgumentList cm m r args,
@@ -97,12 +100,15 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	 String ->
 	 ((
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	  args -> cm (ObjectSchemeExpression r m)) ->
-	 SymbolBindings (Macro cm r m) ->
-	 SymbolBindings (Macro cm r m);
+	 MacroBindings cm r m;
 	addMacroBinding name p b = addBinding (MkSymbol name) (convertToMacro p) b;
+
+	type TopLevelBindings cm r m = (?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)) =>
+	 SymbolBindings (TopLevelMacro cm r m) -> SymbolBindings (TopLevelMacro cm r m);
 
 	addTopLevelMacroBinding ::
 		(
@@ -112,11 +118,11 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	 String ->
 	 ((
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 args -> cm (TopLevelObjectCommand r m)) ->
-	 SymbolBindings (TopLevelMacro cm r m) ->
-	 SymbolBindings (TopLevelMacro cm r m);
+	 TopLevelBindings cm r m;
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;
 
 	exitFuncProc :: (Monad m) => (a -> m b) -> (a -> m ());

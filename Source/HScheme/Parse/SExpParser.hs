@@ -421,7 +421,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 
 	expressionOrEndParse :: (SchemeParser cm m r p) =>
 	 p (Maybe (Object r m));
-	expressionOrEndParse = let {?objType=Type} in 
+	expressionOrEndParse = let {?objType=MkType} in 
 		(expressionParse >>= (return . Just)) |||
 		(optionalWhitespaceParse >> streamEndParse >> (return Nothing)) |||
 		(unexpectedCharError "input");

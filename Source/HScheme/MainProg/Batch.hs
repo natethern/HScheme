@@ -93,14 +93,11 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		) =>
 	 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
 	 (Object r m -> cm ()) ->
-	 (Object r m -> cm ()) ->
 	 [Object r m] ->
 	 cm ();
-	evaluateObjects mrun outproc failproc objects = catch (
-	 rsRunInterp outproc mrun
+	evaluateObjects mrun outproc objects = rsRunInterp outproc mrun
 	  (interpretTopLevelExpressionsList objects)
-	  (\proc -> interpretTopLevelExpressionsEat proc objects)
-	 ) failproc;
+	  (\proc -> interpretTopLevelExpressionsEat proc objects);
 
 	runObjects ::
 		(
@@ -112,12 +109,11 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
-	 (Object r m -> cm ()) ->
 	 [Object r m] ->
 	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
-	runObjects outproc failproc objects bindings =
-	 evaluateObjects mrun outproc failproc objects where
+	runObjects outproc objects bindings =
+	 evaluateObjects mrun outproc objects where
 		{
 		mrun lm = lm (getBinding bindings);
 		};
@@ -133,12 +129,11 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
-	 (Object r m -> cm ()) ->
 	 [Object r m] ->
 	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
-	runObjectsWithExit outproc failproc objects rootBindings =
-	 evaluateObjects mrun outproc failproc objects where
+	runObjectsWithExit outproc objects rootBindings =
+	 evaluateObjects mrun outproc objects where
 		{
 		mrun lm = callCC (\exitFunc -> do
 			{

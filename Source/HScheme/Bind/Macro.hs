@@ -34,11 +34,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (Macro cm r m) ->
-	 SymbolBindings (Macro cm r m);
+	 MacroBindings cm r m;
 	macroBindings = concatenateList
 		[
 		-- 4.1.2 Literal Expressions
@@ -65,11 +63,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (Macro cm r m) ->
-	 SymbolBindings (Macro cm r m);
+	 MacroBindings cm r m;
 	pureMacroBindings = concatenateList
 		[
 		macroBindings,
@@ -88,11 +84,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (Macro cm r m) ->
-	 SymbolBindings (Macro cm r m);
+	 MacroBindings cm r m;
 	fullMacroBindings = concatenateList
 		[
 		pureMacroBindings,

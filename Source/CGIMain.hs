@@ -1,22 +1,22 @@
 -- This is written in Haskell.
 {--
-SoupServer -- RDF-based information system
+HScheme -- a Scheme interpreter written in Haskell
 Copyright (C) 2002 Ashley Yakeley <ashley@semantic.org>
 
-This file is part of SoupServer.
+This file is part of HScheme.
 
-SoupServer is free software; you can redistribute it and/or modify
+HScheme is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 2 of the License, or
 (at your option) any later version.
 
-SoupServer is distributed in the hope that it will be useful,
+HScheme is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with SoupServer; if not, write to the Free Software
+along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
@@ -26,7 +26,6 @@ module Main where
 	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase.Protocol.CGI;
 	import Org.Org.Semantic.HBase;
-	import System.Exit;
 
 	type CPS r = SchemeCPS r (IO ());
 
@@ -45,24 +44,17 @@ module Main where
 		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
 		};
 
-	reportError ::
+	printError ::
 		(
-		Build IO r,
-		?objType :: Type (Object r m),
+		Show a,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 Object r m -> IO ();
-	reportError obj = do
-		{
-		text <- toString obj;
-		fsSinkList ?stderr (encodeUTF8 ("error: "++text++"\n"));
-		fsFlush ?stderr;
-		exitFailure;
-		};
-
-	printError :: (Show a) =>
 	 a -> IO ();
-	printError a = putStrLn ("Error: "++ (show a)++"");
+	printError a = do
+		{
+		fsSinkList ?stderr (encodeUTF8 ("Error: "++(show a)++"\n"));
+		fsFlush ?stderr;
+		};
 
 	isFull :: QueryParameters -> Bool;
 	isFull params = case findQueryParameter (encodeLatin1 "flavour") params of
@@ -92,7 +84,7 @@ module Main where
 		bindings <- runBindings emptyBindings;
 		initObjects <- readFiles [initfilename];
 		progObjects <- parseAllFromString source;
-		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		runObjects printResult (initObjects ++ progObjects) bindings;
 		});
 
 	main :: IO ();
@@ -108,7 +100,7 @@ module Main where
 		case findQueryParameter (encodeLatin1 "monad") params of
 			{
 			Just [0x63,0x6F,0x6E,0x74] -> 
-			 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = ioRead ["."]} in
 			 if (isFull params)
@@ -119,7 +111,7 @@ module Main where
 			  pureMacroBindings pureTopLevelBindings monadContPureBindings
 			  "init.pure.scm" source;
 			_ -> 
-			 let {?objType = Type::Type (Object IORef IO)} in
+			 let {?objType = MkType::Type (Object IORef IO)} in
 			 let {?binder = setBinder} in
 			 let {?read = ioRead ["."]} in
 			 if (isFull params)

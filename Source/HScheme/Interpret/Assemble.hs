@@ -126,7 +126,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 					{
 					Just (MkSyntax syntax) -> do
 						{
-						obj <- syntax Type arglist;
+						obj <- syntax MkType arglist;
 						assembleExpression obj;
 						};
 					Nothing -> case getBinding ?macrobindings sym of
