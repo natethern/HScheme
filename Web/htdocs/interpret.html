@@ -10,12 +10,12 @@
 <TEXTAREA NAME="input" ROWS="40" COLS="100">
 </TEXTAREA><BR>
 <INPUT TYPE="RADIO" NAME="flavour" VALUE="full" CHECKED> full
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure"> pure functional only
-<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> allow <TT>call-with-result</TT>
-<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> allow <TT>call-with-current-continuation</TT> (slow)
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure"> pure
+<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
+<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
 <INPUT TYPE="RESET" VALUE="Clear">
 <INPUT TYPE="SUBMIT" VALUE="Interpret">
 </FORM>
-
+<P>"Pure" means pure functional only; "continuations" allows <TT>call-with-current-continuation</TT>, but is slower than "direct" and disallows <TT>call-with-result</TT>.</P>
 </BODY>
 </HTML>
