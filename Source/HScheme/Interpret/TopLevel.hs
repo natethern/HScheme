@@ -27,7 +27,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	setBinder,recursiveBinder,
 	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
 	pureDefineT,fullDefineT,
-	beginM,bodyM,bodyListM,
+	beginT,bodyM,bodyListM,
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
@@ -383,7 +383,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		return (MkTopLevelCommand (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
 		};
 
-	beginM ::
+	beginT ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
@@ -394,14 +394,10 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (TopLevelObjectCommand r m);
-	beginM = begin (return nullObject) id (>>);
+	beginT = begin (return nullObject) id (>>);
 
 	newtype TopLevelBinder r m = MkTopLevelBinder
 	 {unTopLevelBinder :: forall a. TopLevelCommand r m (m a) -> SchemeExpression r m (m a)};
-
-	unboundSymbol :: (Monad m) =>
-	 Symbol -> m (Object r m);
-	unboundSymbol sym = return (error ("unbound symbol: " ++ (show sym)));
 
 	setBinder :: (FullScheme m r) =>
 	 TopLevelBinder r m;
@@ -419,7 +415,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		
 		fSubstBindsNewRef [] bodyexpr = bodyexpr;
 		fSubstBindsNewRef ((sym,_):rest) bodyexpr = 
-		 fSubstMap substMap sym (return' (unboundSymbol sym)) (fSubstBindsNewRef rest bodyexpr);
+		 fSubstMap substMap sym (return' (newSymbolBinding sym)) (fSubstBindsNewRef rest bodyexpr);
+
+		newSymbolBinding :: (Monad m) =>
+		 Symbol -> m (Object r m);
+		newSymbolBinding sym = return (error ("uninitialised binding: " ++ (show sym)));
 		};
 
 	recursiveBinder :: (MonadFix m,Scheme m r) =>
@@ -554,17 +554,5 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 {--
 top-level: define, load, define-syntax
 macro: quote, lambda, if, let, let*, syntax-rules, case-match, letrec, begin, set!
-
-
-(let ((a b))
-	(let ((f (lambda (x) (list x a))))
-		(f obj)
-	)
-)
-
-(define f (lambda () a))
-(let ((a 'b))
- (f)
-)
 --}
 	}

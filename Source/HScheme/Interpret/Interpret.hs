@@ -37,7 +37,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 
 	getBadLoc :: Symbol -> ObjLocation r m;
 --	getBadLoc sym = throwArgError "unbound-symbol" ([SymbolObject sym]);
-	getBadLoc sym = error ("unbound-symbol" ++ (show sym));
+	getBadLoc sym = error ("unbound-symbol: " ++ (show sym));
 
 	getLoc ::
 		(

@@ -1,16 +1,16 @@
 (let
 	((q 4))
-	(begin-list
+	(body-list
 		(set! q 7)
 		q
 	)
 )
 
 (define a 3)
-;(define b a)
-;(define bf (lambda () a))
+(define b a)
+(define bf (lambda () a))
 (set! a 5)
 a
 a
-;b
-;(bf)
+b
+(bf)

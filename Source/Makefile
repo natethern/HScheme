@@ -181,6 +181,7 @@ test-pure: \
  test/bindingbody.scm.pure.diff \
  test/binding.scm.pure.diff \
  test/boundlate.scm.pure.diff \
+ test/begin.scm.pure.diff \
  test/factorial.scm.pure.diff
 
 #	time ./$< test/helloworld.scm
@@ -198,6 +199,7 @@ test-full: \
  test/binding.scm.full.diff \
  test/setvar.scm.full.diff \
  test/boundlate.scm.full.diff \
+ test/begin.scm.full.diff \
  test/factorial.scm.full.diff
 
 test_p: bin/$(COMMAND_PROF)
@@ -513,9 +515,6 @@ Org/Org/Semantic/HScheme/Interpret/Evaluate.o Org/Org/Semantic/HScheme/Interpret
 Org/Org/Semantic/HScheme/Interpret/Evaluate.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Evaluate.o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Evaluate.q_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi

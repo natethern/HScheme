@@ -40,7 +40,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 	loadCommand filename = do
 		{
 		readObjects <- ?load filename;
-		beginM readObjects;
+		beginT readObjects;
 		};
 
 	loadT ::

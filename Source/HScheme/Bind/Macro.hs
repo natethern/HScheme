@@ -72,11 +72,12 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 	 SymbolBindings (Macro cm r m);
 	pureMacroBindings = concatenateList
 		[
-		macroBindings
+		macroBindings,
 
 		-- 4.2.3 Sequencing
---		,addMacroBinding	"begin"					beginM
---		,addMacroBinding	"begin-list"			beginListM
+		addMacroBinding	"begin"				bodyM,
+		addMacroBinding	"body"				bodyM,
+		addMacroBinding	"body-list"			bodyListM
 		];
 
 	fullMacroBindings ::

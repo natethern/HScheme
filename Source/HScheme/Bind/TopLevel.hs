@@ -40,10 +40,7 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 	commonTopLevelBindings = concatenateList
 		[
 		-- 4.2.3 Sequencing
-		addTopLevelMacroBinding	"begin"					beginM,
-
-		-- 4.3.2 Pattern Language
---		addSyntaxMakerMacroBinding	"syntax-rules"			syntaxRulesM,
+		addTopLevelMacroBinding	"begin"				beginT,
 
 		-- 5.3 Syntax Definitions
 		addTopLevelMacroBinding	"define-syntax"		defineSyntaxT
