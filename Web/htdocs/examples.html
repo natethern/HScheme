@@ -23,6 +23,7 @@
 <INPUT TYPE="SUBMIT" VALUE="Interpret">
 </FORM>
 <H2>Fixed Point</H2>
+<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
 <TEXTAREA NAME="input" ROWS="7" COLS="80">
 (define hello-goodbye-etc (lambda (x) `(hello goodbye . ,x) ))
 (hello-goodbye-etc '(a b c))
