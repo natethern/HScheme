@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module SExpChars where
 	{
-	import Unicode;
+	import HBase;
 
 {--
 ASCII: 2^7 = 128

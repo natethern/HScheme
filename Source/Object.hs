@@ -24,9 +24,7 @@ module Object where
 	{
 	import Port;
 	import Numerics;
-	import MonadCont;
-	import MonadError;
-	import Subtype;
+	import HBase;
 	
 	class Location m r where
 		{
@@ -73,7 +71,7 @@ module Object where
 	
 	type ObjLocation r m = r (Object r m);
 
-	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ord, Eq);
+	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ordered,Eq);
 
 	instance Show Symbol where
 		{

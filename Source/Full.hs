@@ -23,8 +23,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Full where
 	{
 	import Object;
-	import MoreRef;
-	import Ref;
+--	import MoreRef;
+	import MonadReference;
 
 	instance
 		(

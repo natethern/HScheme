@@ -24,8 +24,7 @@ module Bindings where
 	{
 	import Conversions;
 	import Object;
-	import Subtype;
-	import Type;
+	import HBase;
 
 	addBinding ::
 		(

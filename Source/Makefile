@@ -23,22 +23,14 @@ GHC = ghc  -package lang  $*
 HC				= ghc
 HCI				= ghci
 HCPACKAGES		= -package data
-HCIMPORTDIRS	= -i. -iCommon
-HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances
+HCIMPORTDIRS	= -i. -i../../HBase/Source/Basic/ -i../../HBase/Source/Category/ -i../../HBase/Source/Mathematics/ -i../../HBase/Source/Text/ -i../../HBase/Source/Imperative/ -i../../HBase/Source/Interface/
+HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
+#HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
 LDH				= $(HC) -pgml$(CC) $(HCPACKAGES)
 LDFLAGS			=
 
 HC_SRCS			= \
-	Common/Type.hs	\
-	Common/Subtype.hs	\
-	Common/LiftedMonad.hs	\
-	Common/Ref.hs	\
-	Common/MoreRef.hs	\
-	ContinuationPassing.hs	\
-	UnicodeDefs.hs	\
-	UnicodeData.hs	\
-	Unicode.hs	\
 	Numerics.hs	\
 	Port.hs	\
 	InputPortParser.hs	\
@@ -76,13 +68,13 @@ OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
 default: build
 
 clean:
-	rm -f hscheme UnicodeData.hs UnicodeData.m4 UnicodeData-3.1.0.txt UnicodePropList.m4 PropList-3.1.0.txt Makefile.bak
-	rm -f *.hi *.o Common/*.hi Common/*.o
+	rm -f hscheme Makefile.bak
+	rm -f *.hi *.o
 
 build: hscheme
 
-hscheme: $(OBJS)
-	$(LDH) $(filter %.o,$^) $(LDFLAGS) -o $@
+hscheme: $(OBJS) ../../HBase/Source/libHBase.a
+	$(LDH) $(filter %.o,$^) ../../HBase/Source/libHBase.a $(LDFLAGS) -o $@
 
 test: hscheme
 	./$<
@@ -90,23 +82,6 @@ test: hscheme
 # Standard suffix rules
 
 .SUFFIXES: .o .hs .hi .lhs .hc .s
-
-UnicodeData.hs: UnicodeData.hs.m4 UnicodeData.m4 UnicodePropList.m4
-	m4 -DDATAFILE="UnicodeData.m4" -DPROPFILE="UnicodePropList.m4" $< > $@
-
-UnicodeData.m4: UnicodeData-3.1.0.txt
-	sed -e 's/;/'\'',`/g; s/^/uchar(`/; s/$$/'\'')dnl/' $< > $@
-
-UnicodeData-3.1.0.txt:
-	rm -f $@
-	wget http://www.unicode.org/Public/3.1-Update/$@
-
-UnicodePropList.m4: PropList-3.1.0.txt
-	sed -e 's/#.*$$//;s/^ *\([.0-9A-F]*\) *; *\([0-9A-Za-z_]*\)/charprop(\2,\1)/;s/\.\./,/;/^$$/ d' $<	> $@
-
-PropList-3.1.0.txt:
-	rm -f $@
-	wget http://www.unicode.org/Public/3.1-Update/$@
 
 %.int:
 	$(HCI) $(HCOPTS) -package lang -i../../JVM-Bridge/Current/source/Haskell $(HCIMPORTDIRS) $*
@@ -123,47 +98,32 @@ PropList-3.1.0.txt:
 depend: $(HC_SRCS)
 	$(HC) -M $(HCFLAGS) $^
 # DO NOT DELETE: Beginning of Haskell dependencies
-Common/Type.o : Common/Type.hs
-Common/Subtype.o : Common/Subtype.hs
-Common/Subtype.o : Common/Type.hi
-Common/LiftedMonad.o : Common/LiftedMonad.hs
-Common/Ref.o : Common/Ref.hs
-Common/MoreRef.o : Common/MoreRef.hs
-Common/MoreRef.o : Common/LiftedMonad.hi
-Common/MoreRef.o : Common/Ref.hi
-ContinuationPassing.o : ContinuationPassing.hs
-ContinuationPassing.o : Common/LiftedMonad.hi
-UnicodeDefs.o : UnicodeDefs.hs
-UnicodeData.o : UnicodeData.hs
-UnicodeData.o : UnicodeDefs.hi
-Unicode.o : Unicode.hs
-Unicode.o : UnicodeDefs.hi
-Unicode.o : UnicodeData.hi
 Numerics.o : Numerics.hs
+Numerics.o : ../../HBase/Source/Interface//HBase.hi
 Port.o : Port.hs
+Port.o : ../../HBase/Source/Interface//HBase.hi
 InputPortParser.o : InputPortParser.hs
-InputPortParser.o : Common/LiftedMonad.hi
+InputPortParser.o : ../../HBase/Source/Interface//HBase.hi
 InputPortParser.o : Port.hi
 Object.o : Object.hs
-Object.o : Common/Subtype.hi
+Object.o : ../../HBase/Source/Interface//HBase.hi
 Object.o : Numerics.hi
 Object.o : Port.hi
 Conversions.o : Conversions.hs
-Conversions.o : Common/Type.hi
-Conversions.o : Common/Subtype.hi
+Conversions.o : ../../HBase/Source/Interface//HBase.hi
 Conversions.o : Numerics.hi
 Conversions.o : Port.hi
 Conversions.o : Object.hi
 Evaluate.o : Evaluate.hs
-Evaluate.o : Common/Type.hi
+Evaluate.o : ../../HBase/Source/Interface//HBase.hi
 Evaluate.o : Object.hi
 TopLevel.o : TopLevel.hs
-TopLevel.o : Common/Type.hi
+TopLevel.o : ../../HBase/Source/Interface//HBase.hi
 TopLevel.o : Object.hi
 TopLevel.o : Conversions.hi
 TopLevel.o : Evaluate.hi
 SystemInterface.o : SystemInterface.hs
-SystemInterface.o : Common/Type.hi
+SystemInterface.o : ../../HBase/Source/Interface//HBase.hi
 SystemInterface.o : Port.hi
 SystemInterface.o : Object.hi
 SystemInterface.o : Conversions.hi
@@ -172,35 +132,30 @@ SystemInterface.o : Procedures.hi
 SystemInterface.o : TopLevel.hi
 SystemInterface.o : Bindings.hi
 Procedures.o : Procedures.hs
-Procedures.o : Common/Type.hi
-Procedures.o : Common/Subtype.hi
+Procedures.o : ../../HBase/Source/Interface//HBase.hi
 Procedures.o : Object.hi
 Procedures.o : Conversions.hi
 Procedures.o : Evaluate.hi
 Lambda.o : Lambda.hs
-Lambda.o : Common/Type.hi
-Lambda.o : Common/Subtype.hi
+Lambda.o : ../../HBase/Source/Interface//HBase.hi
 Lambda.o : Object.hi
 Lambda.o : Conversions.hi
 Lambda.o : Procedures.hi
 Lambda.o : Evaluate.hi
 Lambda.o : TopLevel.hi
 PortProcedures.o : PortProcedures.hs
-PortProcedures.o : Common/Type.hi
+PortProcedures.o : ../../HBase/Source/Interface//HBase.hi
 PortProcedures.o : Port.hi
 PortProcedures.o : Object.hi
 PortProcedures.o : Conversions.hi
 Equality.o : Equality.hs
-Equality.o : Common/Type.hi
+Equality.o : ../../HBase/Source/Interface//HBase.hi
 Equality.o : Numerics.hi
 Equality.o : Object.hi
 SExpChars.o : SExpChars.hs
-SExpChars.o : Unicode.hi
+SExpChars.o : ../../HBase/Source/Interface//HBase.hi
 SExpParser.o : SExpParser.hs
-SExpParser.o : Common/Type.hi
-SExpParser.o : Common/Subtype.hi
-SExpParser.o : Common/LiftedMonad.hi
-SExpParser.o : Unicode.hi
+SExpParser.o : ../../HBase/Source/Interface//HBase.hi
 SExpParser.o : SExpChars.hi
 SExpParser.o : InputPortParser.hi
 SExpParser.o : Port.hi
@@ -209,17 +164,15 @@ SExpParser.o : Conversions.hi
 SExpParser.o : Procedures.hi
 SExpParser.o : PortProcedures.hi
 Syntax.o : Syntax.hs
-Syntax.o : Common/Type.hi
-Syntax.o : Common/Subtype.hi
+Syntax.o : ../../HBase/Source/Interface//HBase.hi
 Syntax.o : Object.hi
 Syntax.o : Conversions.hi
 Bindings.o : Bindings.hs
-Bindings.o : Common/Type.hi
-Bindings.o : Common/Subtype.hi
+Bindings.o : ../../HBase/Source/Interface//HBase.hi
 Bindings.o : Object.hi
 Bindings.o : Conversions.hi
 NumericProcedures.o : NumericProcedures.hs
-NumericProcedures.o : Common/Type.hi
+NumericProcedures.o : ../../HBase/Source/Interface//HBase.hi
 NumericProcedures.o : Numerics.hi
 NumericProcedures.o : Object.hi
 NumericProcedures.o : Conversions.hi
@@ -230,7 +183,7 @@ StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
 StandardBindings.o : TopLevel.hi
 StandardBindings.o : Procedures.hi
-StandardBindings.o : NumericProcedures.hi
+StandardBindings.o : ./NumericProcedures.hi
 StandardBindings.o : Equality.hi
 StandardBindings.o : Lambda.hi
 StandardBindings.o : PortProcedures.hi
@@ -238,57 +191,53 @@ StandardBindings.o : ./Syntax.hi
 FMapBindings.o : FMapBindings.hs
 FMapBindings.o : Object.hi
 FullProcedures.o : FullProcedures.hs
-FullProcedures.o : Common/Type.hi
+FullProcedures.o : ../../HBase/Source/Basic//Type.hi
 FullProcedures.o : Object.hi
 FullProcedures.o : Conversions.hi
 FullProcedures.o : Evaluate.hi
 FullStandardBindings.o : FullStandardBindings.hs
 FullStandardBindings.o : Object.hi
 FullStandardBindings.o : Bindings.hi
-FullStandardBindings.o : StandardBindings.hi
-FullStandardBindings.o : FullProcedures.hi
+FullStandardBindings.o : ./StandardBindings.hi
+FullStandardBindings.o : ./FullProcedures.hi
 FullStandardBindings.o : Equality.hi
 IOBindings.o : IOBindings.hs
-IOBindings.o : Common/Type.hi
-IOBindings.o : Common/LiftedMonad.hi
+IOBindings.o : ../../HBase/Source/Basic//Type.hi
+IOBindings.o : ../../HBase/Source/Category//LiftedMonad.hi
 IOBindings.o : Port.hi
 IOBindings.o : Object.hi
 IOBindings.o : SystemInterface.hi
 SchemeCPS.o : SchemeCPS.hs
-SchemeCPS.o : Common/Subtype.hi
-SchemeCPS.o : Common/LiftedMonad.hi
-SchemeCPS.o : Common/Ref.hi
-SchemeCPS.o : Common/MoreRef.hi
+SchemeCPS.o : ../../HBase/Source/Interface//HBase.hi
 SchemeCPS.o : Object.hi
-SchemeCPS.o : ContinuationPassing.hi
+SchemeCPS.o : ../../HBase/Source/Category//ContinuationPassing.hi
 SchemeCPS.o : Conversions.hi
 Pure.o : Pure.hs
 Pure.o : Object.hi
 Full.o : Full.hs
-Full.o : Common/Ref.hi
-Full.o : Common/MoreRef.hi
+Full.o : ../../HBase/Source/Category//MonadReference.hi
 Full.o : Object.hi
 Interactive.o : Interactive.hs
-Interactive.o : Common/Type.hi
-Interactive.o : Common/Subtype.hi
+Interactive.o : ../../HBase/Source/Basic//Type.hi
+Interactive.o : ../../HBase/Source/Basic//Subtype.hi
 Interactive.o : Port.hi
 Interactive.o : InputPortParser.hi
 Interactive.o : Object.hi
 Interactive.o : Conversions.hi
 Interactive.o : Procedures.hi
 Interactive.o : Bindings.hi
-Interactive.o : StandardBindings.hi
+Interactive.o : ./StandardBindings.hi
 Interactive.o : SExpParser.hi
-Interactive.o : FullStandardBindings.hi
-Interactive.o : FMapBindings.hi
+Interactive.o : ./FullStandardBindings.hi
+Interactive.o : ./FMapBindings.hi
 Interactive.o : SystemInterface.hi
 InteractiveMain.o : InteractiveMain.hs
-InteractiveMain.o : Common/Type.hi
-InteractiveMain.o : Pure.hi
-InteractiveMain.o : Full.hi
+InteractiveMain.o : ../../HBase/Source/Basic//Type.hi
+InteractiveMain.o : ./Pure.hi
+InteractiveMain.o : ./Full.hi
 InteractiveMain.o : SchemeCPS.hi
-InteractiveMain.o : ContinuationPassing.hi
-InteractiveMain.o : Interactive.hi
+InteractiveMain.o : ../../HBase/Source/Category//ContinuationPassing.hi
+InteractiveMain.o : ./Interactive.hi
 InteractiveMain.o : SystemInterface.hi
-InteractiveMain.o : IOBindings.hi
+InteractiveMain.o : ./IOBindings.hi
 # DO NOT DELETE: End of Haskell dependencies

@@ -33,6 +33,7 @@ module StandardBindings where
 	import Bindings;
 	import Object;
 	import Numerics;
+	import HBase;
 
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
@@ -62,10 +63,16 @@ module StandardBindings where
 		addProcBinding	"equal?"				equalP,
 		
 		-- 6.2.5 Numerical Operations
+		addProcBinding	"number?"				isNumberP,
+		addProcBinding	"exact?"				isExactP,
+		addProcBinding	"inexact?"				isInexactP,
+		addProcBinding	"zero?"					isZeroP,
 		addProcBinding	"+"						(foldingLP (+) 0),
 		addProcBinding	"-"						subtractP,
 		addProcBinding	"*"						(foldingLP (*) 1),
-		addProcBinding	"/"						divideP,
+--		addProcBinding	"/"						divideP,
+		addProcBinding	"real-part"				realPartP,
+		addProcBinding	"imag-part"				imagPartP,
 
 		-- 6.3.1 Booleans
 		addProcBinding	"not"					notP,

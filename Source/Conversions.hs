@@ -25,9 +25,8 @@ module Conversions where
 	import Object;
 	import Port;
 	import Numerics;
-	import Subtype;
-	import Type;
-	
+	import HBase;
+
 	class (Scheme x m r) => ArgumentList x m r a where
 		{
 		convertFromObjects :: [Object r m] -> m a;

@@ -33,10 +33,7 @@ module Interactive where
 	import Object;
 	import InputPortParser;
 	import Port;
-	import Subtype;
-	import Type;
-	import MonadError;
-	import MonadCont;
+	import HBase;
 
 	reportError :: (Scheme x m r) =>
 	 Type (r ()) -> OutputPort Char m -> x -> m ();

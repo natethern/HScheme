@@ -25,7 +25,7 @@ module FullProcedures where
 	import Evaluate;
 	import Conversions;
 	import Object;
-	import Type;
+	import HBase;
 
 	-- 4.1.6 Assignments
 	setBang ::

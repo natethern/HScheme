@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module InputPortParser where
 	{
 	import Port;
-	import LiftedMonad;
+	import HBase;
 	
 	data Parser c m a = MkParser {unParser :: InputPort c m -> m a};
 	

@@ -24,7 +24,7 @@ module Equality where
 	{
 	import Object;
 	import Numerics;
-	import Type;
+	import HBase;
 	
 	-- 6.1 Equivalence Predicates
 	sameList	:: (Scheme x m r) => 

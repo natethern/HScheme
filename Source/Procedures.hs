@@ -25,8 +25,7 @@ module Procedures where
 	import Evaluate;
 	import Conversions;
 	import Object;
-	import Subtype;
-	import Type;
+	import HBase;
 
 	-- 4.1.2 Literal Expressions
 	quote :: (Scheme x m r) =>
@@ -86,7 +85,7 @@ module Procedures where
 
 	appendP ::  (Scheme x m r) =>
 	 Type (r ()) -> [[Object r m]] -> m [Object r m];
-	appendP Type listlist = return (concat listlist);
+	appendP Type listlist = return (concatenateList listlist);
 	
 	-- 6.4 Control Features
 	applyP :: (Scheme x m r,?bindings :: Bindings r m) =>
@@ -163,8 +162,8 @@ module Procedures where
 	
 	hexDigit n = hd (mod n 16) where
 		{
-		hd i | i < 10 = toEnum ((fromEnum '0') + i);
-		hd i = toEnum ((fromEnum 'A') + i - 10);
+		hd i | i < 10 = succNWrap i '0';
+		hd i = succNWrap (i-10) 'A';
 		};
 
 	hexCode4 i =
@@ -174,8 +173,8 @@ module Procedures where
 	 [hexDigit i];
 
 	charToString :: Char -> String;
-	charToString c | (fromEnum c) < 32 = "#\\u"++(hexCode4 (fromEnum c));
-	charToString c | (fromEnum c) > 127 = "#\\u"++(hexCode4 (fromEnum c));
+	charToString c | (valueNthFromStart c) < 32 = "#\\u"++(hexCode4 (valueNthFromStart c));
+	charToString c | (valueNthFromStart c) > 127 = "#\\u"++(hexCode4 (valueNthFromStart c));
 	charToString c = "#\\"++[c];
 	
 	escapeChar :: Char -> String;

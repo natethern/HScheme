@@ -23,17 +23,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module FMapBindings where
 	{
 	import Object;
-	import FiniteMap;
+	import HBase;
 
 	emptyBindings :: (Scheme x m r) => Bindings r m;
-	emptyBindings = toBindings emptyFM where
+	emptyBindings = toBindings empty where
 		{
 		toBindings :: (Scheme x m r) =>
 		 FiniteMap Symbol (ObjLocation r m) -> Bindings r m;
 		toBindings map = MkBindings
 			{
-			getBinding = lookupFM map,
-			newBinding = \sym loc -> toBindings (addToFM map sym loc)
+			getBinding = \sym -> lookup sym map,
+			newBinding = \sym loc -> toBindings (addMapEntry (sym,loc) map)
 			};
 		};
 	}

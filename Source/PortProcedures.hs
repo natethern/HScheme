@@ -25,7 +25,7 @@ module PortProcedures where
 	import Conversions;
 	import Object;
 	import Port;
-	import Type;
+	import HBase;
 
 	-- 6.6.1 Ports
 	isInputPortP :: (Scheme x m r) =>

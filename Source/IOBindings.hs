@@ -25,8 +25,7 @@ module IOBindings where
 	import SystemInterface;
 	import Object;
 	import Port;
-	import LiftedMonad;
-	import Type;
+	import HBase;
 	import IO;
 
 	handleInputPort :: (SemiLiftedMonad IO m) => Handle -> InputPort Char m;

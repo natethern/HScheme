@@ -29,7 +29,7 @@ module TopLevel
 	import Evaluate;
 	import Conversions;
 	import Object;
-	import Type;
+	import HBase;
 	
 	-- 5.2 Definitions
 	defineT ::
@@ -53,7 +53,7 @@ module TopLevel
 							NilObject -> do
 								{
 								th <- getLocation thead;
-								result <- let {?bindings=bindings} in evaluate th;
+								result <- evaluate th with {?bindings=bindings};
 								loc <- newLocation result;
 								return (newBinding bindings name loc,MkArgNoneType);
 								};
@@ -80,7 +80,7 @@ module TopLevel
 		};
 	topLevelApplyEval bindings obj arglist = do
 		{
-		result <- let {?bindings=bindings} in applyEval obj arglist;
+		result <- applyEval obj arglist with {?bindings=bindings;};
 		return (bindings,result);
 		};
 
@@ -103,7 +103,7 @@ module TopLevel
 				};
 			_ -> do
 				{
-				r <- let {?bindings=bindings} in evaluate a;
+				r <- evaluate a with {?bindings = bindings};
 				return (bindings,r);
 				};
 			};

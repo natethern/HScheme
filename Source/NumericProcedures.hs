@@ -25,7 +25,34 @@ module NumericProcedures where
 	import Conversions;
 	import Object;
 	import Numerics;
-	import Type;
+	import HBase;
+
+	isNumberP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isNumberP Type (NumberObject _,()) = return True;
+	isNumberP Type (_,()) = return False;
+
+	isExactP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isExactP Type (NumberObject n,()) = return (isExactN n);
+	isExactP Type (_,()) = return False;
+
+	isInexactP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isInexactP Type (NumberObject n,()) = return (not (isExactN n));
+	isInexactP Type (_,()) = return False;
+
+	realPartP :: (Scheme x m r) =>
+	 Type (r ()) -> (Number,()) -> m Number;
+	realPartP Type (n,()) = return ((realPart n) :+ 0);
+
+	imagPartP :: (Scheme x m r) =>
+	 Type (r ()) -> (Number,()) -> m Number;
+	imagPartP Type (n,()) = return ((imagPart n) :+ 0);
+
+	isZeroP :: (Scheme x m r) =>
+	 Type (r ()) -> (Number,()) -> m Bool;
+	isZeroP Type (n,()) = return (n == 0);
 
 	unaryP :: (Scheme x m r) =>
 	 (Number -> Number) ->
@@ -38,9 +65,9 @@ module NumericProcedures where
 	binaryP op Type (a,(b,())) = return (op a b);
 
 	foldingLP :: (Scheme x m r) =>
-	 (Number -> Number -> Number) ->
-	 Number ->
-	 Type (r ()) -> [Number] -> m Number;
+	 (a -> Number -> a) ->
+	 a ->
+	 Type (r ()) -> [Number] -> m a;
 	foldingLP op a Type ns = return (foldl op a ns);
 
 	inverterFoldingLP :: (Scheme x m r) =>
@@ -53,8 +80,8 @@ module NumericProcedures where
 	subtractP :: (Scheme x m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
 	subtractP = inverterFoldingLP (-) 0;
-	
+{--	
 	divideP :: (Scheme x m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
 	divideP = inverterFoldingLP (/) 1;
-	}
+--}	}

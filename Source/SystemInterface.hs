@@ -29,7 +29,7 @@ module SystemInterface where
 	import Conversions;
 	import Object;
 	import Port;
-	import Type;
+	import HBase;
 
 	data PureSystemInterface m r = MkPureSystemInterface
 		{

@@ -30,6 +30,7 @@ module Main where
 	import Full;
 	import Pure;
 	import Type;
+	import HBase;
 	import IORef;
 	
 	type M = SchemeCPS IORef (IO ());

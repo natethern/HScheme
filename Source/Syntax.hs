@@ -22,11 +22,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Syntax where
 	{
---	import Evaluate;
 	import Conversions;
 	import Object;
-	import Subtype;
-	import Type;
+	import HBase;
 
 	substitute :: (Scheme x m r) =>
 	 [(Symbol,Object r m)] -> Object r m -> m (Object r m);
@@ -82,7 +80,7 @@ module Syntax where
 		};
 	matchBinding literals (PairObject _ _) _ = return Nothing;
 	matchBinding literals (SymbolObject name) args =
-	 if elem name literals
+	 if hasElement name literals
 	 then case args of
 	 	{
 	 	SymbolObject name' | name == name' -> return (Just []);
@@ -114,7 +112,7 @@ module Syntax where
 			};
 		};
 	matchBindings literals (SymbolObject name) args =
-	 if elem name literals
+	 if hasElement name literals
 	 then return Nothing
 	 else do
 		{

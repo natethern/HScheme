@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Port where
 	{
+	import HBase;
+
 	data (Monad m) => InputPort c m = MkInputPort
 		{
 		ipRead	:: m (Maybe c),

@@ -29,10 +29,7 @@ module SExpParser where
 	import Port;
 	import InputPortParser;
 	import SExpChars;
-	import Unicode;
-	import LiftedMonad;
-	import Subtype;
-	import Type;
+	import HBase;
 
 	type TextParser = Parser Char;
 

@@ -27,9 +27,7 @@ module Lambda where
 	import Procedures;
 	import Conversions;
 	import Object;
-	import Subtype;
-	import Type;
-	import MonadCont;
+	import HBase;
 
 	-- 4.2.3 Sequencing
 	begin ::

@@ -25,11 +25,7 @@ module SchemeCPS where
 	import Conversions;
 	import ContinuationPassing;
 	import Object;
-	import MoreRef;
-	import Ref;
-	import LiftedMonad;
-	import Subtype;
-	import MonadError;
+	import HBase;
 
 	type SchemeCPS r p = CPS (SchemeCPSError r p) p;
 

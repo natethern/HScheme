@@ -59,6 +59,17 @@
 	((or first . rest) (if first #t (or . rest)))
 ))
 
+; 6.2.5 Numerical Operations
+(define complex? number?)
+
+(define real? (lambda (n)
+	(and (complex? n) (zero? (imag-part n)))
+))
+
+(define rational? (lambda (n)
+	(and (real? n) (exact? n))
+))
+
 ; 6.4 Control Features
 (define call-with-values (lambda (producer consumer)
 	(apply consumer (values->list (producer)))
