@@ -29,7 +29,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	-- 4.1.2 Literal Expressions
 	quoteM :: (Build cm r,Monad m,?objType :: Type (Object r m)) =>
 	 (Object r m,()) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	quoteM (q,()) = return (return' (return q));
 
 	liftF3 :: (FunctorApply f) =>
@@ -42,11 +42,11 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		(
 		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Object r m,(Object r m,Maybe (Object r m))) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	ifM (condObj,(thenObj,mElseObj)) = do
 		{
 		condExpr <- assembleExpression condObj;
@@ -71,10 +71,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		(
 		Build cm r,
 		FullScheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (SchemeExpression r m (m (Object r m)));
+	 (Symbol,(Object r m,())) -> cm (ObjectSchemeExpression r m);
 	setBangM (sym,(obj,())) = do
 		{
 		expr <- assembleExpression obj;

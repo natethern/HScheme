@@ -69,11 +69,13 @@ LIB_HC_SRCS			= \
 	$(HIER)/Core/Numerics.hs	\
 	$(HIER)/Core/Port.hs	\
 	$(HIER)/Core/Build.hs	\
+	$(HIER)/Core/Symbol.hs	\
+	$(HIER)/Core/Binding.hs	\
 	$(HIER)/Core/Object.hs	\
+	$(HIER)/Core/Scheme.hs	\
 	$(HIER)/Core/Conversions.hs	\
 	$(HIER)/Core/Throw.hs	\
 	$(HIER)/Core/Stream.hs	\
-	$(HIER)/Core/System.hs	\
 	$(HIER)/Core.hs	\
 	\
 	$(HIER)/Interpret/FunctorLambda.hs	\
@@ -313,6 +315,8 @@ $(HROOT):
 Org/Org/Semantic/HScheme/Core/Numerics.o Org/Org/Semantic/HScheme/Core/Numerics.p_o : Org/Org/Semantic/HScheme/Core/Numerics.hs
 Org/Org/Semantic/HScheme/Core/Port.o Org/Org/Semantic/HScheme/Core/Port.p_o : Org/Org/Semantic/HScheme/Core/Port.hs
 Org/Org/Semantic/HScheme/Core/Build.o Org/Org/Semantic/HScheme/Core/Build.p_o : Org/Org/Semantic/HScheme/Core/Build.hs
+Org/Org/Semantic/HScheme/Core/Symbol.o Org/Org/Semantic/HScheme/Core/Symbol.p_o : Org/Org/Semantic/HScheme/Core/Symbol.hs
+Org/Org/Semantic/HScheme/Core/Binding.o Org/Org/Semantic/HScheme/Core/Binding.p_o : Org/Org/Semantic/HScheme/Core/Binding.hs
 Org/Org/Semantic/HScheme/Core/Object.o Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Object.hs
 Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
@@ -320,6 +324,15 @@ Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Port.hi
 Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
 Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Symbol.p_hi
+Org/Org/Semantic/HScheme/Core/Object.o : Org/Org/Semantic/HScheme/Core/Binding.hi
+Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Binding.p_hi
+Org/Org/Semantic/HScheme/Core/Scheme.o Org/Org/Semantic/HScheme/Core/Scheme.p_o : Org/Org/Semantic/HScheme/Core/Scheme.hs
+Org/Org/Semantic/HScheme/Core/Scheme.o : Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Scheme.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Scheme.o : Org/Org/Semantic/HScheme/Core/Object.hi
+Org/Org/Semantic/HScheme/Core/Scheme.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Conversions.hs
 Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
@@ -327,11 +340,15 @@ Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Port
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o : Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Throw.o Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Throw.hs
 Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Throw.o : Org/Org/Semantic/HScheme/Core/Conversions.hi
@@ -343,9 +360,8 @@ Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Throw.hi
 Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Throw.p_hi
-Org/Org/Semantic/HScheme/Core/System.o Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/System.hs
-Org/Org/Semantic/HScheme/Core/System.o : Org/Org/Semantic/HScheme/Core/Port.hi
-Org/Org/Semantic/HScheme/Core/System.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
+Org/Org/Semantic/HScheme/Core/Stream.o : Org/Org/Semantic/HScheme/Core/Scheme.hi
+Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Scheme.p_hi
 Org/Org/Semantic/HScheme/Core.o Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core.hs
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Numerics.p_hi
@@ -353,16 +369,20 @@ Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Port.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Port.p_hi
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Build.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Symbol.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Binding.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Binding.p_hi
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Scheme.hi
+Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Scheme.p_hi
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Conversions.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Conversions.p_hi
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Throw.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Throw.p_hi
 Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/Stream.hi
 Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/Stream.p_hi
-Org/Org/Semantic/HScheme/Core.o : Org/Org/Semantic/HScheme/Core/System.hi
-Org/Org/Semantic/HScheme/Core.p_o : Org/Org/Semantic/HScheme/Core/System.p_hi
 Org/Org/Semantic/HScheme/Interpret/FunctorLambda.o Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hs
 Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hs
 Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o : Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
@@ -509,6 +529,8 @@ Org/Org/Semantic/HScheme/Bind/TopLevel.p_o : Org/Org/Semantic/HScheme/Bind/Add.p
 Org/Org/Semantic/HScheme/Bind/Run.o Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Bind/Run.hs
 Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
 Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/Parse.hi
 Org/Org/Semantic/HScheme/Bind/Run.p_o : Org/Org/Semantic/HScheme/Parse.p_hi
 Org/Org/Semantic/HScheme/Bind/Run.o : Org/Org/Semantic/HScheme/RunLib.hi

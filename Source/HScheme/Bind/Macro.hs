@@ -32,11 +32,11 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro cm r m) ->
-	 Binds Symbol (Macro cm r m);
+	 SymbolBindings (Macro cm r m) ->
+	 SymbolBindings (Macro cm r m);
 	macroBindings = concatenateList
 		[
 		-- 4.1.2 Literal Expressions
@@ -52,17 +52,20 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		addMacroBinding	"let"					letSeparateM,
 		addMacroBinding	"let*"					letSequentialM,
 		addMacroBinding	"letrec"				letRecursiveM
+
+		-- Misc
+--		,addMacroBinding	"case-match"					caseMatchM								-- nonstandard
 		];
 
 	pureMacroBindings ::
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro cm r m) ->
-	 Binds Symbol (Macro cm r m);
+	 SymbolBindings (Macro cm r m) ->
+	 SymbolBindings (Macro cm r m);
 	pureMacroBindings = concatenateList
 		[
 		macroBindings
@@ -76,11 +79,11 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		(
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (Macro cm r m) ->
-	 Binds Symbol (Macro cm r m);
+	 SymbolBindings (Macro cm r m) ->
+	 SymbolBindings (Macro cm r m);
 	fullMacroBindings = concatenateList
 		[
 		pureMacroBindings,

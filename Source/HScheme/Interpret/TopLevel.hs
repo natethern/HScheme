@@ -125,7 +125,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		Scheme m r
 		) =>
 	 Object r m ->
-	 SchemeExpression r m (m (Object r m)) ->
+	 ObjectSchemeExpression r m ->
 	 cm (SchemeExpression r m ([Object r m] -> m (Object r m)));
 	makeLambda params expr = do
 		{
@@ -134,7 +134,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		};
 
 	convertToLocationExpression :: (Scheme m r) =>
-	 SchemeExpression r m (m (Object r m)) ->
+	 ObjectSchemeExpression r m ->
 	 SchemeExpression r m (m (ObjLocation r m));
 	convertToLocationExpression = fmap (\mvalue -> (do
 	 	{
@@ -143,22 +143,22 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 	}));
 
 	convertToLocationBinding :: (Scheme m r) =>
-	 (Symbol,SchemeExpression r m (m (Object r m))) ->
+	 (Symbol,ObjectSchemeExpression r m) ->
 	 (Symbol,SchemeExpression r m (m (ObjLocation r m)));
 	convertToLocationBinding (sym,valueExpr) = (sym,convertToLocationExpression valueExpr);
 
 	data TopLevelCommand cm r m a = MkTopLevelExpression
 		{
 		tleExpression :: SchemeExpression r m a,
-		tleInitialBindings :: [(Symbol,SchemeExpression r m (m (Object r m)))],
+		tleInitialBindings :: [(Symbol,ObjectSchemeExpression r m)],
 		tleSyntaxes :: [(Symbol,Syntax cm r m)]
 		};
 
 	type TopLevelObjectCommand cm r m = TopLevelCommand cm r m (m (Object r m));
 
 	newtype TopLevelMacro cm r m = MkTopLevelMacro ((
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] -> cm (TopLevelObjectCommand cm r m));
 
@@ -166,12 +166,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Object r m,[Object r m]) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	lambdaM (params,bodyObj) = do
 		{
 		body <- bodyM bodyObj;
@@ -183,11 +183,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [(Symbol,(Object r m,()))] ->
-	 cm [(Symbol,SchemeExpression r m (m (Object r m)))];
+	 cm [(Symbol,ObjectSchemeExpression r m)];
 	compileBinds [] = return [];
 	compileBinds ((sym,(obj,())):bs) = do
 		{
@@ -209,12 +209,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	letSequentialM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -226,12 +226,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	letSeparateM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -243,12 +243,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	letRecursiveM (bindList,bodyObj) = do
 		{
 		binds <- compileBinds bindList;
@@ -260,9 +260,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm (TopLevelObjectCommand cm r m);
 	assembleTopLevelObjectCommand obj = do
@@ -290,11 +290,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
-	 Object r m -> cm (SchemeExpression r m (m (Object r m)));
+	 Object r m -> cm (ObjectSchemeExpression r m);
 	assembleTopLevelExpression obj = do
 		{
 		MkTopLevelExpression expr _ _ <- assembleTopLevelObjectCommand obj;
@@ -306,8 +306,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	pureDefineT (sym,(val,())) = do
@@ -320,8 +320,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		FullScheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	fullDefineT (sym,(val,())) = do
@@ -342,9 +342,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 a -> 
 	 (m (Object r m) -> a -> a) ->
@@ -355,7 +355,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		{
 		(MkTopLevelExpression expr1 binds1 syntax1) <- assembleTopLevelObjectCommand obj;
 		(MkTopLevelExpression exprr bindsr syntaxr) <- let
-		 {?syntacticbindings = newBinds ?syntacticbindings syntax1} in
+		 {?syntacticbindings = newBindings ?syntacticbindings syntax1} in
 		 begin none conn objs;
 		return (MkTopLevelExpression (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
 		};
@@ -364,9 +364,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] ->
 	 cm (TopLevelObjectCommand cm r m);
@@ -376,9 +376,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 m a -> 
 	 (m (Object r m) -> m a -> m a) ->
@@ -395,21 +395,21 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	bodyM = assembleTopLevelExpressions (return nullObject) (>>);
 
 	assembleTopLevelExpressionsList ::
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m [Object r m]));
@@ -429,21 +429,21 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 cm (SchemeExpression r m (m (Object r m)));
+	 cm (ObjectSchemeExpression r m);
 	bodyListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (assembleTopLevelExpressionsList obj);
 
 	assembleTopLevelExpressionsEat ::
 		(
 		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Object r m -> m ()) ->
 	 [Object r m] ->

@@ -398,7 +398,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	toString (InputPortObject _)	= return "#<input port>";
 	toString (OutputPortObject _)	= return "#<output port>";
 	toString (ProcedureObject _)	= return "#<procedure>";
-	toString (BindingsObject _)		= return "#<environment>";
+	toString (EnvironmentObject _)	= return "#<environment>";
 
 	toStringP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Object r m,()) -> m (SList Char);

@@ -31,9 +31,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		Build cm r,
 		Scheme m r,
 		?load :: String -> cm [Object r m],
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 String -> cm (TopLevelObjectCommand cm r m);
 	loadCommand filename = do
@@ -47,9 +47,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		Build cm r,
 		Scheme m r,
 		?load :: String -> cm [Object r m],
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
 	 (SList Char,()) -> cm (TopLevelObjectCommand cm r m);
 	loadT (MkSList filename,()) = loadCommand filename;

@@ -20,19 +20,17 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.MacroLib.Syntax where
+module Org.Org.Semantic.HScheme.MacroLib.Syntax
+	(
+	defineSyntaxT
+	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	data Bind sym a = MkBind sym a;
-{--
-	addBindings :: [Bind sym a] -> Binds sym a -> Binds sym a;
-	addBindings [] binds = binds;
-	addBindings ((MkBind sym a):binds) bindings =
-	 addBindings binds (addBinding sym a bindings);
---}
+
 	type Binding r m = Bind Symbol (Object r m);
 
 	substitute :: (Build cm r) =>
@@ -181,7 +179,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax where
 		(
 		BuildThrow cm (Object r m) r,
 		?objType :: Type (Object r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m)
 		) =>
 	 Object r m -> cm (Syntax cm r m);
 	compileSyntax (SymbolObject sym) = case getBinding ?syntacticbindings sym of
@@ -214,8 +212,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax where
 		(
 		BuildThrow cm (Object r m) r,
 		Monad m,
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?macrobindings :: Binds Symbol (Macro cm r m)
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	defineSyntaxT (sym,(obj,())) = do

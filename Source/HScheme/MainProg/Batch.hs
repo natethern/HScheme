@@ -76,9 +76,9 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		(
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
 	 (((Symbol -> Maybe (ObjLocation r m)) -> m ()) -> m ()) ->
@@ -99,15 +99,15 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		(
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
 	 [String] ->
-	 Bindings r m ->
+	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
 	runProgramBindings outproc failproc filenames bindings =
 	 runProgram mrun outproc failproc filenames where
@@ -120,15 +120,15 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		RunnableScheme cm m r,
 		MonadCont m,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?load :: String -> cm [Object r m]
 		) =>
 	 (Object r m -> cm ()) ->
 	 (Object r m -> cm ()) ->
 	 [String] ->
-	 Bindings r m ->
+	 SymbolBindings (ObjLocation r m) ->
 	 cm ();
 	runProgramBindingsWithExit outproc failproc filenames rootBindings =
 	 runProgram mrun outproc failproc filenames where

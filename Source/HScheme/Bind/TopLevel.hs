@@ -32,11 +32,11 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (TopLevelMacro cm r m) ->
-	 Binds Symbol (TopLevelMacro cm r m);
+	 SymbolBindings (TopLevelMacro cm r m) ->
+	 SymbolBindings (TopLevelMacro cm r m);
 	commonTopLevelBindings = concatenateList
 		[
 		-- 4.2.3 Sequencing
@@ -53,11 +53,11 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (TopLevelMacro cm r m) ->
-	 Binds Symbol (TopLevelMacro cm r m);
+	 SymbolBindings (TopLevelMacro cm r m) ->
+	 SymbolBindings (TopLevelMacro cm r m);
 	pureTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -70,11 +70,11 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		(
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 Binds Symbol (TopLevelMacro cm r m) ->
-	 Binds Symbol (TopLevelMacro cm r m);
+	 SymbolBindings (TopLevelMacro cm r m) ->
+	 SymbolBindings (TopLevelMacro cm r m);
 	fullTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -89,10 +89,10 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		Scheme m r,
 		?objType :: Type (Object r m),
 		?load :: String -> cm [Object r m],
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 		) =>
-	 Binds Symbol (TopLevelMacro cm r m) ->
-	 Binds Symbol (TopLevelMacro cm r m);
+	 SymbolBindings (TopLevelMacro cm r m) ->
+	 SymbolBindings (TopLevelMacro cm r m);
 	systemTopLevelBindings = concatenateList
 		[
 		-- 6.6.4 System Interface

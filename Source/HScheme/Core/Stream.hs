@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.Stream where
 	{
+	import Org.Org.Semantic.HScheme.Core.Scheme;
 	import Org.Org.Semantic.HScheme.Core.Throw;
 	import Org.Org.Semantic.HScheme.Core.Object;
 	import Org.Org.Semantic.HScheme.Core.Build;

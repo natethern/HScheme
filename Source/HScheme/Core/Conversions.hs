@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Core.Conversions where
 	{
 	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HScheme.Core.Port;
 	import Org.Org.Semantic.HScheme.Core.Numerics;
@@ -437,20 +438,20 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance (Monad cm) => MonadSubtype cm (Object r m) Symbol;
 
 	
-	-- Bindings
+	-- Environment
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (Bindings r m) where
+	instance (Monad cm) => MonadIsA cm (Object r m) (Environment r m) where
 		{
-		getConvert = return . BindingsObject;
+		getConvert = return . EnvironmentObject;
 		};
 
-	instance (Monad cm) => MonadMaybeA cm (Bindings r m) (Object r m) where
+	instance (Monad cm) => MonadMaybeA cm (Environment r m) (Object r m) where
 		{
-		getMaybeConvert (BindingsObject a) = return (Just a);
+		getMaybeConvert (EnvironmentObject a) = return (Just a);
 		getMaybeConvert _ = return Nothing;
 		};
 	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Bindings r m);
+	instance (Monad cm) => MonadSubtype cm (Object r m) (Environment r m);
 
 	
 	-- InputPort

@@ -24,6 +24,7 @@ module Org.Org.Semantic.HScheme.Core.Throw where
 	{
 	import Org.Org.Semantic.HScheme.Core.Conversions;
 	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 

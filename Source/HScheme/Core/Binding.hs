@@ -20,29 +20,25 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Bind.FMapBindings(emptyBindings) where
+module Org.Org.Semantic.HScheme.Core.Binding where
 	{
-	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	fmapGetBinding ::
-	 FiniteMap Symbol a -> Symbol -> Maybe a;
-	fmapGetBinding map sym = lookup sym map;
-
-	fmapNewBinding ::
-	 FiniteMap Symbol a ->
-	 Symbol ->
-	 a ->
-	 SymbolBindings a;
-	fmapNewBinding map sym a = toBindings (addMapEntry (sym,a) map);
-
-	toBindings :: FiniteMap Symbol a -> SymbolBindings a;
-	toBindings map = MkBindings
+	data Bindings sym a = MkBindings
 		{
-		getBinding = fmapGetBinding map,
-		newBinding = fmapNewBinding map
+		newBinding :: sym -> a -> Bindings sym a,
+		getBinding :: sym -> Maybe a
 		};
 
-	emptyBindings :: SymbolBindings a;
-	emptyBindings = toBindings empty;
+	newBindings :: Bindings sym a -> [(sym,a)] -> Bindings sym a;
+	newBindings b [] = b;
+	newBindings b ((sym,a):r) = newBinding (newBindings b r) sym a;
+
+	newRefBinding :: (MonadCreatable cm r) => 
+	 Bindings sym (r a) -> sym -> a -> cm (r a,Bindings sym (r a));
+	newRefBinding bindings sym obj = do
+		{
+		loc <- new obj;
+		return (loc,newBinding bindings sym loc);
+		};
 	}

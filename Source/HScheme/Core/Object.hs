@@ -22,60 +22,21 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.Object where
 	{
+	import Org.Org.Semantic.HScheme.Core.Binding;
+	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HScheme.Core.Port;
 	import Org.Org.Semantic.HScheme.Core.Numerics;
 	import Org.Org.Semantic.HBase;
 
-	class (BuildThrow m (Object r m) r) =>
-	 Scheme m r;
+	type SymbolBindings = Bindings Symbol;
 
-	instance (BuildThrow m (Object r m) r) =>
-	 Scheme m r;
+	type Syntax cm r m = [Object r m] -> cm (Object r m);
 
-	class
-		(
-		Scheme m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
-		) =>
-	 FullScheme m r;
-
-	instance
-		(
-		Scheme m r,
-		MonadFullReference m r,
-		MonadEqualReference m r
-		) =>
-	 FullScheme m r;
-
-	type ObjLocation r m = r (Object r m);
-
-	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ordered,Eq);
-
-	instance Show Symbol where
+	data Environment r m = MkEnvironment
 		{
-		show (MkSymbol s) = s;
-		};
-
-	data Binds sym a = MkBinds
-		{
-		newBinding :: sym -> a -> Binds sym a,
-		getBinding :: sym -> Maybe a
-		};
-
-	newBinds :: Binds sym a -> [(sym,a)] -> Binds sym a;
-	newBinds b [] = b;
-	newBinds b ((sym,a):r) = newBinding (newBinds b r) sym a;
-
-	type Bindings r m = Binds Symbol (ObjLocation r m);
-
-	newObjBinding :: (Build cm r) => 
-	 Bindings r m -> Symbol -> Object r m -> cm (ObjLocation r m,Bindings r m);
-	newObjBinding bindings sym obj = do
-		{
-		loc <- new obj;
-		return (loc,newBinding bindings sym loc);
+		envSyn :: SymbolBindings (Syntax m r m),
+		envLoc :: SymbolBindings (ObjLocation r m)
 		};
 
 	type Procedure r m = ([Object r m] -> m (Object r m));
@@ -96,7 +57,9 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	 InputPortObject 	(InputPort Word8 m)					|
 	 OutputPortObject 	(OutputPort Word8 m)				|
 	 ProcedureObject	(Procedure r m)						|
-	 BindingsObject		(Bindings r m)						;
+	 EnvironmentObject	(Environment r m)					;
+
+	type ObjLocation r m = r (Object r m);
 
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;
@@ -108,12 +71,6 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	isNullObject :: Object r m -> Bool;
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
-
-	getObjectRType :: Object r m -> Type (r ());
-	getObjectRType _ = Type;
-
-	getObjectsRType :: [Object r m] -> Type (r ());
-	getObjectsRType _ = Type;
 
 	cons :: (Build cm r) =>
 	 Object r m -> Object r m -> cm (Object r m);

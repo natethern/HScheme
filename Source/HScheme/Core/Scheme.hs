@@ -20,17 +20,31 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Core.System where
+module Org.Org.Semantic.HScheme.Core.Scheme where
 	{
-	import Org.Org.Semantic.HScheme.Core.Port;
+	import Org.Org.Semantic.HScheme.Core.Object;
+	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 
-	data System m = MkSystem
-		{
-		fsiCurrentInputPort		:: InputPort Word8 m,
-		fsiCurrentOutputPort	:: OutputPort Word8 m,
-		fsiCurrentErrorPort		:: OutputPort Word8 m,
-		fsiOpenInputFile		:: String -> m (InputPort Word8 m),
-		fsiOpenOutputFile		:: String -> m (OutputPort Word8 m)
-		};
+	class (BuildThrow m (Object r m) r) =>
+	 Scheme m r;
+
+	instance (BuildThrow m (Object r m) r) =>
+	 Scheme m r;
+
+	class
+		(
+		Scheme m r,
+		MonadFullReference m r,
+		MonadEqualReference m r
+		) =>
+	 FullScheme m r;
+
+	instance
+		(
+		Scheme m r,
+		MonadFullReference m r,
+		MonadEqualReference m r
+		) =>
+	 FullScheme m r;
 	}

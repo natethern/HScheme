@@ -47,18 +47,18 @@ module Org.Org.Semantic.HScheme.Bind
 		?objType :: Type (Object r m)
 		) =>
 	 ((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-	 	?macrobindings :: Binds Symbol (Macro cm r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax cm r m)
-	 	) => Binds Symbol (Macro cm r m) -> Binds Symbol (Macro cm r m)) ->
+	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+	 	?macrobindings :: SymbolBindings (Macro cm r m),
+	 	?syntacticbindings :: SymbolBindings (Syntax cm r m)
+	 	) => SymbolBindings (Macro cm r m) -> SymbolBindings (Macro cm r m)) ->
 	 ((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
-	 	?macrobindings :: Binds Symbol (Macro cm r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax cm r m)
-	 	) => Binds Symbol (TopLevelMacro cm r m) -> Binds Symbol (TopLevelMacro cm r m)) ->
-	 ((?macrobindings :: Binds Symbol (Macro cm r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax cm r m),
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+	 	?macrobindings :: SymbolBindings (Macro cm r m),
+	 	?syntacticbindings :: SymbolBindings (Syntax cm r m)
+	 	) => SymbolBindings (TopLevelMacro cm r m) -> SymbolBindings (TopLevelMacro cm r m)) ->
+	 ((?macrobindings :: SymbolBindings (Macro cm r m),
+	 	?syntacticbindings :: SymbolBindings (Syntax cm r m),
+	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
 	 	) => a) ->
 	 a;
 	mutualBind macroBinds tlBinds a = 

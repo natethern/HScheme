@@ -44,12 +44,12 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>
-	  Bindings r m -> m ();
+	  SymbolBindings (ObjLocation r m) -> m ();
 	interactiveLoop bindings = do
 		{
 {--
@@ -101,12 +101,12 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>
-	 Bindings r m ->
+	 SymbolBindings (ObjLocation r m) ->
 	 String ->
 	 m ();
 	interact bindings filename =
@@ -129,12 +129,12 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?macrobindings :: SymbolBindings (Macro cm r m),
+		?syntacticbindings :: SymbolBindings (Syntax cm r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?system :: System cm
 		) =>
-	 Bindings r m ->
+	 SymbolBindings (ObjLocation r m) ->
 	 String ->
 	 m ();
 	interactWithExit rootBindings filename = callCC (\exitFunc -> do

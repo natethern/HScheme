@@ -54,4 +54,13 @@ module Org.Org.Semantic.HScheme.Core.Port where
 		opWriteStr op s;
 		opWriteOne op '\n';
 		};
+
+	data System m = MkSystem
+		{
+		fsiCurrentInputPort		:: InputPort Word8 m,
+		fsiCurrentOutputPort	:: OutputPort Word8 m,
+		fsiCurrentErrorPort		:: OutputPort Word8 m,
+		fsiOpenInputFile		:: String -> m (InputPort Word8 m),
+		fsiOpenOutputFile		:: String -> m (OutputPort Word8 m)
+		};
 	}
