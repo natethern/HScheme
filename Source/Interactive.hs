@@ -27,6 +27,7 @@ module Interactive where
 	import SExpParser;
 	import Bindings;
 	import StandardBindings;
+	import Port;
 	import Procedures;
 	import Evaluate;
 	import Conversions;
@@ -109,8 +110,12 @@ module Interactive where
 		{
 		bindings <- chain
 		 (addProcBinding "exit" (exitFuncProc exitFunc))
-		 monadicStdBindings emptyBindings;		
-		interactiveLoop t readString bindings;
+		 monadicStdBindings emptyBindings;
+		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
+		objs <- runParser (ipRead port)  (expressionsP t);
+		inputPortCloseS t (port,());
+		bindings' <- printeval bindings objs;
+		interactiveLoop t readString bindings';
 		});
 
 	fullInteract ::
@@ -126,7 +131,11 @@ module Interactive where
 			fullStdBindings,
 			ioBindings,
 		 	addProcBinding "exit" (exitFuncProc exitFunc)
-		 	] emptyBindings;		
-		interactiveLoop t readString bindings;
+		 	] emptyBindings;
+		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
+		objs <- runParser (ipRead port)  (expressionsP t);
+		inputPortCloseS t (port,());
+		bindings' <- printeval bindings objs;
+		interactiveLoop t readString bindings';
 		});
 	}

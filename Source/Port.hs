@@ -34,6 +34,22 @@ module Port where
 		return MkArgNoneType;
 		};
 
+	outputPortCloseS :: (Scheme x m r) =>
+	 Type (r ()) -> (OutputPort m,()) -> m ArgNoneType;
+	outputPortCloseS Type (port,()) = do
+		{
+		opWrite port Nothing;
+		return MkArgNoneType;
+		};
+
+	inputPortCloseS :: (Scheme x m r) =>
+	 Type (r ()) -> (InputPort m,()) -> m ArgNoneType;
+	inputPortCloseS Type (port,()) = do
+		{
+		ipClose port;
+		return MkArgNoneType;
+		};
+
 	isInputPortS :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isInputPortS Type (InputPortObject _,()) = return True;

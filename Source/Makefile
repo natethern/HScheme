@@ -246,6 +246,7 @@ Interactive.o : Object.hi
 Interactive.o : Conversions.hi
 Interactive.o : Evaluate.hi
 Interactive.o : Procedures.hi
+Interactive.o : Port.hi
 Interactive.o : StandardBindings.hi
 Interactive.o : Bindings.hi
 Interactive.o : SExpParser.hi

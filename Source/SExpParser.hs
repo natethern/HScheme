@@ -439,6 +439,6 @@ module SExpParser where
 			};
 		};
 	
-	expressionsP :: (Scheme x m r) => TextParser m [Object r m];
-	expressionsP = manyP expressionP;
+	expressionsP :: (Scheme x m r) => Type (r ()) -> TextParser m [Object r m];
+	expressionsP Type = manyP expressionP;
 	}

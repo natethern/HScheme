@@ -64,6 +64,8 @@ module StandardBindings where
 		addProcBinding	"call-with-current-continuation"	callCCS,
 		addProcBinding	"input-port?"	isInputPortS,
 		addProcBinding	"output-port?"	isOutputPortS,
-		addProcBinding	"port-write-char"	portWriteCharS
+		addProcBinding	"port-write-char"	portWriteCharS,
+		addProcBinding	"close-input-port"	inputPortCloseS,
+		addProcBinding	"close-output-port"	outputPortCloseS
 		];
 	}

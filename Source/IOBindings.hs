@@ -76,10 +76,28 @@ module IOBindings where
 	 Type (r ()) -> () -> m (OutputPort m);
 	stdoutS Type () = return (handleOutputPort stdout);
 
+	openInputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
+	 Type (r ()) -> (StringType,()) -> m (InputPort m);
+	openInputFileS Type (MkStringType name,()) = do
+		{
+		h <- call (openFile name ReadMode);
+		return (handleInputPort h);
+		};
+
+	openOutputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
+	 Type (r ()) -> (StringType,()) -> m (OutputPort m);
+	openOutputFileS Type (MkStringType name,()) = do
+		{
+		h <- call (openFile name WriteMode);
+		return (handleOutputPort h);
+		};
+
 	ioBindings :: (Scheme x m r,SemiLiftedMonad IO m) => Bindings r m -> m (Bindings r m);
 	ioBindings = chainList
 		[
 		addProcBinding	"current-input-port"	stdinS,
-		addProcBinding	"current-output-port"	stdoutS
+		addProcBinding	"current-output-port"	stdoutS,
+		addProcBinding	"open-input-file"		openInputFileS,
+		addProcBinding	"open-output-file"		openOutputFileS
 		];
 	}
