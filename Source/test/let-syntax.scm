@@ -55,3 +55,23 @@
 		(sb sa)
 	)
 )
+
+(let-syntax ((sa (syntax-rules () ((sa) 'outer-5))))
+	(let-syntax
+		(
+			(sb (syntax-rules () ((sb) (sa))))
+			(sa (syntax-rules () ((sa) 'inner-5)))
+		)
+		(list (sa) (sb))
+	)
+)
+
+(let-syntax ((sa (syntax-rules () ((sa) 'outer-6))))
+	(letrec-syntax
+		(
+			(sb (syntax-rules () ((sb) (sa))))
+			(sa (syntax-rules () ((sa) 'inner-6)))
+		)
+		(list (sa) (sb))
+	)
+)
