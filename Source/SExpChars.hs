@@ -41,24 +41,24 @@ ASCII: 2^7 = 128
  7 misc			#%&*/@\	Po
 
 R5RS:
-initial = letter or !$%&*/:<>?^_~
+initial = letter or !$%&*/:<=>?^_~
 subs = initial or digit or +-.@
-non-subs = control or space or left/right or '"`,;#\=|
+non-subs = control or space or left/right or '"`,;#\|
 
 forbidden = Cc except tab cr lf
 reserved = []{} (Ps,Pe), | (Sm)
 whitespace = Zs, tab cr lf (Cc)
-initial = Lu, Ll, Pc, Sc, :!?%&*/ (Po), <>~ (Sm), ^ (Sk)
+initial = Lu, Ll, Pc, Sc, :!?%&*/ (Po), <=>~ (Sm), ^ (Sk)
 swing = Nd, Pd, + (Sm), .@ (Po),
-others = () (Ps,Pe), '",;#\ (Po), = (Sm), ` (Sk)
+others = () (Ps,Pe), '",;#\ (Po), ` (Sk)
 
 HScheme:
 forbidden = C* except tab cr lf
 reserved = (Ps,Pe) except () , Pi, Pf, |
 whitespace = Z*, tab cr lf
-initial = L*, M*, S* except +`=| , Pc, Pd except - , Po except .@'",;#\
+initial = L*, M*, S* except +`| , Pc, Pd except - , Po except .@'",;#\
 swing = N*, -+.@
-others = () (Ps,Pe), '",;#\ (Po), = (Sm), ` (Sk)
+others = () (Ps,Pe), '",;#\ (Po), ` (Sk)
 
 --}
 
@@ -72,7 +72,6 @@ others = () (Ps,Pe), '",;#\ (Po), = (Sm), ` (Sk)
 
 	allowedIdentifier1 '+' = False;
 	allowedIdentifier1 '`' = False;
-	allowedIdentifier1 '=' = False;
 	allowedIdentifier1 '|' = False;
 
 	allowedIdentifier1 '-' = False;
@@ -113,5 +112,4 @@ others = () (Ps,Pe), '",;#\ (Po), = (Sm), ` (Sk)
 		ClNumber -> True;
 		_ -> allowedIdentifier1 i;
 		};
-
 	}

@@ -52,4 +52,23 @@ module FullProcedures where
 		setBang name res;
 		return MkArgNoneType;
 		};
+
+	-- 6.3.2 Pairs and Lists
+	setCarP ::  (FullScheme x m r) =>
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
+	setCarP Type ((PairObject carLoc _),(obj,())) = do
+		{
+		setLocation carLoc obj;
+		return MkArgNoneType;
+		};	
+	setCarP Type (_,(obj,())) = fail "not a pair";	
+
+	setCdrP ::  (FullScheme x m r) =>
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m ArgNoneType;
+	setCdrP Type ((PairObject _ cdrLoc),(obj,())) = do
+		{
+		setLocation cdrLoc obj;
+		return MkArgNoneType;
+		};	
+	setCdrP Type (_,(obj,())) = fail "not a pair";	
 	}

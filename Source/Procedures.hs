@@ -57,6 +57,16 @@ module Procedures where
 			};
 		};
 
+	-- 6.3.1 Booleans
+	notP :: (Scheme x m r) =>
+	 Type (r ()) -> (Bool,()) -> m Bool;
+	notP Type (b,()) = return (not b);
+
+	isBooleanP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isBooleanP Type (BooleanObject _,()) = return True;
+	isBooleanP Type (_,()) = return False;
+
 	-- 6.3.2 Pairs and Lists
 	consP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m (Object r m);
@@ -70,10 +80,6 @@ module Procedures where
 	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
 	cdrP Type ((_,t),()) = return t;
 
---	makeList :: (Scheme x m r) =>
---	 [Object r m] -> m (Object r m);
---	makeList = getConvert;
-
 	listP ::  (Scheme x m r) =>
 	 Type (r ()) -> [Object r m] -> m [Object r m];
 	listP Type list = return list;
@@ -83,6 +89,10 @@ module Procedures where
 	appendP Type listlist = return (concat listlist);
 	
 	-- 6.4 Control Features
+	applyP :: (Scheme x m r,?bindings :: Bindings r m) =>
+	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
+	applyP Type (proc,(args,())) = proc ?bindings args;
+	
 	valuesP :: (Scheme x m r) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);
 	valuesP Type = return . mkValuesObject;
@@ -100,16 +110,6 @@ module Procedures where
 		) =>
 	 Type (r ()) -> () -> m (Bindings r m);
 	currentEnvironmentP Type () = return ?bindings;
-
-{--	
-	applyS :: Procedure m;
-	applyS [] = fail "apply needs at least 1 argument";
-	applyS (x:xs) = apply x (appconv xs) where
-		{
-		appconv [] = [];
-		appconv ...
-		};
---}	
 	
 	printList :: (Scheme x m r) =>
 	 ObjLocation r m -> ObjLocation r m -> m String;

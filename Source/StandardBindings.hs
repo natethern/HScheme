@@ -37,6 +37,8 @@ module StandardBindings where
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
+		addBinding		"<nothing>"				nullObject,
+		
 		-- 4.1.2 Literal Expressions
 		addMacroBinding	"quote"					quoteM,
 
@@ -65,6 +67,10 @@ module StandardBindings where
 		addProcBinding	"*"						(foldingLP (*) 1),
 		addProcBinding	"/"						divideP,
 
+		-- 6.3.1 Booleans
+		addProcBinding	"not"					notP,
+		addProcBinding	"boolean?"				isBooleanP,
+
 		-- 6.3.2 Pairs and Lists
 		addProcBinding	"cons"					consP,
 		addProcBinding	"car"					carP,
@@ -74,6 +80,7 @@ module StandardBindings where
 
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"			isProcedureP,
+		addProcBinding	"apply"					applyP,
 		addProcBinding	"values"				valuesP,
 		addProcBinding	"values->list"			valuesToListP,
 

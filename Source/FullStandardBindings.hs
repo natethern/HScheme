@@ -34,10 +34,14 @@ module FullStandardBindings where
 		monadicStdBindings,
 
 		-- 4.1.6 Assignments
-		addMacroBinding "set!" setBangM,
+		addMacroBinding "set!"		setBangM,
 
 		-- 6.1 Equivalence Predicates
-		addProcBinding "eqv?" eqvP,
-		addProcBinding "eq?" eqP
+		addProcBinding "eqv?"		eqvP,
+		addProcBinding "eq?"		eqP,
+
+		-- 6.3.2 Pairs and Lists
+		addProcBinding "set-car!"	setCarP,
+		addProcBinding "set-cdr!"	setCdrP
 		];
 	}
