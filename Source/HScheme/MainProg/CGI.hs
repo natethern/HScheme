@@ -29,7 +29,22 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 	import Org.Org.Semantic.HScheme.MacroLib;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase;
+
+	paramsBindings :: (Build cm r,Scheme m r) =>
+	 ([Word8] -> Bool) -> QueryParameters -> LocationBindings cm r m;
+	paramsBindings match (MkQueryParameters list) = concatenateList (fmap paramBinding list) where
+		{
+		paramBinding :: (Build cm r,Scheme m r) =>
+		 ([Word8],[Word8]) -> LocationBindings cm r m;
+		paramBinding (name,value) | match name = \b -> do
+			{
+			valueObj <- getObject (MkSList value);
+			addLocationBinding (MkSymbol (decodeLatin1 name)) valueObj b;
+			};
+		paramBinding _ = nothing;
+		};
 
 	runSchemeProgram ::
 		(
