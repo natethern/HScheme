@@ -184,9 +184,4 @@ module Procedures where
 		s <- toString o;
 		return (MkStringType s);
 		};
-
-{--		
-	call-with-current-continuation :: (Scheme x m r) => 
-	call-with-current-continuation foo = peirceM (
---}	
 	}

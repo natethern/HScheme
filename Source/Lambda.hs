@@ -28,6 +28,7 @@ module Lambda where
 	import Object;
 	import Subtype;
 	import Type;
+	import MonadCont;
 
 	begin ::
 		(
@@ -188,4 +189,17 @@ module Lambda where
 	isProcedureS :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isProcedureS Type (obj,()) = isProcedure obj;
+	
+	callCCS ::
+		(
+		Scheme x m r,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> (Procedure r m) -> m (Object r m);
+	callCCS Type proc = callCC (\cont -> proc ?bindings
+	  [ProcedureObject (\_ args -> do
+	  	{
+	  	(resultArg,()) <- convertFromObjects args;
+	  	cont resultArg;
+	  	})]);
 	}

@@ -46,6 +46,7 @@ module StandardBindings where
 		addMacroBinding	"begin"	beginS,
 		addMacroBinding	"let"	letS,
 		addMacroBinding	"let*"	letStarS,
-		addMacroBinding	"lambda"	lambdaS
+		addMacroBinding	"lambda"	lambdaS,
+		addMacroBinding	"call-with-current-continuation"	callCCS
 		];
 	}
