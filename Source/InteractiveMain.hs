@@ -50,7 +50,7 @@ module Main where
 	cpsInteract interact = runContinuationPass
 	 (\_ -> fail "error in catch code!")
 	 return
-	 (interact ioFullSystemInterface);
+	 (interact (ioFullSystemInterface lift));
 
 	main :: IO ();
 	main = do
@@ -59,8 +59,8 @@ module Main where
 		case flavour of
 			{
 			FullFlavour -> cpsInteract (fullInteract :: Interact (CPS IORef) IORef);
-			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) ioFullSystemInterface;
-			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) ioFullSystemInterface;
+			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id);
+			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id);
 			};
 		};
 

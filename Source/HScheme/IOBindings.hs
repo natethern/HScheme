@@ -28,10 +28,10 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	import Org.Org.Semantic.HBase;
 	import IO;
 
-	handleInputPort :: (LiftedMonad IO m) => Handle -> InputPort Char m;
+	handleInputPort :: Handle -> InputPort Char IO;
 	handleInputPort h = MkInputPort
 		{
-		ipRead = lift (do
+		ipRead = do
 			{
 			eof <- hIsEOF h;
 			if (eof) then return Nothing else do
@@ -39,8 +39,8 @@ module Org.Org.Semantic.HScheme.IOBindings where
 				c <- hGetChar h;
 				return (Just c);
 				};
-			}),
-		ipPeek = lift (do
+			},
+		ipPeek = do
 			{
 			eof <- hIsEOF h;
 			if (eof) then return Nothing else do
@@ -48,61 +48,76 @@ module Org.Org.Semantic.HScheme.IOBindings where
 				c <- hLookAhead h;
 				return (Just c);
 				};
-			}),
-		ipReady	= lift (hReady h),
-		ipClose = lift (hClose h)
+			},
+		ipReady	= hReady h,
+		ipClose = hClose h
 		};
 
-	handleOutputPort :: (LiftedMonad IO m) => Handle -> OutputPort Char m;
+	remonadInputPort :: (Monad m,Monad n) =>
+	 (forall a. m a -> n a) -> InputPort c m -> InputPort c n;
+	remonadInputPort remonad (MkInputPort rd pk rdy cl) = MkInputPort
+	 (remonad rd) (remonad pk) (remonad rdy) (remonad cl);
+
+	handleOutputPort :: Handle -> OutputPort Char IO;
 	handleOutputPort h = MkOutputPort
 		{
-		opWrite = \mc -> lift (case mc of
+		opWrite = \mc -> case mc of
 			{
 			Nothing -> hClose h;
 			Just c -> hPutChar h c;
-			}),
-		opFlush = lift (hFlush h)
+			},
+		opFlush = hFlush h
 		};
 
-	stdInputPort :: (LiftedMonad IO m) => InputPort Char m;
+	remonadOutputPort :: (Monad m,Monad n) =>
+	 (forall a. m a -> n a) -> OutputPort c m -> OutputPort c n;
+	remonadOutputPort remonad (MkOutputPort w f) = MkOutputPort
+	 (\mc -> remonad (w mc)) (remonad f);
+
+	stdInputPort :: InputPort Char IO;
 	stdInputPort = handleInputPort stdin;
 
-	stdOutputPort :: (LiftedMonad IO m) => OutputPort Char m;
+	stdOutputPort :: OutputPort Char IO;
 	stdOutputPort = handleOutputPort stdout;
 
-	stdErrorPort :: (LiftedMonad IO m) => OutputPort Char m;
+	stdErrorPort :: OutputPort Char IO;
 	stdErrorPort = handleOutputPort stderr;
 
-	openInputFile :: (LiftedMonad IO m) =>
-	 String -> m (InputPort Char m);
-	openInputFile name = do
+	openInputFile :: (Monad m) =>
+	 (forall a. IO a -> m a) -> String -> m (InputPort Char m);
+	openInputFile remonad name = do
 		{
-		h <- lift (openFile name ReadMode);
-		return (handleInputPort h);
+		h <- remonad (openFile name ReadMode);
+		return (remonadInputPort remonad (handleInputPort h));
 		};
 
-	openOutputFile :: (LiftedMonad IO m) =>
-	 String -> m (OutputPort Char m);
-	openOutputFile name = do
+	openOutputFile :: (Monad m) =>
+	 (forall a. IO a -> m a) -> String -> m (OutputPort Char m);
+	openOutputFile remonad name = do
 		{
-		h <- lift (openFile name WriteMode);
-		return (handleOutputPort h);
+		h <- remonad (openFile name WriteMode);
+		return (remonadOutputPort remonad (handleOutputPort h));
 		};
 
-	ioPureSystemInterface :: (Scheme m r,LiftedMonad IO m) =>
-	 PureSystemInterface m r;
-	ioPureSystemInterface = MkPureSystemInterface
-	 (loadBindingsWithProcs openInputFile stdOutputPort);
+	ioPureSystemInterface :: (Scheme m r,Monad m) =>
+	 (forall a. IO a -> m a) -> PureSystemInterface m r;
+	ioPureSystemInterface remonad = MkPureSystemInterface
+	 (loadBindingsWithProcs (openInputFile remonad) (remonadOutputPort remonad stdOutputPort));
 
-	ioFullSystemInterface :: (Scheme m r,LiftedMonad IO m) =>
-	 FullSystemInterface m r;
-	ioFullSystemInterface = MkFullSystemInterface
+	ioQuietPureSystemInterface :: (Scheme m r,Monad m) =>
+	 (forall a. IO a -> m a) -> PureSystemInterface m r;
+	ioQuietPureSystemInterface remonad = MkPureSystemInterface
+	 (loadBindingsWithProcs (openInputFile remonad) (remonadOutputPort remonad stdErrorPort));
+
+	ioFullSystemInterface :: (Scheme m r,Monad m) =>
+	 (forall a. IO a -> m a) -> FullSystemInterface m r;
+	ioFullSystemInterface remonad = MkFullSystemInterface
 		{
-		fsiPure = MkPureSystemInterface (loadBindingsWithProcs openInputFile stdOutputPort),
-		fsiCurrentInputPort		= stdInputPort,
-		fsiCurrentOutputPort	= stdOutputPort,
-		fsiCurrentErrorPort		= stdErrorPort,
-		fsiOpenInputFile		= openInputFile,
-		fsiOpenOutputFile		= openOutputFile
+		fsiPure = ioPureSystemInterface remonad,
+		fsiCurrentInputPort		= remonadInputPort remonad stdInputPort,
+		fsiCurrentOutputPort	= remonadOutputPort remonad stdOutputPort,
+		fsiCurrentErrorPort		= remonadOutputPort remonad stdErrorPort,
+		fsiOpenInputFile		= openInputFile remonad,
+		fsiOpenOutputFile		= openOutputFile remonad
 		};
 	}

@@ -28,19 +28,18 @@ module Main where
 	import System.Environment;
 	import Numeric;
 
-	type CPS r = SchemeCPS r (IO ());
+	type M = ShowExceptionMonad IO;
 
-	instance Show (SchemeCPSError IORef (IO ())) where
+	type ConstantRef = Constant M;
+
+	type CPS r = SchemeCPS r (M ());
+
+	instance Show (SchemeCPSError r (M ())) where
 		{
 		show (StringError s) = s;
 		show (ExceptionError ex) = show ex;
 		show (ObjError ex) = "Scheme object error";
 		};
-
-	ioQuietPureSystemInterface :: (Scheme m r,LiftedMonad IO m) =>
-	 PureSystemInterface m r;
-	ioQuietPureSystemInterface = MkPureSystemInterface
-	 (loadBindingsWithProcs openInputFile stdErrorPort);
 
 	printError :: (Show a) =>
 	 a -> IO ();
@@ -53,24 +52,24 @@ module Main where
 		(bindings :: Bindings (Constant IO) m) <- chainList
 			[
 			monadFixPureBindings,
-			pureSystemBindings ioQuietPureSystemInterface
+			pureSystemBindings (ioPureSystemInterface id)
 			] emptyBindings;
-		bindings' <- psiLoadBindings ioQuietPureSystemInterface bindings "Prelude.pure.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id) bindings "Prelude.pure.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
 
 	contPureInterpret ::
-	 String -> CPS (Constant IO) ();
+	 String -> CPS ConstantRef ();
 	contPureInterpret source = do
 		{
-		(bindings :: Bindings (Constant IO) (CPS (Constant IO))) <- chainList
+		(bindings :: Bindings ConstantRef (CPS ConstantRef)) <- chainList
 			[
 			monadContPureBindings,
-			pureSystemBindings ioQuietPureSystemInterface
+			pureSystemBindings (ioPureSystemInterface (lift . lift))
 			] emptyBindings;
-		bindings' <- psiLoadBindings ioQuietPureSystemInterface bindings "Prelude.pure.scm";
-		parseEvalFromString (printResult stdOutputPort) bindings' source;
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift)) bindings "Prelude.pure.scm";
+		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};
 
@@ -81,9 +80,9 @@ module Main where
 		(bindings :: Bindings IORef m) <- chainList
 			[
 			monadFixFullBindings,
-			pureSystemBindings ioQuietPureSystemInterface
+			pureSystemBindings (ioPureSystemInterface id)
 			] emptyBindings;
-		bindings' <- psiLoadBindings ioQuietPureSystemInterface bindings "Prelude.full.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id) bindings "Prelude.full.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
@@ -95,10 +94,10 @@ module Main where
 		(bindings :: Bindings IORef (CPS IORef)) <- chainList
 			[
 			monadContFullBindings,
-			pureSystemBindings ioQuietPureSystemInterface
+			pureSystemBindings (ioPureSystemInterface (lift . lift))
 			] emptyBindings;
-		bindings' <- psiLoadBindings ioQuietPureSystemInterface bindings "Prelude.full.scm";
-		parseEvalFromString (printResult stdOutputPort) bindings' source;
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift)) bindings "Prelude.full.scm";
+		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};
 
@@ -110,8 +109,8 @@ module Main where
 		};
 
 	runCPS ::
-	 CPS r () -> ShowExceptionMonad IO ();
-	runCPS cps = lift (runContinuationPass (\_ -> fail "error in catch code!") return cps);
+	 CPS r () -> M ();
+	runCPS cps = runContinuationPass (\s -> throwX (MkShowException (show s))) return cps;
 
 	main :: IO ();
 	main = catch (do
