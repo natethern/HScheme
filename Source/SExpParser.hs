@@ -33,9 +33,9 @@ module SExpParser where
 
 	type TextParser = Parser Char;
 
-	isJust :: (a -> Bool) -> (Maybe a) -> Maybe a;
-	isJust test Nothing = Nothing;
-	isJust test (Just a) = if test a then Just a else Nothing;
+	testJust :: (a -> Bool) -> Maybe a -> Maybe a;
+	testJust test Nothing = Nothing;
+	testJust test (Just a) = if test a then Just a else Nothing;
 
 	restOfLineParser :: (Monad m) => TextParser m ();
 	restOfLineParser = do
@@ -97,7 +97,7 @@ module SExpParser where
 	identifierRestParser = do
 		{
 		mc <- currentC;
-		case isJust allowedIdentifierR mc of
+		case testJust allowedIdentifierR mc of
 			{
 			(Just c) -> do
 				{
@@ -117,7 +117,7 @@ module SExpParser where
 	identifierParser = do
 		{
 		mc <- currentC;
-		case isJust allowedIdentifier1 mc of
+		case testJust allowedIdentifier1 mc of
 			{
 			(Just c) -> do
 				{

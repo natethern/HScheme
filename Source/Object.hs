@@ -37,7 +37,7 @@ module Object where
 		MonadCont m,
 		MonadIsA m x (Object r m),
 		MonadIsA m (Object r m) x,
-		MonadError x m,
+		MonadSingleException x m,
 		Location m r
 		) =>
 	 Scheme x m r;
@@ -47,7 +47,7 @@ module Object where
 		MonadCont m,
 		MonadIsA m x (Object r m),
 		MonadIsA m (Object r m) x,
-		MonadError x m,
+		MonadSingleException x m,
 		Location m r
 		) =>
 	 Scheme x m r;

@@ -42,15 +42,17 @@ module Interactive where
 		errObj <- getConvert error;
 		(MkStringType errText) <- toStringP t (errObj,());
 		opWriteStrLn errPort ("error: "++errText);
+		opFlush errPort;
 		};
 
-	interactiveLoop :: (Scheme x m r) =>
+	interactiveLoop :: (Scheme x m r,
+		MonadBottom m,IsA x Exception
+		) =>
 	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
 	interactiveLoop t fsi bindings = do
 		{
 		let {input = trapEOT (fsiCurrentInputPort fsi);};
-		mbindings' <- catchError (do
-			{
+		mbindings' <- catchSingle (catchBottom (do {
 			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
 			opFlush (fsiCurrentOutputPort fsi);
 			mobject <- portRead input;
@@ -63,7 +65,8 @@ module Interactive where
 					return (Just bindings');
 					};
 				};
-			})
+			}) (\ex -> throwSingle (convert ex))
+			)
 			(\error -> do
 			{
 			runParser input restOfLineParser;
@@ -78,7 +81,9 @@ module Interactive where
 			};
 		};
 
-	pureInteract :: (Scheme x m r) =>
+	pureInteract :: (Scheme x m r,
+		MonadBottom m,IsA x Exception
+		) =>
 	 Type (r ()) -> FullSystemInterface m r -> m ();
 	pureInteract t fsi = callCC (\exitFunc -> do
 		{
@@ -88,7 +93,7 @@ module Interactive where
 			monadicStdBindings,
 			pureSystemBindings (fsiPure fsi)
 			] emptyBindings;
-		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
+		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
 			(\error -> do
 			{
 			reportError t (fsiCurrentErrorPort fsi) error;
@@ -98,7 +103,9 @@ module Interactive where
 		interactiveLoop t fsi bindings';
 		});
 
-	fullInteract :: (FullScheme x m r) =>
+	fullInteract :: (FullScheme x m r,
+		MonadBottom m,IsA x Exception
+		) =>
 	 Type (r ()) -> FullSystemInterface m r -> m ();
 	fullInteract t fsi = callCC (\exitFunc -> do
 		{
@@ -108,7 +115,7 @@ module Interactive where
 			fullStdBindings,
 			fullSystemBindings fsi
 		 	] emptyBindings;
-		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.full.scm")
+		bindings' <- catchSingle (psiLoadBindings (fsiPure fsi) bindings "Prelude.full.scm")
 			(\error -> do
 			{
 			reportError t (fsiCurrentErrorPort fsi) error;

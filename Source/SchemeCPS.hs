@@ -27,30 +27,47 @@ module SchemeCPS where
 	import Object;
 	import HBase;
 
-	type SchemeCPS r p = CPS (SchemeCPSError r p) p;
+	type SchemeCPS r p = ContinuationPass p (SchemeCPSError r p);
 
 	type SchemeCPSObject r p = Object r (SchemeCPS r p);
 
 	data SchemeCPSError r p = 
 		StringError String				|
+		ExceptionError Exception		|
 		ObjError (SchemeCPSObject r p)	;
 
-	instance (Location (CPS (SchemeCPSError r p) p) r) =>
+	instance (Location (SchemeCPS r p) r) =>
 	 MonadIsA (SchemeCPS r p) (SchemeCPSError r p) (SchemeCPSObject r p) where
 		{
 		getConvert = return . ObjError;
 		};
 
-	instance (Location (CPS (SchemeCPSError r p) p) r) =>
+	instance (Location (SchemeCPS r p) r) =>
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
+		getConvert (ExceptionError x) = getConvert (MkStringType (show x));
 		getConvert (StringError s) = getConvert (MkStringType s);
 		};
 
-	instance Error (SchemeCPSError r p) where
+	instance MaybeA (SchemeCPSError r p) String where
 		{
-		strMsg s = StringError s;
+		maybeConvert = Just . convert;
+		};
+
+	instance IsA (SchemeCPSError r p) String where
+		{
+		convert = StringError;
+		};
+
+	instance MaybeA (SchemeCPSError r p) Exception where
+		{
+		maybeConvert = Just . convert;
+		};
+
+	instance IsA (SchemeCPSError r p) Exception where
+		{
+		convert = ExceptionError;
 		};
 
 	instance

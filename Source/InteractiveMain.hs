@@ -25,18 +25,16 @@ module Main where
 	import IOBindings;
 	import SystemInterface;
 	import Interactive;
-	import ContinuationPassing;
 	import SchemeCPS;
 	import Full;
 	import Pure;
-	import Type;
 	import HBase;
 	import IORef;
-	
+
 	type M = SchemeCPS IORef (IO ());
-	
+
 	main :: IO ();
-	main = doMonadCPS
+	main = doMonadContinuationPass
 		(\_ -> return "error in catch code!")
 --		((pureInteract :: Type (PureLocation ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);
 		((fullInteract :: Type (IORef ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);

@@ -83,26 +83,26 @@
 	(car (list-tail x k))
 ))
 
-(define memq (lambda (item list)
-	(if (null? list) #f
-		(if (eq? item (car list)) list
-			(memq item (cdr list))
+(define memq (lambda (key lst)
+	(if (null? lst) #f
+		(if (eq? item (car lst)) lst
+			(memq item (cdr lst))
 		)
 	)
 ))
 
-(define memv (lambda (item list)
-	(if (null? list) #f
-		(if (eqv? item (car list)) list
-			(memv item (cdr list))
+(define memv (lambda (item lst)
+	(if (null? lst) #f
+		(if (eqv? item (car lst)) lst
+			(memv item (cdr lst))
 		)
 	)
 ))
 
-(define member (lambda (item list)
-	(if (null? list) #f
-		(if (equal? item (car list)) list
-			(member item (cdr list))
+(define member (lambda (item lst)
+	(if (null? lst) #f
+		(if (equal? item (car lst)) lst
+			(member item (cdr lst))
 		)
 	)
 ))
@@ -125,6 +125,18 @@
 	(case-match alist ()
 		(() #f)
 		(((k v) . rest) (if (eqv? k key) v (assoc key rest)))
+	)
+))
+
+; 6.3.3 Symbols
+(define symbol->string to-string)
+
+
+; 6.3.4 Characters
+(define char-numeric? (lambda (c)
+	(if (char? c)
+		(if (char-decimal-digit c) #t #f)
+		#f
 	)
 ))
 

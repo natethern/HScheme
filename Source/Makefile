@@ -236,11 +236,9 @@ Interactive.o : FMapBindings.hi
 Interactive.o : SystemInterface.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : ../../HBase/Source/Interface//HBase.hi
-InteractiveMain.o : ../../HBase/Source/Basic//Type.hi
 InteractiveMain.o : Pure.hi
 InteractiveMain.o : Full.hi
 InteractiveMain.o : SchemeCPS.hi
-InteractiveMain.o : ../../HBase/Source/Category//ContinuationPassing.hi
 InteractiveMain.o : Interactive.hi
 InteractiveMain.o : SystemInterface.hi
 InteractiveMain.o : IOBindings.hi

@@ -388,6 +388,52 @@ module Conversions where
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) Number;
 
+
+	-- Integer
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) Integer where
+		{
+		getConvert i = getConvert (convert i :: Number);
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m Integer (Object r m) where
+		{
+		getMaybeConvert obj = do
+			{
+			mn <- getMaybeConvert obj;
+			return (do
+				{
+				(n :: Number) <- mn;
+				maybeConvert n;
+				});
+			};
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) Integer;
+
+
+	-- Integer
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) Rational where
+		{
+		getConvert i = getConvert (convert i :: Number);
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m Rational (Object r m) where
+		{
+		getMaybeConvert obj = do
+			{
+			mn <- getMaybeConvert obj;
+			return (do
+				{
+				(n :: Number) <- mn;
+				maybeConvert n;
+				});
+			};
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) Rational;
+
 	
 	-- Symbol
 

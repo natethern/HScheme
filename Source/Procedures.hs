@@ -96,7 +96,27 @@ module Procedures where
 	appendP ::  (Scheme x m r) =>
 	 Type (r ()) -> [[Object r m]] -> m [Object r m];
 	appendP Type listlist = return (concatenateList listlist);
-	
+
+	-- 6.3.3 Symbols
+	isSymbolP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isSymbolP Type (SymbolObject _,()) = return True;
+	isSymbolP Type (_,()) = return False;
+
+	makeSymbolP :: (Scheme x m r) =>
+	 Type (r ()) -> (StringType,()) -> m Symbol;
+	makeSymbolP Type (MkStringType s,()) = return (MkSymbol s);
+
+	-- 6.3.4 Characters
+	charTestP :: (Scheme x m r) =>
+	 (Char -> Bool) -> Type (r ()) -> (Object r m,()) -> m Bool;
+	charTestP f Type (CharObject c,()) = return (f c);
+	charTestP f Type (_,()) = return False;
+
+	charFuncP :: (Scheme x m r) =>
+	 (Char -> a) -> Type (r ()) -> (Char,()) -> m a;
+	charFuncP f Type (c,()) = return (f c);
+
 	-- 6.4 Control Features
 	applyP :: (Scheme x m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
