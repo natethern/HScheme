@@ -24,6 +24,7 @@ module Lambda where
 	{
 	import Evaluate;
 	import Procedures;
+	import Conversions;
 	import Object;
 	import Subtype;
 	import Type;
@@ -119,6 +120,51 @@ module Lambda where
 		) =>
 	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
 	letStarS Type (newbinds,body) = letStar ?bindings newbinds body;
+
+	matchBinding :: (Scheme x m r) =>
+	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m);
+	matchBinding bindings (SymbolObject name) arg = do
+		{
+		loc <- newLocation arg;
+		return (newBinding bindings name loc);
+		};
+	matchBinding bindings NilObject arg = do
+		{
+		() <- convertFromObject arg;
+		return bindings;
+		};
+	matchBinding bindings (PairObject hloc tloc) arg = do
+		{
+		(argh,argt) <- convertFromObject arg;
+		head <- getLocation hloc;
+		bindings' <- matchBinding bindings head argh;
+		tail <- getLocation tloc;
+		bindings'' <- matchBinding bindings' tail argt;
+		return bindings'';
+		};
+
+	matchBindings :: (Scheme x m r) =>
+	 Bindings r m -> Object r m -> [Object r m] -> m (Bindings r m);
+	matchBindings bindings (SymbolObject name) args = do
+		{
+		argList <- getConvert args;
+		argListLoc <- newLocation argList;
+		return (newBinding bindings name argListLoc);
+		};
+	matchBindings bindings NilObject args = do
+		{
+		() <- convertFromObjects args;
+		return bindings;
+		};
+	matchBindings bindings (PairObject hloc tloc) args = do
+		{
+		(argh,argt) <- convertFromObjects args;
+		head <- getLocation hloc;
+		bindings' <- matchBinding bindings head argh;
+		tail <- getLocation tloc;
+		bindings'' <- matchBindings bindings' tail argt;
+		return bindings'';
+		};
 {--
 	bindArgList :: (Scheme x m r) =>
 	 Object r m -> m (Object r m) -> Procedure r m;
@@ -131,13 +177,12 @@ module Lambda where
 	bindArgList _ _ _ = fail "";
 --}
 	lambda :: (Scheme x m r) => Object r m -> [Object r m] -> m (Procedure r m);
-	lambda (SymbolObject argName) body = do
+	lambda argNames body = do
 		{
 		return (\bindings args -> do
 			{
-			argList <- getConvert args;
-			argListLoc <- newLocation argList;
-			begin (newBinding bindings argName argListLoc) body;
+			bindings' <- matchBindings bindings argNames args;
+			begin bindings' body;
 			});
 		};
 	

@@ -158,6 +158,7 @@ Lambda.o : Lambda.hs
 Lambda.o : Common/Type.hi
 Lambda.o : Common/Subtype.hi
 Lambda.o : Object.hi
+Lambda.o : Conversions.hi
 Lambda.o : Procedures.hi
 Lambda.o : Evaluate.hi
 Bindings.o : Bindings.hs
