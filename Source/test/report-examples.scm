@@ -106,7 +106,7 @@
 
 "library procedure:  (max x1 x2 ...)"
 (max 3 4)								;===>  4    ; exact
-(max 3.9 4)								;===>  4.0  ; inexact	SHOULD BE 4
+(max 3.9 4)								;===>  4.0  ; inexact
 
 "procedure:  (+ z1 ...)"
 "procedure:  (* z1 ...)"
@@ -156,26 +156,26 @@
 "procedure:  (denominator q)"
 (numerator (/ 6 4))						;===>  3
 (denominator (/ 6 4))					;===>  2
-(denominator (exact->inexact (/ 6 4)))	;===> 2.0	SHOULD BE 2
+(denominator (exact->inexact (/ 6 4)))	;===> 2.0
 
 "procedure:  (floor x)"
 "procedure:  (ceiling x)"
 "procedure:  (truncate x)"
 "procedure:  (round x)"
-(floor -4.3)							;===>  -5.0				SHOULD BE -5
-(ceiling -4.3)							;===>  -4.0				SHOULD BE -4
-(truncate -4.3)							;===>  -4.0				SHOULD BE -4
-(round -4.3)							;===>  -4.0				SHOULD BE -4
-(floor 3.5)								;===>  3.0				SHOULD BE 3
-(ceiling 3.5)							;===>  4.0				SHOULD BE 4
-(truncate 3.5)							;===>  3.0				SHOULD BE 3
-(round 3.5)								;===>  4.0  ; inexact	SHOULD BE 4
+(floor -4.3)							;===>  -5.0
+(ceiling -4.3)							;===>  -4.0
+(truncate -4.3)							;===>  -4.0
+(round -4.3)							;===>  -4.0
+(floor 3.5)								;===>  3.0
+(ceiling 3.5)							;===>  4.0
+(truncate 3.5)							;===>  3.0
+(round 3.5)								;===>  4.0  ; inexact
 (round 7/2)								;===>  4    ; exact
 (round 7)								;===>  7
 
 "library procedure:  (rationalize x y)"
 (rationalize (inexact->exact .3) 1/10)	;===> 1/3    ; exact
-(rationalize .3 1/10)					;===> #i1/3  ; inexact	SHOULD BE 1/3
+(rationalize .3 1/10)					;===> #i1/3  ; inexact
 
 
 "6.2.6  Numerical input and output"

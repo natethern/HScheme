@@ -49,6 +49,37 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 (a -> x) -> (a,()) -> m x;
 	unaryP f (a,()) = return (f a);
 
+	unaryMRoundP :: (Monad m) =>
+	 (EIReal -> m Integer) -> (EIReal,()) -> m EIReal;
+	unaryMRoundP f (a@(ExactReal _),()) = fmap (ExactReal . convert) (f a);
+	unaryMRoundP f (a@(InexactReal _),()) = fmap (InexactReal . fromInteger) (f a);
+
+	unaryRoundP :: (Monad m) =>
+	 (EIReal -> Integer) -> (EIReal,()) -> m EIReal;
+	unaryRoundP f = unaryMRoundP (return . f);
+
+	unaryRationalRoundP ::
+		(
+		Build m r,
+		ObjectSubtype r obj EIReal,
+		ProcedureError m obj,
+		?objType :: Type obj
+		) =>
+	 (Rational -> Integer) -> (EIReal,()) -> m EIReal;
+	unaryRationalRoundP f = unaryMRoundP (\eir -> case maybeApproximate eir of
+		{
+		Just r -> return (f r);
+		Nothing -> do
+			{
+			obj <- getObject eir;
+			throwArgumentListMismatchError (WrongArgumentType 1 (MkMismatch RationalTypeExpected obj));
+			};
+		});
+
+	checkInexact :: (EIReal -> EIReal -> EIReal) -> EIReal -> EIReal -> EIReal;
+	checkInexact f a@(ExactReal _) b@(ExactReal _) = f a b;
+	checkInexact f a b = InexactReal (toInexact (f a b));
+
 	objPropertyP :: (Monad m,?objType :: Type obj) =>
 	 (obj -> m Bool) -> (obj,()) -> m Bool;
 	objPropertyP f (a,()) = f a;
@@ -131,8 +162,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"negative?"						(unaryP (isNegativeStrict :: EIReal -> Bool)),
 		addProcBinding	"odd?"							(unaryP (isOdd :: Integer -> Bool)),
 		addProcBinding	"even?"							(unaryP (isEven :: Integer -> Bool)),
-		addProcBinding	"max"							(foldingLP1 (max :: EIReal -> EIReal -> EIReal)),
-		addProcBinding	"min"							(foldingLP1 (min :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"max"							(foldingLP1 (checkInexact (max :: EIReal -> EIReal -> EIReal))),
+		addProcBinding	"min"							(foldingLP1 (checkInexact (min :: EIReal -> EIReal -> EIReal))),
 		addProcBinding	"+"								(foldingLP ((+) :: Number -> Number -> Number) 0),
 		addProcBinding	"*"								(foldingLP ((*) :: Number -> Number -> Number) 1),
 		addProcBinding	"-"								subtractP,
@@ -143,13 +174,14 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"modulo"						(binaryP (switchArgs failingModulo :: EIReal -> EIReal -> EIReal)),
 		addProcBinding	"gcd"							(listaryP (gcd :: [Integer] -> Integer)),
 		addProcBinding	"lcm"							(listaryP (lcm :: [Integer] -> Integer)),
-		addProcBinding	"numerator"						(unaryP (numerator :: Rational -> Integer)),
-		addProcBinding	"denominator"					(unaryP (denominator :: Rational -> Integer)),
-		addProcBinding	"floor"							(unaryP (failingFloor :: EIReal -> Integer)),
-		addProcBinding	"ceiling"						(unaryP (failingCeiling :: EIReal -> Integer)),
-		addProcBinding	"truncate"						(unaryP (let {?rounding = roundTowardZero} in failingRound :: EIReal -> Integer)),
-		addProcBinding	"round"							(unaryP (let {?rounding = roundHalfEven} in failingRound :: EIReal -> Integer)),
+		addProcBinding	"numerator"						(unaryRationalRoundP (numerator :: Rational -> Integer)),
+		addProcBinding	"denominator"					(unaryRationalRoundP (denominator :: Rational -> Integer)),
+		addProcBinding	"floor"							(unaryRoundP (failingFloor :: EIReal -> Integer)),
+		addProcBinding	"ceiling"						(unaryRoundP (failingCeiling :: EIReal -> Integer)),
+		addProcBinding	"truncate"						(unaryRoundP (let {?rounding = roundTowardZero} in failingRound :: EIReal -> Integer)),
+		addProcBinding	"round"							(unaryRoundP (let {?rounding = roundHalfEven} in failingRound :: EIReal -> Integer)),
 		addProcBinding	"rationalize"					rationalizeP,
+		addProcBinding	"rationalize-exact"				rationalizeExactP,
 		addProcBinding	"exp"							(unaryNumberP exp),
 		addProcBinding	"log"							(unaryNumberP log),
 		addProcBinding	"sin"							(unaryNumberP sin),

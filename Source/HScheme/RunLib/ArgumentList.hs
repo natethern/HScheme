@@ -38,6 +38,15 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		 Int -> [obj] -> cm (ArgumentMatchMonad obj a);
 		};
 
+	getArgumentMatch ::
+		(
+		ProcedureError cm obj,
+		?objType :: Type obj
+		) =>
+	 ArgumentMatchMonad obj a -> cm a;
+	getArgumentMatch (SuccessResult a) = return a;
+	getArgumentMatch (ExceptionResult am) = throwArgumentListMismatchError am;
+
 	convertFromObjects ::
 		(
 		ProcedureError cm obj,
@@ -49,11 +58,7 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	convertFromObjects args = do
 		{
 		ma <- maybeConvertFromObjects 0 args;
-		case ma of
-			{
-			SuccessResult a -> return a;
-			ExceptionResult am -> throwArgumentListMismatchError am;
-			};
+		getArgumentMatch ma;
 		};
 
 	instance (ListObject r obj) =>

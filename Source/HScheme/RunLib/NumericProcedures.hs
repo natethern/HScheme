@@ -49,13 +49,25 @@ module Org.Org.Semantic.HScheme.RunLib.NumericProcedures where
 	 (Number,()) -> m Bool;
 	isZeroP (n,()) = return (isZero n);
 
-	rationalizeP :: (Monad m) =>
-	 (EIReal,(EIReal,())) -> m (Either Bool Rational);
-	rationalizeP (x,(y,_)) = return (case simplestRational (x - y) (x + y) of
+	rationalizeExact :: EIReal -> EIReal -> Either Bool Rational;
+	rationalizeExact x y = case simplestRational (x - y) (x + y) of
 		{
 		Just r -> Right r;
 		Nothing -> Left False;
-		});
+		};
+
+	mapRight :: (a -> b) -> Either x a -> Either x b;
+	mapRight _ (Left x) = Left x;
+	mapRight f (Right a) = Right (f a);
+
+	rationalizeExactP :: (Monad m) =>
+	 (EIReal,(EIReal,())) -> m (Either Bool Rational);
+	rationalizeExactP (x,(y,_)) = return (rationalizeExact x y);
+
+	rationalizeP :: (Monad m) =>
+	 (EIReal,(EIReal,())) -> m (Either Bool EIReal);
+	rationalizeP (x@(ExactReal _),(y@(ExactReal _),_)) = return (mapRight convert (rationalizeExact x y));
+	rationalizeP (x,(y,_)) = return (mapRight (InexactReal . approximate) (rationalizeExact x y));
 
 	eirMod :: EIReal -> EIReal -> EIReal;
 	eirMod n d = case maybeModulo d n of

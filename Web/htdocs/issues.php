@@ -9,11 +9,10 @@
 <H1>HScheme Issues</H1>
 <P>HScheme is intended to be R<SUP>5</SUP>RS-compliant when run with the default monad and bindings. As of <? echo date("Y-m-d H:i",getlastmod()); ?>, these issues stand before release:</P>
 <UL>
-<LI><P>Macros are not hygienic. I just noticed this after adding test cases from chapter 4 of R5RS. This is my current top priority.</P>
+<LI><P>Macros are not hygienic. I just noticed this after adding test cases from chapter 4 of R<SUP>5</SUP>RS. This is my current top priority.</P>
 <LI><P>Ellipses don't work in vectors in <TT>syntax-rules</TT>.</P>
 <LI><P>The <TT>quasiquote</TT> implementation isn't standard.</P>
 <LI><P>The procedure <TT>eval</TT> exists, but no environments are available to use it with.</P>
-<LI><P>HScheme returns exact results to certain functions when given inexact arguments, such as <TT>floor</TT>, <TT>quotient</TT>, <TT>rationalize</TT>.</P>
 <LI><P>I expect there are missing and broken procedures and macros. I haven't yet checked every one.</P>
 </UL>
 <P CLASS=path>
