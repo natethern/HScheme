@@ -80,7 +80,7 @@ module Main where
 		(bindings :: Bindings IORef m) <- chainList
 			[
 			monadFixFullBindings,
-			pureSystemBindings (ioPureSystemInterface id)
+			pureSystemBindings (ioQuietPureSystemInterface id)
 			] emptyBindings;
 		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id) bindings "Prelude.full.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
@@ -94,7 +94,7 @@ module Main where
 		(bindings :: Bindings IORef (CPS IORef)) <- chainList
 			[
 			monadContFullBindings,
-			pureSystemBindings (ioPureSystemInterface (lift . lift))
+			pureSystemBindings (ioQuietPureSystemInterface (lift . lift))
 			] emptyBindings;
 		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift)) bindings "Prelude.full.scm";
 		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
