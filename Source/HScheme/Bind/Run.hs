@@ -79,10 +79,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	commonStrictPureBindings ::
 		(
 		Build cm r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Scheme m r
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	commonStrictPureBindings = concatenateList
 		[
 		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
@@ -281,12 +280,11 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		Scheme m r,
-		?objType :: Type (Object r m),
 		?macrobindings :: Symbol -> Maybe (Macro im r m),
         ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r m)
 		) =>
 	 (forall a. im a -> m a) ->
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	evalBindings remonad = concatenateList
 		[
 		-- 6.5 Eval
@@ -296,19 +294,17 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	simpleStrictPureBindings ::
 		(
 		Build cm r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Scheme m r
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	simpleStrictPureBindings = commonStrictPureBindings;
 
 	commonPureBindings ::
 		(
 		Build cm r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Scheme m r
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	commonPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
@@ -333,20 +329,18 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	simplePureBindings ::
 		(
 		Build cm r,
-		Scheme m r,
-		?objType :: Type (Object r m)
+		Scheme m r
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	simplePureBindings = commonPureBindings;
 
 	monadContBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		MonadCont m,
-		?objType :: Type (Object r m)
+		MonadCont m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -357,10 +351,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		Scheme m r,
-		MonadGuard m,
-		?objType :: Type (Object r m)
+		MonadGuard m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadGuardBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -371,10 +364,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		Scheme m r,
-		MonadFix m,
-		?objType :: Type (Object r m)
+		MonadFix m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
@@ -385,49 +377,44 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		Scheme m r,
-		MonadFix m,
-		?objType :: Type (Object r m)
+		MonadFix m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
 
 	monadContStrictPureBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		MonadCont m,
-		?objType :: Type (Object r m)
+		MonadCont m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
 
 	monadFixPureBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		MonadFix m,
-		?objType :: Type (Object r m)
+		MonadFix m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
 
 	monadContPureBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		MonadCont m,
-		?objType :: Type (Object r m)
+		MonadCont m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadContPureBindings = simplePureBindings ++ monadContBindings;
 
 	simpleFullBindings ::
 		(
 		Build cm r,
-		FullScheme m r,
-		?objType :: Type (Object r m)
+		FullScheme m r
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	simpleFullBindings = concatenateList
 		[
 		commonPureBindings,
@@ -455,10 +442,9 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		FullScheme m r,
-		MonadFix m,
-		?objType :: Type (Object r m)
+		MonadFix m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
 
 	-- this one is closest to R5RS
@@ -466,20 +452,18 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		Build cm r,
 		FullScheme m r,
-		MonadCont m,
-		?objType :: Type (Object r m)
+		MonadCont m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	monadContFullBindings = simpleFullBindings ++ monadContBindings;
 
 	fullSystemBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		?objType :: Type (Object r m),
 		?system :: System m
 		) =>
-	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	fullSystemBindings = concatenateList
 		[
 		-- 6.6.1 Ports

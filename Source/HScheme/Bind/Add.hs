@@ -30,29 +30,34 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	addBinding :: sym -> a -> Bindings sym a -> Bindings sym a;
 	addBinding sym a b = newBinding b sym a;
 
+	type RefBindings cm r obj =
+		(
+		?objType :: Type obj
+		) =>
+	 SymbolBindings (r obj) -> cm (SymbolBindings (r obj));
+
 	addLocationBinding :: (Build cm r) =>
 	 Symbol ->
 	 obj ->
-	 SymbolBindings (r obj) ->
-	 cm (SymbolBindings (r obj));
+	 RefBindings cm r obj;
 	addLocationBinding name obj b = do
 		{
 		(_,b') <- newRefBinding b name obj;
 		return b';
 		};
 
+	type LocationBindings cm r m = RefBindings cm r (Object r m);
+
 	addProcBinding ::
 		(
 		Build cm r,
 		BuildThrow m (Object r m) r,
 		ArgumentList r (Object r m) args,
-		ObjectSubtype r (Object r m) ret,
-		?objType :: Type (Object r m)
+		ObjectSubtype r (Object r m) ret
 		) =>
 	 String ->
 	 ((?objType :: Type (Object r m)) => args -> m ret) ->
-	 SymbolBindings (ObjLocation r m) ->
-	 cm (SymbolBindings (ObjLocation r m));
+	 LocationBindings cm r m;
 	addProcBinding name p b = addLocationBinding (MkSymbol name)
 	 (ProcedureObject (convertToProcedure p)) b;
 

@@ -72,9 +72,9 @@ module Main where
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 ((?toplevelbindings :: Bindings Symbol (TopLevelMacro IO r m)) => Bindings Symbol (Macro IO r m) -> Bindings Symbol (Macro IO r m)) ->
-	 ((?toplevelbindings :: Bindings Symbol (TopLevelMacro IO r m)) => Bindings Symbol (TopLevelMacro IO r m) -> Bindings Symbol (TopLevelMacro IO r m)) ->
-	 (Bindings Symbol (ObjLocation r m) -> IO (Bindings Symbol (ObjLocation r m))) ->
+	 MacroBindings IO r m ->
+	 TopLevelBindings IO r m ->
+	 LocationBindings IO r m ->
 	 String ->
 	 String ->
 	 IO ();
