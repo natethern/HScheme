@@ -54,6 +54,7 @@ HC_SRCS			= \
 	Equality.hs	\
 	SExpChars.hs	\
 	SExpParser.hs	\
+	Syntax.hs	\
 	\
 	Bindings.hs	\
 	NumericProcedures.hs	\
@@ -207,6 +208,11 @@ SExpParser.o : Object.hi
 SExpParser.o : Conversions.hi
 SExpParser.o : Procedures.hi
 SExpParser.o : PortProcedures.hi
+Syntax.o : Syntax.hs
+Syntax.o : Common/Type.hi
+Syntax.o : Common/Subtype.hi
+Syntax.o : Object.hi
+Syntax.o : Conversions.hi
 Bindings.o : Bindings.hs
 Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
@@ -228,6 +234,7 @@ StandardBindings.o : NumericProcedures.hi
 StandardBindings.o : Equality.hi
 StandardBindings.o : Lambda.hi
 StandardBindings.o : PortProcedures.hi
+StandardBindings.o : ./Syntax.hi
 FMapBindings.o : FMapBindings.hs
 FMapBindings.o : Object.hi
 FullProcedures.o : FullProcedures.hs

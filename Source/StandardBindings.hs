@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module StandardBindings where
 	{
+	import Syntax;
 	import PortProcedures;
 	import Lambda;
 	import Equality;
@@ -48,6 +49,9 @@ module StandardBindings where
 		-- 4.2.2 Binding Constructs
 		addMacroBinding	"let"					letM,
 		addMacroBinding	"let*"					letStarM,
+
+		-- 4.3.2 Pattern Language
+		addMacroBinding	"syntax-rules"			syntaxRulesM,
 
 		-- 5.2 Definitions
 		addTopLevelMacroBinding	"define"		defineT,

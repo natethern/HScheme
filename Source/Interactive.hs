@@ -111,7 +111,7 @@ module Interactive where
 			fullStdBindings,
 			fullSystemBindings fsi
 		 	] emptyBindings;
-		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
+		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.full.scm")
 			(\error -> do
 			{
 			reportError t (fsiCurrentErrorPort fsi) error;

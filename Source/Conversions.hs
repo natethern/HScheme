@@ -512,4 +512,20 @@ module Conversions where
 		};
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) (Procedure r m);
+
+	
+	-- Syntax
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) (Syntax r m) where
+		{
+		getConvert = return . SyntaxObject;
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m (Syntax r m) (Object r m) where
+		{
+		getMaybeConvert (SyntaxObject a) = return (Just a);
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (Syntax r m);
 	}
