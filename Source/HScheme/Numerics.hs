@@ -20,31 +20,21 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module FullStandardBindings where
+module Org.Org.Semantic.HScheme.Numerics where
 	{
-	import Equality;
-	import FullProcedures;
-	import StandardBindings;
-	import Bindings;
-	import Object;
-
-	fullStdBindings :: (FullScheme x m r) => Bindings r m -> m (Bindings r m);
-	fullStdBindings = chainList
-		[
-		monadicStdBindings,
-
-		-- 4.1.6 Assignments
-		addMacroBinding "set!"			setBangM,
-
-		-- 6.1 Equivalence Predicates
-		addProcBinding "eqv?"			eqvP,
-		addProcBinding "eq?"			eqP,
-
-		-- 6.3.2 Pairs and Lists
-		addProcBinding "set-car!"		setCarP,
-		addProcBinding "set-cdr!"		setCdrP,
-
-		-- 6.3.5 Strings
-		addProcBinding "string-set!"	stringSetP
-		];
+	import Org.Org.Semantic.HBase;
+	
+	type Number = Complex Rational;
+	
+	equalNumber :: Number -> Number -> Bool;
+	equalNumber = (==);
+	
+	eqvNumber :: Number -> Number -> Bool;
+	eqvNumber = (==);
+	
+	eqNumber :: Number -> Number -> Bool;
+	eqNumber = (==);
+	
+	isExactN :: Number -> Bool;
+	isExactN = const True;
 	}

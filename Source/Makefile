@@ -23,58 +23,61 @@ GHC = ghc  -package lang  $*
 HC				= ghc
 HCI				= ghci
 HCPACKAGES		= -package data
-HCIMPORTDIRS	= -i. -i../../HBase/Source/Basic/ -i../../HBase/Source/Category/ -i../../HBase/Source/Mathematics/ -i../../HBase/Source/Text/ -i../../HBase/Source/Imperative/ -i../../HBase/Source/Interface/
+HCIMPORTDIRS	= -i. -i/usr/share/haskell-import
 #HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
 HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
+HROOT			= Org/Org/Semantic
+HIER			= $(HROOT)/HScheme
 LDH				= $(HC) -pgml$(CC) $(HCPACKAGES)
 LDFLAGS			=
 
 HC_SRCS			= \
-	Numerics.hs	\
-	Port.hs	\
-	InputPortParser.hs	\
+	$(HIER)/Numerics.hs	\
+	$(HIER)/Port.hs	\
+	$(HIER)/InputPortParser.hs	\
 	\
-	Object.hs	\
-	Conversions.hs	\
-	Evaluate.hs	\
-	TopLevel.hs	\
-	SystemInterface.hs	\
-	Procedures.hs	\
-	Lambda.hs	\
-	PortProcedures.hs	\
-	Equality.hs	\
-	SExpChars.hs	\
-	SExpParser.hs	\
-	Syntax.hs	\
+	$(HIER)/Object.hs	\
+	$(HIER)/Conversions.hs	\
+	$(HIER)/Evaluate.hs	\
+	$(HIER)/TopLevel.hs	\
+	$(HIER)/SystemInterface.hs	\
+	$(HIER)/Procedures.hs	\
+	$(HIER)/Lambda.hs	\
+	$(HIER)/PortProcedures.hs	\
+	$(HIER)/Equality.hs	\
+	$(HIER)/SExpChars.hs	\
+	$(HIER)/SExpParser.hs	\
+	$(HIER)/Syntax.hs	\
 	\
-	Bindings.hs	\
-	NumericProcedures.hs	\
-	StandardBindings.hs	\
-	FMapBindings.hs	\
-	FullProcedures.hs	\
-	FullStandardBindings.hs	\
-	IOBindings.hs	\
+	$(HIER)/Bindings.hs	\
+	$(HIER)/NumericProcedures.hs	\
+	$(HIER)/StandardBindings.hs	\
+	$(HIER)/FMapBindings.hs	\
+	$(HIER)/FullProcedures.hs	\
+	$(HIER)/FullStandardBindings.hs	\
+	$(HIER)/IOBindings.hs	\
 	\
-	SchemeCPS.hs	\
-	Interactive.hs	\
+	$(HIER)/SchemeCPS.hs	\
+	$(HIER)/Interactive.hs	\
 	InteractiveMain.hs
 
 OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
 
+COMMAND	=hscheme.cmd
 
 default: build
 
 clean:
-	rm -f hscheme Makefile.bak
-	rm -f *.hi *.o
+	rm -f $(COMMAND) Makefile.bak
+	rm -f *.hi *.o $(HIER)/*.hi $(HIER)/*.o
 
-build: hscheme
+build: $(COMMAND)
 
-hscheme: $(OBJS) ../../HBase/Source/libHBase.a
-	$(LDH) $(filter %.o,$^) ../../HBase/Source/libHBase.a $(LDFLAGS) -o $@
+$(COMMAND): $(OBJS) /usr/lib/libHBase.a
+	$(LDH) $(filter %.o,$^) /usr/lib/libHBase.a $(LDFLAGS) -o $@
 
-test: hscheme
+test: $(COMMAND)
 	./$<
 
 # Standard suffix rules
@@ -95,141 +98,145 @@ test: hscheme
 
 depend: $(HC_SRCS)
 	$(HC) -M $(HCFLAGS) $^
+
+$(HROOT):
+	mkdir -p Org/Org/
+	cd Org/Org/; ln -s ../../ Semantic
+
 # DO NOT DELETE: Beginning of Haskell dependencies
-Numerics.o : Numerics.hs
-Numerics.o : ../../HBase/Source/Interface//HBase.hi
-Port.o : Port.hs
-Port.o : ../../HBase/Source/Interface//HBase.hi
-InputPortParser.o : InputPortParser.hs
-InputPortParser.o : ../../HBase/Source/Interface//HBase.hi
-InputPortParser.o : Port.hi
-Object.o : Object.hs
-Object.o : ../../HBase/Source/Interface//HBase.hi
-Object.o : Numerics.hi
-Object.o : Port.hi
-Conversions.o : Conversions.hs
-Conversions.o : ../../HBase/Source/Interface//HBase.hi
-Conversions.o : Numerics.hi
-Conversions.o : Port.hi
-Conversions.o : Object.hi
-Evaluate.o : Evaluate.hs
-Evaluate.o : ../../HBase/Source/Interface//HBase.hi
-Evaluate.o : Object.hi
-TopLevel.o : TopLevel.hs
-TopLevel.o : ../../HBase/Source/Interface//HBase.hi
-TopLevel.o : Object.hi
-TopLevel.o : Conversions.hi
-TopLevel.o : Evaluate.hi
-SystemInterface.o : SystemInterface.hs
-SystemInterface.o : ../../HBase/Source/Interface//HBase.hi
-SystemInterface.o : Port.hi
-SystemInterface.o : Object.hi
-SystemInterface.o : Conversions.hi
-SystemInterface.o : SExpParser.hi
-SystemInterface.o : Procedures.hi
-SystemInterface.o : TopLevel.hi
-SystemInterface.o : Bindings.hi
-Procedures.o : Procedures.hs
-Procedures.o : ../../HBase/Source/Interface//HBase.hi
-Procedures.o : Object.hi
-Procedures.o : Conversions.hi
-Procedures.o : Evaluate.hi
-Lambda.o : Lambda.hs
-Lambda.o : ../../HBase/Source/Interface//HBase.hi
-Lambda.o : Object.hi
-Lambda.o : Conversions.hi
-Lambda.o : Procedures.hi
-Lambda.o : Evaluate.hi
-Lambda.o : TopLevel.hi
-PortProcedures.o : PortProcedures.hs
-PortProcedures.o : ../../HBase/Source/Interface//HBase.hi
-PortProcedures.o : Port.hi
-PortProcedures.o : Object.hi
-PortProcedures.o : Conversions.hi
-Equality.o : Equality.hs
-Equality.o : ../../HBase/Source/Interface//HBase.hi
-Equality.o : Numerics.hi
-Equality.o : Object.hi
-SExpChars.o : SExpChars.hs
-SExpChars.o : ../../HBase/Source/Interface//HBase.hi
-SExpParser.o : SExpParser.hs
-SExpParser.o : ../../HBase/Source/Interface//HBase.hi
-SExpParser.o : SExpChars.hi
-SExpParser.o : InputPortParser.hi
-SExpParser.o : Port.hi
-SExpParser.o : Object.hi
-SExpParser.o : Conversions.hi
-SExpParser.o : Procedures.hi
-SExpParser.o : PortProcedures.hi
-Syntax.o : Syntax.hs
-Syntax.o : ../../HBase/Source/Interface//HBase.hi
-Syntax.o : Object.hi
-Syntax.o : Bindings.hi
-Syntax.o : Conversions.hi
-Syntax.o : Evaluate.hi
-Bindings.o : Bindings.hs
-Bindings.o : ../../HBase/Source/Interface//HBase.hi
-Bindings.o : Object.hi
-Bindings.o : Conversions.hi
-NumericProcedures.o : NumericProcedures.hs
-NumericProcedures.o : ../../HBase/Source/Interface//HBase.hi
-NumericProcedures.o : Numerics.hi
-NumericProcedures.o : Object.hi
-NumericProcedures.o : Conversions.hi
-StandardBindings.o : StandardBindings.hs
-StandardBindings.o : ../../HBase/Source/Interface//HBase.hi
-StandardBindings.o : Numerics.hi
-StandardBindings.o : Object.hi
-StandardBindings.o : Bindings.hi
-StandardBindings.o : Evaluate.hi
-StandardBindings.o : TopLevel.hi
-StandardBindings.o : Procedures.hi
-StandardBindings.o : NumericProcedures.hi
-StandardBindings.o : Equality.hi
-StandardBindings.o : Lambda.hi
-StandardBindings.o : PortProcedures.hi
-StandardBindings.o : Syntax.hi
-FMapBindings.o : FMapBindings.hs
-FMapBindings.o : ../../HBase/Source/Interface//HBase.hi
-FMapBindings.o : Object.hi
-FullProcedures.o : FullProcedures.hs
-FullProcedures.o : ../../HBase/Source/Interface//HBase.hi
-FullProcedures.o : Object.hi
-FullProcedures.o : Conversions.hi
-FullProcedures.o : Evaluate.hi
-FullStandardBindings.o : FullStandardBindings.hs
-FullStandardBindings.o : Object.hi
-FullStandardBindings.o : Bindings.hi
-FullStandardBindings.o : StandardBindings.hi
-FullStandardBindings.o : FullProcedures.hi
-FullStandardBindings.o : Equality.hi
-IOBindings.o : IOBindings.hs
-IOBindings.o : ../../HBase/Source/Interface//HBase.hi
-IOBindings.o : Port.hi
-IOBindings.o : Object.hi
-IOBindings.o : SystemInterface.hi
-SchemeCPS.o : SchemeCPS.hs
-SchemeCPS.o : ../../HBase/Source/Interface//HBase.hi
-SchemeCPS.o : Object.hi
-SchemeCPS.o : ../../HBase/Source/Category//ContinuationPassing.hi
-SchemeCPS.o : Conversions.hi
-Interactive.o : Interactive.hs
-Interactive.o : ../../HBase/Source/Interface//HBase.hi
-Interactive.o : Port.hi
-Interactive.o : InputPortParser.hi
-Interactive.o : Object.hi
-Interactive.o : Conversions.hi
-Interactive.o : Procedures.hi
-Interactive.o : Bindings.hi
-Interactive.o : StandardBindings.hi
-Interactive.o : SExpParser.hi
-Interactive.o : FullStandardBindings.hi
-Interactive.o : FMapBindings.hi
-Interactive.o : SystemInterface.hi
+Org/Org/Semantic/HScheme/Numerics.o : Org/Org/Semantic/HScheme/Numerics.hs
+Org/Org/Semantic/HScheme/Numerics.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Port.o : Org/Org/Semantic/HScheme/Port.hs
+Org/Org/Semantic/HScheme/Port.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/InputPortParser.o : Org/Org/Semantic/HScheme/InputPortParser.hs
+Org/Org/Semantic/HScheme/InputPortParser.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/InputPortParser.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/Object.o : Org/Org/Semantic/HScheme/Object.hs
+Org/Org/Semantic/HScheme/Object.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Object.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme/Object.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Conversions.hs
+Org/Org/Semantic/HScheme/Conversions.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/Evaluate.hs
+Org/Org/Semantic/HScheme/Evaluate.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Evaluate.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/TopLevel.hs
+Org/Org/Semantic/HScheme/TopLevel.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/TopLevel.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/SystemInterface.hs
+Org/Org/Semantic/HScheme/SystemInterface.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/SExpParser.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/TopLevel.hi
+Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Procedures.hs
+Org/Org/Semantic/HScheme/Procedures.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Procedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Lambda.hs
+Org/Org/Semantic/HScheme/Lambda.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/Lambda.o : Org/Org/Semantic/HScheme/TopLevel.hi
+Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/PortProcedures.hs
+Org/Org/Semantic/HScheme/PortProcedures.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/PortProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Equality.hs
+Org/Org/Semantic/HScheme/Equality.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/SExpChars.o : Org/Org/Semantic/HScheme/SExpChars.hs
+Org/Org/Semantic/HScheme/SExpChars.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpParser.hs
+Org/Org/Semantic/HScheme/SExpParser.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpChars.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/InputPortParser.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/PortProcedures.hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Syntax.hs
+Org/Org/Semantic/HScheme/Syntax.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/Bindings.hs
+Org/Org/Semantic/HScheme/Bindings.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Bindings.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/NumericProcedures.hs
+Org/Org/Semantic/HScheme/NumericProcedures.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/NumericProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/StandardBindings.hs
+Org/Org/Semantic/HScheme/StandardBindings.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Numerics.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/TopLevel.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/NumericProcedures.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Equality.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Lambda.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/PortProcedures.hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Syntax.hi
+Org/Org/Semantic/HScheme/FMapBindings.o : Org/Org/Semantic/HScheme/FMapBindings.hs
+Org/Org/Semantic/HScheme/FMapBindings.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/FMapBindings.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/FullProcedures.hs
+Org/Org/Semantic/HScheme/FullProcedures.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/FullProcedures.o : Org/Org/Semantic/HScheme/Evaluate.hi
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/FullStandardBindings.hs
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/StandardBindings.hi
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/FullProcedures.hi
+Org/Org/Semantic/HScheme/FullStandardBindings.o : Org/Org/Semantic/HScheme/Equality.hi
+Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/IOBindings.hs
+Org/Org/Semantic/HScheme/IOBindings.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/IOBindings.o : Org/Org/Semantic/HScheme/SystemInterface.hi
+Org/Org/Semantic/HScheme/SchemeCPS.o : Org/Org/Semantic/HScheme/SchemeCPS.hs
+Org/Org/Semantic/HScheme/SchemeCPS.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/SchemeCPS.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/SchemeCPS.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Interactive.hs
+Org/Org/Semantic/HScheme/Interactive.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Port.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/InputPortParser.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Object.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Procedures.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/Bindings.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/StandardBindings.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SExpParser.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FullStandardBindings.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FMapBindings.hi
+Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SystemInterface.hi
 InteractiveMain.o : InteractiveMain.hs
-InteractiveMain.o : ../../HBase/Source/Interface//HBase.hi
-InteractiveMain.o : SchemeCPS.hi
-InteractiveMain.o : Interactive.hi
-InteractiveMain.o : SystemInterface.hi
-InteractiveMain.o : IOBindings.hi
+InteractiveMain.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
+InteractiveMain.o : Org/Org/Semantic/HScheme/SchemeCPS.hi
+InteractiveMain.o : Org/Org/Semantic/HScheme/Interactive.hi
+InteractiveMain.o : Org/Org/Semantic/HScheme/SystemInterface.hi
+InteractiveMain.o : Org/Org/Semantic/HScheme/IOBindings.hi
 # DO NOT DELETE: End of Haskell dependencies

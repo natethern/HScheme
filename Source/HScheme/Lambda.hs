@@ -20,14 +20,14 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Lambda where
+module Org.Org.Semantic.HScheme.Lambda where
 	{
-	import TopLevel;
-	import Evaluate;
-	import Procedures;
-	import Conversions;
-	import Object;
-	import HBase;
+	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 
 	-- 4.2.3 Sequencing
 	begin ::
@@ -66,7 +66,7 @@ module Lambda where
 		foo bindings [] = return bindings;
 		foo bindings ((name,(object,())):binds) = do
 			{
-			result <- evaluate object with {?bindings=original};
+			result <- let {?bindings=original} in evaluate object;
 			loc <- new result;
 			foo (newBinding bindings name loc) binds;
 			};
@@ -80,7 +80,7 @@ module Lambda where
 	accrueBindingsStar bindings [] = return bindings;
 	accrueBindingsStar bindings ((name,(object,())):binds) = do
 		{
-		result <- evaluate object with {?bindings=bindings};
+		result <- let {?bindings=bindings} in evaluate object;
 		loc <- new result;
 		accrueBindingsStar (newBinding bindings name loc) binds;
 		};

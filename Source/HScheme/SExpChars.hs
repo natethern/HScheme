@@ -20,9 +20,9 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module SExpChars where
+module Org.Org.Semantic.HScheme.SExpChars where
 	{
-	import HBase;
+	import Org.Org.Semantic.HBase;
 
 {--
 ASCII: 2^7 = 128

@@ -20,20 +20,20 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module StandardBindings where
+module Org.Org.Semantic.HScheme.StandardBindings where
 	{
-	import Syntax;
-	import PortProcedures;
-	import Lambda;
-	import Equality;
-	import NumericProcedures;
-	import Procedures;
-	import TopLevel;
-	import Evaluate;
-	import Bindings;
-	import Object;
-	import Numerics;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Syntax;
+	import Org.Org.Semantic.HScheme.PortProcedures;
+	import Org.Org.Semantic.HScheme.Lambda;
+	import Org.Org.Semantic.HScheme.Equality;
+	import Org.Org.Semantic.HScheme.NumericProcedures;
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Bindings;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Numerics;
+	import Org.Org.Semantic.HBase;
 
 	loop :: a;
 	loop = loop;
@@ -121,7 +121,7 @@ module StandardBindings where
 		addProcBinding	"char-number"					(charFuncP getNumber),					-- nonstandard
 		addProcBinding	"char-decimal-digit"			(charFuncP getDecimalDigit),			-- nonstandard
 		addProcBinding	"char->integer"					(charFuncP valueNthFromStart),
-		addProcBinding	"integer->char"					(\_ (i,()) -> return (unJust (nthValueFromStart i) :: Char)),
+		addProcBinding	"integer->char"					(\_ (i,()) -> return (failingUnJust (nthValueFromStart i) :: Char)),
 
 		-- 6.3.5 Strings
 		addProcBinding	"string?"						isStringP,

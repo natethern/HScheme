@@ -20,20 +20,20 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Interactive where
+module Org.Org.Semantic.HScheme.Interactive where
 	{
-	import SystemInterface;
-	import FMapBindings;
-	import FullStandardBindings;
-	import SExpParser;
-	import StandardBindings;
-	import Bindings;
-	import Procedures;
-	import Conversions;
-	import Object;
-	import InputPortParser;
-	import Port;
-	import HBase;
+	import Org.Org.Semantic.HScheme.SystemInterface;
+	import Org.Org.Semantic.HScheme.FMapBindings;
+	import Org.Org.Semantic.HScheme.FullStandardBindings;
+	import Org.Org.Semantic.HScheme.SExpParser;
+	import Org.Org.Semantic.HScheme.StandardBindings;
+	import Org.Org.Semantic.HScheme.Bindings;
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.InputPortParser;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HBase;
 
 	reportError :: (Scheme x m r) =>
 	 Type (r ()) -> OutputPort Char m -> x -> m ();

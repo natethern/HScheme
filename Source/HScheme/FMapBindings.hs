@@ -20,10 +20,10 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module FMapBindings where
+module Org.Org.Semantic.HScheme.FMapBindings where
 	{
-	import Object;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 
 	emptyBindings :: (Scheme x m r) => Bindings r m;
 	emptyBindings = toBindings empty where

@@ -20,11 +20,11 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Object where
+module Org.Org.Semantic.HScheme.Object where
 	{
-	import Port;
-	import Numerics;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HScheme.Numerics;
+	import Org.Org.Semantic.HBase;
 
 	class
 		(

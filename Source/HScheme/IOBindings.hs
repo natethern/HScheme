@@ -20,18 +20,18 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module IOBindings where
+module Org.Org.Semantic.HScheme.IOBindings where
 	{
-	import SystemInterface;
-	import Object;
-	import Port;
-	import HBase;
+	import Org.Org.Semantic.HScheme.SystemInterface;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HBase;
 	import IO;
 
-	handleInputPort :: (SemiLiftedMonad IO m) => Handle -> InputPort Char m;
+	handleInputPort :: (LiftedMonad IO m) => Handle -> InputPort Char m;
 	handleInputPort h = MkInputPort
 		{
-		ipRead = call (do
+		ipRead = lift (do
 			{
 			eof <- hIsEOF h;
 			if (eof) then return Nothing else do
@@ -40,7 +40,7 @@ module IOBindings where
 				return (Just c);
 				};
 			}),
-		ipPeek = call (do
+		ipPeek = lift (do
 			{
 			eof <- hIsEOF h;
 			if (eof) then return Nothing else do
@@ -49,47 +49,47 @@ module IOBindings where
 				return (Just c);
 				};
 			}),
-		ipReady	= call (hReady h),
-		ipClose = call (hClose h)
+		ipReady	= lift (hReady h),
+		ipClose = lift (hClose h)
 		};
 
-	handleOutputPort :: (SemiLiftedMonad IO m) => Handle -> OutputPort Char m;
+	handleOutputPort :: (LiftedMonad IO m) => Handle -> OutputPort Char m;
 	handleOutputPort h = MkOutputPort
 		{
-		opWrite = \mc -> call (case mc of
+		opWrite = \mc -> lift (case mc of
 			{
 			Nothing -> hClose h;
 			Just c -> hPutChar h c;
 			}),
-		opFlush = call (hFlush h)
+		opFlush = lift (hFlush h)
 		};
 
-	stdInputPort :: (SemiLiftedMonad IO m) => InputPort Char m;
+	stdInputPort :: (LiftedMonad IO m) => InputPort Char m;
 	stdInputPort = handleInputPort stdin;
 
-	stdOutputPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
+	stdOutputPort :: (LiftedMonad IO m) => OutputPort Char m;
 	stdOutputPort = handleOutputPort stdout;
 
-	stdErrorPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
+	stdErrorPort :: (LiftedMonad IO m) => OutputPort Char m;
 	stdErrorPort = handleOutputPort stderr;
 
-	openInputFile :: (SemiLiftedMonad IO m) =>
+	openInputFile :: (LiftedMonad IO m) =>
 	 String -> m (InputPort Char m);
 	openInputFile name = do
 		{
-		h <- call (openFile name ReadMode);
+		h <- lift (openFile name ReadMode);
 		return (handleInputPort h);
 		};
 
-	openOutputFile :: (SemiLiftedMonad IO m) =>
+	openOutputFile :: (LiftedMonad IO m) =>
 	 String -> m (OutputPort Char m);
 	openOutputFile name = do
 		{
-		h <- call (openFile name WriteMode);
+		h <- lift (openFile name WriteMode);
 		return (handleOutputPort h);
 		};
 
-	ioFullSystemInterface :: (Scheme x m r,SemiLiftedMonad IO m) =>
+	ioFullSystemInterface :: (Scheme x m r,LiftedMonad IO m) =>
 	 FullSystemInterface m r;
 	ioFullSystemInterface = MkFullSystemInterface
 		{

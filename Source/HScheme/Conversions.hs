@@ -20,12 +20,12 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Conversions where
+module Org.Org.Semantic.HScheme.Conversions where
 	{
-	import Object;
-	import Port;
-	import Numerics;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HScheme.Numerics;
+	import Org.Org.Semantic.HBase;
 
 	class (Scheme x m r) => ArgumentList x m r a where
 		{
@@ -107,7 +107,7 @@ module Conversions where
 	convertToProcedure foo bindings obj = do
 		{
 		args <- convertFromObjects obj;
-		r <- foo args with {?bindings=bindings;};
+		r <- let {?bindings=bindings;} in foo args;
 		getConvert r;
 		};
 	
@@ -122,7 +122,7 @@ module Conversions where
 	convertToMacro foo bindings obj = do
 		{
 		args <- convertFromObject obj;
-		r <- foo args with {?bindings=bindings;};
+		r <- let {?bindings=bindings;} in foo args;
 		getConvert r;
 		};
 	

@@ -20,16 +20,16 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module SystemInterface where
+module Org.Org.Semantic.HScheme.SystemInterface where
 	{
-	import Bindings;
-	import TopLevel;
-	import Procedures;
-	import SExpParser;
-	import Conversions;
-	import Object;
-	import Port;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Bindings;
+	import Org.Org.Semantic.HScheme.TopLevel;
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.SExpParser;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HBase;
 
 	data PureSystemInterface m r = MkPureSystemInterface
 		{

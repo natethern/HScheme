@@ -20,12 +20,11 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module SchemeCPS where
+module Org.Org.Semantic.HScheme.SchemeCPS where
 	{
-	import Conversions;
-	import ContinuationPassing;
-	import Object;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 
 	type SchemeCPS r p = ContinuationPass p (SchemeCPSError r p);
 
@@ -84,7 +83,7 @@ module SchemeCPS where
 		) =>
 	 MonadGettableReference (SchemeCPS r (m p)) r where
 		{
-		get r = call ((get :: r a -> m a) r);
+		get r = lift ((get :: r a -> m a) r);
 		};
 
 	instance
@@ -93,7 +92,7 @@ module SchemeCPS where
 		) =>
 	 MonadSettableReference (SchemeCPS r (m p)) r where
 		{
-		set r v = call ((set :: r a -> a -> m ()) r v);
+		set r v = lift ((set :: r a -> a -> m ()) r v);
 		};
 
 	instance
@@ -102,7 +101,7 @@ module SchemeCPS where
 		) =>
 	 MonadCreatable (SchemeCPS r (m p)) r where
 		{
-		new a = call ((new :: a -> m (r a)) a);
+		new a = lift ((new :: a -> m (r a)) a);
 		};
 
 	instance
@@ -111,7 +110,7 @@ module SchemeCPS where
 		) =>
 	 MonadEqualReference (SchemeCPS r (m p)) r where
 		{
-		getEqualReference a b = call ((getEqualReference :: r a -> r a -> m Bool) a b);
+		getEqualReference a b = lift ((getEqualReference :: r a -> r a -> m Bool) a b);
 		};
 
 	instance

@@ -20,16 +20,16 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module TopLevel
+module Org.Org.Semantic.HScheme.TopLevel
 	(
 	defineT,
 	topLevelEvaluate
 	) where
 	{
-	import Evaluate;
-	import Conversions;
-	import Object;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 	
 	-- 5.2 Definitions
 	defineT ::
@@ -53,7 +53,7 @@ module TopLevel
 							NilObject -> do
 								{
 								th <- get thead;
-								result <- evaluate th with {?bindings=bindings};
+								result <- let {?bindings=bindings} in evaluate th;
 								loc <- new result;
 								return (newBinding bindings name loc,MkArgNoneType);
 								};
@@ -80,7 +80,7 @@ module TopLevel
 		};
 	topLevelApplyEval bindings obj arglist = do
 		{
-		result <- applyEval obj arglist with {?bindings=bindings;};
+		result <- let {?bindings=bindings;} in applyEval obj arglist;
 		return (bindings,result);
 		};
 
@@ -103,7 +103,7 @@ module TopLevel
 				};
 			_ -> do
 				{
-				r <- evaluate a with {?bindings = bindings};
+				r <- let {?bindings = bindings} in evaluate a;
 				return (bindings,r);
 				};
 			};

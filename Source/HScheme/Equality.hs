@@ -20,11 +20,11 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Equality where
+module Org.Org.Semantic.HScheme.Equality where
 	{
-	import Object;
-	import Numerics;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Numerics;
+	import Org.Org.Semantic.HBase;
 	
 	-- 6.1 Equivalence Predicates
 	sameList	:: (Scheme x m r) => 

@@ -20,12 +20,12 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module PortProcedures where
+module Org.Org.Semantic.HScheme.PortProcedures where
 	{
-	import Conversions;
-	import Object;
-	import Port;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HBase;
 
 	-- 6.6.1 Ports
 	isInputPortP :: (Scheme x m r) =>

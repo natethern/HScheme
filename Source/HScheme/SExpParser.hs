@@ -20,16 +20,16 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module SExpParser where
+module Org.Org.Semantic.HScheme.SExpParser where
 	{
-	import PortProcedures;
-	import Procedures;
-	import Conversions;
-	import Object;
-	import Port;
-	import InputPortParser;
-	import SExpChars;
-	import HBase;
+	import Org.Org.Semantic.HScheme.PortProcedures;
+	import Org.Org.Semantic.HScheme.Procedures;
+	import Org.Org.Semantic.HScheme.Conversions;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HScheme.InputPortParser;
+	import Org.Org.Semantic.HScheme.SExpChars;
+	import Org.Org.Semantic.HBase;
 
 	type TextParser = Parser Char;
 

@@ -20,10 +20,10 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module InputPortParser where
+module Org.Org.Semantic.HScheme.InputPortParser where
 	{
-	import Port;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Port;
+	import Org.Org.Semantic.HBase;
 	
 	data Parser c m a = MkParser {unParser :: InputPort c m -> m a};
 	
@@ -40,13 +40,13 @@ module InputPortParser where
 		fail s = MkParser (\_ -> fail s);
 		};
 	
-	instance (Monad m) => SemiLiftedMonad m (Parser c m) where
+	instance (Monad m) => LiftedMonad m (Parser c m) where
 		{
-		call ma = MkParser (\_ -> ma);
+		lift ma = MkParser (\_ -> ma);
 		};
 
 	mlift :: (Monad m) => m a -> Parser c m a;
-	mlift = call;
+	mlift = lift;
 
 	runParser :: (Monad m) => InputPort c m -> Parser c m a -> m a;
 	runParser source (MkParser parser) = parser source;

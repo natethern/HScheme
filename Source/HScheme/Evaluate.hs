@@ -20,10 +20,10 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Evaluate where
+module Org.Org.Semantic.HScheme.Evaluate where
 	{
-	import Object;
-	import HBase;
+	import Org.Org.Semantic.HScheme.Object;
+	import Org.Org.Semantic.HBase;
 	
 	isNil :: Object r m -> Bool;
 	isNil NilObject = True;
@@ -66,7 +66,7 @@ module Evaluate where
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateP Type (obj,Just bindings) = evaluate obj with {?bindings = bindings};
+	evaluateP Type (obj,Just bindings) = let  {?bindings = bindings} in evaluate obj;
 	evaluateP Type (obj,Nothing) = evaluate obj;
 	
 	evalList ::
