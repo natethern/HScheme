@@ -6,7 +6,17 @@
 </HEAD>
 <BODY>
 <H1>HScheme</H1>
-<P>HScheme is a Scheme interpreter written in Haskell. There's an online <A HREF="interpret.php">interpreter</A>, and also some <A HREF="examples.php">examples</A>.
+<P>HScheme is a Scheme interpreter written in Haskell. It's intended to be <A HREF="http://www.schemers.org/Documents/Standards/R5RS/HTML/r5rs.html">R5RS</A>-compliant. Features include:</P>
+<UL>
+<LI><P>The full numeric tower, with exact and inexact types, complex numbers, rationals etc. as per R5RS. Actually, the numeric type is complex where the real and imaginary components can be separately exact or inexact.</P>
+<LI><P>A macro system as per R5RS.</P>
+<LI><P>Proper tail recursion.</P>
+<LI><P>Control functions such as <TT>call-with-current-continuation</TT> and <TT>dynamic-wind</TT> as per R5RS.</P>
+<LI><P>A fixed-point function, <TT>call-with-result</TT>, which allows you to call a function with the an argument that contains the result of the function (also, <TT>letrec</TT> has been extended in the same way). For instance, to create circular lists:</P><BLOCKQUOTE><P><TT>(call-with-result (lambda (rest) (cons 'hello rest)))</TT></P></BLOCKQUOTE><P>This is particularly useful if you're restricted to purely functional procedures.</P>
+<LI><P>The ability to specify the execution monad. The standard one is called "GCPS", which stands for "guarded continuation-passing style". Other monads may be faster (or not), but disallow certain functions. The "identity" monad disallows anything imperative (<TT>set!</TT> and friends, IO interaction, etc.), but does allow a certain degree of examination of fixed-point arguments.</P>
+<LI><P>The ability to specify a strictly functional subset of available standard procedures.</P>
+</UL>
+<P>There's an online <A HREF="interpret.php">interpreter</A>, and also some <A HREF="examples.php">examples</A>. See the <A HREF="issues.php">issues list</A> for the current status.</P>
 <P>
 HScheme is written by <A HREF="http://semantic.org/">Ashley Yakeley</A>. See the <A HREF="http://sourceforge.net/projects/hscheme/">Project Info</A>.
 </P>
