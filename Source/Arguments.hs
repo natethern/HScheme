@@ -43,6 +43,13 @@ module Arguments where
 		show GCPSWhichMonad = "GCPS IO";
 		};
 
+	defaultWhichMonad :: SchemeWhichMonad;
+	defaultWhichMonad = GCPSWhichMonad;
+
+	defaultStdBindings :: SchemeWhichMonad -> SchemeStdBindings;
+	defaultStdBindings IdentityWhichMonad = StrictPureStdBindings;
+	defaultStdBindings _ = FullStdBindings;
+
 	parseArgs :: (Monad m) =>
 	 [String] -> m (Maybe SchemeStdBindings,Maybe SchemeWhichMonad,[String],Bool,[String],Bool);
 	parseArgs [] = return (Nothing,Nothing,[],True,[],False);

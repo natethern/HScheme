@@ -22,12 +22,16 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Main where
 	{
+	import Arguments;
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase.Encoding.URI;
 	import Org.Org.Semantic.HBase.Protocol.CGI;
 	import Org.Org.Semantic.HBase;
 
 	type CPS r = SchemeCPS r (IO ());
+	type GCPS r = SchemeGCPS r (IO ());
+
+	type IdentityConst = Constant Identity;
 
 	printResult ::
 		(
@@ -56,11 +60,23 @@ module Main where
 		fsFlush ?stderr;
 		};
 
-	isFull :: QueryParameters -> Bool;
-	isFull params = case findQueryParameter (encodeLatin1 "flavour") params of
+	getStdBindings :: SchemeWhichMonad -> QueryParameters -> SchemeStdBindings;
+	getStdBindings whichmonad params = case findQueryParameter (encodeLatin1 "bindings") params of
 		{
-		Just [0x70,0x75,0x72,0x65] -> False;
-		_ -> True;
+		Just s | s == (encodeLatin1 "full") -> FullStdBindings;
+		Just s | s == (encodeLatin1 "pure") -> PureStdBindings;
+		Just s | s == (encodeLatin1 "strict") -> StrictPureStdBindings;
+		_ -> defaultStdBindings whichmonad;
+		};
+
+	getWhichMonad :: QueryParameters -> SchemeWhichMonad;
+	getWhichMonad params = case findQueryParameter (encodeLatin1 "monad") params of
+		{
+		Just s | s == (encodeLatin1 "gcps") -> GCPSWhichMonad;
+		Just s | s == (encodeLatin1 "cps") -> CPSWhichMonad;
+		Just s | s == (encodeLatin1 "io") -> IOWhichMonad;
+		Just s | s == (encodeLatin1 "pure") -> IdentityWhichMonad;
+		_ -> defaultWhichMonad;
 		};
 
 	runProg ::
@@ -74,7 +90,7 @@ module Main where
 		) =>
 	 MacroBindings IO r m ->
 	 ((?syntacticbindings :: Bindings Symbol (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
-	 LocationBindings IO r m ->
+	 ((?macrobindings :: Symbol -> Maybe (Macro IO r m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r m)) => LocationBindings IO r m) ->
 	 String ->
 	 String ->
 	 IO ();
@@ -97,38 +113,161 @@ module Main where
 			Just sourceBytes -> return (decodeLatin1 sourceBytes);
 			Nothing -> fail "no input";
 			};
-		case findQueryParameter (encodeLatin1 "monad") params of
+		let {whichmonad = getWhichMonad params};
+		case whichmonad of
 			{
-			Just [0x63,0x6F,0x6E,0x74] -> 
+			GCPSWhichMonad -> 
+			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
+			 case (getStdBindings whichmonad params) of
+				{
+				FullStdBindings -> runProg
+				 fullMacroBindings
+				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings,
+					monadGuardBindings,
+					evalBindings (lift . lift),
+					setBindings,
+					portBindings
+					])
+				 "init.full.scm" source;
+				PureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings,
+					monadGuardBindings,
+					evalBindings (lift . lift),
+					portBindings
+					])
+				 "init.pure.scm" source;
+				StrictPureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings
+					])
+				 "init.pure.scm" source;
+				};
+			CPSWhichMonad -> 
 			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
-			 let {?read = ioRead ["."]} in
-			 if (isFull params)
-			 then runProg
-			  fullMacroBindings
-			  (fullTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
-			  monadContFullBindings
-			  "init.full.scm" source
-			 else runProg
-			  pureMacroBindings
-			  (pureTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
-			  monadContPureBindings
-			  "init.pure.scm" source;
-			_ -> 
+			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
+			 case (getStdBindings whichmonad params) of
+				{
+				FullStdBindings -> runProg
+				 fullMacroBindings
+				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings,
+					evalBindings lift,
+					setBindings,
+					portBindings
+					])
+				 "init.full.scm" source;
+				PureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings,
+					evalBindings lift,
+					portBindings
+					])
+				 "init.pure.scm" source;
+				StrictPureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					monadContBindings
+					])
+				 "init.pure.scm" source;
+				};
+			IOWhichMonad -> 
 			 let {?objType = MkType::Type (Object IORef IO)} in
 			 let {?binder = setBinder} in
-			 let {?read = ioRead ["."]} in
-			 if (isFull params)
-			 then runProg
-			  fullMacroBindings
-			  (fullTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
-			  monadFixFullBindings
-			  "init.full.scm" source
-			 else runProg
-			  pureMacroBindings
-			  (pureTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
-			  monadFixPureBindings
-			  "init.pure.scm" source;
+			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
+			 case (getStdBindings whichmonad params) of
+				{
+				FullStdBindings -> runProg
+				 fullMacroBindings
+				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					evalBindings id,
+					setBindings,
+					portBindings
+					])
+				 "init.full.scm" source;
+				PureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					evalBindings id,
+					portBindings
+					])
+				 "init.pure.scm" source;
+				StrictPureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings
+					])
+				 "init.pure.scm" source;
+				};
+			IdentityWhichMonad -> 
+			 let {?objType = MkType::Type (Object IdentityConst Identity)} in
+			 let {?binder = recursiveBinder} in
+			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
+			 case (getStdBindings whichmonad params) of
+				{
+				FullStdBindings -> fail "can't use pure monad with full bindings";
+				PureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings,
+					portBindings
+					])
+				 "init.pure.scm" source;
+				StrictPureStdBindings -> runProg
+				 pureMacroBindings
+				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
+				 (concatenateList
+					[
+					baseBindings,
+					monadFixBindings
+					])
+				 "init.pure.scm" source;
+				};
 			};
 		})
 		printError);

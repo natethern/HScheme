@@ -76,13 +76,13 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	switchArgs :: (a -> b -> c) -> (b -> a -> c);
 	switchArgs foo b a = foo a b;
 
-	commonStrictPureBindings ::
+	baseBindings ::
 		(
 		Build cm r,
 		Scheme m r
 		) =>
 	 LocationBindings cm r m;
-	commonStrictPureBindings = concatenateList
+	baseBindings = concatenateList
 		[
 		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
 		addLocationBinding		(MkSymbol "<loop>")				loop,									-- test
@@ -276,64 +276,6 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"to-string"						toStringP								-- nonstandard
 		];
 
-	evalBindings ::
-		(
-		Build cm r,
-		Scheme m r,
-		?macrobindings :: Symbol -> Maybe (Macro im r m),
-        ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r m)
-		) =>
-	 (forall a. im a -> m a) ->
-	 LocationBindings cm r m;
-	evalBindings remonad = concatenateList
-		[
-		-- 6.5 Eval
-		addProcBinding	"eval"							(evaluateP remonad)
-		];
-
-	simpleStrictPureBindings ::
-		(
-		Build cm r,
-		Scheme m r
-		) =>
-	 LocationBindings cm r m;
-	simpleStrictPureBindings = commonStrictPureBindings;
-
-	commonPureBindings ::
-		(
-		Build cm r,
-		Scheme m r
-		) =>
-	 LocationBindings cm r m;
-	commonPureBindings = concatenateList
-		[
-		commonStrictPureBindings,
-
-		-- 6.6.1 Ports
-		addProcBinding	"input-port?"					isInputPortP,
-		addProcBinding	"output-port?"					isOutputPortP,
-		addProcBinding	"close-input-port"				inputPortCloseP,
-		addProcBinding	"close-output-port"				outputPortCloseP,
-
-		-- 6.6.2 Input
-		addProcBinding	"port-read"						portReadP,								-- nonstandard
-		addProcBinding	"port-read-byte"				portReadByteP,							-- nonstandard
-		addProcBinding	"port-peek-byte"				portPeekByteP,							-- nonstandard
-		addProcBinding	"eof-object?"					isEOFObjectP,
-		addProcBinding	"port-byte-ready?"				portByteReadyP,							-- nonstandard
-
-		-- 6.6.3 Output
-		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
-		];
-
-	simplePureBindings ::
-		(
-		Build cm r,
-		Scheme m r
-		) =>
-	 LocationBindings cm r m;
-	simplePureBindings = commonPureBindings;
-
 	monadContBindings ::
 		(
 		Build cm r,
@@ -373,52 +315,54 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"call-with-result"				fixP									-- nonstandard
 		];
 
-	monadFixStrictPureBindings ::
+	evalBindings ::
 		(
 		Build cm r,
 		Scheme m r,
-		MonadFix m
+		?macrobindings :: Symbol -> Maybe (Macro im r m),
+        ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r m)
 		) =>
+	 (forall a. im a -> m a) ->
 	 LocationBindings cm r m;
-	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
+	evalBindings remonad = concatenateList
+		[
+		-- 6.5 Eval
+		addProcBinding	"eval"							(evaluateP remonad)
+		];
 
-	monadContStrictPureBindings ::
+	portBindings ::
 		(
 		Build cm r,
-		Scheme m r,
-		MonadCont m
+		Scheme m r
 		) =>
 	 LocationBindings cm r m;
-	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
+	portBindings = concatenateList
+		[
+		-- 6.6.1 Ports
+		addProcBinding	"input-port?"					isInputPortP,
+		addProcBinding	"output-port?"					isOutputPortP,
+		addProcBinding	"close-input-port"				inputPortCloseP,
+		addProcBinding	"close-output-port"				outputPortCloseP,
 
-	monadFixPureBindings ::
-		(
-		Build cm r,
-		Scheme m r,
-		MonadFix m
-		) =>
-	 LocationBindings cm r m;
-	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
+		-- 6.6.2 Input
+		addProcBinding	"port-read"						portReadP,								-- nonstandard
+		addProcBinding	"port-read-byte"				portReadByteP,							-- nonstandard
+		addProcBinding	"port-peek-byte"				portPeekByteP,							-- nonstandard
+		addProcBinding	"eof-object?"					isEOFObjectP,
+		addProcBinding	"port-byte-ready?"				portByteReadyP,							-- nonstandard
 
-	monadContPureBindings ::
-		(
-		Build cm r,
-		Scheme m r,
-		MonadCont m
-		) =>
-	 LocationBindings cm r m;
-	monadContPureBindings = simplePureBindings ++ monadContBindings;
+		-- 6.6.3 Output
+		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
+		];
 
-	simpleFullBindings ::
+	setBindings ::
 		(
 		Build cm r,
 		FullScheme m r
 		) =>
 	 LocationBindings cm r m;
-	simpleFullBindings = concatenateList
+	setBindings = concatenateList
 		[
-		commonPureBindings,
-
 		-- 6.1 Equivalence Predicates
 		addProcBinding			"eqv?"				eqvP,
 		addProcBinding			"eq?"				eqP,
@@ -438,33 +382,14 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding			"vector-fill!"		vectorFillP
 		];
 
-	monadFixFullBindings ::
-		(
-		Build cm r,
-		FullScheme m r,
-		MonadFix m
-		) =>
-	 LocationBindings cm r m;
-	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
-
-	-- this one is closest to R5RS
-	monadContFullBindings ::
-		(
-		Build cm r,
-		FullScheme m r,
-		MonadCont m
-		) =>
-	 LocationBindings cm r m;
-	monadContFullBindings = simpleFullBindings ++ monadContBindings;
-
-	fullSystemBindings ::
+	systemPortBindings ::
 		(
 		Build cm r,
 		Scheme m r,
 		?system :: System m
 		) =>
 	 LocationBindings cm r m;
-	fullSystemBindings = concatenateList
+	systemPortBindings = concatenateList
 		[
 		-- 6.6.1 Ports
 		addProcBinding	"current-input-port"	currentInputPortP,

@@ -58,12 +58,8 @@ module Main where
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
-			whichmonad = unJust GCPSWhichMonad mwm;
-			flavour = unJust (case whichmonad of
-				{
-				IdentityWhichMonad -> PureStdBindings;
-				_ -> FullStdBindings;
-				}) mflavour;
+			whichmonad = unJust defaultWhichMonad mwm;
+			flavour = unJust (defaultStdBindings whichmonad) mflavour;
 			allFileNames initFile = optPrepend initfile initFile filenames
 			};
 		if verbose then do
@@ -86,21 +82,43 @@ module Main where
 				 let {?system = ioSystem (lift . lift)} in				 
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings (lift . lift)) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						monadGuardBindings,
+						evalBindings (lift . lift),
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings (lift . lift))) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						monadGuardBindings,
+						evalBindings (lift . lift),
+						portBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
@@ -115,21 +133,41 @@ module Main where
 				 let {?system = ioSystem lift} in
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadFixBindings ++ (evalBindings lift) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						evalBindings lift,
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadFixBindings ++ (evalBindings lift)) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						evalBindings lift,
+						portBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
@@ -144,21 +182,39 @@ module Main where
 				 let {?system = ioSystem id} in
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						evalBindings id,
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjects printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixPureBindings ++ monadGuardBindings ++ (evalBindings id)) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						evalBindings id,
+						portBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- monadFixStrictPureBindings emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					});
@@ -173,14 +229,23 @@ module Main where
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- monadFixPureBindings emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						portBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					});
 				StrictPureStdBindings -> 
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- monadFixStrictPureBindings emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					});

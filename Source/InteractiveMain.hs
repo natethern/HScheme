@@ -58,12 +58,8 @@ module Main where
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
-			whichmonad = unJust GCPSWhichMonad mwm;
-			flavour = unJust (case whichmonad of
-				{
-				IdentityWhichMonad -> PureStdBindings;
-				_ -> FullStdBindings;
-				}) mflavour;
+			whichmonad = unJust defaultWhichMonad mwm;
+			flavour = unJust (defaultStdBindings whichmonad) mflavour;
 			allFileNames initFile = optPrepend initfile initFile filenames
 			};
 		if verbose then do
@@ -86,7 +82,17 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						monadGuardBindings,
+						evalBindings id,
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
@@ -96,7 +102,15 @@ module Main where
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings id)) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						monadGuardBindings,
+						evalBindings id,
+						portBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -106,7 +120,11 @@ module Main where
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -124,7 +142,16 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadFixBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						evalBindings id,
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
@@ -134,7 +161,14 @@ module Main where
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadFixBindings ++ (evalBindings id)) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						monadContBindings,
+						evalBindings id,
+						portBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -144,7 +178,11 @@ module Main where
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -162,21 +200,39 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						evalBindings id,
+						setBindings,
+						portBindings,
+						systemPortBindings
+						]) emptyBindings;
 					commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
 					interact bindings commands;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixPureBindings ++ monadGuardBindings ++ (evalBindings id)) emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings,
+						evalBindings id,
+						portBindings
+						]) emptyBindings;
 					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
 					interact bindings commands;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- monadFixStrictPureBindings emptyBindings;
+					bindings <- (concatenateList
+						[
+						baseBindings,
+						monadFixBindings
+						]) emptyBindings;
 					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
 					interact bindings commands;
 					});

@@ -58,15 +58,15 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		beginT readObjects;
 		};
 
-	secureLoad :: (Monad cm) =>
+	secureRead :: (Monad cm) =>
 	 (String -> cm a) -> (String -> Bool) -> (String -> cm a);
-	secureLoad loader match filename = if match filename
+	secureRead loader match filename = if match filename
 	 then loader filename
 	 else fail ("file \""++filename++"\" not found");
 
-	matchSecureLoad :: (Monad cm) =>
+	matchSecureRead :: (Monad cm) =>
 	 (String -> cm a) -> [String] -> (String -> cm a);
-	matchSecureLoad loader allowed = secureLoad loader (\f -> hasElement f allowed);
+	matchSecureRead loader allowed = secureRead loader (\f -> hasElement f allowed);
 
 	loadT ::
 		(

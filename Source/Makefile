@@ -184,16 +184,16 @@ testrelease: test-pure test-full test-cgi
 %.pure.diff: %.ref %.pure.out
 	diff -u $^
 
-test/%.scm.initfull.out: test/%.scm bin/$(INTER_COMMAND_REL) init.full.scm
+test/%.scm.initfull.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.full.scm
 	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.initpure.out: test/%.scm bin/$(INTER_COMMAND_REL) init.pure.scm init.full.scm
+test/%.scm.initpure.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.pure.scm init.full.scm
 	time bin/$(BATCH_COMMAND_REL) --mpure --noinit init.pure.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.full.out: test/%.scm bin/$(INTER_COMMAND_REL)
+test/%.scm.full.out: test/%.scm bin/$(BATCH_COMMAND_REL)
 	time bin/$(BATCH_COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
 
-test/%.scm.pure.out: test/%.scm bin/$(INTER_COMMAND_REL)
+test/%.scm.pure.out: test/%.scm bin/$(BATCH_COMMAND_REL)
 	time bin/$(BATCH_COMMAND_REL) --mpure --noinit $< > $@ || (rm $@; exit 1)
 
 test-pure:	\
@@ -276,7 +276,7 @@ prof: $(LIBFILE_PROF) bin/$(BATCH_COMMAND_PROF) bin/$(INTER_COMMAND_PROF)
 
 cgi: $(CGI_COMMAND)
 
-$(CGI_COMMAND): CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+$(CGI_COMMAND): Arguments.o CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) $(CGI_LDFLAGS) -o $@
 	strip $@
 
