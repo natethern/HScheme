@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
 	type IOConst = Constant IO;
 
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadThrow (Object r m) IO where
+	 MonadThrow (CompleteObject r m) IO where
 		{
 		throw obj = do
 			{
@@ -40,7 +40,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
 		};
 
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadException (Object r m) IO where
+	 MonadException (CompleteObject r m) IO where
 		{
 		catch foo cc = catchSingle foo (\ex -> do
 			{

@@ -80,13 +80,13 @@ module Org.Org.Semantic.HScheme.Core.Mismatch where
 
 	data Mismatch obj = MkMismatch Expected obj;
 
-	mismatch ::
+	returnThrowMismatch ::
 		(
 		Monad m,
 		MonadSingleThrow (Mismatch obj) n
 		) =>
 	 Expected -> obj -> m (n a);
-	mismatch exp obj = return (throwSingle (MkMismatch exp obj));
+	returnThrowMismatch exp obj = return (throwSingle (MkMismatch exp obj));
 
 	type MatchMonad obj = Result (Mismatch obj);
 

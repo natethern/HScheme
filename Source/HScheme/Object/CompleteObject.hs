@@ -33,8 +33,8 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	instance (Build cm r,MonadThrow (Object r m) cm) =>
-	 ParserError cm (Object r m) where
+	instance (Build cm r,MonadThrow (CompleteObject r m) cm) =>
+	 ParserError cm (CompleteObject r m) where
 		{
 		throwParseFailed = throwSimpleError "no-parse";
 		throwInappropriateCharacter context c = do

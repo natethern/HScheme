@@ -79,14 +79,6 @@ module Org.Org.Semantic.HScheme.Core.Build where
 		cons h tobj;
 		};
 
-{-
-	class
-		(
-		BuildThrow m obj r
-		) =>
-	 BuildObject m obj r | obj -> r;
--}
-
 	-- throw, etc.
 
 	lastResortThrowObject :: (MonadThrow obj m,?objType :: Type obj) =>

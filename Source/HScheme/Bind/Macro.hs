@@ -63,21 +63,6 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		addMacroBinding	"case-match"		caseMatchM		-- nonstandard
 		];
 
-{-
-	completeMacroBindings ::
-		(
-		BuildThrow cm obj r,
-		MonadFix m,
---		Scheme m r,
-		?binder :: TopLevelBinder r obj m,
-		?objType :: Type obj
-		) =>
-	 MacroBindings cm r obj m;
-	completeMacroBindings = concatenateList
-		[
-		];
--}
-
 	pureMacroBindings ::
 		(
 		IsA Bool obj,

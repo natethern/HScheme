@@ -45,30 +45,30 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 	outputPortClosePN (port,()) = opClose port;
 
 	-- 6.6.2 Input
-	isEOFObjectP :: (Build m r,ObjectSubtype r obj VoidObjType,?objType :: Type obj) =>
+	isEOFObjectP :: (Build m r,ObjectSubtype r obj EOFObjType,?objType :: Type obj) =>
 	 (obj,()) -> m Bool;
-	isEOFObjectP (obj,()) = getObjectIs (MkType :: Type VoidObjType) obj;
+	isEOFObjectP (obj,()) = getObjectIs (MkType :: Type EOFObjType) obj;
 	
 	portReadByteP :: (Monad m) =>
-	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
+	 (InputPort Word8 m,()) -> m (Either EOFObjType Word8);
 	portReadByteP (port,()) = do
 		{
 		mc <- ipRead port;
 		return (case mc of
 			{
-			Nothing -> Left MkVoidObjType;
+			Nothing -> Left MkEOFObjType;
 			Just c -> Right c;
 			});
 		};
 	
 	portPeekByteP :: (Monad m) =>
-	 (InputPort Word8 m,()) -> m (Either VoidObjType Word8);
+	 (InputPort Word8 m,()) -> m (Either EOFObjType Word8);
 	portPeekByteP (port,()) = do
 		{
 		mc <- ipPeek port;
 		return (case mc of
 			{
-			Nothing -> Left MkVoidObjType;
+			Nothing -> Left MkEOFObjType;
 			Just c -> Right c;
 			});
 		};
@@ -79,10 +79,10 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 
 	-- 6.6.3 Output
 	portWriteByteP :: (Monad m) =>
-	 (Word8,(OutputPort Word8 m,())) -> m VoidObjType;
+	 (Word8,(OutputPort Word8 m,())) -> m EOFObjType;
 	portWriteByteP (c,(port,())) = do
 		{
 		opWriteOne port c;
-		return MkVoidObjType;
+		return MkEOFObjType;
 		};
 	}

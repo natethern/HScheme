@@ -49,8 +49,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		(
 		Build cm r,
 		Runnable cm m
---		InterpretObject m r obj,
---		AssembleError cm obj
 		) =>
 	 RunnableScheme cm m r obj where
 		{
@@ -73,8 +71,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		Build m r,
 		Monad m,
 		ListObject r obj
---		InterpretObject m r obj,
---		AssembleError m obj
 		) =>
 	 RunnableScheme m m r obj where
 		{
@@ -94,8 +90,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		(
 		ObjectSubtype r obj obj,
 		Build IO r
---		InterpretObject Identity r obj,
---		AssembleError IO obj
 		) =>
 	 RunnableScheme IO Identity r obj where
 		{

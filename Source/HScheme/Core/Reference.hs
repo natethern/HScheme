@@ -20,14 +20,10 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Core.Object where
+module Org.Org.Semantic.HScheme.Core.Reference where
 	{
-	import Org.Org.Semantic.HScheme.Core.Binding;
-	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
-
-	type SymbolBindings = Bindings Symbol;
 
 	type SRefArray r a = ArrayList (r a);
 
@@ -66,8 +62,6 @@ module Org.Org.Semantic.HScheme.Core.Object where
 		};
 
 	newtype SList a = MkSList {unSList :: [a]};
-
-	data VoidObjType = MkVoidObjType;
 
 	class Eq1 r where
 		{

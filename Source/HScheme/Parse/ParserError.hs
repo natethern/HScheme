@@ -36,21 +36,5 @@ module Org.Org.Semantic.HScheme.Parse.ParserError where
 		 String -> cm a;
 		throwUTF8Error :: forall a. (?objType :: Type obj) =>
 		 UTF8Error -> cm a;
-{-
-		unexpectedCharError context = do
-			{
-			contextObj <- parserLift (getObject (MkSList context));
-			(do
-				{
-				t <- tokenParse;
-				parserLift (do
-					{
-					tObj <- getObject t;
-					throwArgError "inappropriate-character" [tObj,contextObj];
-					});
-				}) |||
-			(parserLift (throwArgError "inappropriate-stream-end" [contextObj]));
-			};
--}
 		};
 	}

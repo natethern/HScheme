@@ -26,6 +26,8 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	import Org.Org.Semantic.HScheme.Core.Build;
 	import Org.Org.Semantic.HBase;
 
+	data EOFObjType = MkEOFObjType;
+
 	class HasBooleanType obj where
 		{
 		isBooleanType :: obj -> Bool;
@@ -109,7 +111,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		{
 		getObject () = return nilObject;
 		resultFromObject obj | Just Nothing <- objectCell obj = return (SuccessResult ());
-		resultFromObject obj = mismatch NullExpected obj;
+		resultFromObject obj = returnThrowMismatch NullExpected obj;
 		};
 
 	
@@ -133,7 +135,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 					});
 				};
 			Just Nothing -> return (return Nothing);
-			Nothing -> mismatch listExpected obj;
+			Nothing -> returnThrowMismatch listExpected obj;
 			};
 		};
 
@@ -158,7 +160,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 					});
 				};
 			Just Nothing -> return (return []);
-			Nothing -> mismatch listExpected obj;
+			Nothing -> returnThrowMismatch listExpected obj;
 			};
 		};
 
@@ -193,6 +195,6 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				return (objH,objT);
 				});
 			};
-		resultFromObject obj = mismatch PairTypeExpected obj;
+		resultFromObject obj = returnThrowMismatch PairTypeExpected obj;
 		};
 	}

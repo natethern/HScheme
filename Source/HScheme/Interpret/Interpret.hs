@@ -34,7 +34,6 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 
 	getLoc ::
 		(
---		InterpretObject m r obj,
 		?objType :: Type obj
 		) =>
 	 (Symbol -> Maybe (r obj)) -> Symbol -> r obj;
@@ -43,24 +42,11 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		Just loc -> loc;
 		Nothing -> getBadLoc sym;
 		};
-{--
-	getSymbolBinding ::
-		(
-		InterpretObject m r obj
-		) =>
-	 Bindings r m -> Symbol -> m (r obj);
-	getSymbolBinding bindings sym = getLoc (getBinding bindings);
---}
 
 	bindExpression ::
 		(
 		Monad cm,
---		BuildThrow cm obj r,
---		InterpretObject m r obj,
 		?objType :: Type obj
---		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
---		?syntacticbindings :: SymbolBindings (Syntax r obj),
---		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 SchemeExpression r obj a -> cm ((Symbol -> Maybe (r obj)) -> a);
 	bindExpression rr = return (\lookupSym -> runLambda (getLoc lookupSym) rr);

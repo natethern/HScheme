@@ -328,8 +328,6 @@
 				ABAD375C04A403EE00A80103,
 				ABAD375704A403EE00A80103,
 				ABAD375504A403EE00A80103,
-				ABAD375A04A403EE00A80103,
-				ABAD375904A403EE00A80103,
 				AB9AA28E0501FABF00A80103,
 				ABAD375D04A403EE00A80103,
 			);
@@ -359,22 +357,12 @@
 		};
 		ABAD375704A403EE00A80103 = {
 			isa = PBXFileReference;
-			path = Object.hs;
+			path = Reference.hs;
 			refType = 4;
 		};
 		ABAD375804A403EE00A80103 = {
 			isa = PBXFileReference;
 			path = Port.hs;
-			refType = 4;
-		};
-		ABAD375904A403EE00A80103 = {
-			isa = PBXFileReference;
-			path = Scheme.hs;
-			refType = 4;
-		};
-		ABAD375A04A403EE00A80103 = {
-			isa = PBXFileReference;
-			path = Stream.hs;
 			refType = 4;
 		};
 		ABAD375B04A403EE00A80103 = {

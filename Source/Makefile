@@ -86,12 +86,10 @@ LIB_HC_SRCS			= \
 	$(HIER)/Core/Build.hs	\
 	$(HIER)/Core/Symbol.hs	\
 	$(HIER)/Core/Binding.hs	\
-	$(HIER)/Core/Object.hs	\
-	$(HIER)/Core/Scheme.hs	\
+	$(HIER)/Core/Reference.hs	\
 	$(HIER)/Core/Mismatch.hs	\
 	$(HIER)/Core/Conversions.hs	\
 	$(HIER)/Core/Throw.hs	\
-	$(HIER)/Core/Stream.hs	\
 	$(HIER)/Core/Procedure.hs	\
 	$(HIER)/Core.hs	\
 	\
@@ -473,17 +471,10 @@ Org/Org/Semantic/HScheme/Core/Port.o Org/Org/Semantic/HScheme/Core/Port.q_o Org/
 Org/Org/Semantic/HScheme/Core/Build.o Org/Org/Semantic/HScheme/Core/Build.q_o Org/Org/Semantic/HScheme/Core/Build.p_o : Org/Org/Semantic/HScheme/Core/Build.hs
 Org/Org/Semantic/HScheme/Core/Symbol.o Org/Org/Semantic/HScheme/Core/Symbol.q_o Org/Org/Semantic/HScheme/Core/Symbol.p_o : Org/Org/Semantic/HScheme/Core/Symbol.hs
 Org/Org/Semantic/HScheme/Core/Binding.o Org/Org/Semantic/HScheme/Core/Binding.q_o Org/Org/Semantic/HScheme/Core/Binding.p_o : Org/Org/Semantic/HScheme/Core/Binding.hs
-Org/Org/Semantic/HScheme/Core/Object.o Org/Org/Semantic/HScheme/Core/Object.q_o Org/Org/Semantic/HScheme/Core/Object.p_o : Org/Org/Semantic/HScheme/Core/Object.hs
-Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
-Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
-Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
-Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
-Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
-Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
-Org/Org/Semantic/HScheme/Core/Object.o : ./Org/Org/Semantic/HScheme/Core/Binding.hi
-Org/Org/Semantic/HScheme/Core/Object.q_o : ./Org/Org/Semantic/HScheme/Core/Binding.q_hi
-Org/Org/Semantic/HScheme/Core/Object.p_o : ./Org/Org/Semantic/HScheme/Core/Binding.p_hi
-Org/Org/Semantic/HScheme/Core/Scheme.o Org/Org/Semantic/HScheme/Core/Scheme.q_o Org/Org/Semantic/HScheme/Core/Scheme.p_o : Org/Org/Semantic/HScheme/Core/Scheme.hs
+Org/Org/Semantic/HScheme/Core/Reference.o Org/Org/Semantic/HScheme/Core/Reference.q_o Org/Org/Semantic/HScheme/Core/Reference.p_o : Org/Org/Semantic/HScheme/Core/Reference.hs
+Org/Org/Semantic/HScheme/Core/Reference.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
+Org/Org/Semantic/HScheme/Core/Reference.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
+Org/Org/Semantic/HScheme/Core/Reference.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
 Org/Org/Semantic/HScheme/Core/Mismatch.o Org/Org/Semantic/HScheme/Core/Mismatch.q_o Org/Org/Semantic/HScheme/Core/Mismatch.p_o : Org/Org/Semantic/HScheme/Core/Mismatch.hs
 Org/Org/Semantic/HScheme/Core/Mismatch.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
 Org/Org/Semantic/HScheme/Core/Mismatch.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
@@ -505,22 +496,6 @@ Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol
 Org/Org/Semantic/HScheme/Core/Throw.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
 Org/Org/Semantic/HScheme/Core/Throw.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
 Org/Org/Semantic/HScheme/Core/Throw.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o Org/Org/Semantic/HScheme/Core/Stream.q_o Org/Org/Semantic/HScheme/Core/Stream.p_o : Org/Org/Semantic/HScheme/Core/Stream.hs
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Build.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
-Org/Org/Semantic/HScheme/Core/Stream.o : ./Org/Org/Semantic/HScheme/Core/Throw.hi
-Org/Org/Semantic/HScheme/Core/Stream.q_o : ./Org/Org/Semantic/HScheme/Core/Throw.q_hi
-Org/Org/Semantic/HScheme/Core/Stream.p_o : ./Org/Org/Semantic/HScheme/Core/Throw.p_hi
 Org/Org/Semantic/HScheme/Core/Procedure.o Org/Org/Semantic/HScheme/Core/Procedure.q_o Org/Org/Semantic/HScheme/Core/Procedure.p_o : Org/Org/Semantic/HScheme/Core/Procedure.hs
 Org/Org/Semantic/HScheme/Core/Procedure.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Procedure.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
@@ -547,12 +522,9 @@ Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Binding.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Binding.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Binding.p_hi
-Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
-Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
-Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
-Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Scheme.hi
-Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Scheme.q_hi
-Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Scheme.p_hi
+Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Reference.hi
+Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Reference.q_hi
+Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Reference.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Mismatch.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.p_hi
@@ -562,9 +534,6 @@ Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Throw.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Throw.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Throw.p_hi
-Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Stream.hi
-Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Stream.q_hi
-Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Stream.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Procedure.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Procedure.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Procedure.p_hi

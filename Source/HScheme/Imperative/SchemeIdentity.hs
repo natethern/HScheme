@@ -37,7 +37,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity where
 		get r = return (unIdentity (get r));
 		};
 
-	instance MonadThrow (Object (Constant Identity) Identity) Identity where
+	instance MonadThrow (CompleteObject (Constant Identity) Identity) Identity where
 		{
 		throw obj = error (unIdentity (toString obj));
 		};

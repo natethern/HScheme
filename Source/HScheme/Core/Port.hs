@@ -25,30 +25,55 @@ module Org.Org.Semantic.HScheme.Core.Port where
 	import Org.Org.Semantic.HBase;
 
 	type InputPort c m = Closeable m (PeekSource m (Maybe c));
+
+	ipClose :: (Monad m) =>
+	 InputPort c m -> m ();
 	ipClose = clClose;
+
+	ipRead :: (Monad m) =>
+	 InputPort c m -> m (Maybe c);
 	ipRead = psSource . clItem;
+
+	ipPeek :: (Monad m) =>
+	 InputPort c m -> m (Maybe c);
 	ipPeek = psPeek . clItem;
+
+	ipReady :: (Monad m) =>
+	 InputPort c m -> m Bool;
 	ipReady = psReady . clItem;
+
 	ipReadAll :: (Monad m) =>
-	 Closeable m (PeekSource m (Maybe c)) -> m [c];
+	 InputPort c m -> m [c];
 	ipReadAll = getMaybePeekSourceContents . clItem;
 
 	type OutputPort c m = Closeable m (FlushSink m c);
+
+	opClose :: (Monad m) =>
+	 OutputPort c m -> m ();
 	opClose = clClose;
+
+	opWrite :: (Monad m) =>
+	 OutputPort c m -> Maybe c -> m ();
 	opWrite = fsSink . clItem;
+
+	opFlush :: (Monad m) =>
+	 OutputPort c m -> m ();
 	opFlush = fsFlush . clItem;
+
 	opWriteOne :: (Monad m) =>
-	 Closeable m (FlushSink m c) -> c -> m ();
+	 OutputPort c m -> c -> m ();
 	opWriteOne = fsSinkOne . clItem;
+
 	opWriteList :: (Monad m) =>
-	 Closeable m (FlushSink m c) -> [c] -> m ();
+	 OutputPort c m -> [c] -> m ();
 	opWriteList = fsSinkList . clItem;
+
 	opWriteStr :: (Monad m) =>
-	 Closeable m (FlushSink m c) -> [c] -> m ();
+	 OutputPort c m -> [c] -> m ();
 	opWriteStr = opWriteList;
 
 	opWriteStrLn :: (Monad m) =>
-	 Closeable m (FlushSink m Char) -> [Char] -> m ();
+	 OutputPort Char m -> [Char] -> m ();
 	opWriteStrLn op s = do
 		{
 		opWriteStr op s;

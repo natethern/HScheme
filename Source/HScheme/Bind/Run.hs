@@ -96,7 +96,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		ObjectSubtype r obj (SRefArray r Char),
 		ObjectSubtype r obj (SList obj),
 		ObjectSubtype r obj (SRefArray r obj),
-		ObjectSubtype r obj VoidObjType,
+		ObjectSubtype r obj EOFObjType,
 		ParseObject r obj,
 		ParserError m obj,
 		Equal m obj,
@@ -107,7 +107,6 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 RefBindings cm r obj;
 	baseBindings = concatenateList
 		[
---		addLocationBinding		(MkSymbol "<nothing>")			VoidObject,								-- nonstandard
 		addLocationBinding		(MkSymbol "<loop>")				loop,									-- test
 		addLocationBinding		(MkSymbol "<undefined>")		undefined,								-- test
 
@@ -293,7 +292,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 --		addProcBinding	"raise"							lastResortThrowP,						-- nonstandard
 
 		-- 6.5 Eval
--- ?		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
+--		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
 
 		-- Misc
 		addProcBinding	"to-string"						toStringP								-- nonstandard
@@ -362,7 +361,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		ObjectSubtype r obj Word8,
 		ObjectSubtype r obj (InputPort Word8 m),
 		ObjectSubtype r obj (OutputPort Word8 m),
-		ObjectSubtype r obj VoidObjType,
+		ObjectSubtype r obj EOFObjType,
 		ParseObject r obj,
 		InterpretObject m r obj,
 		ParserError m obj,

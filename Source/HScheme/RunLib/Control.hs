@@ -117,8 +117,8 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 	lastResortThrowP (obj,()) = lastResortThrowObject obj;
 
 {--
-	catchM :: (Scheme m r,MonadException (Object r m) m,?objType :: Type (Object r m)) =>
-	 (Procedure (Object r m) m,()) -> m (Object r m);
+	catchM :: (Scheme m r,MonadException (CompleteObject r m) m,?objType :: Type (CompleteObject r m)) =>
+	 (Procedure (CompleteObject r m) m,()) -> m (CompleteObject r m);
 	catchM = catch;
 --}
 	}

@@ -26,8 +26,8 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
-	type CPS r = SchemeCPS (IO ()) (Object r);
-	type GCPS r = SchemeGCPS (IO ()) (Object r);
+	type CPS r = SchemeCPS (IO ()) (CompleteObject r);
+	type GCPS r = SchemeGCPS (IO ()) (CompleteObject r);
 
 	type IdentityConst = Constant Identity;
 
@@ -38,10 +38,10 @@ module Main where
 	printResult ::
 		(
 		Build IO r,
-		?objType :: Type (Object r m),
+		?objType :: Type (CompleteObject r m),
 		?stdout :: FlushSink IO Word8
 		) =>
-	 Object r m -> IO ();
+	 CompleteObject r m -> IO ();
 	printResult obj = do
 		{
 		str <- toString obj;
@@ -66,7 +66,7 @@ module Main where
 		case whichmonad of
 			{
 			GCPSWhichMonad ->
-			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
+			 let {?objType = MkType::Type (CompleteObject IORef (GCPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = lift . lift . (ioRead loadpaths)} in
 			 let {?system = ioSystem (lift . lift)} in
@@ -127,7 +127,7 @@ module Main where
 					});
 				};
 			CPSWhichMonad ->
-			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
+			 let {?objType = MkType::Type (CompleteObject IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = lift . (ioRead loadpaths)} in
 			 let {?system = ioSystem lift} in
@@ -186,7 +186,7 @@ module Main where
 					});
 				};
 			IOWhichMonad ->
-			 let {?objType = MkType::Type (Object IORef IO)} in
+			 let {?objType = MkType::Type (CompleteObject IORef IO)} in
 			 let {?binder = setBinder} in
 			 let {?read = ioRead loadpaths} in
 			 let {?system = ioSystem id} in

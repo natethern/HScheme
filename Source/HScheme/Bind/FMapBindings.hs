@@ -25,24 +25,25 @@ module Org.Org.Semantic.HScheme.Bind.FMapBindings(emptyBindings) where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	fmapGetBinding ::
-	 FiniteMap Symbol a -> Symbol -> Maybe a;
+	fmapGetBinding :: (Ordered sym) =>
+	 FiniteMap sym a -> sym -> Maybe a;
 	fmapGetBinding map sym = lookup sym map;
 
-	fmapNewBinding ::
-	 FiniteMap Symbol a ->
-	 Symbol ->
+	fmapNewBinding :: (Ordered sym) =>
+	 FiniteMap sym a ->
+	 sym ->
 	 a ->
-	 SymbolBindings a;
+	 Bindings sym a;
 	fmapNewBinding map sym a = toBindings (addMapEntry (sym,a) map);
 
-	toBindings :: FiniteMap Symbol a -> SymbolBindings a;
+	toBindings :: (Ordered sym) =>
+	 FiniteMap sym a -> Bindings sym a;
 	toBindings map = MkBindings
 		{
 		getBinding = fmapGetBinding map,
 		newBinding = fmapNewBinding map
 		};
 
-	emptyBindings :: SymbolBindings a;
+	emptyBindings :: (Ordered sym) => Bindings sym a;
 	emptyBindings = toBindings empty;
 	}

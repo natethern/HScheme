@@ -172,7 +172,7 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 
 	portReadP ::
 		(
-		ObjectSubtype r obj VoidObjType,
+		ObjectSubtype r obj EOFObjType,
 		ParseObject r obj,
 		Build m r,
 		ParserError m obj,
@@ -185,7 +185,7 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		case mobj of
 			{
 			Just obj -> return obj;
-			Nothing -> getObject MkVoidObjType;
+			Nothing -> getObject MkEOFObjType;
 			};
 		};
 
@@ -194,11 +194,11 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		(
 		ApplyObject m r obj,
 		ParserError m obj,
-		ObjectSubtype r obj VoidObjType,
+		ObjectSubtype r obj EOFObjType,
 		ObjectSubtype r obj Word8,
 		?objType :: Type obj
 		) =>
-	 (Procedure obj m,()) -> m (Either VoidObjType Char);
+	 (Procedure obj m,()) -> m (Either EOFObjType Char);
 	parseUTF8P (source,()) = do
 		{
 		mc <- parseUTF8Char (do
@@ -209,13 +209,13 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 			case eb of
 				{
 				Right b -> return (Just (b :: Word8));
-				Left MkVoidObjType -> return Nothing;
+				Left MkEOFObjType -> return Nothing;
 				};
 			});
 		return (case mc of
 			{
 			Just c -> Right c;
-			Nothing -> Left MkVoidObjType;
+			Nothing -> Left MkEOFObjType;
 			});
 		};
 	}

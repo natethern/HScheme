@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.Assemble
 	(
 	SchemeExpression,ObjectSchemeExpression,ListSchemeExpression,
+	SymbolBindings,
 	Macro(..),remonadMacro,
 	PatternError(..),Syntax(..),
 	AssembleError(..),
@@ -65,6 +66,8 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	type ObjectSchemeExpression r obj m = SchemeExpression r obj (m obj);
 
 	type ListSchemeExpression r obj m = SchemeExpression r obj (m [obj]);
+
+	type SymbolBindings = Bindings Symbol;
 
 	newtype Macro cm r obj m = MkMacro
 		((

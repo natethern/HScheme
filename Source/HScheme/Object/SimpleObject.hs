@@ -34,7 +34,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	 NumberObject		Number								|
 	 StringObject		(SRefArray r Char)					;
 
-	instance ListObject ref (Object ref m) where
+	instance ListObject ref (CompleteObject ref m) where
 		{
 		objectCell NilObject = Just Nothing;
 		objectCell (PairObject hr tr) = Just (Just (hr,tr));
@@ -44,9 +44,9 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 		};
 
 	
-	-- Object
+	-- CompleteObject
 
-	instance ObjectSubtype r (Object r m) (Object r m) where
+	instance ObjectSubtype r (CompleteObject r m) (CompleteObject r m) where
 		{
 		getObject = return;
 		resultFromObject = return . return;
@@ -55,12 +55,12 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- Bool
 
-	instance MaybeA Bool (Object r m) where
+	instance MaybeA Bool (CompleteObject r m) where
 		{
 		maybeConvert = Just . convert;
 		};
 
-	instance IsA Bool (Object r m) where
+	instance IsA Bool (CompleteObject r m) where
 		{
 		convert NilObject = False;
 		convert (NumberObject n) = not (isZero n);
@@ -69,7 +69,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 		convert _ = True;
 		};
 
-	instance ObjectSubtype r (Object r m) Bool where
+	instance ObjectSubtype r (CompleteObject r m) Bool where
 		{
 		getObject = return . BooleanObject;
 		resultFromObject obj = return (return (convert obj));
@@ -78,13 +78,13 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- Char
 
-	instance MaybeA Char (Object r m) where
+	instance MaybeA Char (CompleteObject r m) where
 		{
 		maybeConvert (CharObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) Char where
+	instance ObjectSubtype r (CompleteObject r m) Char where
 		{
 		getObject = return . CharObject;
 		resultFromObject = getMaybeToMatch CharTypeExpected (return . maybeConvert);
@@ -93,13 +93,13 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- Number
 
-	instance MaybeA Number (Object r m) where
+	instance MaybeA Number (CompleteObject r m) where
 		{
 		maybeConvert (NumberObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) Number where
+	instance ObjectSubtype r (CompleteObject r m) Number where
 		{
 		getObject = return . NumberObject;
 		resultFromObject = getMaybeToMatch NumberTypeExpected (return . maybeConvert);
@@ -108,7 +108,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- EIReal
 
-	instance ObjectSubtype r (Object r m) EIReal where
+	instance ObjectSubtype r (CompleteObject r m) EIReal where
 		{
 		getObject i = getObject (convert i :: Number);
 		resultFromObject obj = do
@@ -125,7 +125,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- Rational
 
-	instance ObjectSubtype r (Object r m) Rational where
+	instance ObjectSubtype r (CompleteObject r m) Rational where
 		{
 		getObject i = getObject (convert i :: EIReal);
 		resultFromObject obj = do
@@ -142,7 +142,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- Integer
 
-	instance ObjectSubtype r (Object r m) Integer where
+	instance ObjectSubtype r (CompleteObject r m) Integer where
 		{
 		getObject i = getObject (convert i :: EIReal);
 		resultFromObject obj = do
@@ -159,7 +159,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- Int
 
-	instance ObjectSubtype r (Object r m) Int where
+	instance ObjectSubtype r (CompleteObject r m) Int where
 		{
 		getObject i = getObject (convert i :: Integer);
 		resultFromObject obj = do
@@ -176,7 +176,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- Word8
 
-	instance ObjectSubtype r (Object r m) Word8 where
+	instance ObjectSubtype r (CompleteObject r m) Word8 where
 		{
 		getObject i = getObject (convert i :: Integer);
 		resultFromObject obj = do
@@ -193,13 +193,13 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- Symbol
 
-	instance MaybeA Symbol (Object r m) where
+	instance MaybeA Symbol (CompleteObject r m) where
 		{
 		maybeConvert (SymbolObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) Symbol where
+	instance ObjectSubtype r (CompleteObject r m) Symbol where
 		{
 		getObject = return . SymbolObject;
 		resultFromObject = getMaybeToMatch SymbolTypeExpected (return . maybeConvert);
@@ -208,13 +208,13 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- SRefArray r Char
 
-	instance MaybeA (SRefArray r Char) (Object r m) where
+	instance MaybeA (SRefArray r Char) (CompleteObject r m) where
 		{
 		maybeConvert (StringObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) (SRefArray r Char) where
+	instance ObjectSubtype r (CompleteObject r m) (SRefArray r Char) where
 		{
 		getObject = return . StringObject;
 		resultFromObject = getMaybeToMatch StringTypeExpected (return . maybeConvert);
@@ -223,8 +223,8 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 
 	-- SRefList r t
 
-	instance (MaybeA (SRefArray r t) (Object r m)) =>
-	 MaybeA (SRefList r t) (Object r m) where
+	instance (MaybeA (SRefArray r t) (CompleteObject r m)) =>
+	 MaybeA (SRefList r t) (CompleteObject r m) where
 		{
 		maybeConvert obj = do
 			{
@@ -233,8 +233,8 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 			};
 		};
 
-	instance (MaybeA (SRefArray r t) (Object r m),ObjectSubtype r (Object r m) (SRefArray r t)) =>
-	 ObjectSubtype r (Object r m) (SRefList r t) where
+	instance (MaybeA (SRefArray r t) (CompleteObject r m),ObjectSubtype r (CompleteObject r m) (SRefArray r t)) =>
+	 ObjectSubtype r (CompleteObject r m) (SRefList r t) where
 		{
 		getObject (MkSRefList rs) = getObject (fromList rs :: SRefArray r t);
 		resultFromObject obj = do
@@ -281,8 +281,8 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 			};
 		};
 
-	instance (ObjectSubtype r (Object r m) (SRefArray r t)) =>
-	 ObjectSubtype r (Object r m) (SList t) where
+	instance (ObjectSubtype r (CompleteObject r m) (SRefArray r t)) =>
+	 ObjectSubtype r (CompleteObject r m) (SList t) where
 		{
 		getObject (MkSList list) = do
 			{
@@ -308,13 +308,13 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- Procedure
 
-	instance MaybeA (Procedure (Object r m) m) (Object r m) where
+	instance MaybeA (Procedure (CompleteObject r m) m) (CompleteObject r m) where
 		{
 		maybeConvert (ProcedureObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (Object r m) (Procedure (Object r m) m) where
+	instance ObjectSubtype r (CompleteObject r m) (Procedure (CompleteObject r m) m) where
 		{
 		getObject = return . ProcedureObject;
 		resultFromObject = getMaybeToMatch ProcedureTypeExpected (return . maybeConvert);
@@ -324,7 +324,7 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	-- Mismatch
 
 	instance (Build cm r) =>
-	 MonadIsA cm (Object r m) (Mismatch (Object r m)) where
+	 MonadIsA cm (CompleteObject r m) (Mismatch (CompleteObject r m)) where
 		{
 		getConvert (MkMismatch exp obj) = do
 			{
@@ -361,8 +361,8 @@ module Org.Org.Semantic.HScheme.Object.SimpleObject(SimpleObject) where
 	
 	-- InterpretObject
 
-	instance (Build m r,MonadThrow (Object r m) m) =>
-	 RunError (Object r m) m where
+	instance (Build m r,MonadThrow (CompleteObject r m) m) =>
+	 RunError (CompleteObject r m) m where
 		{
 		throwWrongContextError		= throwArgError "single-value-expected";
 		throwTooFewArgumentsError	= throwSimpleError "too-few-args";
