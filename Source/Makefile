@@ -194,7 +194,8 @@ Doc/index.html: $(LIB_HC_SRCS)
 
 # Building
 
-build: $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_REL) bin/$(COMMAND_PROF) $(PACKAGEFILE) cgi
+#build: $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_REL) bin/$(COMMAND_PROF) $(PACKAGEFILE) cgi
+build: $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_REL) $(PACKAGEFILE) cgi
 
 cgi: interpret.cgi
 
@@ -519,6 +520,10 @@ Org/Org/Semantic/HScheme/Bind/FMapBindings.o Org/Org/Semantic/HScheme/Bind/FMapB
 Org/Org/Semantic/HScheme/Bind/FMapBindings.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Bind/FMapBindings.p_o : Org/Org/Semantic/HScheme/Core.p_hi
 Org/Org/Semantic/HScheme/Bind.o Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind.hs
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Interpret.p_hi
 Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/Add.hi
 Org/Org/Semantic/HScheme/Bind.p_o : Org/Org/Semantic/HScheme/Bind/Add.p_hi
 Org/Org/Semantic/HScheme/Bind.o : Org/Org/Semantic/HScheme/Bind/Macro.hi
@@ -567,6 +572,8 @@ Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_o : Org/Org/Semantic/HScheme/RunL
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeCPS.hs
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o : Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Imperative/SchemeCPS.o : Org/Org/Semantic/HScheme/MainProg.hi
+Org/Org/Semantic/HScheme/Imperative/SchemeCPS.p_o : Org/Org/Semantic/HScheme/MainProg.p_hi
 Org/Org/Semantic/HScheme/Imperative.o Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative.hs
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/IOSystem.hi
 Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IOSystem.p_hi

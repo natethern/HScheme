@@ -96,83 +96,9 @@ module Main where
 	defaultFlavour :: SchemeFlavour;
 	defaultFlavour = FullFlavour;
 
-	mutualBind ::
-		(
-		RunnableScheme IO m r,
-		?objType :: Type (Object r m),
-		?stderr :: FlushSink IO Word8,
-		?stdout :: FlushSink IO Word8,
-		?stdin :: PeekSource IO (Maybe Word8)
-		) =>
-	 [String] ->
-	 ((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
-	 	?macrobindings :: Binds Symbol (Macro IO r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax IO r m)
-	 	) => Binds Symbol (Macro IO r m) -> Binds Symbol (Macro IO r m)) ->
-	 ((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
-	 	?macrobindings :: Binds Symbol (Macro IO r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax IO r m)
-	 	) => Binds Symbol (TopLevelMacro IO r m) -> Binds Symbol (TopLevelMacro IO r m)) ->
-	 ((?macrobindings :: Binds Symbol (Macro IO r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax IO r m),
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
-	 	?system :: FullSystemInterface IO m r
-	 	) => a) ->
-	 a;
-	mutualBind loadpaths macroBinds tlBinds a = 
-	 let
-	 	{
-	 	?syntacticbindings = emptyBindings;
-	 	?system = ioFullSystemInterface id loadpaths;
-	 	} in
-	 let
-		{
-		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 macroBinds emptyBindings;
-		tlb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 systemMacroBindings (fsiPure ?system) (tlBinds emptyBindings);
-		} in
-	 let
-	 	{
-	 	?macrobindings = mb;
-	 	?toplevelbindings = tlb;
-	 	} in a;
-
 	optPrepend :: Bool -> a -> [a] -> [a];
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
-
-	instance
-		(
-		MonadGettableReference m r,
-		MonadCreatable m r,
-		MonadException (Object r m) m
-		) =>
-	 RunnableScheme m m r where
-		{
-		rsRun = id;
-		rsLift = id;
-		};
-
-	instance
-		(
-		MonadGettableReference m r,
-		MonadCreatable m r,
-		MonadException (Object r (SchemeCPS r (m ()))) m
-		) =>
-	 RunnableScheme m (SchemeCPS r (m ())) r where
-		{
-		rsRun ma = runExceptionContinuationPass
-		 (\err -> case err of
-			{
-			StringError s -> fail s;
-			ExceptionError ex -> fail (show ex);
-			ObjError obj -> throw obj;
-			}) return ma;
-		rsLift = lift;
-		};
 
 	main :: IO ();
 	main = ioRunProgram (do
@@ -194,16 +120,18 @@ module Main where
 			{
 			FullFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> let {?objType = Type::Type (Object IORef (CPS IORef))} in
-				 (mutualBind loadpaths fullMacroBindings fullTopLevelBindings
-				  (do
+				CPSWhichMonad ->
+				 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+				 let {?system = ioFullSystemInterface id loadpaths;} in
+				 (mutualBind fullMacroBindings fullTopLevelBindings (do
 					{
 					bindings <- (monadContFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
 					runProgramBindingsWithExit exitFailure (allFileNames "init.full.scm") bindings;
 					}));
-				IOWhichMonad -> let {?objType = Type::Type (Object IORef IO)} in
-				 (mutualBind loadpaths fullMacroBindings fullTopLevelBindings
-				  (do
+				IOWhichMonad ->
+				 let {?objType = Type::Type (Object IORef IO)} in
+				 let {?system = ioFullSystemInterface id loadpaths;} in
+				 (mutualBind fullMacroBindings fullTopLevelBindings (do
 					{
 					bindings <- (monadFixFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
 					runProgramBindings exitFailure (allFileNames "init.full.scm") bindings;
@@ -211,16 +139,18 @@ module Main where
 				};
 			PureFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
-				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
-				  (do
+				CPSWhichMonad ->
+				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
+				 let {?system = ioFullSystemInterface id loadpaths} in
+				 (mutualBind pureMacroBindings pureTopLevelBindings (do
 					{
 					bindings <- monadContPureBindings emptyBindings;
 					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
 					}));
-				IOWhichMonad -> let {?objType = Type::Type (Object IOConst IO)} in
-				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
-				  (do
+				IOWhichMonad ->
+				 let {?objType = Type::Type (Object IOConst IO)} in
+				 let {?system = ioFullSystemInterface id loadpaths} in
+				 (mutualBind pureMacroBindings pureTopLevelBindings (do
 					{
 					bindings <- monadFixPureBindings emptyBindings;
 					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;
@@ -228,16 +158,18 @@ module Main where
 				};
 			StrictPureFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
-				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
-				  (do
+				CPSWhichMonad ->
+				 let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
+				 let {?system = ioFullSystemInterface id loadpaths} in
+				 (mutualBind pureMacroBindings pureTopLevelBindings (do
 					{
 					bindings <- monadContStrictPureBindings emptyBindings;
 					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
 					}));
-				IOWhichMonad -> let {?objType = Type::Type (Object IOConst IO)} in
-				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
-				  (do
+				IOWhichMonad ->
+				 let {?objType = Type::Type (Object IOConst IO)} in
+				 let {?system = ioFullSystemInterface id loadpaths} in
+				 (mutualBind pureMacroBindings pureTopLevelBindings (do
 					{
 					bindings <- monadFixStrictPureBindings emptyBindings;
 					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;

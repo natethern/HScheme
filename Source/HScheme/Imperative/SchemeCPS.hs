@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 	{
+	import Org.Org.Semantic.HScheme.MainProg;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -143,4 +144,22 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 		MonadStandardReference m r
 		) =>
 	 MonadStandardReference (SchemeCPS r (m a)) r;
+
+	instance
+		(
+		MonadGettableReference m r,
+		MonadCreatable m r,
+		MonadException (SchemeCPSObject r (m ())) m
+		) =>
+	 RunnableScheme m (SchemeCPS r (m ())) r where
+		{
+		rsRun ma = runExceptionContinuationPass
+		 (\err -> case err of
+			{
+			StringError s -> fail s;
+			ExceptionError ex -> fail (show ex);
+			ObjError obj -> throw obj;
+			}) return ma;
+		rsLift = lift;
+		};
 	}

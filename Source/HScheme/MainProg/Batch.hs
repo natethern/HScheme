@@ -67,6 +67,18 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		 cm a -> m a;
 		};
 
+	instance
+		(
+		MonadGettableReference m r,
+		MonadCreatable m r,
+		MonadException (Object r m) m
+		) =>
+	 RunnableScheme m m r where
+		{
+		rsRun = id;
+		rsLift = id;
+		};
+
 	runProgram ::
 		(
 		RunnableScheme cm m r,

@@ -26,7 +26,8 @@ module Org.Org.Semantic.HScheme.Bind
 	module Org.Org.Semantic.HScheme.Bind.Macro,
 	module Org.Org.Semantic.HScheme.Bind.TopLevel,
 	module Org.Org.Semantic.HScheme.Bind.Run,
-	module Org.Org.Semantic.HScheme.Bind.FMapBindings
+	module Org.Org.Semantic.HScheme.Bind.FMapBindings,
+	module Org.Org.Semantic.HScheme.Bind
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Bind.FMapBindings;
@@ -34,4 +35,51 @@ module Org.Org.Semantic.HScheme.Bind
 	import Org.Org.Semantic.HScheme.Bind.TopLevel;
 	import Org.Org.Semantic.HScheme.Bind.Macro;
 	import Org.Org.Semantic.HScheme.Bind.Add;
+
+	import Org.Org.Semantic.HScheme.Interpret;
+	import Org.Org.Semantic.HScheme.Core;
+	import Org.Org.Semantic.HBase;
+
+	mutualBind ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+	 	?system :: FullSystemInterface cm m r,
+		?stderr :: FlushSink cm Word8,
+		?stdout :: FlushSink cm Word8,
+		?stdin :: PeekSource cm (Maybe Word8)
+		) =>
+	 ((
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+	 	?macrobindings :: Binds Symbol (Macro cm r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax cm r m)
+	 	) => Binds Symbol (Macro cm r m) -> Binds Symbol (Macro cm r m)) ->
+	 ((
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+	 	?macrobindings :: Binds Symbol (Macro cm r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax cm r m)
+	 	) => Binds Symbol (TopLevelMacro cm r m) -> Binds Symbol (TopLevelMacro cm r m)) ->
+	 ((?macrobindings :: Binds Symbol (Macro cm r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax cm r m),
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
+	 	) => a) ->
+	 a;
+	mutualBind macroBinds tlBinds a = 
+	 let
+	 	{
+	 	?syntacticbindings = emptyBindings;
+	 	} in
+	 let
+		{
+		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
+		 macroBinds emptyBindings;
+		tlb = let {?macrobindings = mb;?toplevelbindings = tlb} in
+		 systemMacroBindings (fsiPure ?system) (tlBinds emptyBindings);
+		} in
+	 let
+	 	{
+	 	?macrobindings = mb;
+	 	?toplevelbindings = tlb;
+	 	} in a;
 	}
