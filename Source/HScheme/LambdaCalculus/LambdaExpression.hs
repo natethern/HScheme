@@ -20,17 +20,18 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
+module Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression
 	(
-	LambdaExpression(..),RunnableLambdaExpression(..),FreeSymbolLambdaExpression(..),
+	LambdaExpression(..),RunnableLambdaExpression(..),runLambdaExpression,FreeSymbolLambdaExpression(..),
 	exprAbstractMap,
 	exprAbstractList,exprAbstractListMap,
 	exprAbstractListGuarded,exprAbstractListGuardedMap,
-	exprLet,exprLetMap,exprLetSequential,
+	exprLetMap,exprLetSequential,
 	exprLetMapSequential,exprLetMapSeparate,exprLetMapRecursive,
 	exprConstMapLet
 	) where
 	{
+	import Org.Org.Semantic.HScheme.LambdaCalculus.MutualBindings;
 	import Org.Org.Semantic.HBase;
 
 
@@ -42,6 +43,12 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 		{
 		exprSymbol :: sym -> f val;
 		exprAbstract :: sym -> f r -> f (val -> r);
+
+		exprLet :: sym -> f val -> f r -> f r;
+		exprLet sym valueExpr bodyExpr = fApply (exprAbstract sym bodyExpr) valueExpr;
+
+		exprLetSym :: sym -> sym -> f r -> f r;
+		exprLetSym abssym sym = exprLet abssym (exprSymbol sym);
 		};
 
 	exprAbstractMap :: (LambdaExpression sym val f) =>
@@ -97,10 +104,6 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 		[] -> tooFewArgs;
 		}) (exprAbstract sym (exprAbstractListGuardedMap map tooFewArgs tooManyArgs syms fr));
 
-	exprLet :: (LambdaExpression sym val f) =>
-	 sym -> f val -> f r -> f r;
-	exprLet sym valueExpr bodyExpr = fApply (exprAbstract sym bodyExpr) valueExpr;
-
 	-- | substs are actually done in reverse order
 	exprLetSequential :: (LambdaExpression sym val f) =>
 	 [(sym,f val)] -> f r -> f r;
@@ -120,11 +123,25 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 
 
 	-- RunnableLambdaExpression
-
+{-
 	class (LambdaExpression sym val f) =>
 	 RunnableLambdaExpression sym val f | f -> sym val where
 		{
 		runLambda :: (sym -> val) -> f a -> a;
+		};
+-}
+	class RunnableLambdaExpression sym val f where
+		{
+		runLambda :: forall a. (sym -> val) -> f a -> a;
+		};
+
+	runLambdaExpression :: (LambdaExpression sym val f,RunnableLambdaExpression sym val f) =>
+	 (sym -> val) -> f a -> a;
+	runLambdaExpression = runLambda;
+
+	instance RunnableLambdaExpression sym val Identity where
+		{
+		runLambda _ (Identity a) = a;
 		};
 
 
@@ -147,67 +164,19 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 	 exprLetSequential (purgeMapList (\sym -> fmap ((\val -> (sym,return val))) (map sym)) (exprFreeSymbols expr)) expr;
 
 
-	-- List
-
-	data ZeroList a = MkZeroList;
-	data NextList t a = MkNextList a (t a);
-
-	instance Functor ZeroList where
-		{
-		fmap _ _ = MkZeroList;
-		};
-
-	instance (Functor t) => Functor (NextList t) where
-		{
-		fmap map ~(MkNextList a ta) = MkNextList (map a) (fmap map ta);
-		};
-
-	instance ExtractableFunctor ZeroList where
-		{
-		fExtract _ = return MkZeroList;
-		};
-
-	instance (ExtractableFunctor t) => ExtractableFunctor (NextList t) where
-		{
-		fExtract ~(MkNextList ga tga) = liftF2 MkNextList ga (fExtract tga);
-		};
-
-
 	-- MutualBindings
 
-	data MutualBindings f a v = forall t. (ExtractableFunctor t) =>
-	 MkMutualBindings (t (f a)) (forall r. f r -> f (t v -> r));
-
-	-- uses irrefutable patterns (~) here to get mfix to work
-	makeMutualBindings :: (LambdaExpression sym val f) =>
-	 [(sym,f a)] -> MutualBindings f a val;
-	makeMutualBindings [] = MkMutualBindings MkZeroList (fmap (\r ~MkZeroList -> r));
-	makeMutualBindings ((sym,fval):restb) = case (makeMutualBindings restb) of
-		{
-		(MkMutualBindings bindValues abstracter) -> MkMutualBindings
-		 (MkNextList fval bindValues)
-		 (\body -> fmap (\atar ~(MkNextList a ta) -> atar a ta) ((exprAbstract sym) (abstracter body)));
-		};
-
-	applyMutualBindingsSeparate :: (FunctorApplyReturn f) =>
-	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
-	 MutualBindings f a val -> f r -> f r;
-	applyMutualBindingsSeparate separater (MkMutualBindings bindValues abstracter) body =
-	 liftF2 separater (fExtract bindValues) (abstracter body);
+	exprAbstracter :: (LambdaExpression sym val f) =>
+	 sym -> Abstracter f val;
+	exprAbstracter sym = MkAbstracter (exprAbstract sym);
 
 	exprLetMapSeparate :: (LambdaExpression sym val f) =>
 	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
 	 [(sym,f a)] -> f r -> f r;
-	exprLetMapSeparate separater bindings = applyMutualBindingsSeparate separater (makeMutualBindings bindings);
-
-	applyMutualBindingsRecursive :: (FunctorApplyReturn f) =>
-	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
-	 MutualBindings f a val -> f r -> f r;
-	applyMutualBindingsRecursive fixer (MkMutualBindings bindValues abstracter) body =
-	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
+	exprLetMapSeparate separater bindings = bindSeparate separater (fmap (\(sym,expr) -> (exprAbstracter sym,expr)) bindings);
 
 	exprLetMapRecursive :: (LambdaExpression sym val f) =>
 	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
 	 [(sym,f a)] -> f r -> f r;
-	exprLetMapRecursive fixer bindings = applyMutualBindingsRecursive fixer (makeMutualBindings bindings);
+	exprLetMapRecursive fixer bindings = bindRecursive fixer (fmap (\(sym,expr) -> (exprAbstracter sym,expr)) bindings);
 	}

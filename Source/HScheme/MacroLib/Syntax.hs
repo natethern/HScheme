@@ -24,7 +24,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	(
 	appendTwo,
 	MapObjects(..),SyntaxError(..),
-	defineSyntaxT,caseMatchM,letSyntaxM
+	defineSyntaxT,caseMatchM,
+	letSyntaxSeparateM,letSyntaxRecursiveM
 	) where
 	{
 	import Org.Org.Semantic.HScheme.MacroLib.Macros;
@@ -99,6 +100,24 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			};
 		});
 
+	substituteAssemble ::
+		(
+		ProcedureError cm obj,
+		Build cm r,
+		AssembleError cm obj,
+		InterpretObject m r obj,
+		MapObjects r obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?objType :: Type obj
+		) =>
+	 [Binding obj] -> obj -> cm (ListSchemeExpression r obj m);
+	substituteAssemble subs obj = do
+		{
+		substObj <- substitute subs obj;
+		assembleExpression substObj;		
+		};
+
 	tryEach :: (Monad m) =>
 	 m a -> [m (Result ex (m a))] -> m a;		
 	tryEach none [] = none;
@@ -119,7 +138,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		InterpretObject m r obj,
 		PatternError m obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (obj,([Symbol],[(obj,(obj,()))])) ->
@@ -145,34 +164,39 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	syntaxRulesM ::
 		(
 		MapObjects r obj,
-		Build cm r,
-		ObjectSubtype r obj obj,
-		ObjectSubtype r obj Symbol,
+		Monad cm,
+		InterpretObject m r obj,
 		?objType :: Type obj
 		) =>
-	 ([Symbol],[((Symbol,obj),(obj,()))]) -> cm (Syntax r obj);
-	syntaxRulesM (literals,rules) = return (MkSyntax (transform rules)) where
+	 ([Symbol],[((Symbol,obj),(obj,()))]) -> cm (Syntax r obj m);
+	syntaxRulesM (literals,rules) = return (MkSyntax (\t arglist -> do
+		{
+		transform t rules arglist;
+		})) where
 		{
 		transform ::
 			(
+			Build m r,
 			MapObjects r obj,
 			Build cm r,
 			PatternError cm obj, 
-			ObjectSubtype r obj obj,
-			ObjectSubtype r obj Symbol,
-			?objType :: Type obj
+			AssembleError cm obj,
+			InterpretObject m r obj,
+			?objType :: Type obj,
+			?syntacticbindings :: SymbolBindings (Syntax r obj m),
+			?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 			) =>
+		 Type (r ()) ->
 		 [((Symbol,obj),(obj,()))] ->
-		 Type (r ()) -> 
 		 [obj] ->
-		 cm obj;
-		transform rules t args = tryEach
+		 cm (ListSchemeExpression r obj m);
+		transform _ rules args = tryEach
 		 (throwPatternNotMatchedError args)
 		 (fmap (\((_,patternObj),(template,_)) -> do
 			{
 			pattern <- makeListPattern literals patternObj;
 			nlist <- patternZip pattern args;
-			return (fmap (\subs -> substitute subs template) nlist);
+			return (fmap (\subs -> substituteAssemble subs template) nlist);
 			}) rules)
 		};
 
@@ -192,10 +216,11 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		ObjectSubtype r obj Symbol,
 		SyntaxError cm obj,
 		Build cm r,
+		InterpretObject m r obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
-	 obj -> cm (Syntax r obj);
+	 obj -> cm (Syntax r obj m);
 	compileSyntax obj = do
 		{
 		choice <- fromObject obj;
@@ -226,10 +251,11 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		SyntaxError cm obj,
 		Build cm r,
 		Monad m,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		InterpretObject m r obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
-	 (Symbol,(obj,())) -> cm (Symbol,Syntax r obj);
+	 (Symbol,(obj,())) -> cm (Symbol,Syntax r obj m);
 	compileSyntaxBinding (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = MkType} in compileSyntax obj;
@@ -244,7 +270,8 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		SyntaxError cm obj,
 		Build cm r,
 		Monad m,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		InterpretObject m r obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (Symbol,(obj,())) -> cm (TopLevelListCommand r obj m);
@@ -254,7 +281,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		return (MkTopLevelCommand (return (return [])) [] [synBinding]);
 		};
 
-	letSyntaxM ::
+	letSyntaxSeparateM ::
 		(
 		AssembleError cm obj,
 		SyntaxError cm obj,
@@ -262,13 +289,35 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		Build cm r,
 		InterpretObject m r obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
 	 ([(Symbol,(obj,()))],[obj]) -> cm (ListSchemeExpression r obj m);
-	letSyntaxM (synspecs,bodyObjs) = do
+	letSyntaxSeparateM (synspecs,bodyObjs) = do
+		{
+		synBindings <- for compileSyntaxBinding synspecs;
+		let {?syntacticbindings = newBindings ?syntacticbindings synBindings} in
+		 bodyM bodyObjs;
+		};
+
+	letSyntaxRecursiveM ::
+		(
+--		MonadFix cm,
+		AssembleError cm obj,
+		SyntaxError cm obj,
+		MapObjects r obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
+		) =>
+	 ([(Symbol,(obj,()))],[obj]) -> cm (ListSchemeExpression r obj m);
+	letSyntaxRecursiveM (synspecs,bodyObjs) = do
 		{
 		synBindings <- for compileSyntaxBinding synspecs;
 		let {?syntacticbindings = newBindings ?syntacticbindings synBindings} in

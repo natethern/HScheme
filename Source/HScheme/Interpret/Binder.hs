@@ -29,7 +29,6 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Abstract;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -38,19 +37,26 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 	newSymbolBindingExpression sym =
 	 return (return (error ("uninitialised binding: " ++ (show sym))));
 
-	schemeExprLetNewRefs :: (InterpretObject m r obj) =>
+	schemeExprLetNewRefs ::
+		(
+		InterpretObject m r obj
+		) =>
 	 [Symbol] -> SchemeExpression r obj (m a) -> SchemeExpression r obj (m a);
 	schemeExprLetNewRefs [] bodyexpr = bodyexpr;
 	schemeExprLetNewRefs (sym:rest) bodyexpr = 
 	 schemeExprLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefs rest bodyexpr);
 
-	bindsToSetSequence :: (InterpretObject m r obj,FullBuild m r) =>
+	bindsToSetSequence ::
+		(
+		InterpretObject m r obj,
+		FullBuild m r
+		) =>
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
 	bindsToSetSequence [] bodyexpr = bodyexpr;
 	bindsToSetSequence ((sym,bindexpr):rest) bodyexpr = 
-	 liftF3 setBindValue (exprSymbol sym) bindexpr (bindsToSetSequence rest bodyexpr) where
+	 liftF3 setBindValue (schemeExprSymbol sym) bindexpr (bindsToSetSequence rest bodyexpr) where
 		{
 		setBindValue ref bindaction bodyaction =
 		 {-# SCC "setBindValue" #-}
@@ -62,7 +68,11 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 			};
 		};
 
-	interactiveBind :: (InterpretObject m r obj,FullBuild m r) =>
+	interactiveBind ::
+		(
+		InterpretObject m r obj,
+		FullBuild m r
+		) =>
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m (a,[(Symbol,r obj)]));
@@ -76,10 +86,19 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 		gather sym = fmap (fmap (\((a,binds),loc) -> (a,(sym,loc):binds)))
 		};
 
-	recursiveBinder :: (MonadFix m,InterpretObject m r obj) => TopLevelBinder r obj m;
+	recursiveBinder ::
+		(
+		MonadFix m,
+		InterpretObject m r obj
+		) => TopLevelBinder r obj m;
 	recursiveBinder = MkTopLevelBinder schemeExprLetRecursive;
 
-	setBinder :: (InterpretObject m r obj,FullBuild m r) => TopLevelBinder r obj m;
+	setBinder ::
+		(
+		InterpretObject m r obj,
+		FullBuild m r
+		) =>
+	 TopLevelBinder r obj m;
 	setBinder =
 	 {-# SCC "setBinder.root" #-}
 	 t5 where

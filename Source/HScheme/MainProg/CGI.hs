@@ -70,7 +70,7 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 		) =>
 	 (obj -> IO ()) ->
 	 MacroBindings IO r obj m ->
-	 ((?syntacticbindings :: SymbolBindings (Syntax r obj)) => TopLevelBindings IO r obj m) ->
+	 ((?syntacticbindings :: SymbolBindings (Syntax r obj m)) => TopLevelBindings IO r obj m) ->
 	 ((?macrobindings :: Symbol -> Maybe (Macro IO r obj m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r obj m)) => RefBindings IO r obj) ->
 	 String ->
 	 String ->

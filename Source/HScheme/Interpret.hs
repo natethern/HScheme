@@ -22,10 +22,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret
 	(
-	module Org.Org.Semantic.HScheme.Interpret.LambdaExpression,
-	module Org.Org.Semantic.HScheme.Interpret.SymbolExpression,
-	module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression,
-	module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression,
 	module Org.Org.Semantic.HScheme.Interpret.Assemble,
 	module Org.Org.Semantic.HScheme.Interpret.Abstract,
 	module Org.Org.Semantic.HScheme.Interpret.Pattern,
@@ -42,8 +38,4 @@ module Org.Org.Semantic.HScheme.Interpret
 	import Org.Org.Semantic.HScheme.Interpret.Pattern;
 	import Org.Org.Semantic.HScheme.Interpret.Abstract;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
-	import Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression;
-	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
 	}

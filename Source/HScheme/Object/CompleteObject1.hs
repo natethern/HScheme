@@ -43,7 +43,7 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 	 VectorObject		(SRefArray r (CompleteObject r m))			|
 	 InputPortObject 	(InputPort Word8 m)					|
 	 OutputPortObject 	(OutputPort Word8 m)				|
-	 EnvironmentObject	(Environment r (CompleteObject r m))		;
+	 EnvironmentObject	(Environment r (CompleteObject r m) m)		;
 
 	instance ListObject ref (CompleteObject ref m) where
 		{
@@ -238,13 +238,13 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 	
 	-- Environment
 
-	instance MaybeA (Environment r (CompleteObject r m)) (CompleteObject r m) where
+	instance MaybeA (Environment r (CompleteObject r m) m) (CompleteObject r m) where
 		{
 		maybeConvert (EnvironmentObject a) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
-	instance ObjectSubtype r (CompleteObject r m) (Environment r (CompleteObject r m)) where
+	instance ObjectSubtype r (CompleteObject r m) (Environment r (CompleteObject r m) m) where
 		{
 		getObject = return . EnvironmentObject;
 		resultFromObject = getMaybeToMatch EnvironmentTypeExpected (return . maybeConvert);

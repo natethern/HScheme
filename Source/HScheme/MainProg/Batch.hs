@@ -123,7 +123,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
 	 (forall a. (ArgumentList r obj a) => ((Symbol -> Maybe (r obj)) -> m a) -> m a) ->
@@ -143,7 +143,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
 	 (obj -> cm ()) ->
@@ -166,7 +166,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
 	 (obj -> cm ()) ->

@@ -63,8 +63,8 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 
 		-- 4.3.1 Binding constructs for syntactic keywords
-		addMacroBinding	"let-syntax"		letSyntaxM,
-		addMacroBinding	"letrec-syntax"		letSyntaxM,
+		addMacroBinding	"let-syntax"		letSyntaxSeparateM,
+		addMacroBinding	"letrec-syntax"		letSyntaxRecursiveM,
 
 		-- Misc
 		addMacroBinding	"case-match"		caseMatchM		-- nonstandard

@@ -5,3 +5,13 @@
 		)
 	)
 )
+
+(let-syntax ((m (syntax-rules () ((m y) (let ((x 'outer)) y)))))
+	(let ((x 'inner))
+		(m x)
+	)
+)
+
+(let-syntax ((m (syntax-rules () ((m y) (list y 'y)))))
+	(m (cons 'a 'b))
+)

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Interpret.Assemble
 	(
+	schemeExprSymbol,
 	SchemeExpression,ObjectSchemeExpression,ListSchemeExpression,
 	SymbolBindings,
 	Macro(..),remonadMacro,
@@ -32,8 +33,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	assembleSymbolExpressionSingle,assembleSymbolExpression
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
+	import Org.Org.Semantic.HScheme.LambdaCalculus;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -62,9 +62,17 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		 [obj] -> cm a;
 		};
 
-	newtype Syntax r obj = MkSyntax (forall m. (Build m r,PatternError m obj,?objType :: Type obj) => Type (r ()) -> [obj] -> m obj);
+	newtype Syntax r obj m = MkSyntax (forall cm.
+		(
+		Build cm r,
+		AssembleError cm obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?objType :: Type obj
+		) =>
+	 (Type (r ())) -> [obj] -> cm (ListSchemeExpression r obj m));
 
-	type SchemeExpression r obj = TrackingExpression Symbol (r obj);
+	type SchemeExpression r obj = TrackingLambdaExpression Symbol (LookupLambdaExpression Symbol (r obj));
 
 	type ObjectSchemeExpression r obj m = SchemeExpression r obj (m obj);
 
@@ -74,7 +82,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 
 	newtype Macro cm r obj m = MkMacro
 		((
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
 	 [obj] -> cm (ListSchemeExpression r obj m));
 
@@ -108,7 +116,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		InterpretObject m r obj,
 		Build cm r,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj -> [obj] -> cm (ListSchemeExpression r obj m);
@@ -119,13 +127,17 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		return (makeApply fe ae);
 		};
 
+	schemeExprSymbol ::
+	 Symbol -> SchemeExpression r obj (r obj);
+	schemeExprSymbol = exprSymbol;
+
 	assembleSymbolExpressionSingle ::
 		(
 		Build m r,
 		?objType :: Type obj
 		) =>
 	 Symbol -> ObjectSchemeExpression r obj m;
-	assembleSymbolExpressionSingle sym = fmap get (exprSymbol sym);
+	assembleSymbolExpressionSingle sym = fmap get (schemeExprSymbol sym);
 
 	assembleSymbolExpression ::
 		(
@@ -137,7 +149,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		{
 		obj <- get loc;
 		return [obj];
-		}) (exprSymbol sym);
+		}) (schemeExprSymbol sym);
 
 	assembleExpression ::
 		(
@@ -145,7 +157,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		InterpretObject m r obj,
 		Build cm r,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj -> cm (ListSchemeExpression r obj m);
@@ -170,8 +182,9 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 								{
 								Just (MkSyntax syntax) -> do
 									{
-									obj <- syntax MkType arglist;
-									assembleExpression obj;
+--									obj <- syntax arglist;
+--									assembleExpression obj;
+									syntax MkType arglist;
 									};
 								Nothing -> case ?macrobindings sym of
 									{
@@ -194,7 +207,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		InterpretObject m r obj,
 		Build cm r,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj -> cm (ObjectSchemeExpression r obj m);

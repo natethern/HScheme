@@ -101,7 +101,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		) =>
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
 	  args -> cm (ListSchemeExpression r obj m)) ->
 	 Macro cm r obj m;
@@ -120,7 +120,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 		) =>
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
 	 args -> cm (TopLevelListCommand r obj m)) ->
 	 TopLevelMacro cm r obj m;
@@ -147,7 +147,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	 String ->
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
 	  args -> cm (ListSchemeExpression r obj m)) ->
 	 MacroBindings cm r obj m;
@@ -170,7 +170,7 @@ module Org.Org.Semantic.HScheme.Bind.Add where
 	 String ->
 	 (
 		(
-		?syntacticbindings :: SymbolBindings (Syntax r obj)
+		?syntacticbindings :: SymbolBindings (Syntax r obj m)
 		) =>
 	 args -> cm (TopLevelListCommand r obj m)) ->
 	 TopLevelBindings cm r obj m;

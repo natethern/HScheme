@@ -93,10 +93,18 @@ LIB_HC_SRCS			= \
 	$(HIER)/Core/Procedure.hs	\
 	$(HIER)/Core.hs	\
 	\
-	$(HIER)/Interpret/LambdaExpression.hs	\
-	$(HIER)/Interpret/SymbolExpression.hs	\
-	$(HIER)/Interpret/ListSymbolExpression.hs	\
-	$(HIER)/Interpret/FuncSymbolExpression.hs	\
+	$(HIER)/LambdaCalculus/FixedList.hs	\
+	$(HIER)/LambdaCalculus/MutualBindings.hs	\
+	$(HIER)/LambdaCalculus/LambdaExpression.hs	\
+	$(HIER)/LambdaCalculus/SymbolLambdaExpression.hs	\
+	$(HIER)/LambdaCalculus/ListSymbolExpression.hs	\
+	$(HIER)/LambdaCalculus/LookupLambdaExpression.hs	\
+	$(HIER)/LambdaCalculus/TrackingLambdaExpression.hs	\
+	$(HIER)/LambdaCalculus/LambdaFunctorExpression.hs	\
+	$(HIER)/LambdaCalculus/SymbolLambdaFunctorExpression.hs	\
+	$(HIER)/LambdaCalculus/TrackingLambdaFunctorExpression.hs	\
+	$(HIER)/LambdaCalculus.hs	\
+	\
 	$(HIER)/Interpret/Assemble.hs	\
 	$(HIER)/Interpret/Abstract.hs	\
 	$(HIER)/Interpret/Pattern.hs	\
@@ -542,36 +550,85 @@ Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Throw.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Procedure.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Procedure.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Procedure.p_hi
-Org/Org/Semantic/HScheme/Interpret/LambdaExpression.o Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_o Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_o : Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hs
-Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_o Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hs
-Org/Org/Semantic/HScheme/Interpret/SymbolExpression.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.o Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.q_o Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.hs
-Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.o Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_o Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_o : Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.hs
-Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.o Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.q_o Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.o Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.q_o Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/FixedList.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/MutualBindings.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.o Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.q_o Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.p_o : Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.hs
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o Org/Org/Semantic/HScheme/LambdaCalculus.q_o Org/Org/Semantic/HScheme/LambdaCalculus.p_o : Org/Org/Semantic/HScheme/LambdaCalculus.hs
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/ListSymbolExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LookupLambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/LambdaFunctorExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/SymbolLambdaFunctorExpression.p_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.hi
+Org/Org/Semantic/HScheme/LambdaCalculus.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.q_hi
+Org/Org/Semantic/HScheme/LambdaCalculus.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus/TrackingLambdaFunctorExpression.p_hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.o Org/Org/Semantic/HScheme/Interpret/Assemble.q_o Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : Org/Org/Semantic/HScheme/Interpret/Assemble.hs
 Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/LambdaCalculus.hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.q_hi
+Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.p_hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.o Org/Org/Semantic/HScheme/Interpret/Abstract.q_o Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : Org/Org/Semantic/HScheme/Interpret/Abstract.hs
 Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/LambdaCalculus.hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.q_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.p_hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
@@ -596,9 +653,6 @@ Org/Org/Semantic/HScheme/Interpret/Binder.o Org/Org/Semantic/HScheme/Interpret/B
 Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
 Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
@@ -612,9 +666,9 @@ Org/Org/Semantic/HScheme/Interpret/Interpret.o Org/Org/Semantic/HScheme/Interpre
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/LambdaCalculus.hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.q_hi
+Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.p_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
@@ -635,18 +689,6 @@ Org/Org/Semantic/HScheme/Interpret/Evaluate.o : ./Org/Org/Semantic/HScheme/Inter
 Org/Org/Semantic/HScheme/Interpret/Evaluate.q_o : ./Org/Org/Semantic/HScheme/Interpret/Interpret.q_hi
 Org/Org/Semantic/HScheme/Interpret/Evaluate.p_o : ./Org/Org/Semantic/HScheme/Interpret/Interpret.p_hi
 Org/Org/Semantic/HScheme/Interpret.o Org/Org/Semantic/HScheme/Interpret.q_o Org/Org/Semantic/HScheme/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret.hs
-Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.hi
-Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/LambdaExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/ListSymbolExpression.p_hi
-Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.hi
-Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_hi
-Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_hi
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
@@ -1010,6 +1052,9 @@ Org/Org/Semantic/HScheme/MainProg/Interactive.o Org/Org/Semantic/HScheme/MainPro
 Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/LambdaCalculus.hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.q_hi
+Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/LambdaCalculus.p_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/Interpret.hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi

@@ -49,7 +49,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		?objType :: Type obj,
 		?read :: String -> cm [obj],
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
 		) =>
 	 String -> cm (TopLevelListCommand r obj m);

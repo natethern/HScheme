@@ -31,10 +31,10 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 
 	-- 6.5 Eval
 
-	data Environment r obj = MkEnvironment
+	data Environment r obj m = MkEnvironment
 		{
-		envSyn :: SymbolBindings (Syntax r obj),
-		envLoc :: SymbolBindings (r obj)
+		envSyn :: SymbolBindings (Syntax r obj m),
+		envLoc :: Bindings Symbol (r obj)
 		};
 
 	evaluateObject ::
@@ -43,7 +43,7 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		MonadThrow obj m,
 		InterpretObject m r obj,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m)
 		) =>
 	 obj -> (Symbol -> Maybe (r obj)) -> m [obj];
@@ -63,7 +63,7 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (forall a. cm a -> m a) ->
-	 (obj,(Environment r obj,())) -> m [obj];
+	 (obj,(Environment r obj m,())) -> m [obj];
 	evaluatePL remonad (obj,(MkEnvironment syn loc,())) = let
 		{
 		?syntacticbindings = syn;

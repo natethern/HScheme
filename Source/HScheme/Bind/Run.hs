@@ -340,7 +340,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 	evalBindings ::
 		(
-		ObjectSubtype r obj (Environment r obj),
+		ObjectSubtype r obj (Environment r obj m),
 		MonadThrow obj m,
 		AssembleError m obj,
 		InterpretObject m r obj,

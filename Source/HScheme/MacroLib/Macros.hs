@@ -52,7 +52,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj ->
@@ -73,7 +73,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (obj,[obj]) ->
@@ -94,7 +94,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		Build cm r,
 		InterpretObject m r obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (obj,(obj,Maybe obj)) ->
@@ -127,7 +127,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		FullBuild m r,
 		InterpretObject m r obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (Symbol,(obj,())) -> cm (ListSchemeExpression r obj m);
@@ -139,7 +139,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 			val <- mval;
 			set loc val;
 			return [];
-			}) (exprSymbol sym) expr);
+			}) (schemeExprSymbol sym) expr);
 		};
 
 
@@ -151,7 +151,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		Build cm r,
 		InterpretObject m r obj,
 		?objType :: Type obj,
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 [(Symbol,(obj,()))] ->
@@ -172,7 +172,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 ([(Symbol,(obj,()))],[obj]) ->
@@ -192,7 +192,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 ([(Symbol,(obj,()))],[obj]) ->
@@ -213,7 +213,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 ([(Symbol,(obj,()))],[obj]) ->
@@ -236,7 +236,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 [obj] ->
@@ -251,7 +251,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 [obj] ->
@@ -271,7 +271,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 [obj] ->
@@ -297,7 +297,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 ([(Symbol,(obj,Maybe obj))],((obj,[obj]),[obj])) -> cm (ListSchemeExpression r obj m);
@@ -372,7 +372,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (Symbol,([(Symbol,(obj,()))],[obj])) ->
@@ -405,7 +405,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		InterpretObject m r obj,
 		?objType :: Type obj,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 [obj] ->
@@ -436,7 +436,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		val <- mval;
 		set loc val;
 		return [];
-		}) (exprSymbol sym) valExpr)
+		}) (schemeExprSymbol sym) valExpr)
 	 [(sym,return (return (error "unassigned symbol")))]
 	 [];
 
@@ -448,7 +448,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		?objType :: Type obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (Symbol -> ObjectSchemeExpression r obj m -> TopLevelListCommand r obj m) -> 

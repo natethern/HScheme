@@ -178,6 +178,30 @@
 			path = CompleteObject1.hs;
 			refType = 4;
 		};
+		ABA84482051DC6E600A80103 = {
+			children = (
+				ABA84483051DC87400A80103,
+				ABC55D420519C04B00A80103,
+				ABAD376904A403EE00A80103,
+				ABAD376D04A403EE00A80103,
+				ABAD376B04A403EE00A80103,
+				ABAD376804A403EE00A80103,
+				ABBA7567051DCA6300A80103,
+				ABD5655E051E9ABF00A80103,
+				ABD5655D051E9A8B00A80103,
+				ABBA7568051DCCA900A80103,
+				ABBA7569051E97C500A80103,
+			);
+			isa = PBXGroup;
+			path = LambdaCalculus;
+			refType = 4;
+		};
+		ABA84483051DC87400A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = FixedList.hs;
+			refType = 4;
+		};
 		ABAD36B804A4020700A80103 = {
 			children = (
 				ABAD378F04A403EE00A80103,
@@ -283,6 +307,7 @@
 		ABAD374A04A403EE00A80103 = {
 			children = (
 				ABAD375204A403EE00A80103,
+				ABA84482051DC6E600A80103,
 				ABAD376504A403EE00A80103,
 				ABAD377004A403EE00A80103,
 				ABAD377904A403EE00A80103,
@@ -452,10 +477,6 @@
 		};
 		ABAD376504A403EE00A80103 = {
 			children = (
-				ABAD376904A403EE00A80103,
-				ABAD376D04A403EE00A80103,
-				ABAD376B04A403EE00A80103,
-				ABAD376804A403EE00A80103,
 				ABAD376604A403EE00A80103,
 				AB4CB45804B81D3500A80103,
 				ABAD376C04A403EE00A80103,
@@ -481,7 +502,7 @@
 		};
 		ABAD376804A403EE00A80103 = {
 			isa = PBXFileReference;
-			path = FuncSymbolExpression.hs;
+			path = LookupLambdaExpression.hs;
 			refType = 4;
 		};
 		ABAD376904A403EE00A80103 = {
@@ -506,7 +527,7 @@
 		};
 		ABAD376D04A403EE00A80103 = {
 			isa = PBXFileReference;
-			path = SymbolExpression.hs;
+			path = SymbolLambdaExpression.hs;
 			refType = 4;
 		};
 		ABAD376E04A403EE00A80103 = {
@@ -1017,6 +1038,31 @@
 			path = vector.scm.ref;
 			refType = 4;
 		};
+		ABBA7567051DCA6300A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = TrackingLambdaExpression.hs;
+			refType = 4;
+		};
+		ABBA7568051DCCA900A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = TrackingLambdaFunctorExpression.hs;
+			refType = 4;
+		};
+		ABBA7569051E97C500A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			name = LambdaCalculus.hs;
+			path = ../LambdaCalculus.hs;
+			refType = 4;
+		};
+		ABC55D420519C04B00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = MutualBindings.hs;
+			refType = 4;
+		};
 		ABC8301704C8719700A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME$STYLE";
 			buildPhases = (
@@ -1085,6 +1131,18 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			path = Misc.hs;
+			refType = 4;
+		};
+		ABD5655D051E9A8B00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = SymbolLambdaFunctorExpression.hs;
+			refType = 4;
+		};
+		ABD5655E051E9ABF00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = LambdaFunctorExpression.hs;
 			refType = 4;
 		};
 		ABEBAF00050EF5BE00A80103 = {

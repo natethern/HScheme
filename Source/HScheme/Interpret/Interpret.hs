@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
+	import Org.Org.Semantic.HScheme.LambdaCalculus;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -57,7 +57,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		Build cm r,
 		InterpretObject m r obj,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj -> cm ((Symbol -> Maybe (r obj)) -> m [obj]);
@@ -74,7 +74,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		InterpretObject m r obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (obj -> m ()) ->
@@ -93,7 +93,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		InterpretObject m r obj,
 		?binder :: TopLevelBinder r obj m,
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 TopLevelListCommand r obj m ->

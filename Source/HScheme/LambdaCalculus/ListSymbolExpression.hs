@@ -20,12 +20,12 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
+module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression
 	(
 --	ListSymbolExpression		currently broken
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
+	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression;
 	import Org.Org.Semantic.HBase;
 
 	-- list lengths always the same size

@@ -27,6 +27,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 	import Org.Org.Semantic.HScheme.RunLib;
 	import Org.Org.Semantic.HScheme.Parse;
 	import Org.Org.Semantic.HScheme.Interpret;
+	import Org.Org.Semantic.HScheme.LambdaCalculus;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -38,12 +39,12 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 Environment r obj -> TopLevelCommand r obj m (m a) -> m (Environment r obj,a);
+	 Environment r obj m -> TopLevelCommand r obj m (m a) -> m (Environment r obj m,a);
 	runTopLevelInEnvironment
 	 (MkEnvironment synbindings runbindings) (MkTopLevelCommand expr newbinds newsyntaxes) = do
 		{
 		let {boundExpr = exprConstMapLet (getBinding runbindings) (interactiveBind newbinds expr)};
-		(result,allnewbinds) <- runLambda (\_ -> error "undefined symbol") (schemeExprLetNewRefs (exprFreeSymbols boundExpr) boundExpr);
+		(result,allnewbinds) <- runLambdaExpression (\_ -> error "undefined symbol") (schemeExprLetNewRefs (exprFreeSymbols boundExpr) boundExpr);
 		return (MkEnvironment (newBindings synbindings newsyntaxes) (newBindings runbindings allnewbinds),result);
 		};
 
@@ -56,7 +57,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 Environment r obj -> obj -> m (Environment r obj,[obj]);
+	 Environment r obj m -> obj -> m (Environment r obj m,[obj]);
 	runObjectInEnvironment env obj =  do
 		{
 		tlCommand <- let {?syntacticbindings = envSyn env} in assembleTopLevelListCommand obj;
@@ -114,7 +115,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>
-	 Environment r obj -> m ();
+	 Environment r obj m -> m ();
 	interactiveLoop environment = do
 		{
 		let
@@ -166,7 +167,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m)
 		) =>
-	 TopLevelCommand r obj m (m a) -> Environment r obj -> m (Environment r obj);
+	 TopLevelCommand r obj m (m a) -> Environment r obj m -> m (Environment r obj m);
 	envProc command env = do
 		{
 		(env',_) <- runTopLevelInEnvironment env command;
@@ -185,7 +186,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		MonadException obj m,
 		?objType :: Type obj,
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>
@@ -216,7 +217,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		MonadException obj m,
 		?objType :: Type obj,
 		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
 		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
 		?system :: System m
 		) =>

@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.LambdaExpression;
+	import Org.Org.Semantic.HScheme.LambdaCalculus;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -69,7 +69,8 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 		) =>
 	 [Symbol] -> SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj ([obj] -> (m a));
-	schemeExprAbstractList = exprAbstractListGuardedMap substMap throwTooFewArgumentsError throwTooManyArgumentsError;
+	schemeExprAbstractList =
+	 exprAbstractListGuardedMap substMap throwTooFewArgumentsError throwTooManyArgumentsError;
 
 	schemeExprRefAbstractList ::
 		(
@@ -86,19 +87,28 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 		throwTooManyArgumentsError objs;
 		});
 
-	schemeExprLet :: (InterpretObject m r obj) =>
+	schemeExprLet ::
+		(
+		InterpretObject m r obj
+		) =>
 	 Symbol -> ObjectSchemeExpression r obj m ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
 	schemeExprLet = exprLetMap mSubstMap;
 
-	schemeExprLocLet :: (InterpretObject m r obj) =>
+	schemeExprLocLet ::
+		(
+		InterpretObject m r obj
+		) =>
 	 Symbol -> ObjectSchemeExpression r obj m ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m (a,r obj));
 	schemeExprLocLet = exprLetMap mSubstLocMap;
 
-	schemeExprLetSeparate :: (InterpretObject m r obj) =>
+	schemeExprLetSeparate ::
+		(
+		InterpretObject m r obj
+		) =>
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
@@ -114,13 +124,20 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 			};
 		};
 
-	schemeExprLetSequential :: (InterpretObject m r obj) =>
+	schemeExprLetSequential ::
+		(
+		InterpretObject m r obj
+		) =>
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
 	schemeExprLetSequential = exprLetMapSequential mSubstMap;
 
-	schemeExprLetRecursive :: (MonadFix m,InterpretObject m r obj) =>
+	schemeExprLetRecursive ::
+		(
+		MonadFix m,
+		InterpretObject m r obj
+		) =>
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
