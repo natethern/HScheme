@@ -178,17 +178,21 @@ haskellclean: $(HROOT)
 $(importdir)/%.hi: %.hi
 	install -d -m 755 $(dir $@)
 	install -c -p -m 644 $< $@
+	touch $@
 
 $(importdir)/%.p_hi: %.p_hi
 	install -d -m 755 $(dir $@)
 	install -c -p -m 644 $< $@
+	touch $@
 
 $(libdir)/%.a: %.a
 	install -c -p -m 644 $< $@
 	ranlib $@
+	touch $@
 
 $(bindir)/%: %
 	install -c -p -m 755 $< $@
+	touch $@
 
 
 # Standard Suffix Rules for Building
