@@ -29,6 +29,9 @@ module UnicodeData where
 	sparseArray	bounds other values =
 	 accumArray (\_ a -> a) other bounds values;
 
+
+	-- Data
+
 	codeDecDigit :: Int -> Maybe Integer;
 define(`uchar',`ifelse(`$7',`',`',`	codeDecDigit 0x$1 = Just $7;
 ')')dnl
@@ -75,4 +78,18 @@ define(`uchar',`ifelse(`$15',`',`',`	codeTitleCase 0x$1 = 0x$15;
 ')')dnl
 include(DATAFILE)dnl
 	codeTitleCase i = i;
+
+
+	-- Properties
+define(`propbegin',`ifelse($1,`',`',`
+	codeIs_`'$1 :: Int -> Bool;
+')')dnl
+define(`propend',`ifelse($1,`',`',`	codeIs_`'curpropname _ = False;
+')')dnl
+define(`curpropname',`')dnl
+define(`newprop',`ifelse($1,curpropname,`',`propend(curpropname)`'propbegin($1)')`'define(`curpropname',$1)')dnl
+define(`charprop',`newprop($1)ifelse(`$3',`',`	codeIs_$1 0x$2 = True;',
+`	codeIs_$1 i | (i >= 0x$2) && (i <= 0x$3) = True;')')dnl
+include(PROPFILE)dnl
+newprop(`')dnl
 	}

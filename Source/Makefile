@@ -59,7 +59,7 @@ OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
 default: build
 
 clean:
-	rm -f hscheme UnicodeData.hs UnicodeData.m4 UnicodeData-3.1.0.txt Makefile.bak
+	rm -f hscheme UnicodeData.hs UnicodeData.m4 UnicodeData-3.1.0.txt UnicodePropList.m4 PropList-3.1.0.txt Makefile.bak
 	rm -f *.hi *.o Common/*.hi Common/*.o
 
 build: hscheme
@@ -74,15 +74,22 @@ test: hscheme
 
 .SUFFIXES: .o .hs .hi .lhs .hc .s
 
-UnicodeData.hs: UnicodeData.hs.m4 UnicodeData.m4
-	m4 -DDATAFILE="UnicodeData.m4" $< > $@
+UnicodeData.hs: UnicodeData.hs.m4 UnicodeData.m4 UnicodePropList.m4
+	m4 -DDATAFILE="UnicodeData.m4" -DPROPFILE="UnicodePropList.m4" $< > $@
 
 UnicodeData.m4: UnicodeData-3.1.0.txt
 	sed -e 's/;/'\'',`/g; s/^/uchar(`/; s/$$/'\'')dnl/' $< > $@
 
-UnicodeData-3.1.0.txt: 
+UnicodeData-3.1.0.txt:
 	rm -f $@
-	wget http://www.unicode.org/Public/3.1-Update/UnicodeData-3.1.0.txt
+	wget http://www.unicode.org/Public/3.1-Update/$@
+
+UnicodePropList.m4: PropList-3.1.0.txt
+	sed -e 's/#.*$$//;s/^ *\([.0-9A-F]*\) *; *\([0-9A-Za-z_]*\)/charprop(\2,\1)/;s/\.\./,/;/^$$/ d' $<	> $@
+
+PropList-3.1.0.txt:
+	rm -f $@
+	wget http://www.unicode.org/Public/3.1-Update/$@
 
 %.int:
 	$(HCI) $(HCOPTS) -package lang -i../../JVM-Bridge/Current/source/Haskell $(HCIMPORTDIRS) $*
