@@ -184,6 +184,9 @@ testrelease: test-pure test-full test-cgi
 %.pure.diff: %.ref %.pure.out
 	diff -u $^
 
+%.diff: %.ref %.out
+	diff -u $^
+
 test/%.scm.initfull.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.full.scm
 	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
 
@@ -237,13 +240,13 @@ test-full:	\
  test/helloworld.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
 
-test-cgi: test/cgi-get.diff
-
-test/cgi-get.diff: test/cgi-get.ref test/cgi-get.out
-	diff -u $^
+test-cgi: test/cgi-get.diff test/cgi-error.diff
 
 test/cgi-get.out: $(CGI_COMMAND)
 	env REQUEST_METHOD="GET" QUERY_STRING="input=(*+3+4)" ./$< > $@ || (rm $@; exit 1)
+
+test/cgi-error.out: $(CGI_COMMAND)
+	env REQUEST_METHOD="GET" QUERY_STRING="input=a" ./$< > $@ || (rm $@; exit 1)
 
 testprof: $(BATCH_COMMAND_REL).prof
 

@@ -62,13 +62,8 @@ module Main where
 			flavour = unJust (defaultStdBindings whichmonad) mflavour;
 			allFileNames initFile = optPrepend initfile initFile filenames
 			};
-		if verbose then do
-			{
-			fsSinkList ?stderr (encodeUTF8 "HScheme 0.1\n");
-			fsSinkList ?stderr (encodeUTF8 "Copyright (C) 2003 Ashley Yakeley <ashley@semantic.org>\n");
-			fsSinkList ?stderr (encodeUTF8 ("monad: " ++ (show whichmonad) ++ "\n"));
-			fsSinkList ?stderr (encodeUTF8 ("bindings: " ++ (show flavour) ++ "\n\n"));
-			}
+		if verbose
+		 then verbosity ?stderr whichmonad flavour
 		 else return ();
 		case whichmonad of
 			{

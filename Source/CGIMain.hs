@@ -51,13 +51,13 @@ module Main where
 	printError ::
 		(
 		Show a,
-		?stderr :: FlushSink IO Word8
+		?stdout :: FlushSink IO Word8
 		) =>
 	 a -> IO ();
 	printError a = do
 		{
-		fsSinkList ?stderr (encodeUTF8 ("Error: "++(show a)++"\n"));
-		fsFlush ?stderr;
+		fsSinkList ?stdout (encodeUTF8 ("Error: "++(show a)++"\n"));
+		fsFlush ?stdout;
 		};
 
 	getStdBindings :: SchemeWhichMonad -> QueryParameters -> SchemeStdBindings;
@@ -104,7 +104,7 @@ module Main where
 		});
 
 	main :: IO ();
-	main = ioRunProgram (catchSingle (do
+	main = ioRunProgram (catchBottom (catchSingle (do
 		{
 		putStrLn "Content-Type: text/plain\n";
 		params <- cgiGetQueryParameters;
@@ -113,14 +113,27 @@ module Main where
 			Just sourceBytes -> return (decodeLatin1 sourceBytes);
 			Nothing -> fail "no input";
 			};
-		let {whichmonad = getWhichMonad params};
+		let
+			{
+			verbose = case findQueryParameter (encodeLatin1 "verbose") params of
+				{
+				Just [0x30] -> False;	-- "0"
+				Just _ -> True;
+				Nothing -> False;
+				};
+			whichmonad = getWhichMonad params;
+			stdbindings = getStdBindings whichmonad params;
+			};
+		if verbose
+		 then verbosity ?stdout whichmonad stdbindings
+		 else return ();
 		case whichmonad of
 			{
 			GCPSWhichMonad -> 
 			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
-			 case (getStdBindings whichmonad params) of
+			 case stdbindings of
 				{
 				FullStdBindings -> runProg
 				 fullMacroBindings
@@ -164,7 +177,7 @@ module Main where
 			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
-			 case (getStdBindings whichmonad params) of
+			 case stdbindings of
 				{
 				FullStdBindings -> runProg
 				 fullMacroBindings
@@ -206,7 +219,7 @@ module Main where
 			 let {?objType = MkType::Type (Object IORef IO)} in
 			 let {?binder = setBinder} in
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
-			 case (getStdBindings whichmonad params) of
+			 case stdbindings of
 				{
 				FullStdBindings -> runProg
 				 fullMacroBindings
@@ -245,7 +258,7 @@ module Main where
 			 let {?objType = MkType::Type (Object IdentityConst Identity)} in
 			 let {?binder = recursiveBinder} in
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
-			 case (getStdBindings whichmonad params) of
+			 case stdbindings of
 				{
 				FullStdBindings -> fail "can't use pure monad with full bindings";
 				PureStdBindings -> runProg
@@ -270,5 +283,5 @@ module Main where
 				};
 			};
 		})
-		printError);
+		printError) printError);
 	}

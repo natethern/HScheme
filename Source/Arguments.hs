@@ -115,4 +115,13 @@ module Arguments where
 		(f,m,paths,initfile,files,verbose) <- parseArgs args;
 		return (f,m,paths,initfile,(file:files),verbose);
 		};
+
+	verbosity :: FlushSink IO Word8 -> SchemeWhichMonad -> SchemeStdBindings -> IO ();
+	verbosity outstream whichmonad bindings = do
+		{
+		fsSinkList outstream (encodeUTF8 "HScheme 0.1\n");
+		fsSinkList outstream (encodeUTF8 "Copyright (C) 2003 Ashley Yakeley <ashley@semantic.org>\n");
+		fsSinkList outstream (encodeUTF8 ("monad: " ++ (show whichmonad) ++ "\n"));
+		fsSinkList outstream (encodeUTF8 ("bindings: " ++ (show bindings) ++ "\n\n"));
+		};
 	}
