@@ -169,7 +169,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 
 	syntaxRulesM :: (Scheme m r) =>
 	 Type (r ()) -> ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
-	syntaxRulesM Type (literals,rules) = return (MkSyntax (\args -> let
+	syntaxRulesM Type (literals,rules) = return (\args -> let
 		{
 		transform [] = fail "can't match args";
 		transform (((_,pattern),(template,())):rs) = do
@@ -181,5 +181,5 @@ module Org.Org.Semantic.HScheme.Syntax where
 				Just subs -> substitute subs template;
 				};
 			};
-		} in transform rules));
+		} in transform rules);
 	}

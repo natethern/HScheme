@@ -26,6 +26,7 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	import Org.Org.Semantic.HScheme.FullProcedures;
 	import Org.Org.Semantic.HScheme.StandardBindings;
 	import Org.Org.Semantic.HScheme.Bindings;
+	import Org.Org.Semantic.HScheme.TopLevel;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
@@ -33,21 +34,24 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	 Bindings r m -> m (Bindings r m);
 	simpleFullBindings = chainList
 		[
-		simplePureBindings,
+		commonPureBindings,
 
 		-- 4.1.6 Assignments
-		addMacroBinding "set!"			setBangM,
+		addMacroBinding			"set!"			setBangM,
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"		(defineT fullSetLoc),
 
 		-- 6.1 Equivalence Predicates
-		addProcBinding "eqv?"			eqvP,
-		addProcBinding "eq?"			eqP,
+		addProcBinding			"eqv?"			eqvP,
+		addProcBinding			"eq?"			eqP,
 
 		-- 6.3.2 Pairs and Lists
-		addProcBinding "set-car!"		setCarP,
-		addProcBinding "set-cdr!"		setCdrP,
+		addProcBinding			"set-car!"		setCarP,
+		addProcBinding			"set-cdr!"		setCdrP,
 
 		-- 6.3.5 Strings
-		addProcBinding "string-set!"	stringSetP
+		addProcBinding			"string-set!"	stringSetP
 		];
 
 	monadFixFullBindings :: (FullScheme m r,MonadFix m) =>

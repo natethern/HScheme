@@ -38,8 +38,8 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	loop :: a;
 	loop = loop;
 
-	simpleStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
-	simpleStrictPureBindings = chainList
+	commonStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	commonStrictPureBindings = chainList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
 		addBinding		(MkSymbol "<loop>")				loop,									-- test
@@ -60,9 +60,6 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 		-- 4.3.2 Pattern Language
 		addMacroBinding	"syntax-rules"					syntaxRulesM,
-
-		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"				defineT,
 
 		-- 6.1 Equivalence Predicates
 		addProcBinding	"equal?"						equalP,
@@ -138,38 +135,54 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
 
 		-- 6.5 Eval
-		addProcBinding	"evaluate"						evaluateP,								-- nonstandard
-		addMacroBinding	"current-environment"			currentEnvironmentM,					-- nonstandard
+		addProcBinding	"eval"							evaluateP,
+		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
 
 		-- Misc
 		addProcBinding	"to-string"						toStringP,								-- nonstandard
 		addMacroBinding	"case-match"					caseMatchM								-- nonstandard
-		] where
-		{
-		};
+		];
+
+	simpleStrictPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	simpleStrictPureBindings = chainList
+		[
+		commonStrictPureBindings,
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
+		];
+
+	commonPureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
+	commonPureBindings = chainList
+		[
+		commonStrictPureBindings,
+
+		-- 4.2.3 Sequencing
+		addMacroBinding	"begin"							beginM,
+
+		-- 6.6.1 Ports
+		addProcBinding	"input-port?"					isInputPortP,
+		addProcBinding	"output-port?"					isOutputPortP,
+		addProcBinding	"close-input-port"				inputPortCloseP,
+		addProcBinding	"close-output-port"				outputPortCloseP,
+
+		-- 6.6.2 Input
+		addProcBinding	"port-read-char"				portReadCharP,							-- nonstandard
+		addProcBinding	"port-peek-char"				portPeekCharP,							-- nonstandard
+		addProcBinding	"eof-object?"					isEOFObjectP,
+		addProcBinding	"port-char-ready?"				portCharReadyP,							-- nonstandard
+
+		-- 6.6.3 Output
+		addProcBinding	"port-write-char"				portWriteCharP							-- nonstandard
+		];
 
 	simplePureBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
 	simplePureBindings = chainList
 		[
-		simpleStrictPureBindings,
+		commonPureBindings,
 
-		-- 4.2.3 Sequencing
-		addMacroBinding	"begin"								beginM,
-
-		-- 6.6.1 Ports
-		addProcBinding	"input-port?"						isInputPortP,
-		addProcBinding	"output-port?"						isOutputPortP,
-		addProcBinding	"close-input-port"					inputPortCloseP,
-		addProcBinding	"close-output-port"					outputPortCloseP,
-
-		-- 6.6.2 Input
-		addProcBinding	"port-read-char"					portReadCharP,						-- nonstandard
-		addProcBinding	"port-peek-char"					portPeekCharP,						-- nonstandard
-		addProcBinding	"eof-object?"						isEOFObjectP,
-		addProcBinding	"port-char-ready?"					portCharReadyP,						-- nonstandard
-
-		-- 6.6.3 Output
-		addProcBinding	"port-write-char"					portWriteCharP						-- nonstandard
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
 		];
 
 	monadContBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
@@ -183,7 +196,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	monadFixBindings = chainList
 		[
 		-- 6.4 Control Features
-		addProcBinding	"call-with-result"					fixP								-- nonstandard
+		addProcBinding	"call-with-result"				fixP									-- nonstandard
 		];
 
 	monadFixStrictPureBindings :: (Scheme m r,MonadFix m) =>

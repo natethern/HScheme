@@ -80,13 +80,13 @@ module Org.Org.Semantic.HScheme.Object where
 		};
 
 	type Procedure r m =
-	 [Object r m] -> m (Object r m);
+	 Bindings r m -> [Object r m] -> m (Object r m);
 	type Macro r m =
 	 Bindings r m -> Object r m -> m (Object r m);
 	type TopLevelMacro r m =
 	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
-	newtype Syntax r m = MkSyntax
-	 ([Object r m] -> m (Object r m));
+	type Syntax r m =
+	 [Object r m] -> m (Object r m);
 
 	data Object r m =
 	 NilObject												|

@@ -196,9 +196,9 @@ module Org.Org.Semantic.HScheme.Procedures where
 
 
 	-- 6.4 Control Features
-	applyP :: (Scheme m r) =>
+	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
-	applyP Type (proc,(args,())) = proc args;
+	applyP Type (proc,(args,())) = proc ?bindings args;
 	
 	valuesP :: (Scheme m r) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);

@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.TopLevel
 	(
+	pureSetLoc,fullSetLoc,
 	defineT,
 	topLevelEvaluate
 	) where
@@ -30,43 +31,54 @@ module Org.Org.Semantic.HScheme.TopLevel
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
-	
+
+	pureSetLoc :: (Scheme m r) =>
+	 ObjLocation r m -> Object r m -> m ();
+	pureSetLoc _ _ = fail "can't redefine symbol";
+
+	fullSetLoc :: (FullScheme m r) =>
+	 ObjLocation r m -> Object r m -> m ();
+	fullSetLoc = set;
+
 	-- 5.2 Definitions
-	defineT ::
-		(
-		Scheme m r
-		) =>
+	defineT :: (Scheme m r) =>
+	 (ObjLocation r m -> Object r m -> m ()) ->
 	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,ArgNoneType);
-	defineT bindings (h,t) = do
+	defineT setLoc bindings (h,t) = case h of
 		{
-		case h of
+		SymbolObject name -> case t of
 			{
-			SymbolObject name -> do
+			PairObject thead ttail -> do
 				{
-				case t of
+				tt <- get ttail;
+				case tt of
 					{
-					PairObject thead ttail -> do
+					NilObject ->  do
 						{
-						tt <- get ttail;
-						case tt of
+						th <- get thead;
+						result <- let {?bindings=bindings} in evaluate th;
+						case (getBinding bindings name) of
 							{
-							NilObject -> do
+							Nothing -> do
 								{
-								th <- get thead;
-								result <- let {?bindings=bindings} in evaluate th;
 								loc <- new result;
-								return (newBinding bindings name loc,MkArgNoneType);
+							 	return (newBinding bindings name loc,MkArgNoneType);
+							 	};
+							Just loc -> do
+								{
+								setLoc loc result;
+							 	return (bindings,MkArgNoneType);
 								};
-							_ -> fail "bad define form (too many arguments)";
 							};
 						};
-					NilObject -> fail "bad define form (only one argument)";
-					_ -> fail "bad define form (dotted pair)";
+					_ -> fail "bad define form (too many arguments)";
 					};
 				};
-			PairObject _ _ -> fail "this define form NYI";
-			_ -> fail "bad define form (wrong type for label)";
+			NilObject -> fail "bad define form (only one argument)";
+			_ -> fail "bad define form (dotted pair)";
 			};
+		PairObject _ _ -> fail "this define form NYI";
+		_ -> fail "bad define form (wrong type for label)";
 		};
 	
 	topLevelApplyEval ::

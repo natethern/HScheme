@@ -169,22 +169,30 @@ module Org.Org.Semantic.HScheme.Lambda where
 		return bindings'';
 		};
 
+	mergeBindings :: Bindings r m -> Bindings r m -> Bindings r m;
+	mergeBindings first second = MkBindings
+		{
+		newBinding = \sym loc -> mergeBindings (newBinding first sym loc) second,
+		getBinding = \sym -> case (getBinding first sym) of
+			{
+			Nothing -> getBinding second sym;
+			r -> r;
+			}
+		};
+
 	lambda :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Object r m -> [Object r m] -> m (Procedure r m);
 	lambda argNames body = do
 		{
-		return (\args -> do
+		return (\bindings args -> do
 			{
-			bindings' <- matchBindings ?bindings argNames args;
+			-- lambda-time bindings take priority over runtime
+			bindings' <- matchBindings (mergeBindings ?bindings bindings) argNames args;
 			begin bindings' body;
 			});
 		};
 
-	lambdaM ::
-		(
-		Scheme m r,
-		?bindings :: Bindings r m
-		) =>
+	lambdaM :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
 	lambdaM Type (argBindings,body) = lambda argBindings body;
 
@@ -201,11 +209,12 @@ module Org.Org.Semantic.HScheme.Lambda where
 	callCCP ::
 		(
 		Scheme m r,
-		MonadCont m
+		MonadCont m,
+		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	callCCP Type (proc,()) = callCC (\cont -> proc
-	  [ProcedureObject (\args -> do
+	callCCP Type (proc,()) = callCC (\cont -> proc ?bindings
+	  [ProcedureObject (\_ args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;
 	  	cont resultArg;
@@ -214,8 +223,9 @@ module Org.Org.Semantic.HScheme.Lambda where
 	fixP ::
 		(
 		Scheme m r,
-		MonadFix m
+		MonadFix m,
+		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	fixP Type (proc,()) = mfix (\a -> proc [a]);
+	fixP Type (proc,()) = mfix (\a -> proc ?bindings [a]);
 	}
