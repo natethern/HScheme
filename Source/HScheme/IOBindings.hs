@@ -91,6 +91,24 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		return (remonadInputPort remonad (handleInputPort h));
 		};
 
+	nameInPath :: String -> String -> String;
+	nameInPath path name@('/':_) = name;
+	nameInPath path name = path ++ "/" ++ name;
+
+	openFileReadWithPaths :: [String] -> String -> IO Handle;
+	openFileReadWithPaths [] name = fail ("file "++(show name)++" not found in paths");
+	openFileReadWithPaths (path:paths) name = catchSingle
+		(openFile (nameInPath path name) ReadMode)
+		(\_ -> openFileReadWithPaths paths name);
+
+	openInputFileWithPaths :: (Monad m) =>
+	 (forall a. IO a -> m a) -> [String] -> String -> m (InputPort Char m);
+	openInputFileWithPaths remonad paths name = do
+		{
+		h <- remonad (openFileReadWithPaths paths name);
+		return (remonadInputPort remonad (handleInputPort h));
+		};
+
 	openOutputFile :: (Monad m) =>
 	 (forall a. IO a -> m a) -> String -> m (OutputPort Char m);
 	openOutputFile remonad name = do
@@ -100,20 +118,20 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		};
 
 	ioPureSystemInterface :: (Scheme m r,Monad m) =>
-	 (forall a. IO a -> m a) -> PureSystemInterface m r;
-	ioPureSystemInterface remonad = MkPureSystemInterface
-	 (loadBindingsWithProcs (openInputFile remonad) (remonadOutputPort remonad stdOutputPort));
+	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
+	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
+	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdOutputPort));
 
 	ioQuietPureSystemInterface :: (Scheme m r,Monad m) =>
-	 (forall a. IO a -> m a) -> PureSystemInterface m r;
-	ioQuietPureSystemInterface remonad = MkPureSystemInterface
-	 (loadBindingsWithProcs (openInputFile remonad) (remonadOutputPort remonad stdErrorPort));
+	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m r;
+	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
+	 (loadBindingsWithProcs (openInputFileWithPaths remonad loadpaths) (remonadOutputPort remonad stdErrorPort));
 
 	ioFullSystemInterface :: (Scheme m r,Monad m) =>
-	 (forall a. IO a -> m a) -> FullSystemInterface m r;
-	ioFullSystemInterface remonad = MkFullSystemInterface
+	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m r;
+	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
 		{
-		fsiPure = ioPureSystemInterface remonad,
+		fsiPure = ioPureSystemInterface remonad loadpaths,
 		fsiCurrentInputPort		= remonadInputPort remonad stdInputPort,
 		fsiCurrentOutputPort	= remonadOutputPort remonad stdOutputPort,
 		fsiCurrentErrorPort		= remonadOutputPort remonad stdErrorPort,

@@ -24,6 +24,7 @@ module Main where
 	{
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
+	import System.Environment;
 
 	type CPS r = SchemeCPS r (IO ());
 
@@ -38,29 +39,90 @@ module Main where
 
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
 
-	getFlavour :: IO SchemeFlavour;
-	getFlavour = return PureFlavour;
+	data SchemeWhichMonad = IOWhichMonad | CPSWhichMonad;
+
+	parseArgs :: (Monad m) =>
+	 [String] -> m (Maybe SchemeFlavour,Maybe SchemeWhichMonad,[String],[String]);
+	parseArgs [] = return (Nothing,Nothing,[],[]);
+	parseArgs ("-":files) = return (Nothing,Nothing,[],files);
+	parseArgs ("--pure":args) = do
+		{
+		(_,m,paths,files) <- parseArgs args;
+		return (Just PureFlavour,m,paths,files);
+		};
+	parseArgs ("--cps":args) = do
+		{
+		(f,_,paths,files) <- parseArgs args;
+		return (f,Just CPSWhichMonad,paths,files);
+		};
+	parseArgs ("--plain":args) = do
+		{
+		(f,_,paths,files) <- parseArgs args;
+		return (f,Just IOWhichMonad,paths,files);
+		};
+	parseArgs ("-p":args) = do
+		{
+		(_,m,paths,files) <- parseArgs args;
+		return (Just PureFlavour,m,paths,files);
+		};
+	parseArgs ("--full":args) = do
+		{
+		(_,m,paths,files) <- parseArgs args;
+		return (Just FullFlavour,m,paths,files);
+		};
+	parseArgs ("-f":args) = do
+		{
+		(_,m,paths,files) <- parseArgs args;
+		return (Just FullFlavour,m,paths,files);
+		};
+	parseArgs (('-':('I':path@(_:_))):args) = do
+		{
+		(f,m,paths,files) <- parseArgs args;
+		return (f,m,path:paths,files);
+		};
+	parseArgs ("-I":(path:args)) = do
+		{
+		(f,m,paths,files) <- parseArgs args;
+		return (f,m,path:paths,files);
+		};
+	parseArgs (flag@('-':_):args) = fail ("unrecognised flag "++(show flag));
+	parseArgs (file:args) = do
+		{
+		(f,m,paths,files) <- parseArgs args;
+		return (f,m,paths,(file:files));
+		};
 
 	cpsInteract :: 
 		(
 		MonadGettableReference IO r,
 		MonadCreatable IO r
 		) =>
-	 (Interact (CPS r) r) -> IO ();
-	cpsInteract interact = runContinuationPass
+	 [String] -> (Interact (CPS r) r) -> IO ();
+	cpsInteract loadpaths interact = runContinuationPass
 	 (\_ -> fail "error in catch code!")
 	 return
-	 (interact (ioFullSystemInterface lift));
+	 (interact (ioFullSystemInterface lift loadpaths));
+
+	defaultFlavour :: SchemeFlavour;
+	defaultFlavour = FullFlavour;
 
 	main :: IO ();
 	main = do
 		{
-		flavour <- getFlavour;
+		args <- getArgs;
+		(mflavour,mwm,paths,files) <- parseArgs args;
+		let {loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"]};
+		let {flavour = unJust defaultFlavour mflavour};
+		let {whichmonad = unJust (case flavour of
+			{
+			FullFlavour -> CPSWhichMonad;
+			_ -> IOWhichMonad;
+			}) mwm};
 		case flavour of
 			{
-			FullFlavour -> cpsInteract (fullInteract :: Interact (CPS IORef) IORef);
-			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id);
-			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id);
+			FullFlavour -> cpsInteract loadpaths (fullInteract :: Interact (CPS IORef) IORef);
+			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
+			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) (ioFullSystemInterface id loadpaths);
 			};
 		};
 
