@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd">
+<HTML>
+<HEAD>
+	<TITLE>HScheme Examples</TITLE>
+</HEAD>
+<BODY>
+<H1>HScheme Examples</H1>
+<H2>10,000 Factorial</H2>
+<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
+<TEXTAREA NAME="input" ROWS="7" COLS="80">
+(define fact (lambda (x)
+  (if (equal? x 0) 1 (* x (fact (- x 1))))
+))
+
+(fact 10000)
+</TEXTAREA><BR>
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="full"> full
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure" CHECKED> pure
+<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
+<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
+<INPUT TYPE="RESET" VALUE="Revert">
+<INPUT TYPE="SUBMIT" VALUE="Interpret">
+</FORM>
+<H2>Fixed Point</H2>
+<TEXTAREA NAME="input" ROWS="7" COLS="80">
+(define hello-goodbye-etc (lambda (x) `(hello goodbye . ,x) ))
+(hello-goodbye-etc '(a b c))
+(define hello-goodbyes (call-with-result hello-goodbye-etc))
+(list-head hello-goodbyes 30)
+</TEXTAREA><BR>
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="full"> full
+<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure" CHECKED> pure
+<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
+<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
+<INPUT TYPE="RESET" VALUE="Revert">
+<INPUT TYPE="SUBMIT" VALUE="Interpret">
+</FORM>
+<P>"Pure" means pure functional only; "continuations" allows <TT>call-with-current-continuation</TT>, but is slower than "direct" and disallows <TT>call-with-result</TT>.</P>
+<P CLASS=path>
+<A HREF="./">HScheme</A> -&gt;
+<SPAN CLASS=here>Examples</SPAN>
+</P>
+</BODY>
+</HTML>
