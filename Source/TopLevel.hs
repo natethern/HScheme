@@ -20,19 +20,24 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module TopLevel(topLevelEvaluate,defineTM) where
+module TopLevel
+	(
+	defineT,
+	topLevelEvaluate
+	) where
 	{
 	import Evaluate;
 	import Conversions;
 	import Object;
 	import Type;
 	
-	defineTM ::
+	-- 5.2 Definitions
+	defineT ::
 		(
 		Scheme x m r
 		) =>
 	 Bindings r m -> (Object r m,Object r m) -> m (Bindings r m,ArgNoneType);
-	defineTM bindings (h,t) = do
+	defineT bindings (h,t) = do
 		{
 		case h of
 			{
@@ -103,5 +108,18 @@ module TopLevel(topLevelEvaluate,defineTM) where
 				};
 			};
 		};
-
+{--
+	topLevelEvaluateList ::
+		(
+		Scheme x m r
+		) =>
+	 Bindings r m -> [Object r m] -> m (Bindings r m);
+	
+	topLevelEvaluateList bindings [] = return bindings;
+	topLevelEvaluateList bindings (obj:objs) = do
+		{
+		(bindings',_) <- topLevelEvaluate bindings obj;
+		topLevelEvaluateList bindings' objs;
+		};
+--}
 	}

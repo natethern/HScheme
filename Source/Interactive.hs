@@ -22,106 +22,92 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Interactive where
 	{
+	import SystemInterface;
 	import FMapBindings;
-	import IOBindings;
 	import FullStandardBindings;
 	import SExpParser;
 	import StandardBindings;
 	import Bindings;
-	import PortProcedures;
 	import Procedures;
-	import TopLevel;
-	import Evaluate;
 	import Conversions;
 	import Object;
 	import InputPortParser;
 	import Port;
-	import LiftedMonad;
 	import Subtype;
 	import Type;
-	import IO;
 	import MonadError;
 	import MonadCont;
-
-	printeval :: (Scheme x m r) =>
-	 OutputPort Char m -> Bindings r m -> [Object r m] -> m (Bindings r m);
-	printeval port bindings [] = return bindings;
-	printeval port bindings (obj:objs) = do
-		{
-		(newBindings,result) <- topLevelEvaluate bindings obj;
-		str <- toString result;
-		opWriteStrLn port str;
-		printeval port newBindings objs;	
-		};
-
-	toList :: Maybe a -> [a];
-	toList Nothing = [];
-	toList (Just a) = [a];
 
 	reportError :: (Scheme x m r) =>
 	 Type (r ()) -> OutputPort Char m -> x -> m ();
 	reportError t errPort error = do
 		{
 		errObj <- getConvert error;
-		(MkStringType errText) <- toStringS t (errObj,());
+		(MkStringType errText) <- toStringP t (errObj,());
 		opWriteStrLn errPort ("error: "++errText);
 		};
 
-	interactiveLoop :: (SemiLiftedMonad IO m,Scheme x m r) =>
-	 Type (r ()) -> InputPort Char m -> Bindings r m -> m a;
-	interactiveLoop t reader bindings = do
+	interactiveLoop :: (Scheme x m r) =>
+	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
+	interactiveLoop t fsi bindings = do
 		{
-		newBindings <- catchError (do
+		opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
+		opFlush (fsiCurrentOutputPort fsi);
+		mobject <- portRead (fsiCurrentInputPort fsi);
+		case mobject of
 			{
-			opWriteList stdOutputPort "hscheme> ";
-			opFlush stdOutputPort;
-			mobject <- runParser reader expressionP;
-			printeval stdOutputPort bindings (toList mobject);
-			}) (\error -> do
-			{
-			runParser reader restOfLineP;
-			reportError t stdErrorPort error;
-			return bindings;
-			});
-		interactiveLoop t reader newBindings;
+			Nothing -> return ();
+			Just obj -> do
+				{
+				bindings' <- catchError (printeval (fsiCurrentOutputPort fsi) bindings obj)
+					(\error -> do
+					{
+					runParser (fsiCurrentInputPort fsi) restOfLineParser;
+					reportError t (fsiCurrentErrorPort fsi) error;
+					return bindings;
+					});
+				interactiveLoop t fsi bindings';
+				};
+			};
 		};
 
-	pureInteract ::
-		(
-		SemiLiftedMonad IO m,
-		Scheme x m r
-		) =>
-	 Type (r ()) -> m ();
-	pureInteract t = callCC (\exitFunc -> do
-		{
-		bindings <- chain
-		 (addProcBinding "exit" (exitFuncProc exitFunc))
-		 monadicStdBindings emptyBindings;
-		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
-		objs <- runParser port  (expressionsP t);
-		inputPortCloseS t (port,());
-		bindings' <- printeval nullOutputPort bindings objs;
-		interactiveLoop t stdInputPort bindings';
-		});
-
-	fullInteract ::
-		(
-		SemiLiftedMonad IO m,
-		FullScheme x m r
-		) =>
-	 Type (r ()) -> m ();
-	fullInteract t = callCC (\exitFunc -> do
+	pureInteract :: (Scheme x m r) =>
+	 Type (r ()) -> FullSystemInterface m r -> m ();
+	pureInteract t fsi = callCC (\exitFunc -> do
 		{
 		bindings <- chainList
 			[
+			addProcBinding "exit" (exitFuncProc exitFunc),
+			monadicStdBindings,
+			pureSystemBindings (fsiPure fsi)
+			] emptyBindings;
+		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
+			(\error -> do
+			{
+			reportError t (fsiCurrentErrorPort fsi) error;
+			exitFunc ();
+			return undefined;
+			});
+		interactiveLoop t fsi bindings';
+		});
+
+	fullInteract :: (FullScheme x m r) =>
+	 Type (r ()) -> FullSystemInterface m r -> m ();
+	fullInteract t fsi = callCC (\exitFunc -> do
+		{
+		bindings <- chainList
+			[
+		 	addProcBinding "exit" (exitFuncProc exitFunc),
 			fullStdBindings,
-			ioBindings,
-		 	addProcBinding "exit" (exitFuncProc exitFunc)
+			fullSystemBindings fsi
 		 	] emptyBindings;
-		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
-		objs <- runParser port  (expressionsP t);
-		inputPortCloseS t (port,());
-		bindings' <- printeval nullOutputPort bindings objs;
-		interactiveLoop t stdInputPort bindings';
+		bindings' <- catchError (psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm")
+			(\error -> do
+			{
+			reportError t (fsiCurrentErrorPort fsi) error;
+			exitFunc ();
+			return undefined;
+			});
+		interactiveLoop t fsi bindings';
 		});
 	}

@@ -22,9 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module IOBindings where
 	{
-	import FullStandardBindings;
-	import Bindings;
-	import Conversions;
+	import SystemInterface;
 	import Object;
 	import Port;
 	import LiftedMonad;
@@ -67,9 +65,6 @@ module IOBindings where
 		opFlush = call (hFlush h)
 		};
 
-	eofObject :: (Scheme x m r) => Object r m;
-	eofObject = nullObject;
-
 	stdInputPort :: (SemiLiftedMonad IO m) => InputPort Char m;
 	stdInputPort = handleInputPort stdin;
 
@@ -79,36 +74,31 @@ module IOBindings where
 	stdErrorPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
 	stdErrorPort = handleOutputPort stderr;
 
-	stdinS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> () -> m (InputPort Char m);
-	stdinS Type () = return stdInputPort;
-
-	stdoutS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> () -> m (OutputPort Char m);
-	stdoutS Type () = return stdOutputPort;
-
-	openInputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> (StringType,()) -> m (InputPort Char m);
-	openInputFileS Type (MkStringType name,()) = do
+	openInputFile :: (SemiLiftedMonad IO m) =>
+	 String -> m (InputPort Char m);
+	openInputFile name = do
 		{
 		h <- call (openFile name ReadMode);
 		return (handleInputPort h);
 		};
 
-	openOutputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
-	 Type (r ()) -> (StringType,()) -> m (OutputPort Char m);
-	openOutputFileS Type (MkStringType name,()) = do
+	openOutputFile :: (SemiLiftedMonad IO m) =>
+	 String -> m (OutputPort Char m);
+	openOutputFile name = do
 		{
 		h <- call (openFile name WriteMode);
 		return (handleOutputPort h);
 		};
 
-	ioBindings :: (Scheme x m r,SemiLiftedMonad IO m) => Bindings r m -> m (Bindings r m);
-	ioBindings = chainList
-		[
-		addProcBinding	"current-input-port"	stdinS,
-		addProcBinding	"current-output-port"	stdoutS,
-		addProcBinding	"open-input-file"		openInputFileS,
-		addProcBinding	"open-output-file"		openOutputFileS
-		];
+	ioFullSystemInterface :: (Scheme x m r,SemiLiftedMonad IO m) =>
+	 FullSystemInterface m r;
+	ioFullSystemInterface = MkFullSystemInterface
+		{
+		fsiPure = MkPureSystemInterface (loadBindingsWithProcs openInputFile stdOutputPort),
+		fsiCurrentInputPort		= stdInputPort,
+		fsiCurrentOutputPort	= stdOutputPort,
+		fsiCurrentErrorPort		= stdErrorPort,
+		fsiOpenInputFile		= openInputFile,
+		fsiOpenOutputFile		= openOutputFile
+		};
 	}

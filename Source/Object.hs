@@ -127,6 +127,10 @@ module Object where
 	
 	nullObject = mkValuesObject [];
 	
+	isNullObject :: Object r m -> Bool;
+	isNullObject (ValuesObject []) = True;
+	isNullObject _ = False;
+	
 	cons :: (Scheme x m r) =>
 	 Object r m -> Object r m -> m (Object r m);
 	cons head tail = do

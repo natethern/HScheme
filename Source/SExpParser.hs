@@ -22,9 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module SExpParser where
 	{
+	import PortProcedures;
 	import Procedures;
 	import Conversions;
 	import Object;
+	import Port;
 	import InputPortParser;
 	import SExpChars;
 	import Unicode;
@@ -38,8 +40,8 @@ module SExpParser where
 	isJust test Nothing = Nothing;
 	isJust test (Just a) = if test a then Just a else Nothing;
 
-	restOfLineP :: (Monad m) => TextParser m ();
-	restOfLineP = do
+	restOfLineParser :: (Monad m) => TextParser m ();
+	restOfLineParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -49,15 +51,15 @@ module SExpParser where
 			 else do
 				{
 				nextC;
-				restOfLineP;
+				restOfLineParser;
 				};
 			Nothing -> return ();
 			};
 		};
 
 	-- returns whether it chomped some ws
-	whitespaceP :: (Monad m) => TextParser m Bool;
-	whitespaceP = do
+	whitespaceParser :: (Monad m) => TextParser m Bool;
+	whitespaceParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -65,15 +67,15 @@ module SExpParser where
 			Just ';' -> do
 				{
 				nextC;
-				restOfLineP;
-				whitespaceP;
+				restOfLineParser;
+				whitespaceParser;
 				return True;
 				};
 			Just c -> if isWhitespace c
 			 then do
 				{
 				nextC;
-				whitespaceP;
+				whitespaceParser;
 				return True;
 				}
 			 else return False;
@@ -81,8 +83,8 @@ module SExpParser where
 			};
 		};
 
-	tokenEndP :: (Monad m) => TextParser m Bool;
-	tokenEndP = do
+	tokenEndParser :: (Monad m) => TextParser m Bool;
+	tokenEndParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -94,8 +96,8 @@ module SExpParser where
 			};
 		};
 
-	identifierRestP :: (Monad m) => TextParser m String;
-	identifierRestP = do
+	identifierRestParser :: (Monad m) => TextParser m String;
+	identifierRestParser = do
 		{
 		mc <- currentC;
 		case isJust allowedIdentifierR mc of
@@ -103,19 +105,19 @@ module SExpParser where
 			(Just c) -> do
 				{
 				nextC;
-				rest <- identifierRestP;
+				rest <- identifierRestParser;
 				return (toLowerCase c:rest);
 				};
 			Nothing -> do
 				{
-				end <- tokenEndP;
+				end <- tokenEndParser;
 				if end then (return []) else fail "junk char in identifier";
 				};
 			};
 		};
 
-	identifierP :: (Monad m) => TextParser m (Maybe String);
-	identifierP = do
+	identifierParser :: (Monad m) => TextParser m (Maybe String);
+	identifierParser = do
 		{
 		mc <- currentC;
 		case isJust allowedIdentifier1 mc of
@@ -123,22 +125,22 @@ module SExpParser where
 			(Just c) -> do
 				{
 				nextC;
-				rest <- identifierRestP;
+				rest <- identifierRestParser;
 				return (Just (toLowerCase c:rest));
 				};
 			Nothing -> return Nothing;
 			};
 		};
 
-	integerRestP :: (Monad m) => Integer -> TextParser m Integer;
-	integerRestP prev = do
+	integerRestParser :: (Monad m) => Integer -> TextParser m Integer;
+	integerRestParser prev = do
 		{
 		mc <- currentC;
 		case mc of
 			{
 			Nothing -> do
 				{
-				end <- tokenEndP;
+				end <- tokenEndParser;
 				if end then (return prev) else fail "junk char in integer";
 				};
 			Just c -> case (getDecimalDigit c) of
@@ -147,14 +149,14 @@ module SExpParser where
 				Just n -> do
 					{
 					nextC;
-					integerRestP (prev*10 + n);
+					integerRestParser (prev*10 + n);
 					};
 				};
 			};
 		};
 
-	integerP :: (Monad m) => TextParser m (Maybe Integer);
-	integerP = do
+	integerParser :: (Monad m) => TextParser m (Maybe Integer);
+	integerParser = do
 		{
 		mc <- currentC;
 		case (mc) of
@@ -166,17 +168,17 @@ module SExpParser where
 				Just n -> do
 					{
 					nextC;
-					i <- integerRestP n;
+					i <- integerRestParser n;
 					return (Just i);
 					};
 				};
 			};
 		};
 
-	listRestP :: (Scheme x m r) => TextParser m (Object r m);
-	listRestP = do
+	listRestParser :: (Scheme x m r) => TextParser m (Object r m);
+	listRestParser = do
 		{
-		whitespaceP;
+		whitespaceParser;
 		mc <- currentC;
 		case mc of
 			{
@@ -189,13 +191,13 @@ module SExpParser where
 			Just '.' -> do
 				{
 				nextC;
-				mtail <- expressionP;
+				mtail <- expressionParser;
 				case mtail of
 					{
 					Nothing -> fail "missing tail in dotted pair";
 					Just tail -> do
 						{
-						whitespaceP;
+						whitespaceParser;
 						mc <- currentC;
 						case mc of
 							{
@@ -212,13 +214,13 @@ module SExpParser where
 				};
 			Just c -> do
 				{
-				mhead <- expressionP;
+				mhead <- expressionParser;
 				case mhead of
 					{
 					Nothing -> fail "unterminated list";
 					Just head -> do
 						{
-						tail <- listRestP;
+						tail <- listRestParser;
 						mlift (cons head tail);
 						};
 					};
@@ -226,8 +228,8 @@ module SExpParser where
 			};
 		};
 
-	listP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
-	listP = do
+	listParser :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	listParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -235,22 +237,22 @@ module SExpParser where
 			Just '(' -> do
 				{
 				nextC;
-				list <- listRestP;
+				list <- listRestParser;
 				return (Just list);
 				};
 			_ -> return Nothing;
 			};
 		};
 
-	plusMinusRestP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe Integer);
-	plusMinusRestP Type = do
+	plusMinusRestParser :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe Integer);
+	plusMinusRestParser Type = do
 		{
-		end <- tokenEndP;
+		end <- tokenEndParser;
 		if end
 		 then return Nothing
 		 else do
 			{
-			mi <- integerP;
+			mi <- integerParser;
 			case mi of
 				{
 				Nothing -> fail "bad '+'/'-' token";
@@ -259,8 +261,8 @@ module SExpParser where
 			};
 		};
 
-	plusMinusP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
-	plusMinusP t = do
+	plusMinusParser :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
+	plusMinusParser t = do
 		{
 		mc <- currentC;
 		case mc of
@@ -268,7 +270,7 @@ module SExpParser where
 			Just '+' -> do
 				{
 				nextC;
-				mi <- plusMinusRestP t;
+				mi <- plusMinusRestParser t;
 				case mi of
 					{
 					Nothing -> return (Just (SymbolObject (MkSymbol "+")));
@@ -278,7 +280,7 @@ module SExpParser where
 			Just '-' -> do
 				{
 				nextC;
-				mi <- plusMinusRestP t;
+				mi <- plusMinusRestParser t;
 				case mi of
 					{
 					Nothing -> return (Just (SymbolObject (MkSymbol "-")));
@@ -289,10 +291,10 @@ module SExpParser where
 			};
 		};
 
-	specialCharP :: (Scheme x m r) => Symbol -> TextParser m (Maybe (Object r m));
-	specialCharP symbol = do
+	specialCharParser :: (Scheme x m r) => Symbol -> TextParser m (Maybe (Object r m));
+	specialCharParser symbol = do
 		{
-		mh2 <- expressionP;
+		mh2 <- expressionParser;
 		case mh2 of
 			{
 			Nothing -> fail ("unexpected EOF after "++(unSymbol symbol));
@@ -305,8 +307,8 @@ module SExpParser where
 			};
 		};
 
-	quotedP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
-	quotedP = do
+	quotedParser :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	quotedParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -314,12 +316,12 @@ module SExpParser where
 			Just '\'' -> do
 				{
 				nextC;
-				specialCharP (MkSymbol "quote");
+				specialCharParser (MkSymbol "quote");
 				};
 			Just '`' -> do
 				{
 				nextC;
-				specialCharP (MkSymbol "quasiquote");
+				specialCharParser (MkSymbol "quasiquote");
 				};
 			Just ',' -> do
 				{
@@ -330,17 +332,17 @@ module SExpParser where
 					Just '@' -> do
 						{
 						nextC;
-						specialCharP (MkSymbol "unquote-splicing");
+						specialCharParser (MkSymbol "unquote-splicing");
 						};
-					_ -> specialCharP (MkSymbol "unquote");
+					_ -> specialCharParser (MkSymbol "unquote");
 					};
 				};
 			_ -> return Nothing;
 			};
 		};
 
-	hashLiteralP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
-	hashLiteralP = do
+	hashLiteralParser :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	hashLiteralParser = do
 		{
 		mc <- currentC;
 		case mc of
@@ -383,8 +385,8 @@ module SExpParser where
 			};
 		};
 
-	stringLiteralRestP :: (Scheme x m r) => Type (r ()) -> TextParser m String;
-	stringLiteralRestP t = do
+	stringLiteralRestParser :: (Scheme x m r) => Type (r ()) -> TextParser m String;
+	stringLiteralRestParser t = do
 		{
 		mc <- currentC;
 		case mc of
@@ -397,15 +399,15 @@ module SExpParser where
 			Just c -> do
 				{
 				nextC;
-				cs <- stringLiteralRestP t;
+				cs <- stringLiteralRestParser t;
 				return (c:cs);
 				};
 			Nothing -> fail "unterminated string";
 			};
 		};
 
-	stringLiteralP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe String);
-	stringLiteralP t = do
+	stringLiteralParser :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe String);
+	stringLiteralParser t = do
 		{
 		mc <- currentC;
 		case mc of
@@ -414,7 +416,7 @@ module SExpParser where
 				{
 				nextC;
 				mc <- currentC;
-				str <- stringLiteralRestP t;
+				str <- stringLiteralRestParser t;
 				return (Just str);
 				};
 			_ -> return Nothing;
@@ -428,7 +430,7 @@ module SExpParser where
 		Just a -> justClause a;
 		Nothing -> nothingClause;
 		};
-	
+
 	checkParse :: (Monad m) =>
 	 m (Maybe a) -> (a -> m b) -> m (Maybe b) -> m (Maybe b);
 	checkParse mma just nothingClause = do
@@ -441,17 +443,17 @@ module SExpParser where
 			}) nothingClause;
 		};
 
-	expressionP' :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
-	expressionP' t = do
+	expressionParser' :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
+	expressionParser' t = do
 		{
-		whitespaceP;
-		checkParse integerP (return . NumberObject . fromInteger)
-		 (checkParse identifierP (return . SymbolObject . MkSymbol)
-		  (checkParse hashLiteralP return
-		   (checkParse quotedP return
-		    (checkParse (stringLiteralP t) (mlift . getConvert . MkStringType)
-		     (checkParse (plusMinusP t) return
-		      (checkParse listP return (do
+		whitespaceParser;
+		checkParse integerParser (return . NumberObject . fromInteger)
+		 (checkParse identifierParser (return . SymbolObject . MkSymbol)
+		  (checkParse hashLiteralParser return
+		   (checkParse quotedParser return
+		    (checkParse (stringLiteralParser t) (mlift . getConvert . MkStringType)
+		     (checkParse (plusMinusParser t) return
+		      (checkParse listParser return (do
 			{
 			mc <- currentC;
 			case mc of
@@ -461,25 +463,41 @@ module SExpParser where
 				};
 			})))))));
 		};
-	
-	expressionP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
-	expressionP = expressionP' Type;
-	
-	manyP :: (Monad m) => Parser c m (Maybe a) -> Parser c m [a];
-	manyP oneP = do
+
+	expressionParser :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	expressionParser = expressionParser' Type;
+{--
+	manyParser :: (Monad m) => Parser c m (Maybe a) -> Parser c m [a];
+	manyParser oneP = do
 		{
 		mfirst <- oneP;
 		case mfirst of
 			{
 			Just first -> do
 				{
-				rest <- manyP oneP;
+				rest <- manyParser oneP;
 				return (first:rest);
 				};
 			Nothing -> return [];
 			};
 		};
-	
-	expressionsP :: (Scheme x m r) => Type (r ()) -> TextParser m [Object r m];
-	expressionsP Type = manyP expressionP;
+
+	expressionsParser :: (Scheme x m r) => Type (r ()) -> TextParser m [Object r m];
+	expressionsParser Type = manyParser expressionParser;
+--}
+	portRead :: (Scheme x m r) =>
+	 InputPort Char m -> m (Maybe (Object r m));
+	portRead port = runParser port expressionParser;
+
+	portReadP :: (Scheme x m r) =>
+	 Type (r ()) -> (InputPort Char m,()) -> m (Object r m);
+	portReadP Type (port,()) = do
+		{		
+		mobj <- portRead port;
+		case mobj of
+			{
+			Just obj -> return obj;
+			Nothing -> return eofObject;
+			};
+		};
 	}

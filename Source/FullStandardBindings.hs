@@ -32,8 +32,12 @@ module FullStandardBindings where
 	fullStdBindings = chainList
 		[
 		monadicStdBindings,
-		addProcBinding "eq?" eqS,
-		addProcBinding "eqv?" eqvS,
-		addMacroBinding "set!" setBangS
+
+		-- 4.1.6 Assignments
+		addMacroBinding "set!" setBangM,
+
+		-- 6.1 Equivalence Predicates
+		addProcBinding "eqv?" eqvP,
+		addProcBinding "eq?" eqP
 		];
 	}

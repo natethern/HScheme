@@ -26,6 +26,7 @@ module Equality where
 	import Numerics;
 	import Type;
 	
+	-- 6.1 Equivalence Predicates
 	sameList	:: (Scheme x m r) => 
 	 (Object r m -> Object r m -> m Bool) -> [Object r m] -> [Object r m] -> m Bool;
 	sameList _ [] [] = return True;
@@ -101,15 +102,15 @@ module Equality where
 	eq (ValuesObject a) (ValuesObject b) = sameList eq a b;
 	eq a b = eqv a b;
 	
-	eqS ::  (FullScheme x m r) => 
+	eqP ::  (FullScheme x m r) => 
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
-	eqS Type (a,(b,())) = eq a b;
+	eqP Type (a,(b,())) = eq a b;
 	
-	eqvS ::  (FullScheme x m r) => 
+	eqvP ::  (FullScheme x m r) => 
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
-	eqvS Type (a,(b,())) = eqv a b;
+	eqvP Type (a,(b,())) = eqv a b;
 	
-	equalS ::  (Scheme x m r) => 
+	equalP ::  (Scheme x m r) => 
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
-	equalS Type (a,(b,())) = equal a b;
+	equalP Type (a,(b,())) = equal a b;
 	}

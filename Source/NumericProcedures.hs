@@ -27,34 +27,34 @@ module NumericProcedures where
 	import Numerics;
 	import Type;
 
-	unaryS :: (Scheme x m r) =>
+	unaryP :: (Scheme x m r) =>
 	 (Number -> Number) ->
 	 Type (r ()) -> (Number,()) -> m Number;
-	unaryS op Type (a,()) = return (op a);
+	unaryP op Type (a,()) = return (op a);
 
-	binaryS :: (Scheme x m r) =>
+	binaryP :: (Scheme x m r) =>
 	 (Number -> Number -> Number) ->
 	 Type (r ()) -> (Number,(Number,())) -> m Number;
-	binaryS op Type (a,(b,())) = return (op a b);
+	binaryP op Type (a,(b,())) = return (op a b);
 
-	foldingLS :: (Scheme x m r) =>
+	foldingLP :: (Scheme x m r) =>
 	 (Number -> Number -> Number) ->
 	 Number ->
 	 Type (r ()) -> [Number] -> m Number;
-	foldingLS op a Type ns = return (foldl op a ns);
+	foldingLP op a Type ns = return (foldl op a ns);
 
-	inverterFoldingLS :: (Scheme x m r) =>
+	inverterFoldingLP :: (Scheme x m r) =>
 	 (Number -> Number -> Number) ->
 	 Number ->
 	 Type (r ()) -> (Number,[Number]) -> m Number;
-	inverterFoldingLS op a Type (n,[]) = return (op a n);
-	inverterFoldingLS op _ Type (n,ns) = return (foldl op n ns);
+	inverterFoldingLP op a Type (n,[]) = return (op a n);
+	inverterFoldingLP op _ Type (n,ns) = return (foldl op n ns);
 	
-	subtractS :: (Scheme x m r) =>
+	subtractP :: (Scheme x m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
-	subtractS = inverterFoldingLS (-) 0;
+	subtractP = inverterFoldingLP (-) 0;
 	
-	divideS :: (Scheme x m r) =>
+	divideP :: (Scheme x m r) =>
 	 Type (r ()) -> (Number,[Number]) -> m Number;
-	divideS = inverterFoldingLS (/) 1;
+	divideP = inverterFoldingLP (/) 1;
 	}

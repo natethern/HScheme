@@ -36,38 +36,72 @@ module StandardBindings where
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
-		addTopLevelMacroBinding	"define"	defineTM,
-		addProcBinding	"car"	carS,
-		addProcBinding	"cdr"	cdrS,
-		addProcBinding	"cons"	consS,
-		addProcBinding	"list"	listS,
-		addProcBinding	"to-string"	toStringS,
-		addMacroBinding	"if"	ifS,
-		addMacroBinding	"quote"	quoteS,
-		addProcBinding	"values"	valuesS,
-		addProcBinding	"current-environment"	currentEnvironmentS,
-		addProcBinding	"eval"	evaluateS,
-		addProcBinding	"equal?"	equalS,
-		addProcBinding	"procedure?"	isProcedureS,
-		addMacroBinding	"let"	letS,
-		addMacroBinding	"let*"	letStarS,
-		addMacroBinding	"lambda"	lambdaS,
-		addProcBinding	"+"	(foldingLS (+) 0),
-		addProcBinding	"-"	subtractS,
-		addProcBinding	"*"	(foldingLS (*) 1),
-		addProcBinding	"/"	divideS
+		-- 4.1.2 Literal Expressions
+		addMacroBinding	"quote"					quoteM,
+
+		-- 4.1.4 Procedures
+		addMacroBinding	"lambda"				lambdaM,
+
+		-- 4.1.5 Conditionals
+		addMacroBinding	"if"					ifM,
+
+		-- 4.2.2 Binding Constructs
+		addMacroBinding	"let"					letM,
+		addMacroBinding	"let*"					letStarM,
+
+		-- 5.2 Definitions
+		addTopLevelMacroBinding	"define"		defineT,
+		
+		-- 6.1 Equivalence Predicates
+		addProcBinding	"equal?"				equalP,
+		
+		-- 6.2.5 Numerical Operations
+		addProcBinding	"+"						(foldingLP (+) 0),
+		addProcBinding	"-"						subtractP,
+		addProcBinding	"*"						(foldingLP (*) 1),
+		addProcBinding	"/"						divideP,
+
+		-- 6.3.2 Pairs and Lists
+		addProcBinding	"cons"					consP,
+		addProcBinding	"car"					carP,
+		addProcBinding	"cdr"					cdrP,
+		addProcBinding	"list"					listP,
+		addProcBinding	"append"				appendP,
+
+		-- 6.4 Control Features
+		addProcBinding	"procedure?"			isProcedureP,
+		addProcBinding	"values"				valuesP,
+		addProcBinding	"values->list"			valuesToListP,
+
+		-- 6.5 Eval
+		addProcBinding	"eval"					evaluateP,
+		addProcBinding	"current-environment"	currentEnvironmentP, -- nonstandard
+
+		-- Misc
+		addProcBinding	"to-string"				toStringP
 		];
 
 	monadicStdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	monadicStdBindings = chainList
 		[
 		stdBindings,
-		addMacroBinding	"begin"	beginS,
-		addProcBinding	"call-with-current-continuation"	callCCS,
-		addProcBinding	"input-port?"	isInputPortS,
-		addProcBinding	"output-port?"	isOutputPortS,
-		addProcBinding	"port-write-char"	portWriteCharS,
-		addProcBinding	"close-input-port"	inputPortCloseS,
-		addProcBinding	"close-output-port"	outputPortCloseS
+
+		-- 4.2.3 Sequencing
+		addMacroBinding	"begin"								beginM,
+
+		-- 6.4 Control Features
+		addProcBinding	"call-with-current-continuation"	callCCP,
+
+		-- 6.6.1 Ports
+		addProcBinding	"input-port?"						isInputPortP,
+		addProcBinding	"output-port?"						isOutputPortP,
+		addProcBinding	"close-input-port"					inputPortCloseP,
+		addProcBinding	"close-output-port"					outputPortCloseP,
+
+		-- 6.6.2 Input
+		addProcBinding	"eof-object?"						isEOFObjectP,
+
+		-- 6.6.3 Output
+		addProcBinding	"port-write-char"					portWriteCharP -- nonstandard
 		];
 	}

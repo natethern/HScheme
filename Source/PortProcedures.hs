@@ -27,37 +27,47 @@ module PortProcedures where
 	import Port;
 	import Type;
 
-	portWriteCharS :: (Scheme x m r) =>
-	 Type (r ()) -> (Char,(OutputPort Char m,())) -> m ArgNoneType;
-	portWriteCharS Type (c,(port,())) = do
-		{
-		opWriteOne port c;
-		return MkArgNoneType;
-		};
+	-- 6.6.1 Ports
+	isInputPortP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isInputPortP Type (InputPortObject _,()) = return True;
+	isInputPortP Type (_,()) = return False;
 
-	outputPortCloseS :: (Scheme x m r) =>
-	 Type (r ()) -> (OutputPort Char m,()) -> m ArgNoneType;
-	outputPortCloseS Type (port,()) = do
-		{
-		opClose port;
-		return MkArgNoneType;
-		};
+	isOutputPortP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isOutputPortP Type (OutputPortObject _,()) = return True;
+	isOutputPortP Type (_,()) = return False;
 
-	inputPortCloseS :: (Scheme x m r) =>
+	inputPortCloseP :: (Scheme x m r) =>
 	 Type (r ()) -> (InputPort Char m,()) -> m ArgNoneType;
-	inputPortCloseS Type (port,()) = do
+	inputPortCloseP Type (port,()) = do
 		{
 		ipClose port;
 		return MkArgNoneType;
 		};
 
-	isInputPortS :: (Scheme x m r) =>
-	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isInputPortS Type (InputPortObject _,()) = return True;
-	isInputPortS Type (_,()) = return False;
+	outputPortCloseP :: (Scheme x m r) =>
+	 Type (r ()) -> (OutputPort Char m,()) -> m ArgNoneType;
+	outputPortCloseP Type (port,()) = do
+		{
+		opClose port;
+		return MkArgNoneType;
+		};
 
-	isOutputPortS :: (Scheme x m r) =>
+	-- 6.6.2 Input
+	eofObject :: (Scheme x m r) => Object r m;
+	eofObject = nullObject;
+
+	isEOFObjectP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isOutputPortS Type (OutputPortObject _,()) = return True;
-	isOutputPortS Type (_,()) = return False;
+	isEOFObjectP Type (obj,()) = return (isNullObject obj);
+
+	-- 6.6.3 Output
+	portWriteCharP :: (Scheme x m r) =>
+	 Type (r ()) -> (Char,(OutputPort Char m,())) -> m ArgNoneType;
+	portWriteCharP Type (c,(port,())) = do
+		{
+		opWriteOne port c;
+		return MkArgNoneType;
+		};
 	}

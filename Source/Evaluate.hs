@@ -60,14 +60,14 @@ module Evaluate where
 		_ -> fail "unrecognised expression form";
 		};
 	
-	evaluateS ::
+	evaluateP ::
 		(
 		Scheme x m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateS Type (obj,Just bindings) = evaluate obj with {?bindings = bindings};
-	evaluateS Type (obj,Nothing) = evaluate obj;
+	evaluateP Type (obj,Just bindings) = evaluate obj with {?bindings = bindings};
+	evaluateP Type (obj,Nothing) = evaluate obj;
 	
 	evalList ::
 		(

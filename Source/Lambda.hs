@@ -31,6 +31,7 @@ module Lambda where
 	import Type;
 	import MonadCont;
 
+	-- 4.2.3 Sequencing
 	begin ::
 		(
 		Scheme x m r
@@ -48,14 +49,15 @@ module Lambda where
 		begin newBindings objs;
 		};
 
-	beginS ::
+	beginM ::
 		(
 		Scheme x m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);
-	beginS Type objs = begin ?bindings objs;
+	beginM Type objs = begin ?bindings objs;
 
+	-- 4.2.2 Binding Constructs
 	accrueBindings ::
 		(
 		Scheme x m r
@@ -107,22 +109,23 @@ module Lambda where
 		begin bindings' body;
 		};
 	
-	letS ::
+	letM ::
 		(
 		Scheme x m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
-	letS Type (newbinds,body) = letf ?bindings newbinds body;
+	letM Type (newbinds,body) = letf ?bindings newbinds body;
 	
-	letStarS ::
+	letStarM ::
 		(
 		Scheme x m r,
 		?bindings		:: Bindings r m
 		) =>
 	 Type (r ()) -> ([(Symbol,(Object r m,()))],[Object r m]) -> m (Object r m);
-	letStarS Type (newbinds,body) = letStar ?bindings newbinds body;
+	letStarM Type (newbinds,body) = letStar ?bindings newbinds body;
 
+	-- 4.1.4 Procedures
 	matchBinding :: (Scheme x m r) =>
 	 Bindings r m -> Object r m -> Object r m -> m (Bindings r m);
 	matchBinding bindings (SymbolObject name) arg = do
@@ -178,26 +181,27 @@ module Lambda where
 			});
 		};
 
-	lambdaS :: (Scheme x m r) =>
+	lambdaM :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
-	lambdaS Type (argBindings,body) = lambda argBindings body;
+	lambdaM Type (argBindings,body) = lambda argBindings body;
 
+	-- 6.4 Control Features
 	isProcedure :: (Scheme x m r) =>
 	 Object r m -> m Bool;
 	isProcedure (ProcedureObject _) = return True;
 	isProcedure _ = return False;
 
-	isProcedureS :: (Scheme x m r) =>
+	isProcedureP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
-	isProcedureS Type (obj,()) = isProcedure obj;
+	isProcedureP Type (obj,()) = isProcedure obj;
 	
-	callCCS ::
+	callCCP ::
 		(
 		Scheme x m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	callCCS Type (proc,()) = callCC (\cont -> proc ?bindings
+	callCCP Type (proc,()) = callCC (\cont -> proc ?bindings
 	  [ProcedureObject (\_ args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;

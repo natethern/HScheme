@@ -28,50 +28,23 @@ module Procedures where
 	import Subtype;
 	import Type;
 
-	makeList :: (Scheme x m r) =>
-	 [Object r m] -> m (Object r m);
-	makeList = getConvert;
-
-	listS ::  (Scheme x m r) =>
-	 Type (r ()) -> [Object r m] -> m (Object r m);
-	listS Type = makeList;
-
-	carS :: (Scheme x m r) =>
-	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
-	carS Type ((h,_),()) = return h;
-
-	cdrS :: (Scheme x m r) =>
-	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
-	cdrS Type ((_,t),()) = return t;
-
-	consS :: (Scheme x m r) =>
-	 Type (r ()) -> (Object r m,(Object r m,())) -> m (Object r m);
-	consS Type (h,(t,())) = cons h t;
-
+	-- 4.1.2 Literal Expressions
 	quote :: (Scheme x m r) =>
 	 Object r m -> m (Object r m);
 	quote = return;
 
-	quoteS :: (Scheme x m r) =>
+	quoteM :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m (Object r m);
-	quoteS Type (q,()) = quote q;
-{--	
-	applyS :: Procedure m;
-	applyS [] = fail "apply needs at least 1 argument";
-	applyS (x:xs) = apply x (appconv xs) where
-		{
-		appconv [] = [];
-		appconv ...
-		};
---}	
+	quoteM Type (q,()) = quote q;
 	
-	ifS ::
+	-- 4.1.5 Conditionals
+	ifM ::
 		(
 		Scheme x m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Object r m,(Object r m,Maybe (Object r m))) -> m (Object r m);
-	ifS Type (cond,(thenClause,mElseClause)) = do
+	ifM Type (cond,(thenClause,mElseClause)) = do
 		{
 		isObj <- evaluate cond;
 		is <- getConvert isObj;
@@ -83,6 +56,60 @@ module Procedures where
 			Just elseClause -> evaluate elseClause;
 			};
 		};
+
+	-- 6.3.2 Pairs and Lists
+	consP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m (Object r m);
+	consP Type (h,(t,())) = cons h t;
+
+	carP :: (Scheme x m r) =>
+	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
+	carP Type ((h,_),()) = return h;
+
+	cdrP :: (Scheme x m r) =>
+	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
+	cdrP Type ((_,t),()) = return t;
+
+--	makeList :: (Scheme x m r) =>
+--	 [Object r m] -> m (Object r m);
+--	makeList = getConvert;
+
+	listP ::  (Scheme x m r) =>
+	 Type (r ()) -> [Object r m] -> m [Object r m];
+	listP Type list = return list;
+
+	appendP ::  (Scheme x m r) =>
+	 Type (r ()) -> [[Object r m]] -> m [Object r m];
+	appendP Type listlist = return (concat listlist);
+	
+	-- 6.4 Control Features
+	valuesP :: (Scheme x m r) =>
+	 Type (r ()) -> [Object r m] -> m (Object r m);
+	valuesP Type = return . mkValuesObject;
+	
+	valuesToListP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m [Object r m];
+	valuesToListP Type (ValuesObject list,()) = return list;
+	valuesToListP Type (obj,()) = return [obj];
+	
+	-- 6.5 Eval
+	currentEnvironmentP ::
+		(
+		Scheme x m r,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> () -> m (Bindings r m);
+	currentEnvironmentP Type () = return ?bindings;
+
+{--	
+	applyS :: Procedure m;
+	applyS [] = fail "apply needs at least 1 argument";
+	applyS (x:xs) = apply x (appconv xs) where
+		{
+		appconv [] = [];
+		appconv ...
+		};
+--}	
 	
 	printList :: (Scheme x m r) =>
 	 ObjLocation r m -> ObjLocation r m -> m String;
@@ -147,20 +174,7 @@ module Procedures where
 		c <- getLocation cr;
 		r <- printString cs;
 		return ((escapeChar c)++r);
-		};
-	
-	valuesS :: (Scheme x m r) =>
-	 Type (r ()) -> [Object r m] -> m (Object r m);
-	valuesS Type = return . mkValuesObject;
-	
-	currentEnvironmentS ::
-		(
-		Scheme x m r,
-		?bindings :: Bindings r m
-		) =>
-	 Type (r ()) -> () -> m (Bindings r m);
-	currentEnvironmentS Type () = return ?bindings;
-	
+		};	
 	
 	toString :: (Scheme x m r) =>
 	 Object r m -> m String;
@@ -199,9 +213,9 @@ module Procedures where
 	toString (SyntaxObject _)		= return "#<syntax>";
 	toString (BindingsObject _)		= return "#<environment>";
 
-	toStringS :: (Scheme x m r) =>
+	toStringP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m StringType;
-	toStringS Type (o,()) = do
+	toStringP Type (o,()) = do
 		{
 		s <- toString o;
 		return (MkStringType s);

@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Main where
 	{
+	import IOBindings;
+	import SystemInterface;
 	import Interactive;
 	import ContinuationPassing;
 	import SchemeCPS;
@@ -30,9 +32,11 @@ module Main where
 	import Type;
 	import IORef;
 	
+	type M = SchemeCPS IORef (IO ());
+	
 	main :: IO ();
 	main = doMonadCPS
 		(\_ -> return "error in catch code!")
---		((pureInteract :: Type (PureLocation ()) -> (SchemeCPS PureLocation (IO ())) ()) Type);
-		((fullInteract :: Type (IORef ()) -> (SchemeCPS IORef (IO ())) ()) Type);
+--		((pureInteract :: Type (PureLocation ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);
+		((fullInteract :: Type (IORef ()) -> FullSystemInterface M IORef -> M ()) Type ioFullSystemInterface);
 	}

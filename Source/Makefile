@@ -45,14 +45,15 @@ HC_SRCS			= \
 	\
 	Object.hs	\
 	Conversions.hs	\
-	SExpChars.hs	\
-	SExpParser.hs	\
 	Evaluate.hs	\
 	TopLevel.hs	\
+	SystemInterface.hs	\
 	Procedures.hs	\
 	Lambda.hs	\
 	PortProcedures.hs	\
 	Equality.hs	\
+	SExpChars.hs	\
+	SExpParser.hs	\
 	\
 	Bindings.hs	\
 	NumericProcedures.hs	\
@@ -152,18 +153,6 @@ Conversions.o : Common/Subtype.hi
 Conversions.o : Numerics.hi
 Conversions.o : Port.hi
 Conversions.o : Object.hi
-SExpChars.o : SExpChars.hs
-SExpChars.o : Unicode.hi
-SExpParser.o : SExpParser.hs
-SExpParser.o : Common/Type.hi
-SExpParser.o : Common/Subtype.hi
-SExpParser.o : Common/LiftedMonad.hi
-SExpParser.o : Unicode.hi
-SExpParser.o : SExpChars.hi
-SExpParser.o : InputPortParser.hi
-SExpParser.o : Object.hi
-SExpParser.o : Conversions.hi
-SExpParser.o : Procedures.hi
 Evaluate.o : Evaluate.hs
 Evaluate.o : Common/Type.hi
 Evaluate.o : Object.hi
@@ -172,6 +161,15 @@ TopLevel.o : Common/Type.hi
 TopLevel.o : Object.hi
 TopLevel.o : Conversions.hi
 TopLevel.o : Evaluate.hi
+SystemInterface.o : SystemInterface.hs
+SystemInterface.o : Common/Type.hi
+SystemInterface.o : Port.hi
+SystemInterface.o : Object.hi
+SystemInterface.o : Conversions.hi
+SystemInterface.o : SExpParser.hi
+SystemInterface.o : Procedures.hi
+SystemInterface.o : TopLevel.hi
+SystemInterface.o : Bindings.hi
 Procedures.o : Procedures.hs
 Procedures.o : Common/Type.hi
 Procedures.o : Common/Subtype.hi
@@ -195,6 +193,20 @@ Equality.o : Equality.hs
 Equality.o : Common/Type.hi
 Equality.o : Numerics.hi
 Equality.o : Object.hi
+SExpChars.o : SExpChars.hs
+SExpChars.o : Unicode.hi
+SExpParser.o : SExpParser.hs
+SExpParser.o : Common/Type.hi
+SExpParser.o : Common/Subtype.hi
+SExpParser.o : Common/LiftedMonad.hi
+SExpParser.o : Unicode.hi
+SExpParser.o : SExpChars.hi
+SExpParser.o : InputPortParser.hi
+SExpParser.o : Port.hi
+SExpParser.o : Object.hi
+SExpParser.o : Conversions.hi
+SExpParser.o : Procedures.hi
+SExpParser.o : PortProcedures.hi
 Bindings.o : Bindings.hs
 Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
@@ -234,9 +246,7 @@ IOBindings.o : Common/Type.hi
 IOBindings.o : Common/LiftedMonad.hi
 IOBindings.o : Port.hi
 IOBindings.o : Object.hi
-IOBindings.o : Conversions.hi
-IOBindings.o : Bindings.hi
-IOBindings.o : FullStandardBindings.hi
+IOBindings.o : SystemInterface.hi
 SchemeCPS.o : SchemeCPS.hs
 SchemeCPS.o : Common/Subtype.hi
 SchemeCPS.o : Common/LiftedMonad.hi
@@ -254,21 +264,17 @@ Full.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
-Interactive.o : Common/LiftedMonad.hi
 Interactive.o : Port.hi
 Interactive.o : InputPortParser.hi
 Interactive.o : Object.hi
 Interactive.o : Conversions.hi
-Interactive.o : Evaluate.hi
-Interactive.o : TopLevel.hi
 Interactive.o : Procedures.hi
-Interactive.o : PortProcedures.hi
 Interactive.o : Bindings.hi
 Interactive.o : StandardBindings.hi
 Interactive.o : SExpParser.hi
 Interactive.o : FullStandardBindings.hi
-Interactive.o : IOBindings.hi
 Interactive.o : FMapBindings.hi
+Interactive.o : SystemInterface.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : Common/Type.hi
 InteractiveMain.o : Pure.hi
@@ -276,4 +282,6 @@ InteractiveMain.o : Full.hi
 InteractiveMain.o : SchemeCPS.hi
 InteractiveMain.o : ContinuationPassing.hi
 InteractiveMain.o : Interactive.hi
+InteractiveMain.o : SystemInterface.hi
+InteractiveMain.o : IOBindings.hi
 # DO NOT DELETE: End of Haskell dependencies

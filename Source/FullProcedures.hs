@@ -27,6 +27,7 @@ module FullProcedures where
 	import Object;
 	import Type;
 
+	-- 4.1.6 Assignments
 	setBang ::
 		(
 		FullScheme x m r,
@@ -39,13 +40,13 @@ module FullProcedures where
 		Nothing -> fail ((unSymbol name)++" not defined");
 		};
 	
-	setBangS ::
+	setBangM ::
 		(
 		FullScheme x m r,
 		?bindings :: Bindings r m
 		) =>
 	 Type (r ()) -> (Symbol,(Object r m,())) -> m ArgNoneType;
-	setBangS Type (name,(obj,())) = do
+	setBangM Type (name,(obj,())) = do
 		{
 		res <- evaluate obj;
 		setBang name res;
