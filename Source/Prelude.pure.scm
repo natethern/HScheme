@@ -29,6 +29,14 @@
 ))
 
 
+; 4.2.6 Quasiquotation
+(define quasiquote (syntax-rules (unquote)
+	((quasiquote (unquote a)) a)
+	((quasiquote (a . b)) (cons (quasiquote a) (quasiquote b)))
+	((quasiquote a) (quote a))
+))
+
+
 ; 6.2.5 Numerical Operations
 (define complex? number?)
 
@@ -79,6 +87,11 @@
 
 (define list-tail (lambda (x k)
 	(if (zero? k) x (list-tail (cdr x) (- k 1)))
+))
+
+; non-standard (oddly)
+(define list-head (lambda (x k)
+	(if (zero? k) '() (cons (car x) (list-head (cdr x) (- k 1))))
 ))
 
 (define list-ref (lambda (x k)
