@@ -10,12 +10,12 @@
 if (file_exists("../cgi-bin/interpret.cgi"))
 	{
 	echo "Interpreter last modified ".
-	 date("F d Y H:i:s.",filemtime("../cgi-bin/interpret.cgi"));
+	 date("Y-m-d H:i.",filemtime("../cgi-bin/interpret.cgi"));
 	}
 else echo "<B>Interpreter not available.</B>"
 ?>
 </P>
-<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
+<FORM ACTION="../cgi-bin/interpret.cgi" METHOD="post">
 <P>Scheme Code:<BR>
 <TEXTAREA NAME="input" ROWS="40" COLS="100">
 </TEXTAREA><BR>

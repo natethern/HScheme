@@ -7,40 +7,46 @@
 <BODY>
 
 <H1>HScheme Examples</H1>
+<P>
+<?
+if (file_exists("../cgi-bin/interpret.cgi"))
+	{
+	echo "Interpreter last modified ".
+	 date("Y-m-d H:i.",filemtime("../cgi-bin/interpret.cgi"));
+	}
+else echo "<B>Interpreter not available.</B>"
+?>
+</P>
 <H2>1000 Factorial</H2>
-<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
+<FORM ACTION="../cgi-bin/interpret.cgi" METHOD="post">
 <TEXTAREA NAME="input" ROWS="7" COLS="80">
-(define fact (lambda (x)
-  (if (equal? x 0) 1 (* x (fact (- x 1))))
+(define factorial (lambda (x)
+  (if (= x 0) 1 (* x (factorial (- x 1))))
 ))
 
-(fact 1000)
+(factorial 1000)
 </TEXTAREA><BR>
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="full"> full
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure" CHECKED> pure
-<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
-<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
+<INPUT TYPE="RADIO" NAME="monad" VALUE="gcps" CHECKED> full
+<INPUT TYPE="RADIO" NAME="monad" VALUE="pure"> pure
 <INPUT TYPE="RESET" VALUE="Revert">
 <INPUT TYPE="SUBMIT" VALUE="Interpret">
 </FORM>
 
 <H2>Fixed Point</H2>
-<FORM ACTION="/cgi-bin/interpret.cgi" METHOD="post">
+<FORM ACTION="../cgi-bin/interpret.cgi" METHOD="post">
 <TEXTAREA NAME="input" ROWS="7" COLS="80">
 (define hello-goodbye-etc (lambda (x) `(hello goodbye . ,x) ))
 (hello-goodbye-etc '(a b c))
 (define hello-goodbyes (call-with-result hello-goodbye-etc))
 (list-head hello-goodbyes 30)
 </TEXTAREA><BR>
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="full"> full
-<INPUT TYPE="RADIO" NAME="flavour" VALUE="pure" CHECKED> pure
-<INPUT TYPE="RADIO" NAME="monad" VALUE="fix" CHECKED> direct
-<INPUT TYPE="RADIO" NAME="monad" VALUE="cont"> continuations
+<INPUT TYPE="RADIO" NAME="monad" VALUE="gcps" CHECKED> full
+<INPUT TYPE="RADIO" NAME="monad" VALUE="pure"> pure
 <INPUT TYPE="RESET" VALUE="Revert">
 <INPUT TYPE="SUBMIT" VALUE="Interpret">
 </FORM>
 
-<P>"Pure" means pure functional only; "continuations" allows <TT>call-with-current-continuation</TT>, but is slower than "direct" and disallows <TT>call-with-result</TT>.</P>
+<P>"Pure" means purely functional procedures only.</P>
 <P CLASS=path>
 <A HREF="./">HScheme</A> -&gt;
 <SPAN CLASS=here>Examples</SPAN>
