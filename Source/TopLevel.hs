@@ -53,7 +53,7 @@ module TopLevel
 							NilObject -> do
 								{
 								th <- getLocation thead;
-								result <- evaluate th with {?bindings=bindings};
+								result <- let {?bindings=bindings} in evaluate th;
 								loc <- newLocation result;
 								return (newBinding bindings name loc,MkArgNoneType);
 								};
@@ -80,7 +80,7 @@ module TopLevel
 		};
 	topLevelApplyEval bindings obj arglist = do
 		{
-		result <- applyEval obj arglist with {?bindings=bindings;};
+		result <- let {?bindings=bindings} in applyEval obj arglist;
 		return (bindings,result);
 		};
 
@@ -103,7 +103,7 @@ module TopLevel
 				};
 			_ -> do
 				{
-				r <- evaluate a with {?bindings = bindings};
+				r <- let {?bindings=bindings} in evaluate a;
 				return (bindings,r);
 				};
 			};
