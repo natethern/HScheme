@@ -39,7 +39,7 @@ module Main where
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
 
 	getFlavour :: IO SchemeFlavour;
-	getFlavour = return StrictPureFlavour;
+	getFlavour = return PureFlavour;
 
 	cpsInteract :: 
 		(
