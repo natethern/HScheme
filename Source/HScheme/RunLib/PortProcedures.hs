@@ -105,9 +105,13 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 			meb <- fromObject obj;
 			case meb of
 				{
-				Just (Right b) -> return (Just (b :: Word8));
-				Just (Left MkNullObjType) -> return Nothing;
-				Nothing -> throwSimpleError "wrong-type";
+				SuccessResult (Right b) -> return (Just (b :: Word8));
+				SuccessResult (Left MkNullObjType) -> return Nothing;
+				ExceptionResult mm -> do
+					{
+					mmObj <- getConvert mm;
+					throwArgError "wrong-type" [mmObj];
+					};
 				};
 			});
 		return (case mc of

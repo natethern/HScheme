@@ -71,12 +71,12 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		mpair <- fromObject obj;
 		case mpair of
 			{
-			Just (sym,args) -> case ?toplevelbindings sym of
+			SuccessResult (sym,args) -> case ?toplevelbindings sym of
 				{
 				Just (MkTopLevelMacro tlm) -> tlm args;
 				Nothing -> compileExprTopLevel;
 				};
-			Nothing -> compileExprTopLevel;
+			_ -> compileExprTopLevel;
 			};
 		} where
 		{

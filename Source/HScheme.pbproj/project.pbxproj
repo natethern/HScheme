@@ -247,6 +247,7 @@
 				ABAD375304A403EE00A80103,
 				ABAD375704A403EE00A80103,
 				ABAD375904A403EE00A80103,
+				ABCD883F04D703AC00A80103,
 				ABAD375504A403EE00A80103,
 				ABAD375C04A403EE00A80103,
 				ABAD375A04A403EE00A80103,
@@ -944,6 +945,12 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			path = "report-examples.scm.ref";
+			refType = 4;
+		};
+		ABCD883F04D703AC00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = Mismatch.hs;
 			refType = 4;
 		};
 		ABCE423304C1152600A80103 = {

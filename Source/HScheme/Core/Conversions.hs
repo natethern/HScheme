@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.Core.Conversions where
 	{
+	import Org.Org.Semantic.HScheme.Core.Mismatch;
 	import Org.Org.Semantic.HScheme.Core.Object;
 	import Org.Org.Semantic.HScheme.Core.Symbol;
 	import Org.Org.Semantic.HScheme.Core.Build;
@@ -34,15 +35,26 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	 ObjectSubtype r obj a | obj -> r where
 		{
 		getObject :: forall cm. (Build cm r) => a -> cm obj;
-		fromObject :: forall cm. (Build cm r) => obj -> cm (Maybe a);
-		
+		fromObject :: forall cm. (Build cm r) => obj -> cm (MatchMonad obj a);
+
 		getObjectIs :: forall cm. (Build cm r) => Type a -> obj -> cm Bool;
 		getObjectIs _ obj = do
 			{
-			(ma :: Maybe a) <- fromObject obj;
-			return (isJust ma);
+			(ma :: MatchMonad obj a) <- fromObject obj;
+			return (isSuccessResult ma);
 			};
 		};
+
+	maybeToMatch :: Expected -> obj -> Maybe a -> MatchMonad obj a;
+	maybeToMatch exp obj ma = case ma of
+		{
+		Just a -> return a;
+		Nothing -> throwSingle (MkMismatch exp obj);
+		};
+
+	getMaybeToMatch :: (Functor m) =>
+	 Expected -> (obj -> m (Maybe a)) -> obj -> m (MatchMonad obj a);
+	getMaybeToMatch exp mc obj = fmap (maybeToMatch exp obj) (mc obj);
 
 	
 	-- NullObjType
@@ -59,7 +71,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) NullObjType where
 		{
 		getObject MkNullObjType = return nullObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch NonObjectExpected (return . maybeConvert);
 		};
 
 
@@ -79,14 +91,14 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			ma <- fromObject obj;
 			case ma of
 				{
-				Just a -> return (return (Left a));
-				Nothing -> do
+				SuccessResult a -> return (return (Left a));
+				ExceptionResult (MkMismatch exa _) -> do
 					{
 					mb <- fromObject obj;
-					return (do
+					return (case mb of
 						{
-						b <- mb;
-						return (Right b);
+						SuccessResult b -> SuccessResult (Right b);
+						ExceptionResult (MkMismatch exb _) -> ExceptionResult (MkMismatch (EitherExpected exa exb) obj);
 						});
 					};
 				};
@@ -102,8 +114,8 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	 ObjectSubtype r obj NilType where
 		{
 		getObject () = return nilObject;
-		fromObject obj | Just Nothing <- objectCell obj = return (Just ());
-		fromObject _ = return Nothing;
+		fromObject obj | Just Nothing <- objectCell obj = return (SuccessResult ());
+		fromObject obj = mismatch NullExpected obj;
 		};
 
 	
@@ -123,11 +135,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				return (do
 					{
 					(h,()) <- mh;
-					return (Just h);
+					return (return h);
 					});
 				};
-			Just Nothing -> return (Just Nothing);
-			Nothing ->  return Nothing;
+			Just Nothing -> return (return Nothing);
+			Nothing -> mismatch listExpected obj;
 			};
 		};
 
@@ -151,8 +163,8 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 					return (h:t);
 					});
 				};
-			Just Nothing -> return (Just []);
-			Nothing ->  return Nothing;
+			Just Nothing -> return (return []);
+			Nothing -> mismatch listExpected obj;
 			};
 		};
 
@@ -187,7 +199,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				return (objH,objT);
 				});
 			};
-		fromObject _ = return Nothing;
+		fromObject obj = mismatch PairTypeExpected obj;
 		};
 
 	
@@ -196,7 +208,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (Object r m) where
 		{
 		getObject = return;
-		fromObject = return . Just;
+		fromObject = return . return;
 		};
 
 	
@@ -218,7 +230,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) Bool where
 		{
 		getObject = return . BooleanObject;
-		fromObject obj = return (Just (convert obj));
+		fromObject obj = return (return (convert obj));
 		};
 
 	
@@ -233,7 +245,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) Char where
 		{
 		getObject = return . CharObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch CharTypeExpected (return . maybeConvert);
 		};
 
 	
@@ -248,7 +260,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) Number where
 		{
 		getObject = return . NumberObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch NumberTypeExpected (return . maybeConvert);
 		};
 
 
@@ -263,7 +275,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: Number) <- mn;
-				maybeApproximate n;
+				maybeToMatch RealTypeExpected obj (maybeApproximate n);
 				});
 			};
 		};
@@ -280,7 +292,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: EIReal) <- mn;
-				maybeApproximate n;
+				maybeToMatch RationalTypeExpected obj (maybeApproximate n);
 				});
 			};
 		};
@@ -297,7 +309,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: EIReal) <- mn;
-				maybeApproximate n;
+				maybeToMatch IntegerTypeExpected obj (maybeApproximate n);
 				});
 			};
 		};
@@ -314,7 +326,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: Integer) <- mn;
-				maybeConvert n;
+				maybeToMatch IntTypeExpected obj (maybeConvert n);
 				});
 			};
 		};
@@ -331,7 +343,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: Integer) <- mn;
-				maybeConvert n;
+				maybeToMatch Word8TypeExpected obj (maybeConvert n);
 				});
 			};
 		};
@@ -348,7 +360,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) Symbol where
 		{
 		getObject = return . SymbolObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch SymbolTypeExpected (return . maybeConvert);
 		};
 
 	
@@ -363,7 +375,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (Environment r (Object r m)) where
 		{
 		getObject = return . EnvironmentObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch EnvironmentTypeExpected (return . maybeConvert);
 		};
 
 	
@@ -378,7 +390,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (InputPort Word8 m) where
 		{
 		getObject = return . InputPortObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch InputPortTypeExpected (return . maybeConvert);
 		};
 
 	
@@ -393,7 +405,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (OutputPort Word8 m) where
 		{
 		getObject = return . OutputPortObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch OutputPortTypeExpected (return . maybeConvert);
 		};
 
 
@@ -408,7 +420,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (SRefArray r Word8) where
 		{
 		getObject = return . ByteArrayObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch ByteArrayTypeExpected (return . maybeConvert);
 		};
 
 
@@ -423,7 +435,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (SRefArray r Char) where
 		{
 		getObject = return . StringObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch StringTypeExpected (return . maybeConvert);
 		};
 
 
@@ -438,7 +450,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (SRefArray r (Object r m)) where
 		{
 		getObject = return . VectorObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch VectorTypeExpected (return . maybeConvert);
 		};
 
 
@@ -460,7 +472,15 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	 ObjectSubtype r (Object r m) (SRefList r t) where
 		{
 		getObject (MkSRefList rs) = getObject (fromList rs :: SRefArray r t);
-		fromObject = return . maybeConvert;
+		fromObject obj = do
+			{
+			marr <- fromObject obj;
+			return (do
+				{
+				(arr :: SRefArray r t) <- marr;
+				return (MkSRefList (toList arr));
+				});
+			};
 		};
 
 
@@ -512,12 +532,12 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			mrarray <- fromObject obj;
 			case mrarray of
 				{
-				Just (rarray :: SRefArray r t) -> do
+				SuccessResult (rarray :: SRefArray r t) -> do
 					{
 					slist <- getSRefArrayList rarray;
-					return (Just (MkSList slist));
+					return (return (MkSList slist));
 					};
-				Nothing -> return Nothing;
+				ExceptionResult ex -> return (ExceptionResult ex);
 				};
 			};
 		};
@@ -534,6 +554,19 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance ObjectSubtype r (Object r m) (Procedure (Object r m) m) where
 		{
 		getObject = return . ProcedureObject;
-		fromObject = return . maybeConvert;
+		fromObject = getMaybeToMatch ProcedureTypeExpected (return . maybeConvert);
+		};
+
+	
+	-- Mismatch
+
+	instance (Build cm r) =>
+	 MonadIsA cm (Object r m) (Mismatch (Object r m)) where
+		{
+		getConvert (MkMismatch exp obj) = do
+			{
+			expected <- getObject (MkSList (show exp));
+			makeList [expected,obj];
+			};
 		};
 	}

@@ -69,20 +69,11 @@ module Org.Org.Semantic.HScheme.RunLib.FullProcedures where
 	 (SRefArray r (Object r m),(Integer,(Object r m,()))) -> m NullObjType;
 	vectorSetP = arraySetP;
 
-	for :: (Monad m) =>
-	 [a] -> (a -> m ()) -> m ();
-	for [] _ = return ();
-	for (a:as) f = do
-		{
-		f a;
-		for as f;
-		};
-
 	vectorFillP :: (FullScheme m r,?objType :: Type (Object r m)) =>
 	 (SRefArray r (Object r m),(Object r m,())) -> m NullObjType;
 	vectorFillP (arr,(obj,_)) = do
 		{
-		for (toList arr) (\r -> set r obj);
+		for (\r -> set r obj) (toList arr);
 		return MkNullObjType;
 		};
 	}

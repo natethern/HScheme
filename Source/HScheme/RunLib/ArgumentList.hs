@@ -25,10 +25,37 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
+	data ArgumentMismatch obj =
+	 UnionArgMismatch (ArgumentMismatch obj) (ArgumentMismatch obj)	|
+	 TooFewArguments Int					|
+	 TooManyArguments Int [obj]				|
+	 WrongArgumentType Int (Mismatch obj)	;
+
+	instance (Build cm r) =>
+	 MonadIsA cm (Object r m) (ArgumentMismatch (Object r m)) where
+		{
+		getConvert (UnionArgMismatch am1 am2) = do
+			{
+			am1Obj <- getConvert am1;
+			am2Obj <- getConvert am2;
+			makeList [am1Obj,am2Obj];
+			};
+		getConvert (TooFewArguments pos) = getObject (MkSymbol "too-few-arguments",(pos,()));
+		getConvert (TooManyArguments pos list) = getObject (MkSymbol "too-few-arguments",(pos,(list,())));
+		getConvert (WrongArgumentType pos mm) = do
+			{
+			(mObj :: Object r m) <- getConvert mm;
+			getObject (MkSymbol "wrong-argument-type",(pos,(mObj,())))
+			};
+		};
+
+	type ArgumentMatchMonad obj = Result (ArgumentMismatch obj);
+
 	class (SchemeObject r obj) =>
 	 ArgumentList r obj a | obj -> r where
 		{
-		maybeConvertFromObjects :: forall cm. (Build cm r,?objType :: Type obj) => [obj] -> cm (Maybe a);
+		maybeConvertFromObjects :: forall cm. (Build cm r,?objType :: Type obj) =>
+		 Int -> [obj] -> cm (ArgumentMatchMonad obj a);
 		};
 
 	convertFromObjects ::
@@ -40,19 +67,23 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	 [Object r m] -> cm a;
 	convertFromObjects args = do
 		{
-		ma <- maybeConvertFromObjects args;
+		ma <- maybeConvertFromObjects 0 args;
 		case ma of
 			{
-			Just a -> return a;
-			Nothing -> throwArgError "arg-list-mismatch" args;
+			SuccessResult a -> return a;
+			ExceptionResult am -> do
+				{
+				amObj <- getConvert am;
+				throwArgError "arg-list-mismatch" [amObj];
+				};
 			};
 		};
 
 	instance (SchemeObject r obj) =>
 	 ArgumentList r obj () where
 		{
-		maybeConvertFromObjects [] = return (Just ());
-		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
+		maybeConvertFromObjects _ [] = return (return ());
+		maybeConvertFromObjects pos args = return (throwSingle (TooManyArguments pos args));
 		};
 
 	instance
@@ -62,12 +93,12 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
  	 ArgumentList r obj (a,b) where
 		{
-		maybeConvertFromObjects [] = return Nothing;	-- throwSimpleError "too-few-args";
-		maybeConvertFromObjects (obj:objs) = do
+		maybeConvertFromObjects pos [] = return (throwSingle (TooFewArguments pos));
+		maybeConvertFromObjects pos (obj:objs) = do
 			{
 			ma <- fromObject obj;
-			mb <- maybeConvertFromObjects objs;
-			return (liftF2 (,) ma mb);
+			mb <- maybeConvertFromObjects (pos + 1) objs;
+			return (liftF2 (,) (fmap2 (WrongArgumentType pos) ma) mb);
 			};
 		};
 
@@ -77,13 +108,13 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList r obj (Maybe a) where
 		{
-		maybeConvertFromObjects [] = return (Just Nothing);
-		maybeConvertFromObjects [obj] = do
+		maybeConvertFromObjects pos [] = return (return Nothing);
+		maybeConvertFromObjects pos [obj] = do
 			{
 			ma <- fromObject obj;
-			return (fmap Just ma);
+			return (fmap2 (WrongArgumentType pos) (fmap Just ma));
 			};
-		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
+		maybeConvertFromObjects pos args = return (throwSingle (TooManyArguments pos args));
 		};
 
 	instance
@@ -92,12 +123,12 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList r obj [a] where
 		{
-		maybeConvertFromObjects [] = return (Just []);
-		maybeConvertFromObjects (obj:objs) = do
+		maybeConvertFromObjects pos [] = return (return []);
+		maybeConvertFromObjects pos (obj:objs) = do
 			{
 			ma <- fromObject obj;
-			mas <- maybeConvertFromObjects objs;
-			return (liftF2 (:) ma mas);
+			mas <- maybeConvertFromObjects (pos + 1) objs;
+			return (liftF2 (:) (fmap2 (WrongArgumentType pos) ma) mas);
 			};
 		};
 
@@ -108,19 +139,19 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList r obj (Either a b) where
 		{
-		maybeConvertFromObjects args = do
+		maybeConvertFromObjects pos args = do
 			{
-			ma <- maybeConvertFromObjects args;
+			ma <- maybeConvertFromObjects pos args;
 			case ma of
 				{
-				Just a -> return (Just (Left a));
-				_ -> do
+				SuccessResult a -> return (SuccessResult (Left a));
+				ExceptionResult exa -> do
 					{
-					mb <- maybeConvertFromObjects args;
+					mb <- maybeConvertFromObjects pos args;
 					case mb of
 						{
-						Just b -> return (Just (Right b));
-						_ -> return Nothing;
+						SuccessResult b -> return (SuccessResult (Right b));
+						ExceptionResult exb -> return (ExceptionResult (UnionArgMismatch exa exb));
 						};
 					};
 				};

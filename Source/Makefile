@@ -68,7 +68,7 @@ HCLANGFLAGS		= -package-name $(PACKAGENAME)
 HCPACKAGES		= -package HBase
 HCIMPORTDIRS	= -i.
 HCOPTFLAGS		= -O -fvia-C
-HCFLAGS			= $(HCWARNFLAGS) $(HCLANGFLAGS) $(HCPACKAGES) $(HCIMPORTDIRS)
+HCFLAGS			= -no-recomp $(HCWARNFLAGS) $(HCLANGFLAGS) $(HCPACKAGES) $(HCIMPORTDIRS)
 HCPROFOPTS		= -prof -hisuf p_hi -osuf p_o
 HCFLAGS_REL		= $(HCOPTFLAGS)
 HCFLAGS_PROF	= $(HCOPTFLAGS) $(HCPROFOPTS) -auto-all +RTS -K32M -RTS
@@ -88,6 +88,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/Core/Binding.hs	\
 	$(HIER)/Core/Object.hs	\
 	$(HIER)/Core/Scheme.hs	\
+	$(HIER)/Core/Mismatch.hs	\
 	$(HIER)/Core/Conversions.hs	\
 	$(HIER)/Core/Throw.hs	\
 	$(HIER)/Core/Stream.hs	\
@@ -473,6 +474,10 @@ Org/Org/Semantic/HScheme/Core/Scheme.p_o : ./Org/Org/Semantic/HScheme/Core/Build
 Org/Org/Semantic/HScheme/Core/Scheme.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Scheme.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
 Org/Org/Semantic/HScheme/Core/Scheme.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Mismatch.o Org/Org/Semantic/HScheme/Core/Mismatch.q_o Org/Org/Semantic/HScheme/Core/Mismatch.p_o : Org/Org/Semantic/HScheme/Core/Mismatch.hs
+Org/Org/Semantic/HScheme/Core/Mismatch.o : ./Org/Org/Semantic/HScheme/Core/Symbol.hi
+Org/Org/Semantic/HScheme/Core/Mismatch.q_o : ./Org/Org/Semantic/HScheme/Core/Symbol.q_hi
+Org/Org/Semantic/HScheme/Core/Mismatch.p_o : ./Org/Org/Semantic/HScheme/Core/Symbol.p_hi
 Org/Org/Semantic/HScheme/Core/Conversions.o Org/Org/Semantic/HScheme/Core/Conversions.q_o Org/Org/Semantic/HScheme/Core/Conversions.p_o : Org/Org/Semantic/HScheme/Core/Conversions.hs
 Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Numerics.hi
 Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Numerics.q_hi
@@ -489,6 +494,9 @@ Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/
 Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Object.hi
 Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Object.q_hi
 Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
+Org/Org/Semantic/HScheme/Core/Conversions.o : ./Org/Org/Semantic/HScheme/Core/Mismatch.hi
+Org/Org/Semantic/HScheme/Core/Conversions.q_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.q_hi
+Org/Org/Semantic/HScheme/Core/Conversions.p_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.p_hi
 Org/Org/Semantic/HScheme/Core/Throw.o Org/Org/Semantic/HScheme/Core/Throw.q_o Org/Org/Semantic/HScheme/Core/Throw.p_o : Org/Org/Semantic/HScheme/Core/Throw.hs
 Org/Org/Semantic/HScheme/Core/Throw.o : ./Org/Org/Semantic/HScheme/Core/Build.hi
 Org/Org/Semantic/HScheme/Core/Throw.q_o : ./Org/Org/Semantic/HScheme/Core/Build.q_hi
@@ -537,6 +545,9 @@ Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Object.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Scheme.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Scheme.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Scheme.p_hi
+Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Mismatch.hi
+Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.q_hi
+Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Mismatch.p_hi
 Org/Org/Semantic/HScheme/Core.o : ./Org/Org/Semantic/HScheme/Core/Conversions.hi
 Org/Org/Semantic/HScheme/Core.q_o : ./Org/Org/Semantic/HScheme/Core/Conversions.q_hi
 Org/Org/Semantic/HScheme/Core.p_o : ./Org/Org/Semantic/HScheme/Core/Conversions.p_hi
@@ -844,6 +855,9 @@ Org/Org/Semantic/HScheme/Bind.o Org/Org/Semantic/HScheme/Bind.q_o Org/Org/Semant
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
+Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Bind/Add.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Bind/Add.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/Add.p_hi
@@ -1000,4 +1014,7 @@ CGIMain.o CGIMain.q_o CGIMain.p_o : CGIMain.hs
 CGIMain.o : ./Org/Org/Semantic/HScheme.hi
 CGIMain.q_o : ./Org/Org/Semantic/HScheme.q_hi
 CGIMain.p_o : ./Org/Org/Semantic/HScheme.p_hi
+CGIMain.o : ./Arguments.hi
+CGIMain.q_o : ./Arguments.q_hi
+CGIMain.p_o : ./Arguments.p_hi
 # DO NOT DELETE: End of Haskell dependencies

@@ -29,6 +29,7 @@ module Org.Org.Semantic.HScheme.Core
 	module Org.Org.Semantic.HScheme.Core.Binding,
 	module Org.Org.Semantic.HScheme.Core.Object,
 	module Org.Org.Semantic.HScheme.Core.Scheme,
+	module Org.Org.Semantic.HScheme.Core.Mismatch,
 	module Org.Org.Semantic.HScheme.Core.Conversions,
 	module Org.Org.Semantic.HScheme.Core.Throw,
 	module Org.Org.Semantic.HScheme.Core.Stream
@@ -37,6 +38,7 @@ module Org.Org.Semantic.HScheme.Core
 	import Org.Org.Semantic.HScheme.Core.Stream;
 	import Org.Org.Semantic.HScheme.Core.Throw;
 	import Org.Org.Semantic.HScheme.Core.Conversions;
+	import Org.Org.Semantic.HScheme.Core.Mismatch;
 	import Org.Org.Semantic.HScheme.Core.Scheme;
 	import Org.Org.Semantic.HScheme.Core.Object;
 	import Org.Org.Semantic.HScheme.Core.Binding;

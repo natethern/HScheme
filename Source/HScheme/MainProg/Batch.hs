@@ -97,7 +97,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 			{
 			program <- interpList;
 			results <- return (unIdentity (mrun program));
-			sinkList outproc results;
+			forDo outproc results;
 			return ();
 			};
 		};

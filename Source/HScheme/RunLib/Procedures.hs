@@ -218,7 +218,7 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		result <- unExceptionMonad (dec (accreteEitherList el));
 		case result of
 			{
-			SuccessExceptionResult text -> return (Left (MkSList text));
+			SuccessResult text -> return (Left (MkSList text));
 			_ -> return (Right False);
 			};
 		};

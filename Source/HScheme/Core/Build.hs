@@ -59,12 +59,22 @@ module Org.Org.Semantic.HScheme.Core.Build where
 		nilObject :: obj;
 		};
 
-	cons :: (Build m ref,SchemeObject ref obj) => obj -> obj -> m obj;
+	cons :: (Build m ref,SchemeObject ref obj) =>
+	 obj -> obj -> m obj;
 	cons h t = do
 		{
 		hr <- new h;
 		tr <- new t;
 		return (pairObject hr tr);
+		};
+
+	makeList :: (Build m ref,SchemeObject ref obj) =>
+	 [obj] -> m obj;
+	makeList [] = return nilObject;
+	makeList (h:t) = do
+		{
+		tobj <- makeList t;
+		cons h tobj;
 		};
 
 {-

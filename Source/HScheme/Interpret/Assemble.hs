@@ -100,7 +100,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	assembleApplyExpression f arglist = do
 		{
 		fe <- assembleExpression f;
-		ae <- sinkList assembleExpression arglist;
+		ae <- for assembleExpression arglist;
 		return (makeApply fe ae);
 		};
 
@@ -121,8 +121,12 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		marglist <- fromObject t;
 		case marglist of
 			{
-			Nothing -> throwArgError "bad-argument-list" [t];
-			Just arglist -> case h of
+			ExceptionResult (MkMismatch exp obj) -> do
+				{
+				expobj <- getObject (MkSList (show exp));
+				throwArgError "bad-argument-list" [t,expobj,obj];
+				};
+			SuccessResult arglist -> case h of
 				{
 				SymbolObject sym -> case getBinding ?syntacticbindings sym of
 					{

@@ -101,7 +101,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			nmobj <- pcase arg;
 			case nmobj of
 				{
-				SuccessExceptionResult mobj -> mobj;
+				SuccessResult mobj -> mobj;
 				_ -> matchCases arg rest;
 				};
 			};
@@ -131,7 +131,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			nlist <- patternZip pattern args;
 			case nlist of
 				{
-				SuccessExceptionResult subs -> substitute subs template;
+				SuccessResult subs -> substitute subs template;
 				_ -> transform rs t args;
 				}
 			};
@@ -160,8 +160,12 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 				margs <- fromObject t;
 				case margs of
 					{
-					Nothing -> throwArgError "bad-syntax-rules-syntax" [t];
-					Just args -> syntaxRulesM args;
+					ExceptionResult mm -> do
+						{
+						mmObj <- getConvert mm;
+						throwArgError "bad-syntax-rules-syntax" [t,mmObj];
+						};
+					SuccessResult args -> syntaxRulesM args;
 					};
 				};
 			SymbolObject _ -> throwArgError "undefined-syntax-maker" [h];
