@@ -1,4 +1,3 @@
-"Loading init.full.scm"
 (load "init.pure.scm")
 
 
@@ -29,7 +28,7 @@
 	)
 ))
 
-(define delay (syntax-rules ()
+(define-syntax delay (syntax-rules ()
 	((delay expression) (make-promise (lambda () expression)))
 ))
 
@@ -140,5 +139,3 @@
 (define newline (lambda rest
 	(apply write-char (cons #\newline rest))
 ))
-
-"init.full.scm Loaded"

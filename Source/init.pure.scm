@@ -1,5 +1,3 @@
-"Loading init.pure.scm"
-
 ; 4.2.1 Conditionals
 (define-syntax cond (syntax-rules (=> else)
 	((cond) <nothing>)
@@ -217,8 +215,6 @@
 
 
 ;
-(define null-environment (let ((env (current-environment)))
-	(lambda () env)
-))
-
-"init.pure.scm Loaded"
+;(define null-environment (let ((env (current-environment)))
+;	(lambda () env)
+;))
