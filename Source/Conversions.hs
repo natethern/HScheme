@@ -376,6 +376,38 @@ module Conversions where
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) (Bindings r m);
 
+	
+	-- InputPort
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) (InputPort m) where
+		{
+		getConvert = return . InputPortObject;
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m (InputPort m) (Object r m) where
+		{
+		getMaybeConvert (InputPortObject a) = return (Just a);
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (InputPort m);
+
+	
+	-- OutputPort
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) (OutputPort m) where
+		{
+		getConvert = return . OutputPortObject;
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m (OutputPort m) (Object r m) where
+		{
+		getMaybeConvert (OutputPortObject a) = return (Just a);
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (OutputPort m);
+
 
 	-- String
 

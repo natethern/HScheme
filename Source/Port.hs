@@ -20,20 +20,27 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module FullStandardBindings where
+module Port where
 	{
-	import Equality;
-	import FullProcedures;
-	import StandardBindings;
-	import Bindings;
+	import Conversions;
 	import Object;
+	import Type;
 
-	fullStdBindings :: (FullScheme x m r) => Bindings r m -> m (Bindings r m);
-	fullStdBindings = chainList
-		[
-		monadicStdBindings,
-		addProcBinding "eq?" eqS,
-		addProcBinding "eqv?" eqvS,
-		addMacroBinding "set!" setBangS
-		];
+	portWriteCharS :: (Scheme x m r) =>
+	 Type (r ()) -> (Char,(OutputPort m,())) -> m ArgNoneType;
+	portWriteCharS Type (c,(port,())) = do
+		{
+		opWrite port (Just c);
+		return MkArgNoneType;
+		};
+
+	isInputPortS :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isInputPortS Type (InputPortObject _,()) = return True;
+	isInputPortS Type (_,()) = return False;
+
+	isOutputPortS :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isOutputPortS Type (OutputPortObject _,()) = return True;
+	isOutputPortS Type (_,()) = return False;
 	}

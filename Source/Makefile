@@ -47,8 +47,9 @@ HC_SRCS			= \
 	Procedures.hs	\
 	Conversions.hs	\
 	Lambda.hs	\
-	Bindings.hs	\
+	Port.hs	\
 	Equality.hs	\
+	Bindings.hs	\
 	StandardBindings.hs	\
 	ContinuationPassing.hs	\
 	FMapBindings.hs	\
@@ -57,6 +58,7 @@ HC_SRCS			= \
 	Full.hs	\
 	FullProcedures.hs	\
 	FullStandardBindings.hs	\
+	IOBindings.hs	\
 	Interactive.hs	\
 	InteractiveMain.hs
 
@@ -136,11 +138,14 @@ SExpChars.o : SExpChars.hs
 SExpChars.o : Unicode.hi
 SExpChars.o : Parser.hi
 SExpParser.o : SExpParser.hs
+SExpParser.o : Common/Type.hi
+SExpParser.o : Common/Subtype.hi
 SExpParser.o : Common/LiftedMonad.hi
 SExpParser.o : Unicode.hi
 SExpParser.o : SExpChars.hi
 SExpParser.o : Parser.hi
 SExpParser.o : Object.hi
+SExpParser.o : Conversions.hi
 SExpParser.o : Procedures.hi
 Evaluate.o : Evaluate.hs
 Evaluate.o : Common/Type.hi
@@ -161,15 +166,19 @@ Lambda.o : Object.hi
 Lambda.o : Conversions.hi
 Lambda.o : Procedures.hi
 Lambda.o : Evaluate.hi
+Port.o : Port.hs
+Port.o : Common/Type.hi
+Port.o : Object.hi
+Port.o : Conversions.hi
+Equality.o : Equality.hs
+Equality.o : Common/Type.hi
+Equality.o : Numerics.hi
+Equality.o : Object.hi
 Bindings.o : Bindings.hs
 Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
 Bindings.o : Object.hi
 Bindings.o : Conversions.hi
-Equality.o : Equality.hs
-Equality.o : Common/Type.hi
-Equality.o : Numerics.hi
-Equality.o : Object.hi
 StandardBindings.o : StandardBindings.hs
 StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
@@ -177,6 +186,7 @@ StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
 StandardBindings.o : Equality.hi
 StandardBindings.o : Lambda.hi
+StandardBindings.o : Port.hi
 ContinuationPassing.o : ContinuationPassing.hs
 ContinuationPassing.o : Common/LiftedMonad.hi
 FMapBindings.o : FMapBindings.hs
@@ -206,6 +216,13 @@ FullStandardBindings.o : Bindings.hi
 FullStandardBindings.o : StandardBindings.hi
 FullStandardBindings.o : FullProcedures.hi
 FullStandardBindings.o : Equality.hi
+IOBindings.o : IOBindings.hs
+IOBindings.o : Common/Type.hi
+IOBindings.o : Common/LiftedMonad.hi
+IOBindings.o : Object.hi
+IOBindings.o : Conversions.hi
+IOBindings.o : Bindings.hi
+IOBindings.o : FullStandardBindings.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
@@ -220,6 +237,7 @@ Interactive.o : StandardBindings.hi
 Interactive.o : Bindings.hi
 Interactive.o : SExpParser.hi
 Interactive.o : FullStandardBindings.hi
+Interactive.o : IOBindings.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : Common/Type.hi
 InteractiveMain.o : Pure.hi

@@ -195,8 +195,8 @@ module Lambda where
 		Scheme x m r,
 		?bindings :: Bindings r m
 		) =>
-	 Type (r ()) -> (Procedure r m) -> m (Object r m);
-	callCCS Type proc = callCC (\cont -> proc ?bindings
+	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
+	callCCS Type (proc,()) = callCC (\cont -> proc ?bindings
 	  [ProcedureObject (\_ args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;

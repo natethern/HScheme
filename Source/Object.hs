@@ -100,6 +100,19 @@ module Object where
 	type Syntax r m =
 	 [Object r m] -> m (Object r m);
 
+	data (Monad m) => InputPort m = MkInputPort
+		{
+		ipRead	:: m (Maybe Char),
+		ipPeek	:: m (Maybe Char),
+		ipReady	:: m Bool,
+		ipClose	:: m ()
+		};
+
+	data (Monad m) => OutputPort m = MkOutputPort
+		{
+		opWrite	:: Maybe Char -> m ()
+		};
+
 	data Object r m =
 	 NilObject												|
 	 BooleanObject		Bool								|
@@ -110,7 +123,8 @@ module Object where
 	 ValuesObject		[Object r m]						|
 	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
 	 VectorObject		[ObjLocation r m]					|
-	 PortObject 		()									|
+	 InputPortObject 	(InputPort m)						|
+	 OutputPortObject 	(OutputPort m)						|
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
 	 SyntaxObject		(Syntax r m)						|

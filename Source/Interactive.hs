@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Interactive where
 	{
+	import IOBindings;
 	import FullStandardBindings;
 	import SExpParser;
 	import Bindings;
@@ -108,7 +109,7 @@ module Interactive where
 		{
 		bindings <- chain
 		 (addProcBinding "exit" (exitFuncProc exitFunc))
-		 stdBindings emptyBindings;		
+		 monadicStdBindings emptyBindings;		
 		interactiveLoop t readString bindings;
 		});
 
@@ -120,9 +121,12 @@ module Interactive where
 	 Type (r ()) -> m ();
 	fullInteract t = callCC (\exitFunc -> do
 		{
-		bindings <- chain
-		 (addProcBinding "exit" (exitFuncProc exitFunc))
-		 fullStdBindings emptyBindings;		
+		bindings <- chainList
+			[
+			fullStdBindings,
+			ioBindings,
+		 	addProcBinding "exit" (exitFuncProc exitFunc)
+		 	] emptyBindings;		
 		interactiveLoop t readString bindings;
 		});
 	}

@@ -171,7 +171,8 @@ module Procedures where
 		text <- printVector v;
 		return ("#("++text++")");
 		};
-	toString (PortObject _)			= return "#<port>";
+	toString (InputPortObject _)	= return "#<input port>";
+	toString (OutputPortObject _)	= return "#<output port>";
 	toString (ProcedureObject _)	= return "#<procedure>";
 	toString (MacroObject _)		= return "#<macro>";
 	toString (SyntaxObject _)		= return "#<syntax>";

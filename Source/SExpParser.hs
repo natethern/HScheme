@@ -23,11 +23,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module SExpParser where
 	{
 	import Procedures;
+	import Conversions;
 	import Object;
 	import Parser;
 	import SExpChars;
 	import Unicode;
 	import LiftedMonad;
+	import Subtype;
+	import Type;
 
 	type TextParser = Parser (Maybe Char);
 
@@ -222,6 +225,88 @@ module SExpParser where
 			};
 		};
 
+	hashLiteralP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	hashLiteralP = do
+		{
+		mc <- currentC;
+		case mc of
+			{
+			Just '#' -> do
+				{
+				nextC;
+				mc <- currentC;
+				obj <- case mc of
+					{
+					Just '\\' -> do
+						{
+						nextC;
+						mc <- currentC;
+						case mc of
+							{
+							Just c -> do
+								{
+								nextC;
+								return (CharObject c);
+								};
+							_ -> fail "unterminated # literal";
+							};
+						};
+					Just 't' -> do
+						{
+						nextC;
+						return (BooleanObject True);
+						};
+					Just 'f' -> do
+						{
+						nextC;
+						return (BooleanObject False);
+						};
+					_ -> fail "unrecognised # literal";
+					};
+				return (Just obj);
+				};
+			_ -> return Nothing;
+			};
+		};
+
+	stringLiteralRestP :: (Scheme x m r) => Type (r ()) -> TextParser m String;
+	stringLiteralRestP t = do
+		{
+		mc <- currentC;
+		case mc of
+			{
+			Just '"' -> do
+				{
+				nextC;
+				return "";
+				};
+			Just c -> do
+				{
+				nextC;
+				cs <- stringLiteralRestP t;
+				return (c:cs);
+				};
+			Nothing -> fail "unterminated string";
+			};
+		};
+
+	stringLiteralP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe String);
+	stringLiteralP t = do
+		{
+		mc <- currentC;
+		case mc of
+			{
+			Just '"' -> do
+				{
+				nextC;
+				mc <- currentC;
+				str <- stringLiteralRestP t;
+				return (Just str);
+				};
+			_ -> return Nothing;
+			};
+		};
+
 	ifJust :: (Monad m) =>
 	 Maybe a -> (a -> m b) -> m b -> m b;
 	ifJust ma justClause nothingClause = case ma of
@@ -231,21 +316,27 @@ module SExpParser where
 		};
 	
 	checkParse :: (Monad m) =>
-	 m (Maybe a) -> (a -> b) -> m (Maybe b) -> m (Maybe b);
+	 m (Maybe a) -> (a -> m b) -> m (Maybe b) -> m (Maybe b);
 	checkParse mma just nothingClause = do
 		{
 		ma <- mma;
-		ifJust ma (return . Just . just) nothingClause;
+		ifJust ma (\a -> do
+			{
+			b <- just a;
+			return (Just b);
+			}) nothingClause;
 		};
 
-	expressionP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
-	expressionP = do
+	expressionP' :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
+	expressionP' t = do
 		{
 		whitespaceP;
-		checkParse integerP (NumberObject . fromInteger)
-		 (checkParse identifierP (SymbolObject . MkSymbol)
-		  (checkParse quotedP id
-		   (checkParse listP id (do
+		checkParse integerP (return . NumberObject . fromInteger)
+		 (checkParse identifierP (return . SymbolObject . MkSymbol)
+		  (checkParse hashLiteralP return
+		   (checkParse quotedP return
+		    (checkParse (stringLiteralP t) (mlift . getConvert . MkStringType)
+		     (checkParse listP return (do
 			{
 			mc <- currentC;
 			case mc of
@@ -253,8 +344,11 @@ module SExpParser where
 				Just c -> fail ("unrecognised char, '"++[c]++"'");
 				Nothing -> return Nothing;
 				};
-			}))));
+			}))))));
 		};
+	
+	expressionP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
+	expressionP = expressionP' Type;
 	
 	manyP :: (Monad m) => Parser c m (Maybe a) -> Parser c m [a];
 	manyP oneP = do
