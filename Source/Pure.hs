@@ -24,6 +24,7 @@ module Pure where
 	{
 	import Object;
 	import Subtype;
+	import Equality;
 	import FiniteMap;
 	import MonadError;
 	import MonadCont;
@@ -34,5 +35,6 @@ module Pure where
 		{
 		newLocation a = return (MkPureLocation a);
 		getLocation (MkPureLocation a) = return a;
+		sameLocation (MkPureLocation a) (MkPureLocation b) = return False;
 		};
 	}

@@ -46,6 +46,7 @@ HC_SRCS			= \
 	Procedures.hs	\
 	Conversions.hs	\
 	Bindings.hs	\
+	Equality.hs	\
 	StandardBindings.hs	\
 	ContinuationPassing.hs	\
 	FMapBindings.hs	\
@@ -148,11 +149,16 @@ Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
 Bindings.o : Object.hi
 Bindings.o : Conversions.hi
+Equality.o : Equality.hs
+Equality.o : Common/Type.hi
+Equality.o : Numerics.hi
+Equality.o : Object.hi
 StandardBindings.o : StandardBindings.hs
 StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
+StandardBindings.o : ./Equality.hi
 ContinuationPassing.o : ContinuationPassing.hs
 ContinuationPassing.o : Common/LiftedMonad.hi
 FMapBindings.o : FMapBindings.hs
@@ -160,7 +166,7 @@ FMapBindings.o : Object.hi
 SchemeCPS.o : SchemeCPS.hs
 SchemeCPS.o : Common/Subtype.hi
 SchemeCPS.o : Object.hi
-SchemeCPS.o : ./ContinuationPassing.hi
+SchemeCPS.o : ContinuationPassing.hi
 SchemeCPS.o : Conversions.hi
 Pure.o : Pure.hs
 Pure.o : Common/Subtype.hi
@@ -168,16 +174,16 @@ Pure.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
-Interactive.o : ./Pure.hi
-Interactive.o : ./SchemeCPS.hi
-Interactive.o : ./FMapBindings.hi
+Interactive.o : Pure.hi
+Interactive.o : SchemeCPS.hi
+Interactive.o : FMapBindings.hi
 Interactive.o : Common/LiftedMonad.hi
 Interactive.o : Parser.hi
 Interactive.o : Object.hi
 Interactive.o : Evaluate.hi
 Interactive.o : Procedures.hi
-Interactive.o : ./StandardBindings.hi
+Interactive.o : StandardBindings.hi
 Interactive.o : Bindings.hi
 Interactive.o : SExpParser.hi
-Interactive.o : ./ContinuationPassing.hi
+Interactive.o : ContinuationPassing.hi
 # DO NOT DELETE: End of Haskell dependencies

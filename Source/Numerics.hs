@@ -24,7 +24,8 @@ module Numerics
 	(
 	Number,
 	realPartN,imaginaryPartN,conjugateN,
-	toInexactN
+	toInexactN,
+	eqvNumber,eqNumber,equalNumber
 	) where
 	{
 	import Complex;
@@ -47,10 +48,21 @@ module Numerics
 	isExact (ExactNum _ _) = True;
 	isExact (InexactNum _) = False;
 	
+	eqvNumber :: Number -> Number -> Bool;
+	eqvNumber (ExactNum ar ai) (ExactNum br bi) = ar == br && ai == bi;
+	eqvNumber (InexactNum (ar :+ ai)) (InexactNum (br :+ bi)) = ar == br && ai == bi;
+	eqvNumber _ _ = False;
+	
+	eqNumber :: Number -> Number -> Bool;
+	eqNumber = eqvNumber;
+	
+	equalNumber :: Number -> Number -> Bool;
+	equalNumber (ExactNum ar ai) (ExactNum br bi) = ar == br && ai == bi;
+	equalNumber a b = (toInexact a) == (toInexact b);
+	
 	instance Eq Number where
 		{
-		(ExactNum ar ai) == (ExactNum br bi) = ar == br && ai == bi;
-		a == b = (toInexact a) == (toInexact b);
+		(==) = equalNumber;
 		};
 	
 	showRat :: Rational -> String;

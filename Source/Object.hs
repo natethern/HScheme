@@ -27,10 +27,11 @@ module Object where
 	import MonadError;
 	import Subtype;
 	
-	class (Monad m) => Location m r where
+	class Location m r where
 		{
-		newLocation :: forall a. a -> m (r a);
-		getLocation :: forall a. r a -> m a;
+		sameLocation	:: forall a. r a -> r a -> m Bool;
+		newLocation		:: forall a. a -> m (r a);
+		getLocation		:: forall a. r a -> m a;
 		};
 	
 	class
