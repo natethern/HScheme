@@ -24,7 +24,12 @@ module Unicode
 	(
 	module UnicodeDefs,
 	getGeneralCategory,getDecimalDigit,getNumber,
-	toUpperCase,toLowerCase,toTitleCase
+	toUpperCase,toLowerCase,toTitleCase,
+	isWhitespace,isBidiControl,isJoinControl,
+	isDash,isHyphen,isQuotationMark,isTerminalPunctuation,
+	isOtherMath,isHexDigit,isOtherAlphabetic,isIdeographic,
+	isDiacritic,isExtender,isOtherLowercase,isOtherUppercase,
+	isNoncharacter	
 	) where
 	{
 	import UnicodeData;
@@ -98,4 +103,52 @@ module Unicode
 	
 	toTitleCase :: Char -> Char;
 	toTitleCase = toEnum . codeTitleCase . fromEnum;
+	
+	isWhitespace :: Char -> Bool;
+	isWhitespace = codeIs_White_space . fromEnum;
+	
+	isBidiControl :: Char -> Bool;
+	isBidiControl = codeIs_Bidi_Control . fromEnum;
+	
+	isJoinControl :: Char -> Bool;
+	isJoinControl = codeIs_Join_Control . fromEnum;
+	
+	isDash :: Char -> Bool;
+	isDash = codeIs_Dash . fromEnum;
+	
+	isHyphen :: Char -> Bool;
+	isHyphen = codeIs_Hyphen . fromEnum;
+	
+	isQuotationMark :: Char -> Bool;
+	isQuotationMark = codeIs_Quotation_Mark . fromEnum;
+	
+	isTerminalPunctuation :: Char -> Bool;
+	isTerminalPunctuation = codeIs_Terminal_Punctuation . fromEnum;
+	
+	isOtherMath :: Char -> Bool;
+	isOtherMath = codeIs_Other_Math . fromEnum;
+	
+	isHexDigit :: Char -> Bool;
+	isHexDigit = codeIs_Hex_Digit . fromEnum;
+	
+	isOtherAlphabetic :: Char -> Bool;
+	isOtherAlphabetic = codeIs_Other_Alphabetic . fromEnum;
+	
+	isIdeographic :: Char -> Bool;
+	isIdeographic = codeIs_Ideographic . fromEnum;
+	
+	isDiacritic :: Char -> Bool;
+	isDiacritic = codeIs_Diacritic . fromEnum;
+	
+	isExtender :: Char -> Bool;
+	isExtender = codeIs_Extender . fromEnum;
+	
+	isOtherLowercase :: Char -> Bool;
+	isOtherLowercase = codeIs_Other_Lowercase . fromEnum;
+	
+	isOtherUppercase :: Char -> Bool;
+	isOtherUppercase = codeIs_Other_Uppercase . fromEnum;
+	
+	isNoncharacter :: Char -> Bool;
+	isNoncharacter = codeIs_Noncharacter_Code_Point . fromEnum;
 	}

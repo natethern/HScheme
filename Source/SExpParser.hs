@@ -40,7 +40,7 @@ module SExpParser where
 	whitespaceP = do
 		{
 		mc <- currentC;
-		case isJust isWhiteSpace mc of
+		case isJust isWhitespace mc of
 			{
 			(Just _) -> do
 				{

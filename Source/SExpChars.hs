@@ -24,7 +24,6 @@ module SExpChars where
 	{
 	import Parser;
 	import Unicode;
---	import Char;
 
 {--
 ASCII: 2^7 = 128
@@ -69,12 +68,6 @@ others = () (Ps,Pe), '",;#\ (Po), = (Sm), ` (Sk)
 	allowed '\r' = True;
 	allowed '\n' = True;
 	allowed i = gcMajorClass (getGeneralCategory i) /= ClOther;
-	
-	isWhiteSpace :: Char -> Bool;
-	isWhiteSpace '\t' = True;
-	isWhiteSpace '\r' = True;
-	isWhiteSpace '\n' = True;
-	isWhiteSpace i = gcMajorClass (getGeneralCategory i) == ClSeparator;
 	
 	allowedIdentifier1 :: Char -> Bool;
 
