@@ -59,7 +59,7 @@ OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
 default: build
 
 clean:
-	rm -f UnicodeData.hs UnicodeData.m4 UnicodeData-3.1.0.txt Makefile.bak
+	rm -f hscheme UnicodeData.hs UnicodeData.m4 UnicodeData-3.1.0.txt Makefile.bak
 	rm -f *.hi *.o Common/*.hi Common/*.o
 
 build: hscheme
