@@ -64,84 +64,36 @@ module Main where
 	 a -> IO ();
 	printError a = putStrLn ("Error: "++ (show a)++"");
 
-	fixPureInterpret ::
-		(
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 String -> IO ();
-	fixPureInterpret source =
-	 let {?objType = Type::Type (Object IORef IO)} in
-	 let {?binder = setBinder} in
-	 let {?read = ioRead ["."]} in
-	 mutualBind pureMacroBindings pureTopLevelBindings (do
-		{
-		bindings <- monadFixPureBindings emptyBindings;
-		initObjects <- readFiles ["init.pure.scm"];
-		progObjects <- parseAllFromString source;
-		runObjects printResult reportError (initObjects ++ progObjects) bindings;
-		});
-
-	fixFullInterpret ::
-		(
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 String -> IO ();
-	fixFullInterpret source =
-	 let {?objType = Type::Type (Object IORef IO)} in
-	 let {?binder = setBinder} in
-	 let {?read = ioRead ["."]} in
-	 mutualBind fullMacroBindings fullTopLevelBindings (do
-		{
-		bindings <- monadFixFullBindings emptyBindings;
-		initObjects <- readFiles ["init.full.scm"];
-		progObjects <- parseAllFromString source;
-		runObjects printResult reportError (initObjects ++ progObjects) bindings;
-		});
-
-	contPureInterpret ::
-		(
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 String -> IO ();
-	contPureInterpret source =
-	 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-	 let {?binder = setBinder} in
-	 let {?read = ioRead ["."]} in
-	 mutualBind pureMacroBindings pureTopLevelBindings (do
-		{
-		bindings <- monadContPureBindings emptyBindings;
-		initObjects <- readFiles ["init.pure.scm"];
-		progObjects <- parseAllFromString source;
-		runObjects printResult reportError (initObjects ++ progObjects) bindings;
-		});
-
-	contFullInterpret ::
-		(
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 String -> IO ();
-	contFullInterpret source =
-	 let {?objType = Type::Type (Object IORef (CPS IORef))} in
-	 let {?binder = setBinder} in
-	 let {?read = ioRead ["."]} in
-	 mutualBind fullMacroBindings fullTopLevelBindings (do
-		{
-		bindings <- monadContFullBindings emptyBindings;
-		initObjects <- readFiles ["init.full.scm"];
-		progObjects <- parseAllFromString source;
-		runObjects printResult reportError (initObjects ++ progObjects) bindings;
-		});
-
 	isFull :: QueryParameters -> Bool;
 	isFull params = case findQueryParameter (encodeLatin1 "flavour") params of
 		{
 		Just [0x70,0x75,0x72,0x65] -> False;
 		_ -> True;
 		};
+
+	runProg ::
+		(
+		RunnableScheme IO m r,
+		?objType :: Type (Object r m),
+		?read :: String -> IO [Object r m],
+		?binder :: TopLevelBinder r m,
+		?stdout :: FlushSink IO Word8,
+		?stderr :: FlushSink IO Word8
+		) =>
+	 ((?toplevelbindings :: Bindings Symbol (TopLevelMacro IO r m)) => Bindings Symbol (Macro IO r m) -> Bindings Symbol (Macro IO r m)) ->
+	 ((?toplevelbindings :: Bindings Symbol (TopLevelMacro IO r m)) => Bindings Symbol (TopLevelMacro IO r m) -> Bindings Symbol (TopLevelMacro IO r m)) ->
+	 (Bindings Symbol (ObjLocation r m) -> IO (Bindings Symbol (ObjLocation r m))) ->
+	 String ->
+	 String ->
+	 IO ();
+	runProg macroBindings tlBindings runBindings initfilename source =
+	 mutualBind macroBindings tlBindings (do
+		{
+		bindings <- runBindings emptyBindings;
+		initObjects <- readFiles [initfilename];
+		progObjects <- parseAllFromString source;
+		runObjects printResult reportError (initObjects ++ progObjects) bindings;
+		});
 
 	main :: IO ();
 	main = ioRunProgram (catchSingle (do
@@ -155,12 +107,28 @@ module Main where
 			};
 		case findQueryParameter (encodeLatin1 "monad") params of
 			{
-			Just [0x63,0x6F,0x6E,0x74] -> if (isFull params)
-			 then contFullInterpret source
-			 else contPureInterpret source;
-			_ -> if (isFull params)
-			 then fixFullInterpret source
-			 else fixPureInterpret source;
+			Just [0x63,0x6F,0x6E,0x74] -> 
+			 let {?objType = Type::Type (Object IORef (CPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead ["."]} in
+			 if (isFull params)
+			 then runProg
+			  fullMacroBindings fullTopLevelBindings monadContFullBindings
+			  "init.full.scm" source
+			 else runProg
+			  pureMacroBindings pureTopLevelBindings monadContPureBindings
+			  "init.pure.scm" source;
+			_ -> 
+			 let {?objType = Type::Type (Object IORef IO)} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead ["."]} in
+			 if (isFull params)
+			 then runProg
+			  fullMacroBindings fullTopLevelBindings monadFixFullBindings
+			  "init.full.scm" source
+			 else runProg
+			  pureMacroBindings pureTopLevelBindings monadFixPureBindings
+			  "init.pure.scm" source;
 			};
 		})
 		printError);
