@@ -66,7 +66,7 @@ module Numerics
 		};
 	
 	showRat :: Rational -> String;
-	showRat r = (show n) ++ (if d==0 then "/" ++ (show d) else "") where
+	showRat r = (show n) ++ (if d==1 then "" else "/" ++ (show d)) where
 		{
 		n = numerator r;
 		d = denominator r;

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Conversions where
 	{
 	import Object;
+	import Numerics;
 	import Subtype;
 	import Type;
 	
@@ -343,6 +344,22 @@ module Conversions where
 		};
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) Char;
+
+	
+	-- Number
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) Number where
+		{
+		getConvert = return . NumberObject;
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m Number (Object r m) where
+		{
+		getMaybeConvert (NumberObject a) = return (Just a);
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) Number;
 
 	
 	-- Symbol

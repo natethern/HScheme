@@ -25,10 +25,12 @@ module StandardBindings where
 	import Port;
 	import Lambda;
 	import Equality;
+	import NumericProcedures;
 	import Procedures;
 	import Evaluate;
 	import Bindings;
 	import Object;
+	import Numerics;
 
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
@@ -46,7 +48,11 @@ module StandardBindings where
 		addProcBinding	"procedure?"	isProcedureS,
 		addMacroBinding	"let"	letS,
 		addMacroBinding	"let*"	letStarS,
-		addMacroBinding	"lambda"	lambdaS
+		addMacroBinding	"lambda"	lambdaS,
+		addProcBinding	"+"	(foldingLS (+) 0),
+		addProcBinding	"-"	subtractS,
+		addProcBinding	"*"	(foldingLS (*) 1),
+		addProcBinding	"/"	divideS
 		];
 
 	monadicStdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);

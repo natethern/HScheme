@@ -35,30 +35,34 @@ HC_SRCS			= \
 	Common/LiftedMonad.hs	\
 	Common/Ref.hs	\
 	Common/MoreRef.hs	\
+	ContinuationPassing.hs	\
 	UnicodeDefs.hs	\
 	UnicodeData.hs	\
 	Unicode.hs	\
 	Parser.hs	\
 	Numerics.hs	\
+	\
 	Object.hs	\
+	Conversions.hs	\
 	SExpChars.hs	\
 	SExpParser.hs	\
 	Evaluate.hs	\
 	Procedures.hs	\
-	Conversions.hs	\
 	Lambda.hs	\
 	Port.hs	\
 	Equality.hs	\
+	\
 	Bindings.hs	\
+	NumericProcedures.hs	\
 	StandardBindings.hs	\
-	ContinuationPassing.hs	\
 	FMapBindings.hs	\
-	SchemeCPS.hs	\
-	Pure.hs	\
-	Full.hs	\
 	FullProcedures.hs	\
 	FullStandardBindings.hs	\
 	IOBindings.hs	\
+	\
+	SchemeCPS.hs	\
+	Pure.hs	\
+	Full.hs	\
 	Interactive.hs	\
 	InteractiveMain.hs
 
@@ -123,6 +127,8 @@ Common/Ref.o : Common/Ref.hs
 Common/MoreRef.o : Common/MoreRef.hs
 Common/MoreRef.o : Common/LiftedMonad.hi
 Common/MoreRef.o : Common/Ref.hi
+ContinuationPassing.o : ContinuationPassing.hs
+ContinuationPassing.o : Common/LiftedMonad.hi
 UnicodeDefs.o : UnicodeDefs.hs
 UnicodeData.o : UnicodeData.hs
 UnicodeData.o : UnicodeDefs.hi
@@ -134,6 +140,11 @@ Numerics.o : Numerics.hs
 Object.o : Object.hs
 Object.o : Common/Subtype.hi
 Object.o : Numerics.hi
+Conversions.o : Conversions.hs
+Conversions.o : Common/Type.hi
+Conversions.o : Common/Subtype.hi
+Conversions.o : Numerics.hi
+Conversions.o : Object.hi
 SExpChars.o : SExpChars.hs
 SExpChars.o : Unicode.hi
 SExpChars.o : Parser.hi
@@ -155,10 +166,6 @@ Procedures.o : Common/Type.hi
 Procedures.o : Common/Subtype.hi
 Procedures.o : Object.hi
 Procedures.o : Conversions.hi
-Conversions.o : Conversions.hs
-Conversions.o : Common/Type.hi
-Conversions.o : Common/Subtype.hi
-Conversions.o : Object.hi
 Lambda.o : Lambda.hs
 Lambda.o : Common/Type.hi
 Lambda.o : Common/Subtype.hi
@@ -179,32 +186,23 @@ Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
 Bindings.o : Object.hi
 Bindings.o : Conversions.hi
+NumericProcedures.o : NumericProcedures.hs
+NumericProcedures.o : Common/Type.hi
+NumericProcedures.o : Numerics.hi
+NumericProcedures.o : Object.hi
+NumericProcedures.o : Conversions.hi
 StandardBindings.o : StandardBindings.hs
+StandardBindings.o : Numerics.hi
 StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
+StandardBindings.o : NumericProcedures.hi
 StandardBindings.o : Equality.hi
 StandardBindings.o : Lambda.hi
 StandardBindings.o : Port.hi
-ContinuationPassing.o : ContinuationPassing.hs
-ContinuationPassing.o : Common/LiftedMonad.hi
 FMapBindings.o : FMapBindings.hs
 FMapBindings.o : Object.hi
-SchemeCPS.o : SchemeCPS.hs
-SchemeCPS.o : Common/Subtype.hi
-SchemeCPS.o : Common/LiftedMonad.hi
-SchemeCPS.o : Common/Ref.hi
-SchemeCPS.o : Common/MoreRef.hi
-SchemeCPS.o : Object.hi
-SchemeCPS.o : ContinuationPassing.hi
-SchemeCPS.o : Conversions.hi
-Pure.o : Pure.hs
-Pure.o : Object.hi
-Full.o : Full.hs
-Full.o : Common/Ref.hi
-Full.o : Common/MoreRef.hi
-Full.o : Object.hi
 FullProcedures.o : FullProcedures.hs
 FullProcedures.o : Common/Type.hi
 FullProcedures.o : Object.hi
@@ -223,6 +221,20 @@ IOBindings.o : Object.hi
 IOBindings.o : Conversions.hi
 IOBindings.o : Bindings.hi
 IOBindings.o : FullStandardBindings.hi
+SchemeCPS.o : SchemeCPS.hs
+SchemeCPS.o : Common/Subtype.hi
+SchemeCPS.o : Common/LiftedMonad.hi
+SchemeCPS.o : Common/Ref.hi
+SchemeCPS.o : Common/MoreRef.hi
+SchemeCPS.o : Object.hi
+SchemeCPS.o : ContinuationPassing.hi
+SchemeCPS.o : Conversions.hi
+Pure.o : Pure.hs
+Pure.o : Object.hi
+Full.o : Full.hs
+Full.o : Common/Ref.hi
+Full.o : Common/MoreRef.hi
+Full.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
