@@ -81,8 +81,12 @@ module Org.Org.Semantic.HScheme.Bindings where
 		addBinding (MkSymbol name) (TopLevelMacroObject (convertToTopLevelMacro p)) b;
 		};
 
-	exitFuncProc :: (() -> m ()) -> (Type (r ()) -> () -> m ());
-	exitFuncProc exitFunc Type = exitFunc;
+	exitFuncProc :: (Monad m) => (a -> m b) -> (Type (r ()) -> a -> m ());
+	exitFuncProc exitFunc Type a = do
+		{
+		exitFunc a;
+		return ();
+		};
 
 	chain :: (Monad m) => (a -> m b) -> (b -> m c) -> (a -> m c);
 	chain p1 p2 a = (p1 a) >>= p2;

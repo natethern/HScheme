@@ -22,17 +22,19 @@ GHC = ghc  -package lang  $*
 
 HC				= ghc
 HCI				= ghci
-HCPACKAGES		= -package data
 HCIMPORTDIRS	= -i. -i/usr/share/haskell-import
-#HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
-HCOPTS			= -pgmc$(CC) -pgma$(CC) -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
+HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
+#HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
+LDH				= $(HC) $(HCPACKAGES)
+LDFLAGS			=
+HDOC			= haddock -h
 HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
-LDH				= $(HC) -pgml$(CC) $(HCPACKAGES)
-LDFLAGS			=
+LIBNAME			= HScheme
+LIBFILE			= lib$(LIBNAME).a
 
-HC_SRCS			= \
+LIB_HC_SRCS			= \
 	$(HIER)/Numerics.hs	\
 	$(HIER)/Port.hs	\
 	$(HIER)/InputPortParser.hs	\
@@ -60,25 +62,62 @@ HC_SRCS			= \
 	\
 	$(HIER)/SchemeCPS.hs	\
 	$(HIER)/Interactive.hs	\
-	InteractiveMain.hs
+	$(HIER).hs
 
-OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
+HC_SRCS		= $(LIB_HC_SRCS) InteractiveMain.hs
+
+LIB_OBJS	= $(patsubst %.hs,%.o,$(LIB_HC_SRCS))
 
 COMMAND	=hscheme.cmd
 
 default: build
 
-clean:
-	rm -f $(COMMAND) Makefile.bak
+clean: haskellclean
+	rm -f Makefile.bak
+	rm -rf Doc/
+	rm -f $(LIBFILE) $(COMMAND)
+
+haskellclean:
 	rm -f *.hi *.o $(HIER)/*.hi $(HIER)/*.o
-
-build: $(COMMAND)
-
-$(COMMAND): $(OBJS) /usr/lib/libHBase.a
-	$(LDH) $(filter %.o,$^) /usr/lib/libHBase.a $(LDFLAGS) -o $@
 
 test: $(COMMAND)
 	./$<
+
+PREFIX	=/usr
+IMPORT_DIR	= $(PREFIX)/share/haskell-import
+install:	\
+	$(PREFIX)/lib/$(LIBFILE)	\
+	$(patsubst %.hs,$(IMPORT_DIR)/%.hi,$(LIB_HC_SRCS))	\
+	$(PREFIX)/bin/$(COMMAND)
+
+$(IMPORT_DIR)/%.hi: %.hi
+	install -d -m 755 $(dir $@)
+	install -c -p -m 644 $< $@
+
+$(PREFIX)/lib/$(LIBFILE): $(LIBFILE)
+	install -c -p -m 644 $< $@
+	ranlib $@
+
+$(PREFIX)/bin/%: %
+	install -c -p -m 755 $< $@
+
+build: $(LIBFILE) $(COMMAND)
+
+$(COMMAND): InteractiveMain.o $(LIBFILE) /usr/lib/libHBase.a
+	$(LDH) $(filter %.o,$^) $(filter %.a,$^) $(LDFLAGS) -o $@
+
+doc: Doc/index.html
+
+# --source="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/hscheme/Source/"
+Doc/index.html: $(LIB_HC_SRCS)
+	mkdir -p Doc
+	$(HDOC) --no-implicit-prelude \
+		--html	\
+		-o Doc/ $^
+
+$(LIBFILE): $(LIB_OBJS)
+	ar cru $@ $(filter %.o,$^)
+	ranlib $@
 
 # Standard suffix rules
 
@@ -232,10 +271,12 @@ Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SExpParser.hi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FullStandardBindings.hi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/FMapBindings.hi
 Org/Org/Semantic/HScheme/Interactive.o : Org/Org/Semantic/HScheme/SystemInterface.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme.hs
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SchemeCPS.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/Interactive.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/SystemInterface.hi
+Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/IOBindings.hi
 InteractiveMain.o : InteractiveMain.hs
 InteractiveMain.o : /usr/share/haskell-import/Org/Org/Semantic/HBase.hi
-InteractiveMain.o : Org/Org/Semantic/HScheme/SchemeCPS.hi
-InteractiveMain.o : Org/Org/Semantic/HScheme/Interactive.hi
-InteractiveMain.o : Org/Org/Semantic/HScheme/SystemInterface.hi
-InteractiveMain.o : Org/Org/Semantic/HScheme/IOBindings.hi
+InteractiveMain.o : Org/Org/Semantic/HScheme.hi
 # DO NOT DELETE: End of Haskell dependencies

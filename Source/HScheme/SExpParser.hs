@@ -32,10 +32,12 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 
 	runParser :: (Monad m) =>
-	 InputPort c m -> AddableStreamParser m (Maybe c) a -> m a;
-	runParser port parser = runAddableStreamParser (ipRead port) parser;
+	 InputPort c m -> RecoverableStreamParser m (Maybe c) a -> m a;
+	runParser port parser = runRecoverableStreamParser (ipRead port) parser;
+--	 InputPort c m -> AddableStreamParser m (Maybe c) a -> m a;
+--	runParser port parser = runAddableStreamParser (ipRead port) parser;
 
-	restOfLineParse :: (MonadFirstParser (Maybe Char) p) =>
+	restOfLineParse :: (MonadOrParser (Maybe Char) p) =>
 	 p ();
 	restOfLineParse = do
 		{
@@ -43,7 +45,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		((matchCharacterParse isLineBreak) >> (return ())) ||| (return ());
 		};
 
-	commentParse :: (MonadFirstParser (Maybe Char) p) =>
+	commentParse :: (MonadOrParser (Maybe Char) p) =>
 	 p ();
 	commentParse = do
 		{
@@ -51,7 +53,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		restOfLineParse;
 		};
 
-	optionalWhitespaceParse :: (MonadFirstParser (Maybe Char) p) =>
+	optionalWhitespaceParse :: (MonadOrParser (Maybe Char) p) =>
 	 p ();
 	optionalWhitespaceParse = do
 		{
@@ -59,7 +61,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return ();
 		};
 
-	whitespaceParse :: (MonadFirstParser (Maybe Char) p) =>
+	whitespaceParse :: (MonadOrParser (Maybe Char) p) =>
 	 p ();
 	whitespaceParse = do
 		{
@@ -67,7 +69,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return ();
 		};
 
-	identifierParse :: (MonadFirstParser (Maybe Char) p) =>
+	identifierParse :: (MonadOrParser (Maybe Char) p) =>
 	 p String;
 	identifierParse = do
 		{
@@ -76,7 +78,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return (toLowerCase n:ns);
 		};
 
-	digitParse :: (MonadFirstParser (Maybe Char) p) =>
+	digitParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Integer;
 	digitParse = do
 		{
@@ -92,7 +94,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	assembleDigits i (n:ns) = assembleDigits (i*10 + n) ns;
 	assembleDigits i [] = i;
 
-	digitsParse :: (MonadFirstParser (Maybe Char) p) =>
+	digitsParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Integer;
 	digitsParse = do
 		{
@@ -100,7 +102,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return (assembleDigits 0 digits);
 		};
 	
-	plusDigitsParse :: (MonadFirstParser (Maybe Char) p) =>
+	plusDigitsParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Integer;
 	plusDigitsParse = do
 		{
@@ -108,7 +110,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		digitsParse;
 		};
 	
-	minusDigitsParse :: (MonadFirstParser (Maybe Char) p) =>
+	minusDigitsParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Integer;
 	minusDigitsParse = do
 		{
@@ -117,14 +119,14 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return (- n);
 		};
 
-	integerParse :: (MonadFirstParser (Maybe Char) p) =>
+	integerParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Integer;
 	integerParse = digitsParse ||| plusDigitsParse ||| minusDigitsParse;
 	
 	listContentsParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 p (Object r m);
@@ -148,7 +150,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	listParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 p (Object r m);
@@ -164,7 +166,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	specialCharParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 String -> Symbol -> p (Object r m);
@@ -179,7 +181,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	quotedParse :: 
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 p (Object r m);
@@ -192,7 +194,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	hashLiteralParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p
+		StoppableMonadOrParser String (Maybe Char) p
 		) => 
 	 p (Object r m);
 	hashLiteralParse = do
@@ -214,7 +216,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			}));
 		};
 
-	escapedCharInStringParse :: (MonadFirstParser (Maybe Char) p) =>
+	escapedCharInStringParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Char;
 	escapedCharInStringParse = do
 		{
@@ -222,13 +224,13 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		characterParse;
 		};
 
-	charInStringParse :: (MonadFirstParser (Maybe Char) p) =>
+	charInStringParse :: (MonadOrParser (Maybe Char) p) =>
 	 p Char;
 	charInStringParse = escapedCharInStringParse ||| (isntCharacterParse '"');
 
 	stringLiteralParse ::
 		(
-		StoppableMonadFirstParser String (Maybe Char) p
+		StoppableMonadOrParser String (Maybe Char) p
 		) =>
 	 p String;
 	stringLiteralParse = do
@@ -245,7 +247,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	plift ::
 		(
 		Scheme x m r,
-		MonadFirstParser (Maybe Char) p,
+		MonadOrParser (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 Type (r ()) -> m (Object r m) -> p (Object r m);
@@ -254,7 +256,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	expressionParse' ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 Type (r ()) -> p (Object r m);
@@ -274,7 +276,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	expressionParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 p (Object r m);
@@ -283,7 +285,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	expressionOrEndParse ::
 		(
 		Scheme x m r,
-		StoppableMonadFirstParser String (Maybe Char) p,
+		StoppableMonadOrParser String (Maybe Char) p,
 		LiftedMonad m p
 		) =>
 	 p (Maybe (Object r m));

@@ -22,10 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Main where
 	{
-	import Org.Org.Semantic.HScheme.IOBindings;
-	import Org.Org.Semantic.HScheme.SystemInterface;
-	import Org.Org.Semantic.HScheme.Interactive;
-	import Org.Org.Semantic.HScheme.SchemeCPS;
+	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
 	type M r = SchemeCPS r (IO ());
@@ -62,6 +59,7 @@ module Main where
 		full <- getFull;
 		if full
 		 then doInteract (fullInteract :: Interact IORef)
-		 else doInteract (pureInteract :: Interact Constant);
+--		 else doInteract (pureInteract :: Interact Constant);
+		 else doInteract (safePureInteract :: Interact Constant);
 		};
 	}

@@ -104,10 +104,25 @@ module Org.Org.Semantic.HScheme.Interactive where
 			{
 			reportError t (fsiCurrentErrorPort fsi) error;
 			exitFunc ();
-			return undefined;
 			});
 		interactiveLoop t fsi bindings';
 		});
+
+	safePureInteract ::
+		(
+		Scheme x m r,
+		MonadBottom m,
+		IsA x Exception
+		) =>
+	 FullSystemInterface m r -> m ();
+	safePureInteract fsi = do
+		{
+		bindings <- chainList
+			[
+			stdBindings
+			] emptyBindings;
+		interact Type fsi bindings  "Prelude.pure.scm";
+		};
 
 	pureInteract ::
 		(
