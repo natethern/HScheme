@@ -164,6 +164,7 @@ test-full: \
  test/syntax.scm.diff \
  test/syntax-rec.scm.diff \
  test/letrec.scm.diff \
+ test/letrec-fix.scm.diff \
  test/binding.scm.diff \
  test/setvar.scm.diff \
  test/boundlate.scm.diff \
