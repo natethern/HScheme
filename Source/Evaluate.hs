@@ -39,7 +39,7 @@ module Evaluate where
 	evaluate (SymbolObject a) = case (getBinding ?bindings a) of
 		{
 		Just loc -> getLocation loc;
-		Nothing -> fail (a++" not defined");
+		Nothing -> fail ((unSymbol a)++" not defined");
 		};
 
 	evaluate (PairObject head tail) = do
@@ -122,7 +122,7 @@ module Evaluate where
 	applyEval (MacroObject f) arglist = do
 		{
 		args <- macroToList arglist;
-		f args;
+		f ?bindings args;
 		};
 	applyEval _ _ = fail "wrong type to apply";
 
@@ -149,7 +149,8 @@ module Evaluate where
 							NilObject -> do
 								{
 								th <- getLocation thead;
-								loc <- newLocation th;
+								result <- evaluate th with {?bindings=bindings};
+								loc <- newLocation result;
 								return (newBinding bindings name loc);
 								};
 							_ -> fail "bad define form (too many arguments)";
@@ -183,7 +184,7 @@ module Evaluate where
 				h <- getLocation head;
 				case h of
 					{
-					SymbolObject "define" -> do
+					SymbolObject (MkSymbol "define") -> do
 						{
 						t <- getLocation tail;
 						newBindings <- defineTail bindings t;

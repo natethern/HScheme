@@ -20,9 +20,9 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Main where
+module Interactive where
 	{
-	import ContinuationPassing;
+	import FullStandardBindings;
 	import SExpParser;
 	import Bindings;
 	import StandardBindings;
@@ -32,8 +32,6 @@ module Main where
 	import Parser;
 	import LiftedMonad;
 	import FMapBindings;
-	import SchemeCPS;
-	import Pure;
 	import MonadError;
 	import MonadCont;
 	import IO;
@@ -99,8 +97,13 @@ module Main where
 		return (Just c);
 		};
 
-	mainCPS :: (SemiLiftedMonad IO m,Scheme x m r) => Type (r ()) -> m ();
-	mainCPS t = callCC (\exitFunc -> do
+	pureInteract ::
+		(
+		SemiLiftedMonad IO m,
+		Scheme x m r
+		) =>
+	 Type (r ()) -> m ();
+	pureInteract t = callCC (\exitFunc -> do
 		{
 		bindings <- chain
 		 (addProcBinding "exit" (exitFuncProc exitFunc))
@@ -108,10 +111,17 @@ module Main where
 		interactiveLoop t readString bindings;
 		});
 
-	type CPSIO = SchemeCPS PureLocation (IO ());
-
-	type CPSIOError = SchemeCPSError PureLocation (IO ());
-		
-	main :: IO ();
-	main = doMonadCPS (\_ -> return "error in catch code!") ((mainCPS :: Type (PureLocation ()) -> CPSIO ()) Type);
+	fullInteract ::
+		(
+		SemiLiftedMonad IO m,
+		FullScheme x m r
+		) =>
+	 Type (r ()) -> m ();
+	fullInteract t = callCC (\exitFunc -> do
+		{
+		bindings <- chain
+		 (addProcBinding "exit" (exitFuncProc exitFunc))
+		 fullStdBindings emptyBindings;		
+		interactiveLoop t readString bindings;
+		});
 	}

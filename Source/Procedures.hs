@@ -183,7 +183,7 @@ module Procedures where
 	printS Type NilObject				= return "()";
 	printS Type (BooleanObject True)	= return "#t";
 	printS Type (BooleanObject False)	= return "#f";
-	printS Type (SymbolObject s)		= return s;
+	printS Type (SymbolObject s)		= return (show s);
 	printS Type (NumberObject n)		= return (show n);
 	printS Type (CharObject c)			= return ("#\\"++[c]);
 	printS Type (StringObject s)		= do

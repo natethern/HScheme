@@ -20,31 +20,33 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Full where
+module FullProcedures where
 	{
+	import Evaluate;
 	import Object;
-	import MoreRef;
-	import Ref;
+	import Type;
 
-	instance
+	setBang ::
 		(
-		MonadStandardReference m r,
-		MonadEqualReference m r
+		FullScheme x m r,
+		?bindings :: Bindings r m
 		) =>
-	 Location m r where
+	 Symbol -> Object r m -> m ();
+	setBang name obj = case (getBinding ?bindings name) of
 		{
-		newLocation = newReference;
-		getLocation = get;
+		Just loc -> setLocation loc obj;
+		Nothing -> fail ((unSymbol name)++" not defined");
 		};
-
-	instance
+	
+	setBangS ::
 		(
-		MonadStandardReference m r,
-		MonadEqualReference m r
+		FullScheme x m r,
+		?bindings :: Bindings r m
 		) =>
-	 SettableLocation m r where
+	 Type (r ()) -> (Symbol,Object r m) -> m ();
+	setBangS Type (name,obj) = do
 		{
-		sameLocation = getEqualReference;
-		setLocation = set;
+		res <- evaluate obj;
+		setBang name res;
 		};
 	}

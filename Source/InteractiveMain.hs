@@ -20,31 +20,19 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Full where
+module Main where
 	{
-	import Object;
-	import MoreRef;
-	import Ref;
-
-	instance
-		(
-		MonadStandardReference m r,
-		MonadEqualReference m r
-		) =>
-	 Location m r where
-		{
-		newLocation = newReference;
-		getLocation = get;
-		};
-
-	instance
-		(
-		MonadStandardReference m r,
-		MonadEqualReference m r
-		) =>
-	 SettableLocation m r where
-		{
-		sameLocation = getEqualReference;
-		setLocation = set;
-		};
+	import Interactive;
+	import ContinuationPassing;
+	import SchemeCPS;
+	import Full;
+	import Pure;
+	import Type;
+	import IORef;
+	
+	main :: IO ();
+	main = doMonadCPS
+		(\_ -> return "error in catch code!")
+--		((pureInteract :: Type (PureLocation ()) -> (SchemeCPS PureLocation (IO ())) ()) Type);
+		((fullInteract :: Type (IORef ()) -> (SchemeCPS IORef (IO ())) ()) Type);
 	}

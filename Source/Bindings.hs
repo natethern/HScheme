@@ -31,10 +31,10 @@ module Bindings where
 		(
 		Scheme x m r
 		) =>
-	 Symbol -> Object r m -> Bindings r m -> m (Bindings r m);
+	 String -> Object r m -> Bindings r m -> m (Bindings r m);
 	addBinding name obj b = do
 		{
-		(_,b) <- newObjBinding b name obj;
+		(_,b) <- newObjBinding b (MkSymbol name) obj;
 		return b;
 		};
 
@@ -43,7 +43,7 @@ module Bindings where
 		ArgumentList x m r args,
 		MonadIsA m (Object r m) ret
 		) =>
-	 Symbol ->
+	 String ->
 	 ((?bindings :: Bindings r m) => Type (r ()) -> args -> m ret) ->
 	 Bindings r m ->
 	 m (Bindings r m);
@@ -57,8 +57,8 @@ module Bindings where
 		ArgumentList x m r args,
 		MonadIsA m (Object r m) ret
 		) =>
-	 Symbol ->
-	 (Type (r ()) -> args -> m ret) ->
+	 String ->
+	 ((?bindings :: Bindings r m) => Type (r ()) -> args -> m ret) ->
 	 Bindings r m ->
 	 m (Bindings r m);
 	addMacroBinding name p b = do

@@ -168,18 +168,18 @@ module SExpParser where
 			};
 		};
 
-	specialCharP :: (Scheme x m r) => String -> TextParser m (Maybe (Object r m));
-	specialCharP str = do
+	specialCharP :: (Scheme x m r) => Symbol -> TextParser m (Maybe (Object r m));
+	specialCharP symbol = do
 		{
 		nextC;
 		mh2 <- expressionP;
 		case mh2 of
 			{
-			Nothing -> fail ("unexpected EOF after "++str);
+			Nothing -> fail ("unexpected EOF after "++(unSymbol symbol));
 			Just h2 -> do
 				{					
 				tail <- mlift (cons (h2,NilObject));
-				qf <- mlift (cons (SymbolObject str,tail));
+				qf <- mlift (cons (SymbolObject symbol,tail));
 				return (Just qf);
 				};
 			};
@@ -191,9 +191,9 @@ module SExpParser where
 		mc <- currentC;
 		case mc of
 			{
-			Just '\'' -> specialCharP "quote";
-			Just '`' -> specialCharP "quasiquote";
-			Just ',' -> specialCharP "unquote";
+			Just '\'' -> specialCharP (MkSymbol "quote");
+			Just '`' -> specialCharP (MkSymbol "quasiquote");
+			Just ',' -> specialCharP (MkSymbol "unquote");
 			_ -> return Nothing;
 			};
 		};
@@ -219,7 +219,7 @@ module SExpParser where
 		{
 		whitespaceP;
 		checkParse integerP (NumberObject . fromInteger)
-		 (checkParse identifierP SymbolObject
+		 (checkParse identifierP (SymbolObject . MkSymbol)
 		  (checkParse quotedP id
 		   (checkParse listP id (do
 			{

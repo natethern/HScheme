@@ -49,12 +49,51 @@ module Conversions where
 			};
 		};
 	
+	convertToProcedure ::
+		(
+		ArgumentList x m r args,
+		MonadIsA m (Object r m) ret
+		) =>
+	 ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
+	
+	convertToProcedure foo bindings arglist = do
+		{
+		args <- convertFromObjects arglist;
+		r <- foo args with {?bindings=bindings;};
+		getConvert r;
+		};
+	
+	convertToMacro ::
+		(
+		ArgumentList x m r args,
+		MonadIsA m (Object r m) ret
+		) =>
+	 ((?bindings :: Bindings r m) => args -> m ret) -> Bindings r m -> [Object r m] -> m (Object r m);
+	
+	convertToMacro foo bindings arglist = do
+		{
+		args <- convertFromObjects arglist;
+		r <- foo args with {?bindings=bindings;};
+		getConvert r;
+		};
+
+	
+	-- ()
+
 	instance (Scheme x m r) => ArgumentList x m r () where
 		{
 		convertFromObjects [] = return ();
 		convertFromObjects _ = fail "too many arguments";
 		};
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) () where
+		{
+		getConvert () = return nullObject;
+		};
+
 	
+	-- (a,b)
+
 	instance 
 		(
 		Scheme x m r,
@@ -73,7 +112,10 @@ module Conversions where
 		convertFromObjects [] = fail "not enough arguments";
 		convertFromObjects _ = fail "too many arguments";
 		};
+
 	
+	-- (a,Maybe b)
+
 	instance 
 		(
 		Scheme x m r,
@@ -95,32 +137,6 @@ module Conversions where
 			};
 		convertFromObjects [] = fail "not enough arguments";
 		convertFromObjects _ = fail "too many arguments";
-		};
-	
-	convertToProcedure ::
-		(
-		ArgumentList x m r args,
-		MonadIsA m (Object r m) ret
-		) => ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
-	
-	convertToProcedure foo bindings arglist = do
-		{
-		args <- convertFromObjects arglist;
-		r <- foo args with {?bindings=bindings;};
-		getConvert r;
-		};
-	
-	convertToMacro ::
-		(
-		ArgumentList x m r args,
-		MonadIsA m (Object r m) ret
-		) => (args -> m ret) -> [Object r m] -> m (Object r m);
-	
-	convertToMacro foo arglist = do
-		{
-		args <- convertFromObjects arglist;
-		r <- foo args;
-		getConvert r;
 		};
 
 	
@@ -152,11 +168,6 @@ module Conversions where
 		};
 
 	instance (Scheme x m r) => MonadSubtype m (Object r m) (Object r m);
-
-	instance (Scheme x m r) => MonadIsA m (Object r m) () where
-		{
-		getConvert () = return NilObject;
-		};
 
 	
 	-- Bool
@@ -203,6 +214,29 @@ module Conversions where
 		};
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) Char;
+
+	
+	-- Symbol
+
+	instance (Scheme x m r) => ArgumentList x m r Symbol where
+		{
+		convertFromObjects [obj] = convertFromObject obj;
+		convertFromObjects [] = fail "not enough arguments";
+		convertFromObjects _ = fail "too many arguments";
+		};
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) Symbol where
+		{
+		getConvert = return . SymbolObject;
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m Symbol (Object r m) where
+		{
+		getMaybeConvert (SymbolObject a) = return (Just a);
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) Symbol;
 
 	
 	-- Bindings

@@ -72,7 +72,12 @@ module Object where
 	
 	type ObjLocation r m = r (Object r m);
 
-	type Symbol = String;
+	newtype Symbol = MkSymbol {unSymbol :: String} deriving (Ord, Eq);
+
+	instance Show Symbol where
+		{
+		show (MkSymbol s) = s;
+		};
 
 	data Bindings r m = MkBindings
 		{
@@ -105,7 +110,7 @@ module Object where
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
 	 SyntaxObject		([Object r m] -> m (Object r m))	|
-	 MacroObject		([Object r m] -> m (Object r m))	;
+	 MacroObject		(Procedure r m)						;
 
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;

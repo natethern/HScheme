@@ -25,6 +25,9 @@ module SchemeCPS where
 	import Conversions;
 	import ContinuationPassing;
 	import Object;
+	import MoreRef;
+	import Ref;
+	import LiftedMonad;
 	import Subtype;
 	import MonadError;
 
@@ -53,4 +56,38 @@ module SchemeCPS where
 		{
 		strMsg s = StringError s;
 		};
+
+	instance
+		(
+		MonadReference m r
+		) =>
+	 MonadReference (SchemeCPS r (m p)) r where
+		{
+		get r = call ((get :: r a -> m a) r);
+		set r v = call ((set :: r a -> a -> m ()) r v);
+		};
+
+	instance
+		(
+		MonadCreatableReference m r
+		) =>
+	 MonadCreatableReference (SchemeCPS r (m p)) r where
+		{
+		newReference a = call ((newReference :: a -> m (r a)) a);
+		};
+
+	instance
+		(
+		MonadEqualReference m r
+		) =>
+	 MonadEqualReference (SchemeCPS r (m p)) r where
+		{
+		getEqualReference a b = call ((getEqualReference :: r a -> r a -> m Bool) a b);
+		};
+
+	instance
+		(
+		MonadStandardReference m r
+		) =>
+	 MonadStandardReference (SchemeCPS r (m a)) r;
 	}

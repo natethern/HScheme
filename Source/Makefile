@@ -54,7 +54,10 @@ HC_SRCS			= \
 	SchemeCPS.hs	\
 	Pure.hs	\
 	Full.hs	\
-	Interactive.hs
+	FullProcedures.hs	\
+	FullStandardBindings.hs	\
+	Interactive.hs	\
+	InteractiveMain.hs
 
 OBJS = $(patsubst %.hs,%.o,$(HC_SRCS))
 
@@ -109,11 +112,14 @@ PropList-3.1.0.txt:
 depend: $(HC_SRCS)
 	$(HC) -M $(HCFLAGS) $^
 # DO NOT DELETE: Beginning of Haskell dependencies
-Common/Ref.o : Common/Ref.hs
+Common/Type.o : Common/Type.hs
 Common/Subtype.o : Common/Subtype.hs
 Common/Subtype.o : Common/Type.hi
-Common/Type.o : Common/Type.hs
 Common/LiftedMonad.o : Common/LiftedMonad.hs
+Common/Ref.o : Common/Ref.hs
+Common/MoreRef.o : Common/MoreRef.hs
+Common/MoreRef.o : Common/LiftedMonad.hi
+Common/MoreRef.o : Common/Ref.hi
 UnicodeDefs.o : UnicodeDefs.hs
 UnicodeData.o : UnicodeData.hs
 UnicodeData.o : UnicodeDefs.hi
@@ -160,24 +166,38 @@ StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
-StandardBindings.o : ./Equality.hi
+StandardBindings.o : Equality.hi
 ContinuationPassing.o : ContinuationPassing.hs
 ContinuationPassing.o : Common/LiftedMonad.hi
 FMapBindings.o : FMapBindings.hs
 FMapBindings.o : Object.hi
 SchemeCPS.o : SchemeCPS.hs
 SchemeCPS.o : Common/Subtype.hi
+SchemeCPS.o : Common/LiftedMonad.hi
+SchemeCPS.o : Common/Ref.hi
+SchemeCPS.o : Common/MoreRef.hi
 SchemeCPS.o : Object.hi
 SchemeCPS.o : ContinuationPassing.hi
 SchemeCPS.o : Conversions.hi
 Pure.o : Pure.hs
-Pure.o : Common/Subtype.hi
 Pure.o : Object.hi
+Full.o : Full.hs
+Full.o : Common/Ref.hi
+Full.o : Common/MoreRef.hi
+Full.o : Object.hi
+FullProcedures.o : FullProcedures.hs
+FullProcedures.o : Common/Type.hi
+FullProcedures.o : Object.hi
+FullProcedures.o : Evaluate.hi
+FullStandardBindings.o : FullStandardBindings.hs
+FullStandardBindings.o : Object.hi
+FullStandardBindings.o : Bindings.hi
+FullStandardBindings.o : StandardBindings.hi
+FullStandardBindings.o : FullProcedures.hi
+FullStandardBindings.o : Equality.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
-Interactive.o : Pure.hi
-Interactive.o : SchemeCPS.hi
 Interactive.o : FMapBindings.hi
 Interactive.o : Common/LiftedMonad.hi
 Interactive.o : Parser.hi
@@ -187,5 +207,12 @@ Interactive.o : Procedures.hi
 Interactive.o : StandardBindings.hi
 Interactive.o : Bindings.hi
 Interactive.o : SExpParser.hi
-Interactive.o : ContinuationPassing.hi
+Interactive.o : FullStandardBindings.hi
+InteractiveMain.o : InteractiveMain.hs
+InteractiveMain.o : Common/Type.hi
+InteractiveMain.o : Pure.hi
+InteractiveMain.o : Full.hi
+InteractiveMain.o : SchemeCPS.hi
+InteractiveMain.o : ContinuationPassing.hi
+InteractiveMain.o : Interactive.hi
 # DO NOT DELETE: End of Haskell dependencies
