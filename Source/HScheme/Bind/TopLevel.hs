@@ -50,6 +50,7 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
+		?binder :: TopLevelBinder r m,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
@@ -60,13 +61,14 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		commonTopLevelBindings,
 
 		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"			pureDefineT
+		addTopLevelMacroBinding	"define"			(defineT pureDefine)
 		];
 
 	fullTopLevelBindings ::
 		(
 		FullScheme m r,
 		BuildThrow cm (Object r m) r,
+		?binder :: TopLevelBinder r m,
 		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
@@ -77,7 +79,7 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		commonTopLevelBindings,
 
 		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"			fullDefineT
+		addTopLevelMacroBinding	"define"			(defineT fullDefine)
 		];
 
 	loadTopLevelBindings ::

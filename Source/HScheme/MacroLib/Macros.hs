@@ -56,9 +56,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		) =>
 	 (Object r m,[Object r m]) ->
 	 cm (ObjectSchemeExpression r m);
-	lambdaM (params,bodyObj) = do
+	lambdaM (params,bodyObjs) = do
 		{
-		body <- bodyM bodyObj;
+		body <- bodyM bodyObjs;
 		proc <- makeLambda params body;
 		return (fmap (return . ProcedureObject) proc);
 		};
@@ -285,40 +285,50 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	-- 5.2 Definitions
 
-	pureDefineT ::
+	pureDefine ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Symbol -> ObjectSchemeExpression r m -> TopLevelObjectCommand r m;
+	pureDefine sym valExpr = MkTopLevelCommand (return (return nullObject)) [(sym,valExpr)] [];
+
+	fullDefine ::
+		(
+		FullScheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Symbol -> ObjectSchemeExpression r m-> TopLevelObjectCommand r m;
+	fullDefine sym valExpr = MkTopLevelCommand 
+	 (liftF2 (\loc mval -> do
+		{
+		val <- mval;
+		set loc val;
+		return nullObject;
+		}) (exprSymbol sym) valExpr)
+	 [(sym,return (return (error "unassigned symbol")))]
+	 [];
+
+	defineT ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
+		?binder :: TopLevelBinder r m,
+		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
-	pureDefineT (sym,(val,())) = do
-		{
-		valExpr <- assembleExpression val;
-		return (MkTopLevelCommand (return (return nullObject)) [(sym,valExpr)] []);
-		};
-
-	fullDefineT ::
-		(
-		BuildThrow cm (Object r m) r,
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
-	fullDefineT (sym,(valObj,())) = do
+	 (Symbol -> ObjectSchemeExpression r m -> TopLevelObjectCommand r m) -> 
+	 Either (Symbol,(Object r m,())) ((Symbol,Object r m),[Object r m]) -> cm (TopLevelObjectCommand r m);
+	defineT define (Left (sym,(valObj,()))) = do
 		{
 		valExpr <- assembleExpression valObj;
-		return (MkTopLevelCommand 
-		 (liftF2 (\loc mval -> do
-		 	{
-		 	val <- mval;
-		 	set loc val;
-		 	return nullObject;
-		 	}) (exprSymbol sym) valExpr)
-		 [(sym,return (return (error "unassigned symbol")))] []);
+		return (define sym valExpr);
+		};
+	defineT define (Right ((sym,params),bodyObjs)) = do
+		{
+		valExpr <- lambdaM (params,bodyObjs);
+		return (define sym valExpr);
 		};
 	}
