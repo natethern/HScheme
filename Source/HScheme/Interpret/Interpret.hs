@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
+	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
@@ -62,7 +62,7 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 SchemeExpression r m a -> cm ((Symbol -> Maybe (ObjLocation r m)) -> a);
-	bindExpression rr = return (\lookupSym -> runSymbolExpression (getLoc lookupSym) rr);
+	bindExpression rr = return (\lookupSym -> runFuncSymbolExpression (getLoc lookupSym) rr);
 
 	interpretTopLevelExpression ::
 		(

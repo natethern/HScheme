@@ -27,12 +27,12 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	assembleExpression
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
+	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type SchemeExpression r m = SymbolExpression Symbol (ObjLocation r m);
+	type SchemeExpression r m = FuncSymbolExpression Symbol (ObjLocation r m);
 
 	type ObjectSchemeExpression r m = SchemeExpression r m (m (Object r m));
 

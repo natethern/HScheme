@@ -401,6 +401,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	newtype TopLevelBinder r m = MkTopLevelBinder
 	 {unTopLevelBinder :: forall a. TopLevelCommand r m (m a) -> SchemeExpression r m (m a)};
 
+	liftF3' :: (FunctorApply f) =>
+	 (a -> b -> c -> r) ->
+	 (f a -> f b -> f c -> f r);
+	liftF3' func fa fb = fApply (fApply (fmap func fa) fb);
+
 	setBinder :: (FullScheme m r) =>
 	 TopLevelBinder r m;
 	setBinder = MkTopLevelBinder (\(MkTopLevelCommand expr binds _) ->
@@ -408,20 +413,28 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		{
 		seqSets [] bodyexpr = bodyexpr;
 		seqSets ((sym,bindexpr):rest) bodyexpr = 
-			liftF3 (\ref bindaction bodyaction -> do
-				{	-- same as (set! sym expr)
-				bindvalue <- bindaction;
-				set ref bindvalue;
-				bodyaction;
-				}) (fSymbol sym) bindexpr (seqSets rest bodyexpr);
-		
+		 {-# SCC "seqSets" #-}
+		 liftF3' setBindValue (fSymbol sym) bindexpr (seqSets rest bodyexpr);
+
+		setBindValue ref bindaction bodyaction =
+		 {-# SCC "setBindValue" #-}
+		 do
+			{	-- same as (set! sym expr)
+			bindvalue <- bindaction;
+			set ref bindvalue;
+			bodyaction;
+			};
+
 		fSubstBindsNewRef [] bodyexpr = bodyexpr;
 		fSubstBindsNewRef ((sym,_):rest) bodyexpr = 
+		 {-# SCC "fSubstBindsNewRef" #-}
 		 fSubstMap substMap sym (return' (newSymbolBinding sym)) (fSubstBindsNewRef rest bodyexpr);
 
 		newSymbolBinding :: (Monad m) =>
 		 Symbol -> m (Object r m);
-		newSymbolBinding sym = return (error ("uninitialised binding: " ++ (show sym)));
+		newSymbolBinding sym = 
+		 {-# SCC "newSymbolBinding" #-}
+		 return (error ("uninitialised binding: " ++ (show sym)));
 		};
 
 	recursiveBinder :: (MonadFix m,Scheme m r) =>
