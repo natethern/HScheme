@@ -1,14 +1,10 @@
 (let
-	((q 67))
+	((q 4))
 	(begin-list
-		(port-write-byte 65 (current-output-port))
-		(to-string (set! q 68))
-		(port-write-byte 66 (current-output-port))
-		(port-write-byte q (current-output-port))
-		(to-string q)
+		(set! q 7)
+		q
 	)
 )
-
 
 (define a 3)
 ;(define b a)

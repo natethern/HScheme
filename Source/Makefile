@@ -124,14 +124,21 @@ install:	\
 
 test: test-full test-pure test_p
 
-test-full: bin/$(COMMAND_REL)
-	time ./$< --noinit test/helloworld.scm
-	time ./$< --noinit test/several.scm
-	time ./$< --noinit test/letrec.scm
-	time ./$< --noinit test/binding.scm
-	time ./$< --noinit test/setvar.scm
-	time ./$< --noinit test/boundlate.scm
-	time ./$< --noinit test/factorial.scm
+test/%.scm.diff: test/%.scm.ref test/%.scm.out
+	diff -u $^
+
+test/%.scm.out: test/%.scm bin/$(COMMAND_REL)
+	time bin/$(COMMAND_REL) --noinit $< > $@
+
+test-full: \
+ test/helloworld.scm.diff \
+ test/several.scm.diff \
+ test/letrec.scm.diff \
+ test/binding.scm.diff \
+ test/setvar.scm.diff \
+ test/boundlate.scm.diff \
+ test/factorial.scm.diff \
+ bin/$(COMMAND_REL)
 	time ./$< test/helloworld.scm
 
 test-pure: bin/$(COMMAND_REL)
