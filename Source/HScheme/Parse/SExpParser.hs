@@ -229,12 +229,9 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		return (0:is,False);
 		}) ||| (return ([],True));
 
-	radixPower :: Word8 -> Int -> Integer;
-	radixPower 2 n = bitShift (convert n) 1;
-	radixPower 4 n = bitShift (convert n*2) 1;
-	radixPower 8 n = bitShift (convert n*3) 1;
-	radixPower 16 n = bitShift (convert n*4) 1;
-	radixPower p n = (convert p) ^ (convert n);
+	radixPower :: (?radix :: Word8) =>
+	 Integer -> Rational;
+	radixPower n = (convert (convert ?radix :: Integer) :: Rational) ^^ n;
 
 	convertRational :: (?exactness :: Maybe Bool) =>
 	 Bool -> NaNExtended Rational -> EIReal;
@@ -259,6 +256,31 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 			});
 		};
 
+	exponentMarker :: Char -> Bool;
+	exponentMarker 'e' = True;
+	exponentMarker 's' = True;
+	exponentMarker 'f' = True;
+	exponentMarker 'd' = True;
+	exponentMarker 'l' = True;
+	exponentMarker 'E' = True;
+	exponentMarker 'S' = True;
+	exponentMarker 'F' = True;
+	exponentMarker 'D' = True;
+	exponentMarker 'L' = True;
+	exponentMarker _ = False;
+
+	signParse :: (MonadOrParser Char p) =>
+	 p Bool;
+	signParse = (do
+		{
+		isTokenParse '+';
+		return False;
+		}) ||| (do
+		{
+		isTokenParse '-';
+		return True;
+		}) ||| (return False);
+
 	decimalParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
 	 p EIReal;
 	decimalParse = do
@@ -281,7 +303,24 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 					};
 				};
 			};
-		return (convertRational e (divide (radixPower ?radix (length post)) (addUpDigits 0 (pre ++ post) :: Integer)));
+		mexp <- mOptional (let {?radix=10} in do
+			{
+			matchTokenParse exponentMarker;
+			neg <- signParse;
+			ds <- mOneOrMore digitParse;
+			return (let {d = addUpDigits 0 ds} in if neg then negate d else d);
+			});
+		return (let
+			{
+			fullNum :: Integer;
+			fullNum = addUpDigits 0 (pre ++ post);
+
+			offset :: Integer;
+			offset = (unJust 0 mexp) - (convert (length post));
+
+			rat :: Rational;
+			rat = multiply (radixPower offset) fullNum;
+			} in convertRational e (Number rat));
 		};
 
 	urealParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
@@ -296,16 +335,12 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 
 	realParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
 	 p EIReal;
-	realParse = (do
+	realParse = do
 		{
-		isTokenParse '+';
-		urealParse;
-		}) ||| (do
-		{
-		isTokenParse '-';
+		neg <- signParse;
 		n <- urealParse;
-		return (negate n);
-		}) ||| urealParse;
+		return (if neg then negate n else n);
+		};
 
 	imaginaryParse :: (MonadOrParser Char p,?radix :: Word8,?exactness :: Maybe Bool) =>
 	 p EIReal;
