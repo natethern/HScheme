@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.StandardBindings where
 	{
 	import Org.Org.Semantic.HScheme.SExpParser;
---	import Org.Org.Semantic.HScheme.Syntax;
+	import Org.Org.Semantic.HScheme.Syntax;
 	import Org.Org.Semantic.HScheme.PortProcedures;
 	import Org.Org.Semantic.HScheme.Lambda;
 	import Org.Org.Semantic.HScheme.Equality;
@@ -65,9 +65,6 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addMacroBinding	"let"					letSeparateM,
 		addMacroBinding	"let*"					letSequentialM,
 		addMacroBinding	"letrec"				letRecursiveM
-
-		-- 4.3.2 Pattern Language
---		,addMacroBinding	"syntax-rules"			syntaxRulesM
 		];
 
 	pureMacroBindings ::
@@ -100,10 +97,15 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	 Binds Symbol (TopLevelMacro r m);
 	topLevelBindings = concatenateList
 		[
+		-- 4.3.2 Pattern Language
+--		addSyntaxMakerMacroBinding	"syntax-rules"			syntaxRulesM,
 
 		-- 5.2 Definitions
-		addTopLevelMacroBinding	"define"				defineT
---		,addTopLevelMacroBinding	"define"				(defineT pureSetLoc)
+		addTopLevelMacroBinding	"define"			defineT,
+--		addTopLevelMacroBinding	"define"			(defineT pureSetLoc),
+
+		-- 5.3 Syntax Definitions
+		addTopLevelMacroBinding	"define-syntax"		defineSyntaxT
 		];
 
 	commonStrictPureBindings :: (Scheme m r,?refType :: Type (r ())) => Bindings r m -> m (Bindings r m);

@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Syntax where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
+	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Bindings;
 	import Org.Org.Semantic.HScheme.Object;
@@ -153,7 +154,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 			};
 		};
 {--
-	caseMatchM :: (Scheme m r,?bindings :: Bindings r m) =>
+	caseMatchM :: (Scheme m r,?refType :: Type (r ())) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
 	caseMatchM (argExpr,(literals,cases)) = do
 		{
@@ -161,8 +162,8 @@ module Org.Org.Semantic.HScheme.Syntax where
 		(subs,expr) <- caseMatch (arg,(literals,cases));
 		let {?bindings = addBindings subs ?bindings;} in evaluate expr;
 		};
-
-	syntaxRulesM :: (Scheme m r,?bindings :: Bindings r m) =>
+--}
+	syntaxRulesM :: (Scheme m r,?refType :: Type (r ())) =>
 	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
 	syntaxRulesM (literals,rules) = return (\args -> let
 		{
@@ -177,5 +178,54 @@ module Org.Org.Semantic.HScheme.Syntax where
 				};
 			};
 		} in transform rules);
---}
+
+
+	compileSyntax ::
+		(
+		Scheme m r,
+		?refType :: Type (r ()),
+		?syntacticbindings :: Binds Symbol (Syntax r m)
+		) =>
+	 Object r m -> m (Syntax r m);
+	compileSyntax (SymbolObject sym) = case getBinding ?syntacticbindings sym of
+		{
+		Just syntax -> return syntax;
+		Nothing -> throwArgError "undefined-syntax" [SymbolObject sym];
+		};
+	compileSyntax obj@(PairObject head tail) = do
+		{
+		h <- get head;
+		case h of
+			{
+			SymbolObject (MkSymbol "syntax-rules") -> do
+				{
+				t <- get tail;
+				margs <- getMaybeConvert t;
+				case margs of
+					{
+					Nothing -> throwArgError "bad-syntax-rules-syntax" [t];
+					Just args -> syntaxRulesM args;
+					};
+				};
+			SymbolObject _ -> throwArgError "undefined-syntax-maker" [h];
+			_ -> throwArgError "form-not-syntax" [obj];
+			};
+		};
+	compileSyntax obj = throwArgError "form-not-syntax" [obj];
+
+	defineSyntaxT ::
+		(
+		Scheme m r,
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
+		) =>
+	 (Symbol,(Object r m,())) -> TopLevelAction r m;
+	defineSyntaxT (sym,(obj,())) = MkTopLevelAction (\beg objs -> do
+		{
+		syntax <- let {?refType = Type} in compileSyntax obj;
+		let
+			{
+			?syntacticbindings = newBinding ?syntacticbindings sym syntax;
+			} in beg objs
+		});
 	}

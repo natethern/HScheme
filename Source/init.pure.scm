@@ -1,36 +1,33 @@
 "Loading init.pure.scm"
-(define define-syntax define)
-(define let-syntax let)
-;(define letrec-syntax letrec)
 
 ; 4.2.1 Conditionals
-(define cond (syntax-rules (=> else)
+(define-syntax cond (syntax-rules (=> else)
 	((cond) <nothing>)
 	((cond (else    . exprs)) (begin . exprs))
 	((cond (test    . exprs) . rest) (if test (begin . exprs) (cond . rest)))
 	((cond (test => . exprs) . rest) (if test (begin . exprs) (cond . rest)))
 ))
 
-(define case (syntax-rules (else)
+(define-syntax case (syntax-rules (else)
 	((case key) <nothing>)
 	((case key (else . exprs)) (begin . exprs))
 	((case key (() . exprs) . rest) (case key . rest))
 	((case key ((datum . data) . exprs) . rest) (if (equal? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
 ))
 
-(define and (syntax-rules ()
+(define-syntax and (syntax-rules ()
 	((and) #t)
 	((and first . rest) (if first (and . rest) #f))
 ))
 
-(define or (syntax-rules ()
+(define-syntax or (syntax-rules ()
 	((or) #f)
 	((or first . rest) (if first #t (or . rest)))
 ))
 
 
 ; 4.2.6 Quasiquotation
-(define quasiquote (syntax-rules (unquote unquote-splicing quasiquote)
+(define-syntax quasiquote (syntax-rules (unquote unquote-splicing quasiquote)
 	((quasiquote (unquote a)) a)
 	((quasiquote (quasiquote a)) (quote (quasiquote a)))
 	((quasiquote ((unquote-splicing a) . b)) (append a (quasiquote b)))
@@ -210,7 +207,7 @@
 	<nothing>
 ))
 
-(define catch (syntax-rules () ((catch foo catchclause)
+(define-syntax catch (syntax-rules () ((catch foo catchclause)
 	(call-with-current-continuation (lambda (cont)
 		(let ((throw (lambda (ex) (cont (catchclause ex)))))
 			foo

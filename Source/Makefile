@@ -134,6 +134,7 @@ test/%.scm.out: test/%.scm bin/$(COMMAND_REL)
 test-full: \
  test/helloworld.scm.diff \
  test/several.scm.diff \
+ test/syntax.scm.diff \
  test/letrec.scm.diff \
  test/binding.scm.diff \
  test/setvar.scm.diff \
@@ -312,6 +313,8 @@ Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Port.p_hi
 Org/Org/Semantic/HScheme/Conversions.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/Conversions.p_o : Org/Org/Semantic/HScheme/Object.p_hi
 Org/Org/Semantic/HScheme/Compile.o Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/Compile.hs
+Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
 Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
 Org/Org/Semantic/HScheme/Compile.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
 Org/Org/Semantic/HScheme/Compile.o : Org/Org/Semantic/HScheme/Object.hi
@@ -356,6 +359,8 @@ Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/TopLevel
 Org/Org/Semantic/HScheme/SystemInterface.o : Org/Org/Semantic/HScheme/Bindings.hi
 Org/Org/Semantic/HScheme/SystemInterface.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
 Org/Org/Semantic/HScheme/Macros.o Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/Macros.hs
+Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
 Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
 Org/Org/Semantic/HScheme/Macros.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
 Org/Org/Semantic/HScheme/Macros.o : Org/Org/Semantic/HScheme/Object.hi
@@ -417,6 +422,8 @@ Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Bindings.hi
 Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Bindings.p_hi
 Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Conversions.hi
 Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
+Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Compile.hi
+Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Compile.p_hi
 Org/Org/Semantic/HScheme/Syntax.o : Org/Org/Semantic/HScheme/Evaluate.hi
 Org/Org/Semantic/HScheme/Syntax.p_o : Org/Org/Semantic/HScheme/Evaluate.p_hi
 Org/Org/Semantic/HScheme/ArgumentList.o Org/Org/Semantic/HScheme/ArgumentList.p_o : Org/Org/Semantic/HScheme/ArgumentList.hs
@@ -455,6 +462,8 @@ Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Lambda.hi
 Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Lambda.p_hi
 Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/PortProcedures.hi
 Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/PortProcedures.p_hi
+Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/Syntax.hi
+Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/Syntax.p_hi
 Org/Org/Semantic/HScheme/StandardBindings.o : Org/Org/Semantic/HScheme/SExpParser.hi
 Org/Org/Semantic/HScheme/StandardBindings.p_o : Org/Org/Semantic/HScheme/SExpParser.p_hi
 Org/Org/Semantic/HScheme/FMapBindings.o Org/Org/Semantic/HScheme/FMapBindings.p_o : Org/Org/Semantic/HScheme/FMapBindings.hs

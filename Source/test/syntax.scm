@@ -1,0 +1,22 @@
+(define-syntax simple (syntax-rules ()
+	((simple) 12)
+	((simple x) x)
+))
+
+(simple)
+(simple 5)
+
+(define-syntax and (syntax-rules ()
+	((and) #t)
+	((and first . rest) (if first (and . rest) #f))
+))
+
+(and #t #t #t)
+(and #t #t #f)
+(and #t #t)
+(and #t #f)
+(and #f #t)
+(and #f #f)
+(and #t)
+(and #f)
+(and)

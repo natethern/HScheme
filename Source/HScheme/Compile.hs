@@ -250,18 +250,6 @@ module Org.Org.Semantic.HScheme.Compile where
 			}) valExpr (fAbstract sym body));
 		});
 
-	defineSyntaxT ::
-		(
-		Scheme m r,
-		?syntacticbindings :: Binds Symbol (Syntax r m),
-		?macrobindings :: Binds Symbol (Macro r m)
-		) =>
-	 (Symbol,(Syntax r m,())) -> TopLevelAction r m;
-	defineSyntaxT (sym,(syntax,())) = MkTopLevelAction (\beg objs -> let
-		{
-		?syntacticbindings = newBinding ?syntacticbindings sym syntax;
-		} in beg objs);
-
 	begin ::
 		(
 		Scheme m r,
