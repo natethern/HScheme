@@ -140,9 +140,73 @@
 	)
 ))
 
+(define char=? (lambda (a b)
+	(= (char->integer a) (char->integer b))
+))
+
+(define char<? (lambda (a b)
+	(< (char->integer a) (char->integer b))
+))
+
+(define char>? (lambda (a b)
+	(> (char->integer a) (char->integer b))
+))
+
+(define char<=? (lambda (a b)
+	(<= (char->integer a) (char->integer b))
+))
+
+(define char>=? (lambda (a b)
+	(>= (char->integer a) (char->integer b))
+))
+
+(define char-ci=? (lambda (a b)
+	(= (char->integer (char-upcase a)) (char->integer (char-upcase b)))
+))
+
+(define char-ci<? (lambda (a b)
+	(< (char->integer (char-upcase a)) (char->integer (char-upcase b)))
+))
+
+(define char-ci>? (lambda (a b)
+	(> (char->integer (char-upcase a)) (char->integer (char-upcase b)))
+))
+
+(define char-ci<=? (lambda (a b)
+	(<= (char->integer (char-upcase a)) (char->integer (char-upcase b)))
+))
+
+(define char-ci>=? (lambda (a b)
+	(>= (char->integer (char-upcase a)) (char->integer (char-upcase b)))
+))
+
 ; 6.4 Control Features
 (define call-with-values (lambda (producer consumer)
 	(apply consumer (values->list (producer)))
+))
+
+(define smap (lambda (proc a)
+	(case-match a ()
+		(() '())
+		((ah . at) (cons (proc ah) (smap proc at)))
+	)
+))
+
+(define map (lambda (proc a1 . ar)
+	(case-match a1 ()
+		(() '())
+		((ah . at)
+			(cons
+				(apply proc (cons ah (smap car ar)))
+				(apply map (cons proc (cons at (smap cdr ar))))
+			)
+		)
+	)
+))
+
+(define for-each (lambda args
+	(apply map args)
+	<nothing>
 ))
 
 ;

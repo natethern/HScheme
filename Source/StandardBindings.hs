@@ -42,8 +42,8 @@ module StandardBindings where
 	stdBindings = chainList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
-		addBinding		(MkSymbol "<loop>")				loop,									-- test
-		addBinding		(MkSymbol "<undefined>")		undefined,									-- test
+--		addBinding		(MkSymbol "<loop>")				loop,									-- test
+		addBinding		(MkSymbol "<undefined>")		undefined,								-- test
 		
 		-- 4.1.2 Literal Expressions
 		addMacroBinding	"quote"							quoteM,
@@ -123,11 +123,18 @@ module StandardBindings where
 		addProcBinding	"char->integer"					(charFuncP valueNthFromStart),
 		addProcBinding	"integer->char"					(\_ (i,()) -> return (unJust (nthValueFromStart i) :: Char)),
 
+		-- 6.3.5 Strings
+		addProcBinding	"string?"						isStringP,
+		addProcBinding	"make-string"					makeStringP,
+		addProcBinding	"string"						stringP,
+		addProcBinding	"string-length"					stringLengthP,
+		addProcBinding	"string-ref"					stringRefP,
+
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,
 		addProcBinding	"apply"							applyP,
 		addProcBinding	"values"						valuesP,
-		addProcBinding	"values->list"					valuesToListP,
+		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
 
 		-- 6.5 Eval
 		addProcBinding	"eval"							evaluateP,
@@ -158,9 +165,12 @@ module StandardBindings where
 		addProcBinding	"close-output-port"					outputPortCloseP,
 
 		-- 6.6.2 Input
+		addProcBinding	"port-read-char"					portReadCharP,						-- nonstandard
+		addProcBinding	"port-peek-char"					portPeekCharP,						-- nonstandard
 		addProcBinding	"eof-object?"						isEOFObjectP,
+		addProcBinding	"port-char-ready?"					portCharReadyP,						-- nonstandard
 
 		-- 6.6.3 Output
-		addProcBinding	"port-write-char"					portWriteCharP -- nonstandard
+		addProcBinding	"port-write-char"					portWriteCharP						-- nonstandard
 		];
 	}

@@ -61,6 +61,34 @@ module PortProcedures where
 	isEOFObjectP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isEOFObjectP Type (obj,()) = return (isNullObject obj);
+	
+	portReadCharP :: (Scheme x m r) =>
+	 Type (r ()) -> (InputPort Char m,()) -> m (Either ArgNoneType Char);
+	portReadCharP Type (port,()) = do
+		{
+		mc <- ipRead port;
+		return (case mc of
+			{
+			Nothing -> Left MkArgNoneType;	-- null object, which also happens to be eof object
+			Just c -> Right c;
+			});
+		};
+	
+	portPeekCharP :: (Scheme x m r) =>
+	 Type (r ()) -> (InputPort Char m,()) -> m (Either ArgNoneType Char);
+	portPeekCharP Type (port,()) = do
+		{
+		mc <- ipPeek port;
+		return (case mc of
+			{
+			Nothing -> Left MkArgNoneType;	-- null object, which also happens to be eof object
+			Just c -> Right c;
+			});
+		};
+	
+	portCharReadyP :: (Scheme x m r) =>
+	 Type (r ()) -> (InputPort Char m,()) -> m Bool;
+	portCharReadyP Type (port,()) = ipReady port;
 
 	-- 6.6.3 Output
 	portWriteCharP :: (Scheme x m r) =>

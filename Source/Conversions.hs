@@ -153,6 +153,20 @@ module Conversions where
 		};
 
 	
+	-- Either
+
+	instance
+		(
+		Scheme x m r,
+		MonadIsA m (Object r m) a,
+		MonadIsA m (Object r m) b
+		) => MonadIsA m (Object r m) (Either a b) where
+		{
+		getConvert (Left a) = getConvert a;
+		getConvert (Right b) = getConvert b;
+		};
+
+	
 	-- NilType
 
 	type NilType = ();
@@ -412,7 +426,7 @@ module Conversions where
 	instance (Scheme x m r) => MonadSubtype m (Object r m) Integer;
 
 
-	-- Integer
+	-- Rational
 
 	instance (Scheme x m r) => MonadIsA m (Object r m) Rational where
 		{
@@ -499,7 +513,7 @@ module Conversions where
 	instance (Scheme x m r) => MonadSubtype m (Object r m) (OutputPort Char m);
 
 
-	-- String
+	-- StringType
 
 	newtype StringType = MkStringType String;
 
@@ -541,6 +555,24 @@ module Conversions where
 		};
 	
 	instance (Scheme x m r) => MonadSubtype m (Object r m) StringType;
+
+
+	-- StringRefType
+
+	newtype StringRefType r = MkStringRefType [r Char];
+
+	instance (Scheme x m r) => MonadIsA m (Object r m) (StringRefType r) where
+		{
+		getConvert (MkStringRefType rs) = return (StringObject rs);
+		};
+
+	instance (Scheme x m r) => MonadMaybeA m (StringRefType r) (Object r m) where
+		{
+		getMaybeConvert (StringObject rs) = return (Just (MkStringRefType rs));
+		getMaybeConvert _ = return Nothing;
+		};
+	
+	instance (Scheme x m r) => MonadSubtype m (Object r m) (StringRefType r);
 
 	
 	-- Procedure

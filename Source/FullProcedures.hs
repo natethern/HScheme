@@ -71,4 +71,20 @@ module FullProcedures where
 		return MkArgNoneType;
 		};	
 	setCdrP Type (_,(obj,())) = fail "not a pair";	
+
+	-- 6.3.5 Strings
+	getListRef :: (Monad m) => Integer -> [a] -> m a;
+	getListRef i _ | i < 0 = fail "array out of range";
+	getListRef 0 (a:_) = return a;
+	getListRef _ [] = fail "array out of range";
+	getListRef i (_:as) = getListRef (i - 1) as;
+
+	stringSetP :: (FullScheme x m r) =>
+	 Type (r ()) -> (StringRefType r,(Integer,(Char,()))) -> m ArgNoneType;
+	stringSetP Type (MkStringRefType rs,(i,(c,()))) = do
+		{
+		r <- getListRef i rs;
+		set r c;
+		return MkArgNoneType;
+		};
 	}

@@ -117,6 +117,71 @@ module Procedures where
 	 (Char -> a) -> Type (r ()) -> (Char,()) -> m a;
 	charFuncP f Type (c,()) = return (f c);
 
+	-- 6.3.5 Strings
+	isStringP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isStringP Type (StringObject _,()) = return True;
+	isStringP Type (_,()) = return False;
+
+	makeRefList :: (Scheme x m r) =>
+	 Integer -> a -> m [r a];
+	makeRefList 0 _ = return [];
+	makeRefList i c = do
+		{
+		rest <- makeRefList (i - 1) c;
+		first <- newReference c;
+		return (first:rest);
+		};
+
+	makeStringP :: (Scheme x m r) =>
+	 Type (r ()) -> (Integer,Maybe Char) -> m (StringRefType r);
+	makeStringP Type (i,Nothing) = do
+		{
+		rs <- makeRefList i '\x0000';
+		return (MkStringRefType rs);
+		};
+	makeStringP Type (i,Just c) = do
+		{
+		rs <- makeRefList i c;
+		return (MkStringRefType rs);
+		};
+
+	makeList :: (Monad m) =>
+	 (a -> m b) -> [a] -> m [b];
+	makeList f [] = return [];
+	makeList f (a:as) = do
+		{
+		rest <- makeList f as;
+		first <- f a;
+		return (first:rest);
+		};
+
+	stringP :: (Scheme x m r) =>
+	 Type (r ()) -> [Char] -> m (StringRefType r);
+	stringP Type cs = do	
+		{
+		rs <- makeList newReference cs;
+		return (MkStringRefType rs);
+		};
+
+	stringLengthP :: (Scheme x m r) =>
+	 Type (r ()) -> (StringRefType r,()) -> m Integer;
+	stringLengthP Type (MkStringRefType rs,()) = return (length rs);
+
+	getListRef :: (Monad m) => Integer -> [a] -> m a;
+	getListRef i _ | i < 0 = fail "array out of range";
+	getListRef 0 (a:_) = return a;
+	getListRef _ [] = fail "array out of range";
+	getListRef i (_:as) = getListRef (i - 1) as;
+
+	stringRefP :: (Scheme x m r) =>
+	 Type (r ()) -> (StringRefType r,(Integer,())) -> m Char;
+	stringRefP Type (MkStringRefType rs,(i,())) = do
+		{
+		r <- getListRef i rs;
+		get r;
+		};
+
 	-- 6.4 Control Features
 	applyP :: (Scheme x m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
