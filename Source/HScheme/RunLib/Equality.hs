@@ -37,15 +37,6 @@ module Org.Org.Semantic.HScheme.RunLib.Equality where
 		equal :: obj -> obj -> m Bool;
 		};
 
-	eqP ::
-		(
-		Eq obj,
-		Monad m,
-		?objType :: Type obj
-		) => 
-	 (obj,(obj,())) -> m Bool;
-	eqP (a,(b,())) = return (a == b);
-
 	eqvP ::
 		(
 		Eqv obj,

@@ -412,7 +412,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		[
 		-- 6.1 Equivalence Predicates
 		addProcBinding			"eqv?"				eqvP,
-		addProcBinding			"eq?"				eqP,
+		addProcBinding			"eq?"				eqvP,
 
 		-- 6.3.2 Pairs and Lists
 		addProcBinding			"list?"				isListP

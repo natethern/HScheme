@@ -17,20 +17,21 @@
 (eqv? (lambda (x) x) (lambda (x) x))	;===>  unspecified	#f
 (eqv? (lambda (x) x) (lambda (y) y))	;===>  unspecified	#f
 
+"eqv? on procedures"
 (define gen-counter (lambda ()
 	(let ((n 0))
 		(lambda () (set! n (+ n 1)) n)
 	)
 ))
-"eqv? on procedures"
 (let ((g (gen-counter))) (eqv? g g))	;===>  #t
 (eqv? (gen-counter) (gen-counter))		;===>  #f
+
+"eqv? on procedures"
 (define gen-loser (lambda ()
 	(let ((n 0))
 		(lambda () (set! n (+ n 1)) 27)
 	)
 ))
-"eqv? on procedures"
 (let ((g (gen-loser))) (eqv? g g))		;===>  #t
 (eqv? (gen-loser) (gen-loser))			;===>  unspecified	#f
 

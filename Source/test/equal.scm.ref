@@ -1,3 +1,4 @@
+"equal?"
 #f
 #t
 #t
@@ -5,8 +6,18 @@
 #f
 #t
 #f
+#f
+#f
+"Numbers"
+#t
+#t
 #f
 #f
 "Procedures"
 #f
+#f
+"="
+#t
+#t
+#t
 #f

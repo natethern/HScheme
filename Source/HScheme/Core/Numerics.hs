@@ -26,14 +26,8 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 	
 	type Number = Complex EIReal;
 	
-	equalNumber :: Number -> Number -> Bool;
-	equalNumber = (==);
-	
 	eqvNumber :: Number -> Number -> Bool;
-	eqvNumber = (==);
-	
-	eqNumber :: Number -> Number -> Bool;
-	eqNumber = (==);
+	eqvNumber (ar :+ ai) (br :+ bi) = (identicalEIReal ar br) && (identicalEIReal ai bi);
 	
 	isExactN :: Number -> Bool;
 	isExactN (ExactReal _ :+ ExactReal _) = True;

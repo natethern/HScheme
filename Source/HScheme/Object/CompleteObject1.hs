@@ -29,21 +29,28 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
+	data Different = MkDifferent;
+	
+	instance Eq Different where
+		{
+		_ == _ = False;
+		};
+
 	data CompleteObject r m =
-	 NilObject												|
+	 NilObject																|
 	 PairObject			(r (CompleteObject r m)) (r (CompleteObject r m))	|
-	 SymbolObject		Symbol								|
-	 ProcedureObject	(Procedure (CompleteObject r m) m)			|
-	 BooleanObject		Bool								|
-	 NumberObject		Number								|
-	 CharObject			Char								|
-	 ByteArrayObject	(SRefArray r Word8)					|
-	 StringObject		(SRefArray r Char)					|
-	 VoidObject												|
-	 VectorObject		(SRefArray r (CompleteObject r m))			|
-	 InputPortObject 	(InputPort Word8 m)					|
-	 OutputPortObject 	(OutputPort Word8 m)				|
-	 EnvironmentObject	(Environment r (CompleteObject r m) m)		;
+	 SymbolObject		Symbol												|
+	 ProcedureObject	(Procedure (CompleteObject r m) m) (r Different)	|
+	 BooleanObject		Bool												|
+	 NumberObject		Number												|
+	 CharObject			Char												|
+	 ByteArrayObject	(SRefArray r Word8)									|
+	 StringObject		(SRefArray r Char)									|
+	 VoidObject																|
+	 VectorObject		(SRefArray r (CompleteObject r m))					|
+	 InputPortObject 	(InputPort Word8 m)									|
+	 OutputPortObject 	(OutputPort Word8 m)								|
+	 EnvironmentObject	(Environment r (CompleteObject r m) m)				;
 
 	instance ListObject ref (CompleteObject ref m) where
 		{
@@ -385,13 +392,17 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 
 	instance MaybeA (Procedure (CompleteObject r m) m) (CompleteObject r m) where
 		{
-		maybeConvert (ProcedureObject a) = Just a;
+		maybeConvert (ProcedureObject a _) = Just a;
 		maybeConvert _ = Nothing;
 		};
 
 	instance ObjectSubtype r (CompleteObject r m) (Procedure (CompleteObject r m) m) where
 		{
-		getObject = return . ProcedureObject;
+		getObject proc = do
+			{
+			rd <- new MkDifferent;
+			return (ProcedureObject proc rd);
+			};
 		resultFromObject = getMaybeToMatch ProcedureTypeExpected (return . maybeConvert);
 		};
 
@@ -503,17 +514,7 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 	 (Eq1 r) =>
 	 Eq (CompleteObject r m) where
 		{
-		(NumberObject a) == (NumberObject b)	= a == b;
-		(PairObject ah at) == (PairObject bh bt)	= (eq1 ah bh) && (eq1 at bt);
-		(ByteArrayObject a) == (ByteArrayObject b)	= sameList eq1 (toList a) (toList b);
-		(StringObject a) == (StringObject b)	= sameList eq1 (toList a) (toList b);
-		(VectorObject a) == (VectorObject b)	= sameList eq1 (toList a) (toList b);
-		(BooleanObject a) == (BooleanObject b)	= a == b;
-		(SymbolObject a) == (SymbolObject b)	= a == b;
-		(CharObject a) == (CharObject b)	= a == b;
-		NilObject == NilObject		= True;
-		VoidObject == VoidObject	= True;
-		_ == _	= False;
+		(==) = eqv;
 		};
 
 	instance
@@ -521,8 +522,18 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 	 (Eq1 r) =>
 	 Eqv (CompleteObject r m) where
 		{
-		eqv (NumberObject a) (NumberObject b) = eqvNumber a b;
-		eqv a b = a == b;
+		eqv (NumberObject a) (NumberObject b)	= eqvNumber a b;
+		eqv (PairObject ah at) (PairObject bh bt)	= (eq1 ah bh) && (eq1 at bt);
+		eqv (ByteArrayObject a) (ByteArrayObject b)	= sameList eq1 (toList a) (toList b);
+		eqv (StringObject a) (StringObject b)	= sameList eq1 (toList a) (toList b);
+		eqv (VectorObject a) (VectorObject b)	= sameList eq1 (toList a) (toList b);
+		eqv (BooleanObject a) (BooleanObject b)	= a == b;
+		eqv (SymbolObject a) (SymbolObject b)	= a == b;
+		eqv (CharObject a) (CharObject b)	= a == b;
+		eqv (ProcedureObject _ rda) (ProcedureObject _ rdb)	= eq1 rda rdb;
+		eqv NilObject NilObject		= True;
+		eqv VoidObject VoidObject	= True;
+		eqv _ _	= False;
 		};
 
 	instance (Build cm r,
@@ -531,7 +542,6 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 		) =>
 	 Equal cm (CompleteObject r m) where
 		{
-		equal (NumberObject a) (NumberObject b) = return (equalNumber a b);
 		equal (PairObject ah at) (PairObject bh bt) = do
 			{
 			ahc <- get ah;
@@ -547,7 +557,7 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 		equal (VectorObject a) (VectorObject b) = sameSRefArray equal a b;
 		equal (ByteArrayObject a) (ByteArrayObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
 		equal (StringObject a) (StringObject b) = sameSRefArray (\a' b' -> return (a' == b')) a b;
-		equal a b = return (a == b);
+		equal a b = return (eqv a b);
 		};
 
 
@@ -620,7 +630,7 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 		toString VoidObject				= return "#<void>";
 		toString (InputPortObject _)	= return "#<input port>";
 		toString (OutputPortObject _)	= return "#<output port>";
-		toString (ProcedureObject _)	= return "#<procedure>";
+		toString (ProcedureObject _ _)	= return "#<procedure>";
 		toString (EnvironmentObject _)	= return "#<environment>";
 
 		toDisplay (CharObject c) = return [c];
