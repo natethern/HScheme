@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MacroLib.Load where
 	{
+	import Org.Org.Semantic.HScheme.MacroLib.Macros;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;

@@ -27,29 +27,25 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	class (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r a where
 		{
-		convertFromObjects' :: (?objType :: Type (Object r m)) => [Object r m] -> cm a;
+		maybeConvertFromObjects :: (?objType :: Type (Object r m)) => [Object r m] -> cm (Maybe a);
 		};
 
 	convertFromObjects :: (ArgumentList cm m r a,?objType :: Type (Object r m)) =>
 	 [Object r m] -> cm a;
-	convertFromObjects = convertFromObjects';
+	convertFromObjects args = do
+		{
+		ma <- maybeConvertFromObjects args;
+		case ma of
+			{
+			Just a -> return a;
+			Nothing -> throwArgError "arg-list-mismatch" args;
+			};
+		};
 
 	instance (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r () where
 		{
-		convertFromObjects' [] = return ();
-		convertFromObjects' (_:_) = throwSimpleError "too-many-args";
-		};
-
-	convertFromObject :: (Build cm r,MonadThrow (Object r m) cm,MonadMaybeA cm to (Object r m),?objType :: Type (Object r m)) =>
-	 (Object r m) -> cm to;
-	convertFromObject from = do
-		{
-		mto <- getMaybeConvert from;
-		case mto of
-			{
-			Just to -> return to;
-			Nothing -> throwArgError "wrong-type-arg" [from];
-			};
+		maybeConvertFromObjects [] = return (Just ());
+		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
 		};
 
 	instance
@@ -59,15 +55,12 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList cm m r (a,b) where
 		{
-		convertFromObjects' [] = do
+		maybeConvertFromObjects [] = return Nothing;	-- throwSimpleError "too-few-args";
+		maybeConvertFromObjects (obj:objs) = do
 			{
-			throwSimpleError "too-few-args";
-			};
-		convertFromObjects' (obj:objs) = do
-			{
-			a <- convertFromObject obj;
-			b <- convertFromObjects objs;
-			return (a,b);
+			ma <- getMaybeConvert obj;
+			mb <- maybeConvertFromObjects objs;
+			return (liftF2 (,) ma mb);
 			};
 		};
 
@@ -79,13 +72,13 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList cm m r (Maybe a) where
 		{
-		convertFromObjects' [] = return Nothing;
-		convertFromObjects' [obj] = do
+		maybeConvertFromObjects [] = return (Just Nothing);
+		maybeConvertFromObjects [obj] = do
 			{
-			a <- convertFromObject obj;
-			return (Just a);
+			ma <- getMaybeConvert obj;
+			return (fmap Just ma);
 			};
-		convertFromObjects' _ = throwSimpleError "too-many-args";
+		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
 		};
 
 	instance
@@ -96,12 +89,38 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		) =>
 	 ArgumentList cm m r [a] where
 		{
-		convertFromObjects' [] = return [];
-		convertFromObjects' (obj:objs) = do
+		maybeConvertFromObjects [] = return (Just []);
+		maybeConvertFromObjects (obj:objs) = do
 			{
-			a <- convertFromObject obj;
-			as <- convertFromObjects objs;
-			return (a:as);
+			ma <- getMaybeConvert obj;
+			mas <- maybeConvertFromObjects objs;
+			return (liftF2 (:) ma mas);
+			};
+		};
+
+	instance
+		(
+		ArgumentList cm m r a,
+		ArgumentList cm m r b
+		) =>
+	 ArgumentList cm m r (Either a b) where
+		{
+		maybeConvertFromObjects args = do
+			{
+			ma <- maybeConvertFromObjects args;
+			case ma of
+				{
+				Just a -> return (Just (Left a));
+				_ -> do
+					{
+					mb <- maybeConvertFromObjects args;
+					case mb of
+						{
+						Just b -> return (Just (Right b));
+						_ -> return Nothing;
+						};
+					};
+				};
 			};
 		};
 

@@ -50,23 +50,22 @@ module Org.Org.Semantic.HScheme.RunLib.NumericProcedures where
 
 	isZeroP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Number,()) -> m Bool;
-	isZeroP (n,()) = return (n == 0);
+	isZeroP (n,()) = return (isZero n);
 
-	unaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Number -> Number) ->
-	 (Number,()) -> m Number;
-	unaryP op (a,()) = return (op a);
+	rationalizeP :: (Monad m) =>
+	 (EIReal,(EIReal,())) -> m (Either Bool Rational);
+	rationalizeP (x,(y,_)) = return (case simplestRational (x - y) (x + y) of
+		{
+		Just r -> Right r;
+		Nothing -> Left False;
+		});
 
-	binaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Number -> Number -> Number) ->
-	 (Number,(Number,())) -> m Number;
-	binaryP op (a,(b,())) = return (op a b);
-
-	foldingLP :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (a -> Number -> a) ->
-	 a ->
-	 [Number] -> m a;
-	foldingLP op a ns = return (foldl op a ns);
+	eirMod :: EIReal -> EIReal -> EIReal;
+	eirMod n d = case maybeModulo d n of
+		{
+		Just a -> a;
+		Nothing -> nan;
+		};
 
 	inverterFoldingLP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Number -> Number -> Number) ->
@@ -74,12 +73,12 @@ module Org.Org.Semantic.HScheme.RunLib.NumericProcedures where
 	 (Number,[Number]) -> m Number;
 	inverterFoldingLP op a (n,[]) = return (op a n);
 	inverterFoldingLP op _ (n,ns) = return (foldl op n ns);
-	
+
 	subtractP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Number,[Number]) -> m Number;
 	subtractP = inverterFoldingLP (-) 0;
-{--	
+	
 	divideP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (Number,[Number]) -> m Number;
 	divideP = inverterFoldingLP (/) 1;
---}	}
+	}

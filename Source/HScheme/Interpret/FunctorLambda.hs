@@ -23,8 +23,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	(
 	FunctorLambda(..),RunnableFunctorLambda(..),
-	fSubst,fSubstMap,
-	fSubstMapSequential,fSubstMapSeparate,fSubstMapRecursive
+	exprAbstractMap,
+	exprAbstractList,exprAbstractListMap,
+	exprAbstractListGuarded,exprAbstractListGuardedMap,
+	exprLet,exprLetMap,
+	exprLetMapSequential,exprLetMapSeparate,exprLetMapRecursive
 	) where
 	{
 	import Org.Org.Semantic.HBase;
@@ -36,23 +39,77 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	class (Eq sym,FunctorApplyReturn f) =>
 	 FunctorLambda sym val f | f -> sym val where
 		{
-		fSymbol :: sym -> f val;
-		fAbstract :: sym -> f a -> f (val -> a);
+		exprSymbol :: sym -> f val;
+		exprAbstract :: sym -> f r -> f (val -> r);
 		};
 
-	fSubst :: (FunctorLambda sym val f) =>
-	 sym -> f val -> f r -> f r;
-	fSubst sym valueExpr bodyExpr = fApply (fAbstract sym bodyExpr) valueExpr;
+	exprAbstractMap :: (FunctorLambda sym val f) =>
+	 ((val -> r) -> a -> r) ->
+	 sym -> f r -> f (a -> r);
+	exprAbstractMap map sym expr = fmap map (exprAbstract sym expr);
 
-	fSubstMap :: (FunctorLambda sym val f) =>
-	 ((val -> r) -> a -> r) -> sym -> f a -> f r -> f r;
-	fSubstMap map sym valueExpr bodyExpr = liftF2 map (fAbstract sym bodyExpr) valueExpr;
+	-- lists always the same size
+	exprAbstractList :: (FunctorLambda sym val f) =>
+	 [sym] -> f r -> f ([val] -> r);
+	exprAbstractList [] fr = fmap (\r [] -> r) fr;
+	exprAbstractList (sym:syms) fr =
+	 fmap (\valvalsr (val:vals) -> valvalsr val vals) (exprAbstract sym (exprAbstractList syms fr));
+
+	-- lists always the same size
+	exprAbstractListMap :: (FunctorLambda sym val f) =>
+	 ((val -> r) -> a -> r) ->
+	 [sym] -> f r -> f ([a] -> r);
+	exprAbstractListMap map [] fr = fmap (\r [] -> r) fr;
+	exprAbstractListMap map (sym:syms) fr =
+	 fmap (\valasr (a:as) -> map (\val -> valasr val as) a) (exprAbstract sym (exprAbstractListMap map syms fr));
+
+	exprAbstractListGuarded :: (FunctorLambda sym val f) =>
+	 r ->
+	 ([val] -> r) ->
+	 [sym] -> f r -> f ([val] -> r);
+	exprAbstractListGuarded tooFewArgs tooManyArgs [] fr = fmap (\r args -> case args of
+		{
+		[] -> r;
+		_ -> tooManyArgs args;
+		}) fr;
+	exprAbstractListGuarded tooFewArgs tooManyArgs (sym:syms) fr =
+	 fmap (\valvalsr args -> case args of
+		{
+		(val:vals) -> valvalsr val vals;
+		[] -> tooFewArgs;
+		}) (exprAbstract sym (exprAbstractListGuarded tooFewArgs tooManyArgs syms fr));
+
+	exprAbstractListGuardedMap :: (FunctorLambda sym val f) =>
+	 ((val -> r) -> a -> r) ->
+	 r ->
+	 ([a] -> r) ->
+	 [sym] -> f r -> f ([a] -> r);
+	exprAbstractListGuardedMap map tooFewArgs tooManyArgs [] fr = fmap (\r args -> case args of
+		{
+		[] -> r;
+		_ -> tooManyArgs args;
+		}) fr;
+	exprAbstractListGuardedMap map tooFewArgs tooManyArgs (sym:syms) fr =
+	 fmap (\valasr args -> case args of
+		{
+		(a:as) -> map (\val -> valasr val as) a;
+		[] -> tooFewArgs;
+		}) (exprAbstract sym (exprAbstractListGuardedMap map tooFewArgs tooManyArgs syms fr));
+
+	exprLet :: (FunctorLambda sym val f) =>
+	 sym -> f val -> f r -> f r;
+	exprLet sym valueExpr bodyExpr = fApply (exprAbstract sym bodyExpr) valueExpr;
+
+	exprLetMap :: (FunctorLambda sym val f) =>
+	 ((val -> r) -> a -> r) ->
+	 sym -> f a -> f r -> f r;
+	exprLetMap map sym valueExpr bodyExpr = liftF2 map (exprAbstract sym bodyExpr) valueExpr;
 
 	-- | substs are actually done in reverse order
-	fSubstMapSequential :: (FunctorLambda sym val f) =>
+	exprLetMapSequential :: (FunctorLambda sym val f) =>
 	 ((val -> r) -> a -> r) -> [(sym,f a)] -> f r -> f r;
-	fSubstMapSequential _ [] bodyExpr = bodyExpr;
-	fSubstMapSequential map ((sym,valueExpr):binds) bodyExpr = fSubstMap map sym valueExpr (fSubstMapSequential map binds bodyExpr);
+	exprLetMapSequential _ [] bodyExpr = bodyExpr;
+	exprLetMapSequential map ((sym,valueExpr):binds) bodyExpr = exprLetMap map sym valueExpr (exprLetMapSequential map binds bodyExpr);
 
 
 	-- RunnableFunctorLambda
@@ -81,7 +138,7 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 
 	instance ExtractableFunctor ZeroList where
 		{
-		fExtract _ = return' MkZeroList;
+		fExtract _ = return MkZeroList;
 		};
 
 	instance (ExtractableFunctor t) => ExtractableFunctor (NextList t) where
@@ -103,7 +160,7 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 		{
 		(MkMutualBindings bindValues abstracter) -> MkMutualBindings
 		 (MkNextList fval bindValues)
-		 (\body -> fmap (\atar ~(MkNextList a ta) -> atar a ta) ((fAbstract sym) (abstracter body)));
+		 (\body -> fmap (\atar ~(MkNextList a ta) -> atar a ta) ((exprAbstract sym) (abstracter body)));
 		};
 
 	applyMutualBindingsSeparate :: (FunctorApplyReturn f) =>
@@ -112,10 +169,10 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	applyMutualBindingsSeparate separater (MkMutualBindings bindValues abstracter) body =
 	 liftF2 separater (fExtract bindValues) (abstracter body);
 
-	fSubstMapSeparate :: (FunctorLambda sym val f) =>
+	exprLetMapSeparate :: (FunctorLambda sym val f) =>
 	 (forall t. (ExtractableFunctor t) => t a -> (t val -> r) -> r) ->
 	 [(sym,f a)] -> f r -> f r;
-	fSubstMapSeparate separater bindings = applyMutualBindingsSeparate separater (makeMutualBindings bindings);
+	exprLetMapSeparate separater bindings = applyMutualBindingsSeparate separater (makeMutualBindings bindings);
 
 	applyMutualBindingsRecursive :: (FunctorApplyReturn f) =>
 	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
@@ -123,8 +180,8 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	applyMutualBindingsRecursive fixer (MkMutualBindings bindValues abstracter) body =
 	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
 
-	fSubstMapRecursive :: (FunctorLambda sym val f) =>
+	exprLetMapRecursive :: (FunctorLambda sym val f) =>
 	 (forall t. (ExtractableFunctor t) => t (t val -> a) -> (t val -> r) -> r) ->
 	 [(sym,f a)] -> f r -> f r;
-	fSubstMapRecursive fixer bindings = applyMutualBindingsRecursive fixer (makeMutualBindings bindings);
+	exprLetMapRecursive fixer bindings = applyMutualBindingsRecursive fixer (makeMutualBindings bindings);
 	}

@@ -28,6 +28,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	mustMatch,makeLambda
 	) where
 	{
+	import Org.Org.Semantic.HScheme.Interpret.Abstract;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HScheme.Core;
@@ -38,6 +39,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 LiteralExpected Symbol		|
 	 NullExpected				|
 	 PairTypeExpected			|
+	 ListExpected				|
 	 VectorTypeExpected			|
 	 VectorLengthExpected Int	;
 	
@@ -46,6 +48,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		show (LiteralExpected sym) = show sym;
 		show NullExpected = "()";
 		show PairTypeExpected = "( . )";
+		show ListExpected = "(...)";
 		show VectorTypeExpected = "(# ...)";
 		show (VectorLengthExpected i) = "(# ...) length " ++ (show i);
 		};
@@ -80,6 +83,72 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		};
 
 	type SchemePattern pm r m = Pattern pm (MatchMonad r m) (Object r m);
+
+	makeEllipsisPatternFunc' ::
+		(
+-- 		BuildThrow cm (Object r m) r,
+		Build pm r,
+		?objType :: Type (Object r m)
+		) =>
+	 [Symbol] ->
+	 (Object r m -> pm (MatchMonad r m [Object r m])) ->
+	 ([Object r m] -> pm (MatchMonad r m [Object r m]));
+	makeEllipsisPatternFunc' syms func [] = return (return (fmap (\_ -> NilObject) syms));
+	makeEllipsisPatternFunc' syms func (a:as) = do
+		{
+		mm <- func a;
+		mms <- makeEllipsisPatternFunc' syms func as;
+		fExtract (foo mm mms);
+		};
+
+	foo ::
+		(
+ --		BuildThrow cm (Object r m) r,
+		Build pm r,
+		?objType :: Type (Object r m)
+		) =>
+	 MatchMonad r m [Object r m] ->
+	 MatchMonad r m [Object r m] ->
+	 MatchMonad r m (pm [Object r m]);
+	foo mm mms = do
+		{
+		objs <- mm;
+		objrs <- mms;
+		return (fExtract (bar objs objrs));
+		};
+
+	bar ::
+		(
+ --		BuildThrow cm (Object r m) r,
+		Build pm r,
+		?objType :: Type (Object r m)
+		) =>
+	 [Object r m] ->
+	 [Object r m] ->
+	 [pm (Object r m)];
+	bar objs objrs = fmap (\(obj,objr) -> getConvert (obj,objr)) (zip objs objrs);
+
+	makeEllipsisPatternFunc ::
+		(
+-- 		BuildThrow cm (Object r m) r,
+		Build pm r,
+		?objType :: Type (Object r m)
+		) =>
+	 [Symbol] ->
+	 (Object r m -> pm (MatchMonad r m [Object r m])) ->
+	 (Object r m -> pm (MatchMonad r m [Object r m]));
+	makeEllipsisPatternFunc syms func subject = do
+		{
+		msubjs <- getMaybeConvert subject;
+		case msubjs of
+			{
+			Just subjs -> makeEllipsisPatternFunc' syms func subjs;
+			Nothing -> mismatch ListExpected subject;
+			};
+		};
+
+	ellipsisSymbol :: Symbol;
+	ellipsisSymbol = MkSymbol "...";
 
 	makeObjectPattern ::
 		(
@@ -117,26 +186,35 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		{
 		Just (hobj,tobj) <- getMaybeConvert pobj;
 		MkPattern hsyms hfunc <- makeObjectPattern literals hobj;
-		MkPattern tsyms tfunc <- makeObjectPattern literals tobj;
-		return (MkPattern (hsyms ++ tsyms) (\subj -> do
+		mellipsis <- getMaybeConvert tobj;
+		case mellipsis of
 			{
-			msubj <- getMaybeConvert subj;
-			case msubj of
+			Just (sym,()) | sym == ellipsisSymbol ->
+			 return (MkPattern hsyms (makeEllipsisPatternFunc hsyms hfunc));
+			_ -> do
 				{
-				Nothing -> mismatch PairTypeExpected subj;
-				Just (hsubj,tsubj) -> do
+				MkPattern tsyms tfunc <- makeObjectPattern literals tobj;
+				return (MkPattern (hsyms ++ tsyms) (\subj -> do
 					{
-					nhres <- hfunc hsubj;
-					ntres <- tfunc tsubj;
-					return (do
+					msubj <- getMaybeConvert subj;
+					case msubj of
 						{
-						hres <- nhres;
-						tres <- ntres;
-						return (hres ++ tres)
-						});
-					};
+						Nothing -> mismatch PairTypeExpected subj;
+						Just (hsubj,tsubj) -> do
+							{
+							nhres <- hfunc hsubj;
+							ntres <- tfunc tsubj;
+							return (do
+								{
+								hres <- nhres;
+								tres <- ntres;
+								return (hres ++ tres)
+								});
+							};
+						};
+					}));
 				};
-			}));
+			};
 		};
 	makeObjectPattern _ obj = throwArgError "bad-pattern" [obj];
 
@@ -159,13 +237,6 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 			}));
 		};
 
-	-- lists always the same size
-	fAbstractList :: (FunctorLambda sym val f) =>
-	 [sym] -> f r -> f ([val] -> r);
-	fAbstractList [] fr = fmap (\r [] -> r) fr;
-	fAbstractList (sym:syms) fr =
-	 fmap (\valvalsr (val:vals) -> valvalsr val vals) (fAbstract sym (fAbstractList syms fr));
-
 	patternBind ::
 		(
 		Monad pm,
@@ -183,11 +254,12 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 		vals <- matchvals;
 			return (do
 				{
-	 			locs <- fExtract (fmap new vals);
-				valsmobj locs;
+--	 			locs <- fExtract (fmap new vals);
+--				valsmobj locs;
+				valsmobj vals;
 				});
 			});
-		}) (fAbstractList syms bodyExpr);
+		}) (schemeExprAbstractList syms bodyExpr);
 
 	mustMatch :: 
 		(

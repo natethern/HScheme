@@ -78,6 +78,10 @@
 (define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
 (define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
 
+(define length (lambda (x)
+	(if (null? x) 0 (+ (length (cdr x)) 1))
+))
+
 (define reverse (lambda (x)       
 	(if (null? x) x (append (reverse (cdr x)) (list (car x))))
 ))
@@ -163,12 +167,101 @@
 	(>= (char->integer (char-upcase a)) (char->integer (char-upcase b)))
 ))
 
+(define char-numeric? (lambda (c)
+	(if (char-number c) #t #f)
+))
+
 
 ; 6.3.5 Strings
 (define string-copy (lambda (s)
 	(string-append s)
 ))
 
+(define string-same? (lambda (e sa sb)
+	(define len (string-length sa))
+	(and (= len (string-length sb))
+		(let loop ((k 0))
+			(or (= k len)
+				(and
+					(e (string-ref sa k) (string-ref sb k))
+					(loop (+ k 1))
+				)
+			)
+		)
+	)
+))
+
+(define string-strict-order? (lambda (e f sa sb)
+	(define la (string-length sa))
+	(define lb (string-length sa))
+	(let loop ((k 0))
+		(and (not (= k lb))
+			(or (= k la)
+				(or (f (string-ref sa k) (string-ref sb k))
+					(and (e (string-ref sa k) (string-ref sb k))
+						(loop (+ k 1))
+					)
+				)
+			)
+		)
+	)
+))
+
+(define string-inclusive-order? (lambda (e f sa sb)
+	(define la (string-length sa))
+	(define lb (string-length sa))
+	(let loop ((k 0))
+		(or (= k la)
+			(and (not (= k lb))
+				(or (f (string-ref sa k) (string-ref sb k))
+					(and (e (string-ref sa k) (string-ref sb k))
+						(loop (+ k 1))
+					)
+				)
+			)
+		)
+	)
+))
+
+(define string=? (lambda (sa sb)
+	(string-same? char=? sa sb)
+))
+
+(define string<? (lambda (sa sb)
+	(string-strict-order? char=? char<? sa sb)
+))
+
+(define string>? (lambda (sa sb)
+	(string-strict-order? char=? char>? sa sb)
+))
+
+(define string<=? (lambda (sa sb)
+	(string-inclusive-order? char=? char<? sa sb)
+))
+
+(define string>=? (lambda (sa sb)
+	(string-inclusive-order? char=? char>? sa sb)
+))
+
+(define string-ci=? (lambda (sa sb)
+	(string-same? char-ci=? sa sb)
+))
+
+(define string-ci<? (lambda (sa sb)
+	(string-strict-order? char-ci=? char-ci<? sa sb)
+))
+
+(define string-ci>? (lambda (sa sb)
+	(string-strict-order? char-ci=? char-ci>? sa sb)
+))
+
+(define string-ci<=? (lambda (sa sb)
+	(string-inclusive-order? char-ci=? char-ci<? sa sb)
+))
+
+(define string-ci>=? (lambda (sa sb)
+	(string-inclusive-order? char-ci=? char-ci>? sa sb)
+))
 
 ; Byte Arrays
 (define byte-array-copy (lambda (s)
@@ -212,7 +305,6 @@
 		)
 	))
 )))
-
 
 ;
 ;(define null-environment (let ((env (current-environment)))

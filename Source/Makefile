@@ -91,8 +91,10 @@ LIB_HC_SRCS			= \
 	$(HIER)/Interpret/ListSymbolExpression.hs	\
 	$(HIER)/Interpret/FuncSymbolExpression.hs	\
 	$(HIER)/Interpret/Assemble.hs	\
+	$(HIER)/Interpret/Abstract.hs	\
 	$(HIER)/Interpret/Pattern.hs	\
 	$(HIER)/Interpret/TopLevel.hs	\
+	$(HIER)/Interpret/Binder.hs	\
 	$(HIER)/Interpret/Interpret.hs	\
 	$(HIER)/Interpret/Evaluate.hs	\
 	$(HIER)/Interpret.hs	\
@@ -516,6 +518,16 @@ Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Int
 Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.q_hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Interpret/FuncSymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.o Org/Org/Semantic/HScheme/Interpret/Abstract.q_o Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : Org/Org/Semantic/HScheme/Interpret/Abstract.hs
+Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.q_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
+Org/Org/Semantic/HScheme/Interpret/Abstract.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
 Org/Org/Semantic/HScheme/Interpret/Pattern.o Org/Org/Semantic/HScheme/Interpret/Pattern.q_o Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : Org/Org/Semantic/HScheme/Interpret/Pattern.hs
 Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -526,19 +538,29 @@ Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Inte
 Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.q_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.p_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/TopLevel.hs
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.q_hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.q_hi
-Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.p_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.o Org/Org/Semantic/HScheme/Interpret/Binder.q_o Org/Org/Semantic/HScheme/Interpret/Binder.p_o : Org/Org/Semantic/HScheme/Interpret/Binder.hs
+Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.q_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.hi
+Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.q_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.p_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.hi
+Org/Org/Semantic/HScheme/Interpret/Binder.q_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.q_hi
+Org/Org/Semantic/HScheme/Interpret/Binder.p_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.p_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.o Org/Org/Semantic/HScheme/Interpret/Interpret.q_o Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/Interpret.hs
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -581,12 +603,18 @@ Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Fu
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.hi
+Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.q_hi
+Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Abstract.p_hi
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.p_hi
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Binder.hi
+Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Binder.q_hi
+Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Binder.p_hi
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Interpret.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Interpret.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Interpret.p_hi
@@ -614,6 +642,9 @@ Org/Org/Semantic/HScheme/MacroLib/Load.p_o : ./Org/Org/Semantic/HScheme/Core.p_h
 Org/Org/Semantic/HScheme/MacroLib/Load.o : ./Org/Org/Semantic/HScheme/Interpret.hi
 Org/Org/Semantic/HScheme/MacroLib/Load.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
 Org/Org/Semantic/HScheme/MacroLib/Load.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Load.o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.hi
+Org/Org/Semantic/HScheme/MacroLib/Load.q_o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.q_hi
+Org/Org/Semantic/HScheme/MacroLib/Load.p_o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.p_hi
 Org/Org/Semantic/HScheme/MacroLib.o Org/Org/Semantic/HScheme/MacroLib.q_o Org/Org/Semantic/HScheme/MacroLib.p_o : Org/Org/Semantic/HScheme/MacroLib.hs
 Org/Org/Semantic/HScheme/MacroLib.o : ./Org/Org/Semantic/HScheme/MacroLib/Syntax.hi
 Org/Org/Semantic/HScheme/MacroLib.q_o : ./Org/Org/Semantic/HScheme/MacroLib/Syntax.q_hi

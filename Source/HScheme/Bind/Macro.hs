@@ -40,21 +40,24 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 	macroBindings = concatenateList
 		[
 		-- 4.1.2 Literal Expressions
-		addMacroBinding	"quote"					quoteM,
+		addMacroBinding	"quote"				quoteM,
 
 		-- 4.1.4 Procedures
-		addMacroBinding	"lambda"				lambdaM,
+		addMacroBinding	"lambda"			lambdaM,
 
 		-- 4.1.5 Conditionals
-		addMacroBinding	"if"					ifM,
+		addMacroBinding	"if"				ifM,
 
 		-- 4.2.2 Binding Constructs
-		addMacroBinding	"let"					letSeparateM,
-		addMacroBinding	"let*"					letSequentialM,
-		addMacroBinding	"letrec"				letRecursiveM,
+		addMacroBinding	"let"				(addM letSeparateM namedLetM),
+		addMacroBinding	"let*"				letSequentialM,
+		addMacroBinding	"letrec"			letRecursiveM,
+
+		-- 4.2.4 Iteration
+--		addMacroBinding	"do"				doM,
 
 		-- Misc
-		addMacroBinding	"case-match"			caseMatchM		-- nonstandard
+		addMacroBinding	"case-match"		caseMatchM		-- nonstandard
 		];
 
 	pureMacroBindings ::

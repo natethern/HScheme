@@ -366,34 +366,34 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance (Monad cm) => MonadSubtype cm (Object r m) Number;
 
 
-	-- Integer
+	-- EIReal
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Integer where
+	instance (Monad cm) => MonadIsA cm (Object r m) EIReal where
 		{
 		getConvert i = getConvert (convert i :: Number);
 		};
 
-	instance (Monad cm) => MonadMaybeA cm Integer (Object r m) where
+	instance (Monad cm) => MonadMaybeA cm EIReal (Object r m) where
 		{
 		getMaybeConvert obj = do
 			{
 			mn <- getMaybeConvert obj;
 			return (do
 				{
-				(n :: Number) <- mn;
+				(n ::Number) <- mn;
 				maybeConvert n;
 				});
 			};
 		};
 
-	instance (Monad cm) => MonadSubtype cm (Object r m) Integer;
+	instance (Monad cm) => MonadSubtype cm (Object r m) EIReal;
 
 
 	-- Rational
 
 	instance (Monad cm) => MonadIsA cm (Object r m) Rational where
 		{
-		getConvert i = getConvert (convert i :: Number);
+		getConvert i = getConvert (convert i :: EIReal);
 		};
 
 	instance (Monad cm) => MonadMaybeA cm Rational (Object r m) where
@@ -403,7 +403,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			mn <- getMaybeConvert obj;
 			return (do
 				{
-				(n :: Number) <- mn;
+				(n :: EIReal) <- mn;
 				maybeConvert n;
 				});
 			};
@@ -412,11 +412,34 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	instance (Monad cm) => MonadSubtype cm (Object r m) Rational;
 
 
+	-- Integer
+
+	instance (Monad cm) => MonadIsA cm (Object r m) Integer where
+		{
+		getConvert i = getConvert (convert i :: EIReal);
+		};
+
+	instance (Monad cm) => MonadMaybeA cm Integer (Object r m) where
+		{
+		getMaybeConvert obj = do
+			{
+			mn <- getMaybeConvert obj;
+			return (do
+				{
+				(n :: EIReal) <- mn;
+				maybeConvert n;
+				});
+			};
+		};
+
+	instance (Monad cm) => MonadSubtype cm (Object r m) Integer;
+
+
 	-- Int
 
 	instance (Monad cm) => MonadIsA cm (Object r m) Int where
 		{
-		getConvert i = getConvert (convert (convertFromInt i :: Integer) :: Number);
+		getConvert i = getConvert (convert i :: Integer);
 		};
 
 	instance (Monad cm) => MonadMaybeA cm Int (Object r m) where
@@ -426,9 +449,8 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			mn <- getMaybeConvert obj;
 			return (do
 				{
-				(n :: Number) <- mn;
-				(i :: Integer) <- maybeConvert n;
-				maybeConvert i;
+				(n :: Integer) <- mn;
+				maybeConvert n;
 				});
 			};
 		};
@@ -440,7 +462,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 
 	instance (Monad cm) => MonadIsA cm (Object r m) Word8 where
 		{
-		getConvert i = getConvert (convert (convert i :: Integer) :: Number);
+		getConvert i = getConvert (convert i :: Integer);
 		};
 
 	instance (Monad cm) => MonadMaybeA cm Word8 (Object r m) where
@@ -450,9 +472,8 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			mn <- getMaybeConvert obj;
 			return (do
 				{
-				(n :: Number) <- mn;
-				(i :: Integer) <- maybeConvert n;
-				maybeConvert i;
+				(n :: Integer) <- mn;
+				maybeConvert n;
 				});
 			};
 		};

@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression(FuncSymbolExpress
 
 	instance HasReturn (FuncSymbolExpression sym val) where
 		{
-		return' a = MkFuncSymbolExpression (const a);
+		return a = MkFuncSymbolExpression (const a);
 		};
 
 	instance Functor (FuncSymbolExpression sym val) where
@@ -46,9 +46,9 @@ module Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression(FuncSymbolExpress
 
 	instance (Eq sym) => FunctorLambda sym val (FuncSymbolExpression sym val) where
 		{
-		fSymbol sym = MkFuncSymbolExpression (\sv -> sv sym);
+		exprSymbol sym = MkFuncSymbolExpression (\sv -> sv sym);
 
-		fAbstract abssym (MkFuncSymbolExpression sva) = MkFuncSymbolExpression (\sv v -> sva (\s -> if s == abssym then v else sv s));
+		exprAbstract abssym (MkFuncSymbolExpression sva) = MkFuncSymbolExpression (\sv v -> sva (\s -> if s == abssym then v else sv s));
 		};
 
 	instance (Eq sym) => RunnableFunctorLambda sym val (FuncSymbolExpression sym val) where

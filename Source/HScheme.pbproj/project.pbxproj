@@ -5,6 +5,41 @@
 	};
 	objectVersion = 38;
 	objects = {
+		AB4CB45704B819E300A80103 = {
+			buildArgumentsString = "./make $ACTION$PRODUCT_NAME";
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = depend;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/env;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = Dependencies;
+			passBuildSettingsInEnvironment = 1;
+			productName = Dependencies;
+			settingsToExpand = 6;
+			settingsToPassInEnvironment = 287;
+			settingsToPassOnCommandLine = 280;
+		};
+		AB4CB45804B81D3500A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = Abstract.hs;
+			refType = 4;
+		};
+		AB4CB45904B81E6200A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = Binder.hs;
+			refType = 4;
+		};
 		ABAD36B804A4020700A80103 = {
 			children = (
 				ABAD378F04A403EE00A80103,
@@ -47,6 +82,7 @@
 			mainGroup = ABAD36B804A4020700A80103;
 			projectDirPath = "";
 			targets = (
+				AB4CB45704B819E300A80103,
 				ABAD36C004A4029400A80103,
 				ABAD37B404A40F0D00A80103,
 				ABAD37B504A40F3E00A80103,
@@ -71,7 +107,7 @@
 			name = Everything;
 		};
 		ABAD36C004A4029400A80103 = {
-			buildArgumentsString = $ACTION$STYLE;
+			buildArgumentsString = "./make $ACTION$STYLE";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -82,7 +118,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /usr/bin/gnumake;
+			buildToolPath = /usr/bin/env;
 			buildWorkingDirectory = .;
 			dependencies = (
 			);
@@ -289,8 +325,10 @@
 				ABAD376B04A403EE00A80103,
 				ABAD376804A403EE00A80103,
 				ABAD376604A403EE00A80103,
+				AB4CB45804B81D3500A80103,
 				ABAD376C04A403EE00A80103,
 				ABAD376E04A403EE00A80103,
+				AB4CB45904B81E6200A80103,
 				ABAD376A04A403EE00A80103,
 				ABAD376704A403EE00A80103,
 				ABAD376F04A403EE00A80103,
@@ -564,6 +602,8 @@
 				ABAD37B104A403EE00A80103,
 				ABB6927C04A4677500A80103,
 				ABB6927D04A4678C00A80103,
+				ABC9354304B3FD4A00A80103,
+				ABC9354404B4054F00A80103,
 			);
 			isa = PBXGroup;
 			path = test;
@@ -747,8 +787,8 @@
 		};
 		ABAD37B204A4051F00A80103 = {
 			children = (
-				ABAD378C04A403EE00A80103,
 				ABAD378D04A403EE00A80103,
+				ABAD378C04A403EE00A80103,
 			);
 			isa = PBXGroup;
 			name = Inits;
@@ -765,7 +805,7 @@
 			refType = 4;
 		};
 		ABAD37B404A40F0D00A80103 = {
-			buildArgumentsString = $ACTION$PRODUCT_NAME$STYLE;
+			buildArgumentsString = "./make $ACTION$PRODUCT_NAME$STYLE";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -776,7 +816,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /usr/bin/gnumake;
+			buildToolPath = /usr/bin/env;
 			dependencies = (
 			);
 			isa = PBXLegacyTarget;
@@ -788,7 +828,7 @@
 			settingsToPassOnCommandLine = 280;
 		};
 		ABAD37B504A40F3E00A80103 = {
-			buildArgumentsString = $ACTION$PRODUCT_NAME;
+			buildArgumentsString = "./make $ACTION$PRODUCT_NAME";
 			buildPhases = (
 			);
 			buildSettings = {
@@ -799,7 +839,7 @@
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 			};
-			buildToolPath = /usr/bin/gnumake;
+			buildToolPath = /usr/bin/env;
 			buildWorkingDirectory = .;
 			dependencies = (
 			);
@@ -820,6 +860,18 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			path = vector.scm.ref;
+			refType = 4;
+		};
+		ABC9354304B3FD4A00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "report-examples.scm";
+			refType = 4;
+		};
+		ABC9354404B4054F00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "report-examples.scm.ref";
 			refType = 4;
 		};
 	};

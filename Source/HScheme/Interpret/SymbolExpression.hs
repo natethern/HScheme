@@ -30,7 +30,7 @@ module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) whe
 
 	instance HasReturn (SymbolExpression sym val) where
 		{
-		return' = ClosedSymbolExpression;
+		return = ClosedSymbolExpression;
 		};
 
 	instance Functor (SymbolExpression sym val) where
@@ -43,16 +43,16 @@ module Org.Org.Semantic.HScheme.Interpret.SymbolExpression(SymbolExpression) whe
 		{
 		fApply (ClosedSymbolExpression ab) rda = fmap ab rda;
 		fApply (OpenSymbolExpression sym rdoab) rda = 
-			OpenSymbolExpression sym (fApply (fmap (\oab oa o -> oab o (oa o)) rdoab) (fAbstract sym rda));
+			OpenSymbolExpression sym (fApply (fmap (\oab oa o -> oab o (oa o)) rdoab) (exprAbstract sym rda));
 		};
 
 	instance (Eq sym) => FunctorLambda sym val (SymbolExpression sym val) where
 		{
-		fSymbol sym = OpenSymbolExpression sym (ClosedSymbolExpression id);
+		exprSymbol sym = OpenSymbolExpression sym (ClosedSymbolExpression id);
 
-		fAbstract sym (ClosedSymbolExpression a) = ClosedSymbolExpression (const a);
-		fAbstract sym (OpenSymbolExpression sym' sp) | sym == sym' = sp;
-		fAbstract sym (OpenSymbolExpression sym' sp) = OpenSymbolExpression sym' (fmap (\a val' val -> a val val') (fAbstract sym sp));
+		exprAbstract sym (ClosedSymbolExpression a) = ClosedSymbolExpression (const a);
+		exprAbstract sym (OpenSymbolExpression sym' sp) | sym == sym' = sp;
+		exprAbstract sym (OpenSymbolExpression sym' sp) = OpenSymbolExpression sym' (fmap (\a val' val -> a val val') (exprAbstract sym sp));
 		};
 
 	instance (Eq sym) => RunnableFunctorLambda sym val (SymbolExpression sym val) where

@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 	{
 	import Org.Org.Semantic.HBase;
 	
-	type Number = Complex Rational;
+	type Number = Complex EIReal;
 	
 	equalNumber :: Number -> Number -> Bool;
 	equalNumber = (==);
@@ -36,14 +36,41 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 	eqNumber = (==);
 	
 	isExactN :: Number -> Bool;
-	isExactN = const True;
+	isExactN (ExactReal _ :+ ExactReal _) = True;
+	isExactN _ = False;
+
+	toInexactN :: Number -> Number;
+	toInexactN n = (convert (convert n :: Complex Double));
+
+	toExactN :: Number -> Number;
+	toExactN n = case maybeConvert n of
+		{
+		Just (cir :: Complex (InfExtended Rational)) -> convert cir;
+		Nothing -> nan;
+		};
+
+	isIntegerN :: Number -> Bool;
+	isIntegerN n = isJust (do
+		{
+		(eir :: EIReal) <- maybeConvert n;
+		(i :: Integer) <- maybeConvert eir;
+		return ();
+		});
 
 	showRational :: Rational -> String;
 	showRational r | (denominator r ==1) = show (numerator r);
 	showRational r = (show (numerator r)) ++"%"++ (show (denominator r));
 
+	showInfRational :: InfExtended Rational -> String;
+	showInfRational Infinity = "infinity";
+	showInfRational (Finite r) = showRational r;
+
+	showEIReal :: EIReal -> String;
+	showEIReal (ExactReal ir) = showInfRational ir;
+	showEIReal (InexactReal d) = show d;
+
 	showNumber :: Number -> String;
-	showNumber (r :+ i) | i == zero = showRational r;
-	showNumber (r :+ i) | r == zero = (showRational i) ++ "i";
-	showNumber (r :+ i) = (showRational r) ++ "+" ++ (showRational i) ++ "i";
+	showNumber (r :+ i) | isZero i = showEIReal r;
+	showNumber (r :+ i) | isZero r = (showEIReal i) ++ "i";
+	showNumber (r :+ i) = (showEIReal r) ++ "+" ++ (showEIReal i) ++ "i";
 	}

@@ -111,7 +111,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 Object r m -> cm (ObjectSchemeExpression r m);
-	assembleExpression (SymbolObject sym) = return (fmap get (fSymbol sym));
+	assembleExpression (SymbolObject sym) = return (fmap get (exprSymbol sym));
 	assembleExpression (PairObject head tail) = do
 		{
 		h <- get head;
@@ -141,11 +141,11 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		};
 	assembleExpression a = case a of
 		{
-		BooleanObject _ -> return (return' (return a));
-		NumberObject _ -> return (return' (return a));
-		CharObject _ -> return (return' (return a));
-		StringObject _ -> return (return' (return a));
-		ByteArrayObject _ -> return (return' (return a));
+		BooleanObject _ -> return (return (return a));
+		NumberObject _ -> return (return (return a));
+		CharObject _ -> return (return (return a));
+		StringObject _ -> return (return (return a));
+		ByteArrayObject _ -> return (return (return a));
 		_ -> throwArgError "cant-evaluate-form" [a];
 		};
 	}

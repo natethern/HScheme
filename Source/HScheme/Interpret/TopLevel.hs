@@ -23,126 +23,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	(
 	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro(..),TopLevelBinder(..),
-	assembleTopLevelExpression,assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList,
-	setBinder,recursiveBinder,
-	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
-	pureDefineT,fullDefineT,
-	beginT,bodyM,bodyListM,
+	begin,
+	assembleTopLevelExpression,assembleTopLevelExpressions,
+	assembleTopLevelExpressionsEat,assembleTopLevelExpressionsList
 	) where
 	{
-	import Org.Org.Semantic.HScheme.Interpret.Pattern;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
-	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
+--	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
-
-{--
-	-- deep Haskell magic
-	data ThingySingle m f obj a = forall b. MkThingySingle
-	  ((b -> m obj) -> obj -> (a -> m obj))
-	  (f (a -> m obj) -> f (b -> m obj));
-
-	getThingySingle :: 
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
-		) =>
-	 Object r m -> cm (ThingySingle m (SchemeExpression r m) (Object r m) a);
-	-- b = a
-	getThingySingle NilObject = return (MkThingySingle (\f obj a -> do
-		{
-		mobj <- getMaybeConvert obj;
-		case mobj of
-			{
-			Nothing -> throwArgError "extra-arguments" [obj];
-			Just (_ :: ()) -> f a;
-			};
-		}) id);
-	-- b = p2 (p1 a)
-	getThingySingle (PairObject l1 l2) = do
-		{
-		o1 <- get l1;
-		o2 <- get l2;
-		MkThingySingle map1 bindSyms1 <- getThingySingle o1;
-		MkThingySingle map2 bindSyms2 <- getThingySingle o2;
-		return (MkThingySingle (\f obj a -> do
-			{
-			mobj <- getMaybeConvert obj;
-			case mobj of
-				{
-				Nothing -> throwArgError "missing-arguments" [];
-				Just (p1,p2) -> (map1 (map2 f p2) p1) a;
-				};
-			})
-		 (bindSyms2 . bindSyms1)
-		 );
-		};
-	-- b = (loc,a)
-	getThingySingle (SymbolObject sym) = return (MkThingySingle (\bf obj a -> do
-		{
-		loc <- new obj;
-		bf (loc,a)
-		})
-	 (\ps -> fmap (\f (loc,a) -> f loc a) (fAbstract sym ps)));
-	getThingySingle obj = throwArgError "bad-lambda-arg-list" [obj];
-
-	data ThingyList m f obj a = forall b. MkThingyList
-	  ((b -> m obj) -> [obj] -> (a -> m obj))
-	  (f (a -> m obj) -> f (b -> m obj));
-
-	getThingyList :: 
-		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m),
-		Scheme m r
-		) =>
-	 Object r m -> cm (ThingyList m (SchemeExpression r m) (Object r m) a);
-	-- b = a
-	getThingyList NilObject = return (MkThingyList (\f list a -> case list of
-		{
-		[] -> f a;
-		(obj:_) -> throwArgError "extra-arguments" [obj];
-		}) id);
-	-- b = p2 (p1 a)
-	getThingyList (PairObject l1 lr) = do
-		{
-		obj1 <- get l1;
-		objr <- get lr;
-		MkThingySingle map1 bindSyms1 <- getThingySingle obj1;
-		MkThingyList map2 bindSyms2 <- getThingyList objr;
-		return (MkThingyList (\f list a -> case list of
-			{
-			[] -> throwArgError "missing-arguments" [];
-			(p1:p2) -> (map1 (map2 f p2) p1) a;
-			})
-		(bindSyms2 . bindSyms1));
-		};
-	-- b = (loc,a)
-	getThingyList (SymbolObject sym) = return (MkThingyList (\bf list a -> do
-		{
-		obj <- getConvert list;
-		loc <- new obj;
-		bf (loc,a);
-		})
-	 (\ps -> fmap (\f (loc,a) -> f loc a) (fAbstract sym ps)));
-	getThingyList obj = throwArgError "bad-lambda-arg-list" [obj];
-
-	makeLambda ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
-		) =>
-	 Object r m ->
-	 ObjectSchemeExpression r m ->
-	 cm (SchemeExpression r m ([Object r m] -> m (Object r m)));
-	makeLambda params expr = do
-		{
-		MkThingyList map bindSyms <- getThingyList params;
-		return (fmap ((\ff list -> ff list ()) . map) (bindSyms (fmap (\f () -> f) expr)));
-		};
---}
 
 	data TopLevelCommand r m a = MkTopLevelCommand
 		{
@@ -159,117 +48,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		) =>
 	 [Object r m] -> cm (TopLevelObjectCommand r m));
 
-	compileBinds ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 [(Symbol,(Object r m,()))] ->
-	 cm [(Symbol,ObjectSchemeExpression r m)];
-	compileBinds [] = return [];
-	compileBinds ((sym,(obj,())):bs) = do
-		{
-		expr <- assembleExpression obj;
-		bcs <- compileBinds bs;
-		return ((sym,expr):bcs);
-		};
-
-	substMap :: (Scheme m r) =>
-	 (ObjLocation r m -> m a) -> m (Object r m) -> m a;
-	substMap va mvalue = do
-		{
-	 	value <- mvalue;
-		loc <- new value;
-		va loc;
-		};
-
-	letSequentialM ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ObjectSchemeExpression r m);
-	letSequentialM (bindList,bodyObj) = do
-		{
-		binds <- compileBinds bindList;
-		body <- bodyM bodyObj;
-		return (fSubstMapSequential substMap binds body);
-		};
-
-	letSeparateM ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ObjectSchemeExpression r m);
-	letSeparateM (bindList,bodyObj) = do
-		{
-		binds <- compileBinds bindList;
-		body <- bodyM bodyObj;
-		return (fSubstMapSeparate separater binds body);
-		} where
-		{
-		separater :: (ExtractableFunctor t,Scheme m r) =>
-		 t (m (Object r m)) -> (t (ObjLocation r m) -> m a) -> m a;
-		separater bindExprs absBody = do
-			{
-			objs <- fExtract bindExprs;
-			locs <- fExtract (fmap new objs);
-			absBody locs;
-			};
-		};
-
---	fixFunctor :: (Functor t) => t (t a -> a) -> t a;
---	fixFunctor t = fix (\p -> (fmap (\x -> x p) t));
-
-	mfixExFunctor :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t) =>
-	 t (t a -> m a) -> m (t a);
-	mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
-
-	fixer :: (MonadFix m,ExtractableFunctor t,Scheme m r) =>
-	 t (t (ObjLocation r m) -> m (Object r m)) ->
-	 (t (ObjLocation r m) -> m a) ->
-	 m a;
-	fixer bindsT bodyT = (mfixExFunctor (fmap (\tlocmobj tloc -> do
-		{
-		obj <- tlocmobj tloc;
-		new obj;
-		}) bindsT)) >>= bodyT;
-
-	letRecursiveM ::
-		(
-		MonadFix m,
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 ([(Symbol,(Object r m,()))],[Object r m]) ->
-	 cm (ObjectSchemeExpression r m);
-	letRecursiveM (bindList,bodyObj) = do
-		{
-		binds <- compileBinds bindList;
-		body <- bodyM bodyObj;
-		return (fSubstMapRecursive fixer binds body);
-		};
+	newtype TopLevelBinder r m = MkTopLevelBinder
+	 {unTopLevelBinder :: forall a. TopLevelCommand r m (m a) -> SchemeExpression r m (m a)};
 
 	assembleTopLevelObjectCommand ::
 		(
@@ -318,44 +98,6 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		return expr;
 		};
 
-	-- 5.2 Definitions
-	pureDefineT ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
-	pureDefineT (sym,(val,())) = do
-		{
-		valExpr <- assembleExpression val;
-		return (MkTopLevelCommand (return' (return nullObject)) [(sym,valExpr)] []);
-		};
-
-	fullDefineT ::
-		(
-		BuildThrow cm (Object r m) r,
-		FullScheme m r,
-		?objType :: Type (Object r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
-	fullDefineT (sym,(valObj,())) = do
-		{
-		valExpr <- assembleExpression valObj;
-		return (MkTopLevelCommand 
-		 (liftF2 (\loc mval -> do
-		 	{
-		 	val <- mval;
-		 	set loc val;
-		 	return nullObject;
-		 	}) (fSymbol sym) valExpr)
-		 [(sym,return' (return (error "unassigned symbol")))] []);
-		};
-
 	begin ::
 		(
 		BuildThrow cm (Object r m) r,
@@ -370,7 +112,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 (m (Object r m) -> a -> a) ->
 	 [Object r m] ->
 	 cm (TopLevelCommand r m a);
-	begin none one conn [] = return (MkTopLevelCommand (return' none) [] []);
+	begin none one conn [] = return (MkTopLevelCommand (return none) [] []);
 	begin none one conn [obj] = do
 		{
 		(MkTopLevelCommand expr binds syntax) <- assembleTopLevelObjectCommand obj;
@@ -384,63 +126,6 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		 begin none one conn objs;
 		return (MkTopLevelCommand (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
 		};
-
-	beginT ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 [Object r m] ->
-	 cm (TopLevelObjectCommand r m);
-	beginT = begin (return nullObject) id (>>);
-
-	newtype TopLevelBinder r m = MkTopLevelBinder
-	 {unTopLevelBinder :: forall a. TopLevelCommand r m (m a) -> SchemeExpression r m (m a)};
-
-	liftF3' :: (FunctorApply f) =>
-	 (a -> b -> c -> r) ->
-	 (f a -> f b -> f c -> f r);
-	liftF3' func fa fb = fApply (fApply (fmap func fa) fb);
-
-	setBinder :: (FullScheme m r) =>
-	 TopLevelBinder r m;
-	setBinder = MkTopLevelBinder (\(MkTopLevelCommand expr binds _) ->
-	 fSubstBindsNewRef binds (seqSets binds expr)) where
-		{
-		seqSets [] bodyexpr = bodyexpr;
-		seqSets ((sym,bindexpr):rest) bodyexpr = 
-		 {-# SCC "seqSets" #-}
-		 liftF3' setBindValue (fSymbol sym) bindexpr (seqSets rest bodyexpr);
-
-		setBindValue ref bindaction bodyaction =
-		 {-# SCC "setBindValue" #-}
-		 do
-			{	-- same as (set! sym expr)
-			bindvalue <- bindaction;
-			set ref bindvalue;
-			bodyaction;
-			};
-
-		fSubstBindsNewRef [] bodyexpr = bodyexpr;
-		fSubstBindsNewRef ((sym,_):rest) bodyexpr = 
-		 {-# SCC "fSubstBindsNewRef" #-}
-		 fSubstMap substMap sym (return' (newSymbolBinding sym)) (fSubstBindsNewRef rest bodyexpr);
-
-		newSymbolBinding :: (Monad m) =>
-		 Symbol -> m (Object r m);
-		newSymbolBinding sym = 
-		 {-# SCC "newSymbolBinding" #-}
-		 return (error ("uninitialised binding: " ++ (show sym)));
-		};
-
-	recursiveBinder :: (MonadFix m,Scheme m r) =>
-	 TopLevelBinder r m;
-	recursiveBinder = MkTopLevelBinder (\(MkTopLevelCommand expr binds _) ->
-	 fSubstMapRecursive fixer binds expr);
 
 	assembleTopLevelExpressions ::
 		(
@@ -461,39 +146,6 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		{
 		tlc <- begin none one conn objs;
 		return (unTopLevelBinder ?binder tlc);
-		};
-
-	bodyM ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 [Object r m] ->
-	 cm (ObjectSchemeExpression r m);
-	bodyM = assembleTopLevelExpressions (return nullObject) id (>>);
-
-	lambdaM ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 (Object r m,[Object r m]) ->
-	 cm (ObjectSchemeExpression r m);
-	lambdaM (params,bodyObj) = do
-		{
-		body <- bodyM bodyObj;
-		proc <- makeLambda params body;
-		return (fmap (return . ProcedureObject) proc);
 		};
 
 	assembleTopLevelExpressionsList ::
@@ -521,23 +173,6 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		rs <- mrs;
 		return (r:rs);
 		});
-
-	fmap' :: (Monad f) => (a -> b) -> (f a -> f b);
-	fmap' map fa = fa >>= (return . map);
-
-	bodyListM ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m),
-		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
-		) =>
-	 [Object r m] ->
-	 cm (ObjectSchemeExpression r m);
-	bodyListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (assembleTopLevelExpressionsList obj);
 
 	assembleTopLevelExpressionsEat ::
 		(

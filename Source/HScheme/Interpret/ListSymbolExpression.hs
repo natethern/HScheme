@@ -34,7 +34,7 @@ module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
 
 	instance HasReturn (ListSymbolExpression sym val) where
 		{
-		return' a = MkListSymbolExpression [] (const a);
+		return a = MkListSymbolExpression [] (const a);
 		};
 
 	instance Functor (ListSymbolExpression sym val) where
@@ -48,16 +48,16 @@ module Org.Org.Semantic.HScheme.Interpret.ListSymbolExpression
 		fApply (MkListSymbolExpression (sym:syms) valsab) rda =
 			MkListSymbolExpression (sym:syms') valsb where
 			{
-			MkListSymbolExpression syms' valsva = (fAbstract sym rda);
+			MkListSymbolExpression syms' valsva = (exprAbstract sym rda);
 			valsb (val:vals) = valsab vals (valsva vals val);
 			};
 		};
 
 	instance (Eq sym) => FunctorLambda sym val (ListSymbolExpression sym val) where
 		{
-		fSymbol sym = MkListSymbolExpression [sym] (\[val] -> val);
+		exprSymbol sym = MkListSymbolExpression [sym] (\[val] -> val);
 
-		fAbstract abssym (MkListSymbolExpression syms func) = MkListSymbolExpression syms' (map func) where
+		exprAbstract abssym (MkListSymbolExpression syms func) = MkListSymbolExpression syms' (map func) where
 			{
 			(syms',map) = findSym ((==) abssym) syms;
 

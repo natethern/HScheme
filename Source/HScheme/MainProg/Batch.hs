@@ -51,7 +51,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	instance
 		(
-		FunctorApplyReturn m,
 		MonadGettableReference m r,
 		MonadCreatable m r,
 		MonadException (Object r m) m

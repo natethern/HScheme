@@ -147,7 +147,6 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 
 	instance
 		(
-		FunctorApplyReturn m,
 		MonadGettableReference m r,
 		MonadCreatable m r,
 		MonadException (SchemeCPSObject r (m ())) m

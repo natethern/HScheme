@@ -32,6 +32,41 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	loop :: a;
 	loop = loop;
 
+	foldingLP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (a -> b -> a) ->
+	 a ->
+	 [b] -> m a;
+	foldingLP op a ns = return (foldl op a ns);
+
+	foldingLP1 :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (a -> b -> a) ->
+	 (a,[b]) -> m a;
+	foldingLP1 op (a,ns) = foldingLP op a ns;
+
+	unaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (a -> x) -> (a,()) -> m x;
+	unaryP f (a,()) = return (f a);
+
+	binaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (a -> b -> x) -> (a,(b,())) -> m x;
+	binaryP f (a,(b,())) = return (f a b);
+
+	listaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 ([a] -> x) -> [a] -> m x;
+	listaryP f l = return (f l);
+
+	pairCheckP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (a -> a -> Bool) ->
+	 [a] -> m Bool;
+	pairCheckP op [] = return True;
+	pairCheckP op [x] = return True;
+	pairCheckP op (x:r@(y:_)) = if (op x y) then pairCheckP op r else return False;
+
+	unaryNumberP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Number -> Number) ->
+	 (Number,()) -> m Number;
+	unaryNumberP = unaryP;
+
 	commonStrictPureBindings ::
 		(
 		Build cm r,
@@ -50,15 +85,63 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 
 		-- 6.2.5 Numerical Operations
 		addProcBinding	"number?"						isNumberP,
+		--				"complex?"						init.pure.scm
+		--				"real?"							init.pure.scm
+		--				"rational?"						init.pure.scm
+		addProcBinding	"integer?"						(unaryP (isIntegerN :: Number -> Bool)),
 		addProcBinding	"exact?"						isExactP,
 		addProcBinding	"inexact?"						isInexactP,
-		addProcBinding	"zero?"							isZeroP,
-		addProcBinding	"+"								(foldingLP (+) 0),
+		addProcBinding	"="								(pairCheckP ((==) :: Number -> Number -> Bool)),
+		addProcBinding	"<"								(pairCheckP ((<) :: EIReal -> EIReal -> Bool)),
+		addProcBinding	">"								(pairCheckP ((>) :: EIReal -> EIReal -> Bool)),
+		addProcBinding	"<="							(pairCheckP ((<=) :: EIReal -> EIReal -> Bool)),
+		addProcBinding	">="							(pairCheckP ((>=) :: EIReal -> EIReal -> Bool)),
+		addProcBinding	"zero?"							(unaryP (isZero :: Number -> Bool)),
+		addProcBinding	"positive?"						(unaryP (isPositiveStrict :: EIReal -> Bool)),
+		addProcBinding	"negative?"						(unaryP (isNegativeStrict :: EIReal -> Bool)),
+		addProcBinding	"odd?"							(unaryP (isOdd :: Integer -> Bool)),
+		addProcBinding	"even?"							(unaryP (isEven :: Integer -> Bool)),
+		addProcBinding	"max"							(foldingLP1 (max :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"min"							(foldingLP1 (min :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"+"								(foldingLP ((+) :: Number -> Number -> Number) 0),
+		addProcBinding	"*"								(foldingLP ((*) :: Number -> Number -> Number) 1),
 		addProcBinding	"-"								subtractP,
-		addProcBinding	"*"								(foldingLP (*) 1),
---		addProcBinding	"/"								divideP,
+		addProcBinding	"/"								divideP,
+		addProcBinding	"abs"							(unaryP (abs :: Number -> EIReal)),
+		addProcBinding	"quotient"						(binaryP (let {?rounding = roundTowardZero} in failingIntegerDivideModal :: EIReal -> EIReal -> Integer)),
+		addProcBinding	"remainder"						(binaryP (let {?rounding = roundTowardZero} in failingModuloModal :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"modulo"						(binaryP (failingModulo :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"gcd"							(listaryP (gcd :: [Integer] -> Integer)),
+		addProcBinding	"lcm"							(listaryP (lcm :: [Integer] -> Integer)),
+		addProcBinding	"numerator"						(unaryP (numerator :: Rational -> Integer)),
+		addProcBinding	"denominator"					(unaryP (denominator :: Rational -> Integer)),
+		addProcBinding	"floor"							(unaryP (failingFloor :: EIReal -> Integer)),
+		addProcBinding	"ceiling"						(unaryP (failingCeiling :: EIReal -> Integer)),
+		addProcBinding	"truncate"						(unaryP (let {?rounding = roundTowardZero} in failingRound :: EIReal -> Integer)),
+		addProcBinding	"round"							(unaryP (let {?rounding = roundHalfEven} in failingRound :: EIReal -> Integer)),
+		addProcBinding	"rationalize"					rationalizeP,
+		addProcBinding	"exp"							(unaryNumberP exp),
+		addProcBinding	"log"							(unaryNumberP log),
+		addProcBinding	"sin"							(unaryNumberP sin),
+		addProcBinding	"cos"							(unaryNumberP cos),
+		addProcBinding	"tan"							(unaryNumberP tan),
+		addProcBinding	"asin"							(unaryNumberP asin),
+		addProcBinding	"acos"							(unaryNumberP acos),
+		addProcBinding	"atan"							(unaryNumberP atan),
+		addProcBinding	"sqrt"							(unaryNumberP sqrt),
+		addProcBinding	"expt"							(binaryP ((**) :: Number -> Number -> Number)),
+		addProcBinding	"make-rectangular"				(binaryP ((:+) :: EIReal -> EIReal -> Number)),
+		addProcBinding	"make-polar"					(binaryP (polarComplex :: EIReal -> EIReal -> Number)),
 		addProcBinding	"real-part"						realPartP,
 		addProcBinding	"imag-part"						imagPartP,
+		addProcBinding	"magnitude"						(unaryP (abs :: Number -> EIReal)),
+		addProcBinding	"angle"							(unaryP (phase :: Number -> EIReal)),
+		addProcBinding	"exact->inexact"				(unaryP (toInexactN :: Number -> Number)),
+		addProcBinding	"inexact->exact"				(unaryP (toExactN :: Number -> Number)),
+
+		-- 6.2.6 Numerical input and output
+		addProcBinding	"number->string"				(unaryP showNumber),
+		addProcBinding	"string->number"				parseNumberOnlyFromString,
 
 		-- 6.3.1 Booleans
 		addProcBinding	"not"							notP,
@@ -69,17 +152,43 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"cons"							consP,
 		addProcBinding	"car"							carP,
 		addProcBinding	"cdr"							cdrP,
+		--				"set-car!" 						Full
+		--				"set-cdr!" 						Full
+		--				"caar" etc.						init.pure.scm
 		addProcBinding	"null?"							isNilP,
+		addProcBinding	"list?"							isListP,
 		addProcBinding	"list"							listP,
+		--				"length" 						init.pure.scm
 		addProcBinding	"append"						appendP,
+		--				"reverse" 						init.pure.scm
+		--				"list-tail" 					init.pure.scm
+		--				"list-ref" 						init.pure.scm
+		--				"memq" 							init.full.scm
+		--				"memv" 							init.full.scm
+		--				"member" 						init.pure.scm
+		--				"assq" 							init.full.scm
+		--				"assv" 							init.full.scm
+		--				"assoc" 						init.pure.scm
 
 		-- 6.3.3 Symbols
 		addProcBinding	"symbol?"						isSymbolP,
+		--				"symbol->string" 				init.pure.scm
 		addProcBinding	"string->symbol"				makeSymbolP,
 
 		-- 6.3.4 Characters
 		addProcBinding	"char?"							(charTestP (const True)),
+		--				"char=?" 						init.pure.scm
+		--				"char<?" 						init.pure.scm
+		--				"char>?" 						init.pure.scm
+		--				"char<=?" 						init.pure.scm
+		--				"char>=?" 						init.pure.scm
+		--				"char-ci=?" 					init.pure.scm
+		--				"char-ci<?" 					init.pure.scm
+		--				"char-ci>?" 					init.pure.scm
+		--				"char-ci<=?" 					init.pure.scm
+		--				"char-ci>=?" 					init.pure.scm
 		addProcBinding	"char-alphabetic?"				(charTestP isAlphabetic),
+		--				"char-numeric?" 				init.pure.scm
 		addProcBinding	"char-whitespace?"				(charTestP isWhiteSpace),
 		addProcBinding	"char-upper-case?"				(charTestP isUppercase),
 		addProcBinding	"char-lower-case?"				(charTestP isLowercase),
@@ -110,6 +219,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"string"						stringP,
 		addProcBinding	"string-length"					stringLengthP,
 		addProcBinding	"string-ref"					stringRefP,
+		--				"string-set!"					Full
 		addProcBinding	"string-append"					stringAppendP,
 		addProcBinding	"string-chars"					stringCharsP,
 

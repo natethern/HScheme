@@ -66,6 +66,15 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 			};
 		};
 
+	runParserOnlyString :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+	 [t] -> OrListParser cm t a -> cm (Maybe a);
+	runParserOnlyString text parser = runOrListParser text (do
+		{
+		a <- parser;
+		streamEndParse;
+		return a;
+		});
+
 	unexpectedCharError :: (SchemeParser cm m r p,?objType :: Type (Object r m)) =>
 	 String -> p a;
 	unexpectedCharError context = do
@@ -171,7 +180,11 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	integerParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	integerParse = digitsParse ||| plusDigitsParse ||| minusDigitsParse;
-	
+
+	numberParse :: (MonadOrParser Char p) =>
+	 p Number;
+	numberParse = integerParse >>= (return . fromInteger);
+
 	listContentsParse ::
 		(
 		?objType :: Type (Object r m),
@@ -409,7 +422,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	expressionParse = do
 		{
 		optionalWhitespaceParse;
-		 (integerParse >>= (return . NumberObject . fromInteger))	|||
+		 (numberParse >>= (return . NumberObject))	|||
 		 ((isTokenParse '+') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
 		 ((isTokenParse '-') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
 		 (identifierParse >>= (return . SymbolObject . MkSymbol))	|||
@@ -441,6 +454,10 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	parseFromString :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 String -> m (String,Maybe (Object r m));
 	parseFromString text = runParserString text expressionOrEndParse;
+
+	parseNumberOnlyFromString :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 String -> m (Maybe Number);
+	parseNumberOnlyFromString text = runParserOnlyString text numberParse;
 
 	parseAllFromString :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
 	 String ->

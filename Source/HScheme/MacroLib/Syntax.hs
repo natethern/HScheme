@@ -264,7 +264,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = MkType} in compileSyntax obj;
-		return (MkTopLevelCommand (return' (return nullObject)) []
+		return (MkTopLevelCommand (return (return nullObject)) []
 		 [(sym,syntax)]);
 		};
 	}

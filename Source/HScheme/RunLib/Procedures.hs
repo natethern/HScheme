@@ -60,6 +60,12 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 	isNilP (NilObject,()) = return True;
 	isNilP (_,()) = return False;
 
+	isListP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Object r m,()) -> m Bool;
+	isListP (NilObject,()) = return True;
+	isListP (PairObject _ _,()) = return True;
+	isListP (_,()) = return False;
+
 	listP ::  (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m [Object r m];
 	listP list = return list;
