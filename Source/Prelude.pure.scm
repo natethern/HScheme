@@ -70,6 +70,64 @@
 	(and (real? n) (exact? n))
 ))
 
+; 6.3.2 Pairs and Lists
+(define reverse (lambda (x)       
+	(if (null? x) x (append (reverse (cdr x)) (list (car x))))
+))
+
+(define list-tail (lambda (x k)
+	(if (zero? k) x (list-tail (cdr x) (- k 1)))
+))
+
+(define list-ref (lambda (x k)
+	(car (list-tail x k))
+))
+
+(define memq (lambda (item list)
+	(if (null? list) #f
+		(if (eq? item (car list)) list
+			(memq item (cdr list))
+		)
+	)
+))
+
+(define memv (lambda (item list)
+	(if (null? list) #f
+		(if (eqv? item (car list)) list
+			(memv item (cdr list))
+		)
+	)
+))
+
+(define member (lambda (item list)
+	(if (null? list) #f
+		(if (equal? item (car list)) list
+			(member item (cdr list))
+		)
+	)
+))
+
+(define assq (lambda (key alist)
+	(case-match alist ()
+		(() #f)
+		(((k v) . rest) (if (eq? k key) v (assq key rest)))
+	)
+))
+
+(define assv (lambda (key alist)
+	(case-match alist ()
+		(() #f)
+		(((k v) . rest) (if (eqv? k key) v (assv key rest)))
+	)
+))
+
+(define assoc (lambda (key alist)
+	(case-match alist ()
+		(() #f)
+		(((k v) . rest) (if (eqv? k key) v (assoc key rest)))
+	)
+))
+
 ; 6.4 Control Features
 (define call-with-values (lambda (producer consumer)
 	(apply consumer (values->list (producer)))

@@ -38,7 +38,7 @@ module StandardBindings where
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
-		addBinding		"<nothing>"				nullObject,
+		addBinding		(MkSymbol "<nothing>")	nullObject,
 		
 		-- 4.1.2 Literal Expressions
 		addMacroBinding	"quote"					quoteM,
@@ -79,9 +79,11 @@ module StandardBindings where
 		addProcBinding	"boolean?"				isBooleanP,
 
 		-- 6.3.2 Pairs and Lists
+		addProcBinding	"pair?"					isPairP,
 		addProcBinding	"cons"					consP,
 		addProcBinding	"car"					carP,
 		addProcBinding	"cdr"					cdrP,
+		addProcBinding	"null?"					isNilP,
 		addProcBinding	"list"					listP,
 		addProcBinding	"append"				appendP,
 
@@ -96,7 +98,8 @@ module StandardBindings where
 		addProcBinding	"current-environment"	currentEnvironmentP, -- nonstandard
 
 		-- Misc
-		addProcBinding	"to-string"				toStringP
+		addProcBinding	"to-string"				toStringP,
+		addMacroBinding	"case-match"			caseMatchM
 		];
 
 	monadicStdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);

@@ -30,10 +30,10 @@ module Bindings where
 		(
 		Scheme x m r
 		) =>
-	 String -> Object r m -> Bindings r m -> m (Bindings r m);
+	 Symbol -> Object r m -> Bindings r m -> m (Bindings r m);
 	addBinding name obj b = do
 		{
-		(_,b) <- newObjBinding b (MkSymbol name) obj;
+		(_,b) <- newObjBinding b name obj;
 		return b;
 		};
 
@@ -48,7 +48,7 @@ module Bindings where
 	 m (Bindings r m);
 	addProcBinding name p b = do
 		{
-		addBinding name (ProcedureObject (convertToProcedure (p Type))) b;
+		addBinding (MkSymbol name) (ProcedureObject (convertToProcedure (p Type))) b;
 		};
 
 	addMacroBinding ::
@@ -63,7 +63,7 @@ module Bindings where
 	 m (Bindings r m);
 	addMacroBinding name p b = do
 		{
-		addBinding name (MacroObject (convertToMacro (p Type))) b;
+		addBinding (MkSymbol name) (MacroObject (convertToMacro (p Type))) b;
 		};
 
 	addTopLevelMacroBinding ::
@@ -78,7 +78,7 @@ module Bindings where
 	 m (Bindings r m);
 	addTopLevelMacroBinding name p b = do
 		{
-		addBinding name (TopLevelMacroObject (convertToTopLevelMacro p)) b;
+		addBinding (MkSymbol name) (TopLevelMacroObject (convertToTopLevelMacro p)) b;
 		};
 
 	exitFuncProc :: (() -> m ()) -> (Type (r ()) -> () -> m ());

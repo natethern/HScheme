@@ -67,6 +67,11 @@ module Procedures where
 	isBooleanP Type (_,()) = return False;
 
 	-- 6.3.2 Pairs and Lists
+	isPairP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isPairP Type (PairObject _ _,()) = return True;
+	isPairP Type (_,()) = return False;
+
 	consP :: (Scheme x m r) =>
 	 Type (r ()) -> (Object r m,(Object r m,())) -> m (Object r m);
 	consP Type (h,(t,())) = cons h t;
@@ -78,6 +83,11 @@ module Procedures where
 	cdrP :: (Scheme x m r) =>
 	 Type (r ()) -> ((Object r m,Object r m),()) -> m (Object r m);
 	cdrP Type ((_,t),()) = return t;
+
+	isNilP :: (Scheme x m r) =>
+	 Type (r ()) -> (Object r m,()) -> m Bool;
+	isNilP Type (NilObject,()) = return True;
+	isNilP Type (_,()) = return False;
 
 	listP ::  (Scheme x m r) =>
 	 Type (r ()) -> [Object r m] -> m [Object r m];

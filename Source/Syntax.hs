@@ -22,12 +22,28 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Syntax where
 	{
+	import Evaluate;
 	import Conversions;
+	import Bindings;
 	import Object;
 	import HBase;
 
+	data Binding r m = MkBinding Symbol (Object r m);
+
+	addBindings ::
+		(
+		Scheme x m r
+		) =>
+	 [Binding r m] -> Bindings r m -> m (Bindings r m);
+	addBindings [] bindings = return bindings;
+	addBindings ((MkBinding name obj):binds) bindings = do
+		{
+		bindings' <- addBinding name obj bindings;
+		addBindings binds bindings';
+		};
+
 	substitute :: (Scheme x m r) =>
-	 [(Symbol,Object r m)] -> Object r m -> m (Object r m);
+	 [Binding r m] -> Object r m -> m (Object r m);
 	substitute [] x = return x;
 	substitute subs (PairObject hloc tloc) = do
 		{
@@ -47,14 +63,14 @@ module Syntax where
 		VectorObject locs' <- substitute subs (VectorObject locs);
 		return (VectorObject (loc':locs'));
 		};
-	substitute ((patvar,sub):subs) (SymbolObject name) =
+	substitute ((MkBinding patvar sub):subs) (SymbolObject name) =
 	 if name == patvar
 	 then return sub
 	 else substitute subs (SymbolObject name);
 	substitute _ x = return x;
 
 	matchBinding :: (Scheme x m r) =>
-	 [Symbol] -> Object r m -> Object r m -> m (Maybe [(Symbol,Object r m)]);
+	 [Symbol] -> Object r m -> Object r m -> m (Maybe [Binding r m]);
 	matchBinding literals NilObject NilObject = return (Just []);
 	matchBinding literals NilObject _ = return Nothing;
 	matchBinding literals (PairObject phl ptl) (PairObject ahl atl) = do
@@ -86,11 +102,11 @@ module Syntax where
 	 	SymbolObject name' | name == name' -> return (Just []);
 	 	_ -> return Nothing;
 	 	}
-	 else return (Just [(name,args)]);
+	 else return (Just [MkBinding name args]);
 	matchBinding literals _ _ = return Nothing;
 	
 	matchBindings :: (Scheme x m r) =>
-	 [Symbol] -> Object r m -> [Object r m] -> m (Maybe [(Symbol,Object r m)]);
+	 [Symbol] -> Object r m -> [Object r m] -> m (Maybe [Binding r m]);
 	matchBindings literals NilObject [] = return (Just []);
 	matchBindings literals (PairObject phl ptl) (a1:as) = do
 		{
@@ -117,9 +133,39 @@ module Syntax where
 	 else do
 		{
 		argList <- getConvert args;
-		return (Just [(name,argList)]);
+		return (Just [MkBinding name argList]);
 		};
 	matchBindings literals _ _ = return Nothing;
+
+	caseMatch ::
+		(
+		Scheme x m r
+		) =>
+	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m ([Binding r m],Object r m);
+	caseMatch (arg,(literals,[])) = fail "no match";
+	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
+		{
+		msubs <- matchBinding literals pattern arg;
+		case msubs of
+			{
+			Nothing -> caseMatch (arg,(literals,rs));
+			Just subs -> return (subs,expr);
+			};
+		};
+
+	caseMatchM ::
+		(
+		Scheme x m r,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
+	caseMatchM t (argExpr,(literals,cases)) = do
+		{
+		arg <- evaluate argExpr;
+		(subs,expr) <- caseMatch (arg,(literals,cases));
+		bindings <- addBindings subs ?bindings;
+		evaluate expr with {?bindings = bindings;};
+		};
 
 	syntaxRulesM :: (Scheme x m r) =>
 	 Type (r ()) -> ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> m (Syntax r m);
