@@ -32,12 +32,46 @@ module Port where
 
 	data (Monad m) => OutputPort c m = MkOutputPort
 		{
-		opWrite	:: Maybe c -> m ()
+		opWrite	:: Maybe c -> m (),
+		opFlush :: m ()
 		};
 
 	opWriteOne :: (Monad m) => OutputPort c m -> c -> m ();
 	opWriteOne port c = opWrite port (Just c);
 
+	opWriteList :: (Monad m) => OutputPort c m -> [c] -> m ();
+	opWriteList port [] = return ();
+	opWriteList port (c:cs) = do
+		{
+		opWriteOne port c;
+		opWriteList port cs;
+		};
+
+	opWriteStrLn :: (Monad m) => OutputPort Char m -> String -> m ();
+	opWriteStrLn port s = do
+		{
+		opWriteList port s;
+		opWriteOne port '\n';
+		};
+
 	opClose :: (Monad m) => OutputPort c m -> m ();
 	opClose port = opWrite port Nothing;
+
+	-- ends immediately
+	nullInputPort :: (Monad m) => InputPort c m;
+	nullInputPort = MkInputPort
+		{
+		ipRead = return Nothing,
+		ipPeek = return Nothing,
+		ipReady = return True,
+		ipClose = return ()
+		};
+	
+	-- does nothing
+	nullOutputPort :: (Monad m) => OutputPort c m;
+	nullOutputPort = MkOutputPort
+		{
+		opWrite = \_ -> return (),
+		opFlush = return ()
+		};
 	}

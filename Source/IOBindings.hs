@@ -63,25 +63,29 @@ module IOBindings where
 			{
 			Nothing -> hClose h;
 			Just c -> hPutChar h c;
-			})
+			}),
+		opFlush = call (hFlush h)
 		};
 
 	eofObject :: (Scheme x m r) => Object r m;
 	eofObject = nullObject;
 
-	stdinPort :: (SemiLiftedMonad IO m) => InputPort Char m;
-	stdinPort = handleInputPort stdin;
+	stdInputPort :: (SemiLiftedMonad IO m) => InputPort Char m;
+	stdInputPort = handleInputPort stdin;
 
-	stdoutPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
-	stdoutPort = handleOutputPort stdout;
+	stdOutputPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
+	stdOutputPort = handleOutputPort stdout;
+
+	stdErrorPort :: (SemiLiftedMonad IO m) => OutputPort Char m;
+	stdErrorPort = handleOutputPort stderr;
 
 	stdinS :: (Scheme x m r,SemiLiftedMonad IO m) =>
 	 Type (r ()) -> () -> m (InputPort Char m);
-	stdinS Type () = return stdinPort;
+	stdinS Type () = return stdInputPort;
 
 	stdoutS :: (Scheme x m r,SemiLiftedMonad IO m) =>
 	 Type (r ()) -> () -> m (OutputPort Char m);
-	stdoutS Type () = return stdoutPort;
+	stdoutS Type () = return stdOutputPort;
 
 	openInputFileS :: (Scheme x m r,SemiLiftedMonad IO m) =>
 	 Type (r ()) -> (StringType,()) -> m (InputPort Char m);

@@ -42,20 +42,29 @@ module Interactive where
 	import MonadError;
 	import MonadCont;
 
-	printeval :: (SemiLiftedMonad IO m,Scheme x m r) =>
-	 Bindings r m -> [Object r m] -> m (Bindings r m);
-	printeval bindings [] = return bindings;
-	printeval bindings (obj:objs) = do
+	printeval :: (Scheme x m r) =>
+	 OutputPort Char m -> Bindings r m -> [Object r m] -> m (Bindings r m);
+	printeval port bindings [] = return bindings;
+	printeval port bindings (obj:objs) = do
 		{
 		(newBindings,result) <- defineEvaluate bindings obj;
 		str <- toString result;
-		call (putStrLn str);
-		printeval newBindings objs;	
+		opWriteStrLn port str;
+		printeval port newBindings objs;	
 		};
 
 	toList :: Maybe a -> [a];
 	toList Nothing = [];
 	toList (Just a) = [a];
+
+	reportError :: (Scheme x m r) =>
+	 Type (r ()) -> OutputPort Char m -> x -> m ();
+	reportError t errPort error = do
+		{
+		errObj <- getConvert error;
+		(MkStringType errText) <- toStringS t (errObj,());
+		opWriteStrLn errPort ("error: "++errText);
+		};
 
 	interactiveLoop :: (SemiLiftedMonad IO m,Scheme x m r) =>
 	 Type (r ()) -> InputPort Char m -> Bindings r m -> m a;
@@ -63,19 +72,14 @@ module Interactive where
 		{
 		newBindings <- catchError (do
 			{
-			ref <- call (do
-				{
-				putStr "hscheme> ";
-				hFlush stdout;
-				});
+			opWriteList stdOutputPort "hscheme> ";
+			opFlush stdOutputPort;
 			mobject <- runParser reader expressionP;
-			printeval bindings (toList mobject);
+			printeval stdOutputPort bindings (toList mobject);
 			}) (\error -> do
 			{
 			runParser reader restOfLineP;
-			errObj <- getConvert error;
-			(MkStringType errText) <- toStringS t (errObj,());
-			call (putStrLn ("error: "++errText));
+			reportError t stdErrorPort error;
 			return bindings;
 			});
 		interactiveLoop t reader newBindings;
@@ -95,8 +99,8 @@ module Interactive where
 		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
 		objs <- runParser port  (expressionsP t);
 		inputPortCloseS t (port,());
-		bindings' <- printeval bindings objs;
-		interactiveLoop t stdinPort bindings';
+		bindings' <- printeval nullOutputPort bindings objs;
+		interactiveLoop t stdInputPort bindings';
 		});
 
 	fullInteract ::
@@ -116,7 +120,7 @@ module Interactive where
 		port <- openInputFileS t (MkStringType "Prelude.pure.scm",());
 		objs <- runParser port  (expressionsP t);
 		inputPortCloseS t (port,());
-		bindings' <- printeval bindings objs;
-		interactiveLoop t stdinPort bindings';
+		bindings' <- printeval nullOutputPort bindings objs;
+		interactiveLoop t stdInputPort bindings';
 		});
 	}

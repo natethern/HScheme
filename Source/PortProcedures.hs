@@ -31,7 +31,7 @@ module PortProcedures where
 	 Type (r ()) -> (Char,(OutputPort Char m,())) -> m ArgNoneType;
 	portWriteCharS Type (c,(port,())) = do
 		{
-		opWrite port (Just c);
+		opWriteOne port c;
 		return MkArgNoneType;
 		};
 
@@ -39,7 +39,7 @@ module PortProcedures where
 	 Type (r ()) -> (OutputPort Char m,()) -> m ArgNoneType;
 	outputPortCloseS Type (port,()) = do
 		{
-		opWrite port Nothing;
+		opClose port;
 		return MkArgNoneType;
 		};
 
