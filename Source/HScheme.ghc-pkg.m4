@@ -27,7 +27,7 @@ Package
 	include_dirs     = [],
 	c_includes       = [],
 	package_deps     = ["HBase"],
-	extra_ghc_opts   = ["-fglasgow-exts","-fallow-undecidable-instances"],
+	extra_ghc_opts   = [],
 	extra_cc_opts    = [],
 	extra_frameworks = [],
 	extra_ld_opts    = []
