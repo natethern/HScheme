@@ -42,8 +42,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	getThingySingle :: 
 		(
-		Build cm r,
-		Scheme m r
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m)
 		) =>
 	 Object r m -> cm (ThingySingle m (SchemeExpression r m) (Object r m) a);
 	-- b = a
@@ -52,7 +53,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		mobj <- getMaybeConvert obj;
 		case mobj of
 			{
-			Nothing -> fail "too many arguments";
+			Nothing -> throwArgError "extra-arguments" [obj];
 			Just (_ :: ()) -> f a;
 			};
 		}) id);
@@ -68,7 +69,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 			mobj <- getMaybeConvert obj;
 			case mobj of
 				{
-				Nothing -> fail "too few arguments";
+				Nothing -> throwArgError "missing-arguments" [];
 				Just (p1,p2) -> (map1 (map2 f p2) p1) a;
 				};
 			})
@@ -78,7 +79,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	-- b = (mloc,a)
 	getThingySingle (SymbolObject sym) = return (MkThingySingle (\bf obj a -> bf (new obj,a))
 	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
-	getThingySingle _ = fail "bad arg list in lambda";
+	getThingySingle obj = throwArgError "bad-lambda-arg-list" [obj];
 
 	data ThingyList m f obj a = forall b. MkThingyList
 	  ((b -> m obj) -> [obj] -> (a -> m obj))
@@ -86,7 +87,8 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 
 	getThingyList :: 
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
+		?objType :: Type (Object r m),
 		Scheme m r
 		) =>
 	 Object r m -> cm (ThingyList m (SchemeExpression r m) (Object r m) a);
@@ -94,7 +96,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	getThingyList NilObject = return (MkThingyList (\f list a -> case list of
 		{
 		[] -> f a;
-		_ -> fail "too many arguments";
+		(obj:_) -> throwArgError "extra-arguments" [obj];
 		}) id);
 	-- b = p2 (p1 a)
 	getThingyList (PairObject l1 lr) = do
@@ -105,7 +107,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		MkThingyList map2 bindSyms2 <- getThingyList objr;
 		return (MkThingyList (\f list a -> case list of
 			{
-			[] -> fail "too few arguments";
+			[] -> throwArgError "missing-arguments" [];
 			(p1:p2) -> (map1 (map2 f p2) p1) a;
 			})
 		(bindSyms2 . bindSyms1));
@@ -117,12 +119,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		new obj;
 		},a))
 	 (\ps -> fmap (\f (mloc,a) -> f mloc a) (fAbstract sym ps)));
-	getThingyList _ = fail "bad arg list in lambda";
+	getThingyList obj = throwArgError "bad-lambda-arg-list" [obj];
 
 	makeLambda ::
 		(
-		Build cm r,
-		Scheme m r
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m)
 		) =>
 	 Object r m ->
 	 ObjectSchemeExpression r m ->

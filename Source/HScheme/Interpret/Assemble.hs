@@ -54,7 +54,11 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		return (a:as);
 		};
 
-	doApply :: (Scheme m r) =>
+	doApply ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
 	 m (Object r m) ->
 	 m [Object r m] ->
 	 m (Object r m);
@@ -68,11 +72,15 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 				args <- margs;
 				proc args;
 				};
-			_ -> fail "bad-apply-form";
+			_ -> throwArgError "bad-apply-form" [f];
 			};
 		};
 
-	makeApply :: (Scheme m r) =>
+	makeApply ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
 	 ObjectSchemeExpression r m ->
 	 [ObjectSchemeExpression r m] ->
 	 ObjectSchemeExpression r m;
@@ -115,7 +123,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		marglist <- getMaybeConvert t;
 		case marglist of
 			{
-			Nothing -> fail "not an argument list";
+			Nothing -> throwArgError "bad-argument-list" [t];
 			Just arglist -> case h of
 				{
 				SymbolObject sym -> case getBinding ?syntacticbindings sym of

@@ -28,12 +28,6 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
 
 	type IOConst = Constant IO;
 
-	ioConstType :: Type (IOConst ());
-	ioConstType = Type;
-
-	ioRefType :: Type (IORef ());
-	ioRefType = Type;
-
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
 	 MonadThrow (Object r m) IO where
 		{
