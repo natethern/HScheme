@@ -154,7 +154,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 			[
 			monadFixStrictPureBindings
 			] emptyBindings;
-		interact Type fsi bindings "Prelude.pure.scm";
+		interact Type fsi bindings "init.pure.scm";
 		};
 
 	pureInteract ::
@@ -173,7 +173,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 			monadFixPureBindings,
 			pureSystemBindings (fsiPure fsi)
 			] emptyBindings;
-		interact Type fsi bindings "Prelude.pure.scm";
+		interact Type fsi bindings "init.pure.scm";
 		};
 
 	fullInteract ::
@@ -192,6 +192,6 @@ module Org.Org.Semantic.HScheme.Interactive where
 			monadContFullBindings,
 			fullSystemBindings fsi
 			] emptyBindings;
-		interactWithExit Type fsi bindings "Prelude.full.scm";
+		interactWithExit Type fsi bindings "init.full.scm";
 		};
 	}

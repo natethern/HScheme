@@ -1,5 +1,5 @@
-"Loading Prelude.full.scm"
-(load "Prelude.pure.scm")
+"Loading init.full.scm"
+(load "init.pure.scm")
 
 
 ; 4.1.6 Assignments
@@ -128,4 +128,4 @@
 	(apply write-char (cons #\newline rest))
 ))
 
-"Prelude.full.scm Loaded"
+"init.full.scm Loaded"

@@ -1,4 +1,4 @@
-"Loading Prelude.pure.scm"
+"Loading init.pure.scm"
 (define define-syntax define)
 (define let-syntax let)
 ;(define letrec-syntax letrec)
@@ -214,4 +214,4 @@
 	(lambda () env)
 ))
 
-"Prelude.pure.scm Loaded"
+"init.pure.scm Loaded"

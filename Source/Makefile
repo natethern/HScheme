@@ -46,8 +46,8 @@ LIBFILE_REL		= lib$(LIBNAME).a
 LIBFILE_PROF	= lib$(LIBNAME)_p.a
 HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
-COMMAND_REL		= hscheme.bin
-COMMAND_PROF	= hscheme_p.bin
+COMMAND_REL		= hscheme
+COMMAND_PROF	= hscheme_p
 
 
 # Flags
@@ -109,15 +109,17 @@ install:	\
 	$(libdir)/$(LIBFILE_PROF)	\
 	$(patsubst %.hs,$(importdir)/%.hi,$(LIB_HC_SRCS))	\
 	$(patsubst %.hs,$(importdir)/%.p_hi,$(LIB_HC_SRCS))	\
-	$(bindir)/$(COMMAND_REL)
+	$(bindir)/$(COMMAND_REL)	\
+	$(datadir)/hscheme/init.pure.scm	\
+	$(datadir)/hscheme/init.full.scm
 
 
 # Test
 
-test: $(COMMAND_REL)
+test: bin/$(COMMAND_REL)
 	./$<
 
-test_p: $(COMMAND_PROF)
+test_p: bin/$(COMMAND_PROF)
 	./$< +RTS -p -RTS
 
 
@@ -135,17 +137,19 @@ Doc/index.html: $(LIB_HC_SRCS)
 
 # Building
 
-build: $(LIBFILE_REL) $(LIBFILE_PROF) $(COMMAND_REL) $(COMMAND_PROF) $(PACKAGEFILE)
+build: $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_REL) bin/$(COMMAND_PROF) $(PACKAGEFILE)
 
 cgi: interpret.cgi
 
 interpret.cgi: CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
 
-$(COMMAND_REL): InteractiveMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+bin/$(COMMAND_REL): InteractiveMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+	mkdir -p bin
 	$(LDH) $(filter %.o,$^) $(LIBFILE_REL) $(LDFLAGS) -o $@
 
-$(COMMAND_PROF): InteractiveMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
+bin/$(COMMAND_PROF): InteractiveMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
+	mkdir -p bin
 	$(LDH) $(HCPROFOPTS) $(filter %.p_o,$^) $(LIBFILE_PROF) $(LDFLAGS) $(libdir)/libHBase_p.a -o $@
 
 $(LIBFILE_REL): $(patsubst %.hs,%.o,$(LIB_HC_SRCS))
@@ -164,16 +168,21 @@ $(LIBFILE_PROF): $(patsubst %.hs,%.p_o,$(LIB_HC_SRCS))
 clean: haskellclean
 	rm -f Makefile.bak
 	rm -f *.ghc-pkg
-	rm -rf Doc
+	rm -rf Doc bin
 	rm -f interpret.cgi
 	rm -f *.prof
-	rm -f $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE) $(COMMAND_REL) $(COMMAND_PROF)
+	rm -f $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE)
 
 haskellclean: $(HROOT)
 	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.hi $${ff}.o $${ff}.p_hi $${ff}.p_o; done
 
 
 # Standard Suffix Rules for Installing
+
+$(datadir)/hscheme/%: %
+	install -d -m 755 $(dir $@)
+	install -c -p -m 644 $< $@
+	touch $@
 
 $(importdir)/%.hi: %.hi
 	install -d -m 755 $(dir $@)
@@ -190,7 +199,7 @@ $(libdir)/%.a: %.a
 	ranlib $@
 	touch $@
 
-$(bindir)/%: %
+$(bindir)/%: bin/%
 	install -c -p -m 755 $< $@
 	touch $@
 
