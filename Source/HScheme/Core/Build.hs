@@ -26,6 +26,7 @@ module Org.Org.Semantic.HScheme.Core.Build where
 
 	class
 		(
+		FunctorApplyReturn m,	-- ideally would be a superclass of Monad
 		MonadCreatable m r,
 		MonadGettableReference m r
 		) =>
@@ -33,6 +34,7 @@ module Org.Org.Semantic.HScheme.Core.Build where
 
 	instance
 		(
+		FunctorApplyReturn m,	-- ideally would be a superclass of Monad
 		MonadCreatable m r,
 		MonadGettableReference m r
 		) =>

@@ -53,10 +53,10 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		-- 4.2.2 Binding Constructs
 		addMacroBinding	"let"					letSeparateM,
 		addMacroBinding	"let*"					letSequentialM,
-		addMacroBinding	"letrec"				letRecursiveM
+		addMacroBinding	"letrec"				letRecursiveM,
 
 		-- Misc
---		,addMacroBinding	"case-match"					caseMatchM								-- nonstandard
+		addMacroBinding	"case-match"			caseMatchM		-- nonstandard
 		];
 
 	pureMacroBindings ::
@@ -76,8 +76,10 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 		-- 4.2.3 Sequencing
 		addMacroBinding	"begin"				bodyM,
-		addMacroBinding	"body"				bodyM,
-		addMacroBinding	"body-list"			bodyListM
+
+		-- Misc
+		addMacroBinding	"body"				bodyM,				-- nonstandard
+		addMacroBinding	"body-list"			bodyListM			-- nonstandard
 		];
 
 	fullMacroBindings ::

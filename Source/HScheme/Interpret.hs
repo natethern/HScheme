@@ -25,6 +25,7 @@ module Org.Org.Semantic.HScheme.Interpret
 	module Org.Org.Semantic.HScheme.Interpret.FunctorLambda,
 	module Org.Org.Semantic.HScheme.Interpret.SymbolExpression,
 	module Org.Org.Semantic.HScheme.Interpret.Assemble,
+	module Org.Org.Semantic.HScheme.Interpret.Pattern,
 	module Org.Org.Semantic.HScheme.Interpret.TopLevel,
 	module Org.Org.Semantic.HScheme.Interpret.Interpret,
 	module Org.Org.Semantic.HScheme.Interpret.Evaluate
@@ -33,6 +34,7 @@ module Org.Org.Semantic.HScheme.Interpret
 	import Org.Org.Semantic.HScheme.Interpret.Evaluate;
 	import Org.Org.Semantic.HScheme.Interpret.Interpret;
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
+	import Org.Org.Semantic.HScheme.Interpret.Pattern;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Interpret.SymbolExpression;
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;

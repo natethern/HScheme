@@ -22,14 +22,15 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	(
-	defineSyntaxT
+	defineSyntaxT,caseMatchM
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	data Bind sym a = MkBind sym a;
+--	data Bind sym a = MkBind sym a;
+	type Bind = (,);
 
 	type Binding r m = Bind Symbol (Object r m);
 
@@ -62,12 +63,12 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			return (loc':locs');
 			};
 		};
-	substitute ((MkBind patvar sub):subs) (SymbolObject name) =
+	substitute (((,) patvar sub):subs) (SymbolObject name) =
 	 if name == patvar
 	 then return sub
 	 else substitute subs (SymbolObject name);
 	substitute _ x = return x;
-
+{--
 	matchBinding :: (Build cm r) =>
 	 [Symbol] -> Object r m -> Object r m -> cm (Maybe [Binding r m]);
 	matchBinding literals NilObject NilObject = return (Just []);
@@ -137,10 +138,12 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	matchBindings literals _ _ = return Nothing;
 
 	caseMatch :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
-	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> cm ([Binding r m],Object r m);
+	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
+	 cm ([Binding r m],Object r m);
 	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
-	caseMatch (arg,(literals,((pattern,(expr,())):rs))) = do
+	caseMatch (arg,(literals,((patternObj,(expr,())):rs))) = do
 		{
+		pattern <- makeObjectPattern literals patternObj;
 		msubs <- matchBinding literals pattern arg;
 		case msubs of
 			{
@@ -148,37 +151,72 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			Just subs -> return (subs,expr);
 			};
 		};
-{--
-	caseMatchM :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
-	caseMatchM (argExpr,(literals,cases)) = do
-		{
-		arg <- evaluateObject argExpr;
-		(subs,expr) <- caseMatch (arg,(literals,cases));
-		let {?bindings = addBindings subs ?bindings;} in evaluateObject expr;
-		};
 --}
+	caseMatchM ::
+		(
+		BuildThrow cm (Object r m) r,
+		Scheme m r,
+		?objType :: Type (Object r m),
+		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
+		?macrobindings :: SymbolBindings (Macro cm r m)
+		) =>
+	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
+	 cm (ObjectSchemeExpression r m);
+	caseMatchM (argExprObj,(literals,rules)) = do
+		{
+		argExpr <- assembleExpression argExprObj;
+		sExprs <- fExtract (fmap (\(patternObj,(bodyObj,())) -> do
+			{
+			pattern <- makeObjectPattern literals patternObj;
+			bodyExpr <- assembleExpression bodyObj;
+			return (patternBind pattern bodyExpr);
+			}) rules);
+		return (liftF2 (\marg pcases -> do
+			{
+			arg <- marg;
+			matchCases arg pcases;
+			}) argExpr (fExtract sExprs));
+		} where
+		{
+		matchCases arg [] = throwArgError "no-match" [arg];
+		matchCases arg (pcase:rest) = do
+			{
+			nmobj <- pcase arg;
+			case nmobj of
+				{
+				SuccessExceptionResult mobj -> mobj;
+				_ -> matchCases arg rest;
+				};
+			};
+		};
 
 	syntaxRulesM ::
 		(
-		BuildThrow cm' (Object r m) r,
+		BuildThrow cm (Object r m) r,
 		?objType :: Type (Object r m)
 		) =>
-	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm' (Syntax r (Object r m));
+	 ([Symbol],[((Symbol,Object r m),(Object r m,()))]) -> cm (Syntax r (Object r m));
 	syntaxRulesM (literals,rules) = return (MkSyntax (transform rules)) where
 		{
-		transform :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
+		transform ::
+			(
+			BuildThrow cm (Object r m) r,
+			?objType :: Type (Object r m)
+			) =>
 		 [((Symbol,Object r m),(Object r m,()))] ->
-		 Type (r ()) -> [Object r m] -> cm (Object r m);
+		 Type (r ()) -> 
+		 [Object r m] ->
+		 cm (Object r m);
 		transform [] _ _ = throwSimpleError "no-match";
-		transform (((_,pattern),(template,_)):rs) t args = do
+		transform (((_,patternObj),(template,_)):rs) t args = do
 			{
-			msubs <- matchBindings literals pattern args;
-			case msubs of
+			pattern <- makeListPattern literals patternObj;
+			nlist <- patternZip pattern args;
+			case nlist of
 				{
-				Nothing -> transform rs t args;
-				Just subs -> substitute subs template;
-				};
+				SuccessExceptionResult subs -> substitute subs template;
+				_ -> transform rs t args;
+				}
 			};
 		};
 

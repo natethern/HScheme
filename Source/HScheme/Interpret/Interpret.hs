@@ -28,13 +28,6 @@ module Org.Org.Semantic.HScheme.Interpret.Interpret where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-
-{--
-	isNil :: Object r m -> Bool;
-	isNil NilObject = True;
-	isNil _ = False;
---}
-
 	getBadLoc :: Symbol -> ObjLocation r m;
 --	getBadLoc sym = throwArgError "unbound-symbol" ([SymbolObject sym]);
 	getBadLoc sym = error ("unbound-symbol: " ++ (show sym));

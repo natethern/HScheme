@@ -89,6 +89,7 @@ LIB_HC_SRCS			= \
 	$(HIER)/Interpret/FunctorLambda.hs	\
 	$(HIER)/Interpret/SymbolExpression.hs	\
 	$(HIER)/Interpret/Assemble.hs	\
+	$(HIER)/Interpret/Pattern.hs	\
 	$(HIER)/Interpret/TopLevel.hs	\
 	$(HIER)/Interpret/Interpret.hs	\
 	$(HIER)/Interpret/Evaluate.hs	\
@@ -163,61 +164,46 @@ test: test-pure test-full
 	diff -u $^
 
 test/%.scm.full.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --noinit --mcps --bfull $< > $@ || (rm $@; exit 1)
+	time bin/$(COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
 
 test/%.scm.pure.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --noinit --mpure $< > $@ || (rm $@; exit 1)
+	time bin/$(COMMAND_REL) --mpure --noinit $< > $@ || (rm $@; exit 1)
 
-test-pure: \
- test/constants.scm.pure.diff \
- test/helloworld.scm.pure.diff \
- test/several.scm.pure.diff \
- test/equal.scm.pure.diff \
- test/syntax.scm.pure.diff \
- test/syntax-rec.scm.pure.diff \
- test/letbinding.scm.pure.diff \
- test/letrec.scm.pure.diff \
- test/letrec-fix.scm.pure.diff \
- test/bindingbody.scm.pure.diff \
- test/binding.scm.pure.diff \
- test/boundlate.scm.pure.diff \
- test/begin.scm.pure.diff \
- test/factorial.scm.pure.diff
+test-pure:	\
+ test/constants.scm.pure.diff	\
+ test/helloworld.scm.pure.diff	\
+ test/several.scm.pure.diff	\
+ test/equal.scm.pure.diff	\
+ test/syntax.scm.pure.diff	\
+ test/syntax-rec.scm.pure.diff	\
+ test/letbinding.scm.pure.diff	\
+ test/letrec.scm.pure.diff	\
+ test/letrec-fix.scm.pure.diff	\
+ test/bindingbody.scm.pure.diff	\
+ test/binding.scm.pure.diff	\
+ test/boundlate.scm.pure.diff	\
+ test/begin.scm.pure.diff	\
+ test/factorial.scm.pure.diff	\
+ test/case-match.scm.pure.diff
+	time bin/$(COMMAND_REL) --mpure --noinit init.pure.scm test/helloworld.scm
 
-#	time ./$< test/helloworld.scm
-
-test-full: \
- test/constants.scm.full.diff \
- test/helloworld.scm.full.diff \
- test/several.scm.full.diff \
- test/equal.scm.full.diff \
- test/syntax.scm.full.diff \
- test/syntax-rec.scm.full.diff \
- test/letbinding.scm.full.diff \
- test/letrec.scm.full.diff \
- test/bindingbody.scm.full.diff \
- test/binding.scm.full.diff \
- test/setvar.scm.full.diff \
- test/boundlate.scm.full.diff \
- test/begin.scm.full.diff \
- test/factorial.scm.full.diff
-
-test_p: bin/$(COMMAND_PROF)
-	time ./$< +RTS -p -RTS --noinit test/helloworld.scm
-	time ./$< +RTS -p -RTS --noinit test/several.scm
-	time ./$< +RTS -p -RTS --noinit test/binding.scm
-	time ./$< +RTS -p -RTS --noinit test/setvar.scm
-	time ./$< +RTS -p -RTS --noinit test/boundlate.scm
-	time ./$< +RTS -p -RTS --noinit test/factorial.scm
-	time ./$< +RTS -p -RTS test/helloworld.scm
-
-test_q: bin/$(COMMAND_QUICK)
-	time ./$< --pure --noinit test/helloworld.scm
-	time ./$< --pure --noinit test/several.scm
-	time ./$< --pure --noinit test/binding.scm
-	time ./$< --pure --noinit test/boundlate.scm
-	time ./$< --pure --noinit test/factorial.scm
-	time ./$< --pure test/helloworld.scm
+test-full:	\
+ test/constants.scm.full.diff	\
+ test/helloworld.scm.full.diff	\
+ test/several.scm.full.diff	\
+ test/equal.scm.full.diff	\
+ test/syntax.scm.full.diff	\
+ test/syntax-rec.scm.full.diff	\
+ test/letbinding.scm.full.diff	\
+ test/letrec.scm.full.diff	\
+ test/bindingbody.scm.full.diff	\
+ test/binding.scm.full.diff	\
+ test/setvar.scm.full.diff	\
+ test/boundlate.scm.full.diff	\
+ test/begin.scm.full.diff	\
+ test/factorial.scm.full.diff	\
+ test/case-match.scm.full.diff
+	time bin/$(COMMAND_REL) --noinit init.full.scm test/helloworld.scm
 
 
 # Documentation
@@ -488,6 +474,16 @@ Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Int
 Org/Org/Semantic/HScheme/Interpret/Assemble.o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.q_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.q_hi
 Org/Org/Semantic/HScheme/Interpret/Assemble.p_o : ./Org/Org/Semantic/HScheme/Interpret/SymbolExpression.p_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.o Org/Org/Semantic/HScheme/Interpret/Pattern.q_o Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : Org/Org/Semantic/HScheme/Interpret/Pattern.hs
+Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.q_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Interpret/FunctorLambda.p_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
+Org/Org/Semantic/HScheme/Interpret/Pattern.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : Org/Org/Semantic/HScheme/Interpret/TopLevel.hs
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -498,6 +494,9 @@ Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Int
 Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.q_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.q_hi
+Org/Org/Semantic/HScheme/Interpret/TopLevel.p_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.p_hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.o Org/Org/Semantic/HScheme/Interpret/Interpret.q_o Org/Org/Semantic/HScheme/Interpret/Interpret.p_o : Org/Org/Semantic/HScheme/Interpret/Interpret.hs
 Org/Org/Semantic/HScheme/Interpret/Interpret.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Interpret/Interpret.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -534,6 +533,9 @@ Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Sy
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.hi
+Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.q_hi
+Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Pattern.p_hi
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/TopLevel.p_hi

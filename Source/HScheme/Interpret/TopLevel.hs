@@ -30,12 +30,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	beginT,bodyM,bodyListM,
 	) where
 	{
+	import Org.Org.Semantic.HScheme.Interpret.Pattern;
 	import Org.Org.Semantic.HScheme.Interpret.Assemble;
 	import Org.Org.Semantic.HScheme.Interpret.FunctorLambda;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-
+{--
 	-- deep Haskell magic
 	data ThingySingle m f obj a = forall b. MkThingySingle
 	  ((b -> m obj) -> obj -> (a -> m obj))
@@ -141,6 +142,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		MkThingyList map bindSyms <- getThingyList params;
 		return (fmap ((\ff list -> ff list ()) . map) (bindSyms (fmap (\f () -> f) expr)));
 		};
+--}
 
 	data TopLevelCommand r m a = MkTopLevelCommand
 		{
@@ -222,7 +224,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		return (fSubstMapSeparate separater binds body);
 		} where
 		{
-		separater :: (FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
+		separater :: (ExtractableFunctor t,Scheme m r) =>
 		 t (m (Object r m)) -> (t (ObjLocation r m) -> m a) -> m a;
 		separater bindExprs absBody = do
 			{
@@ -239,7 +241,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 t (t a -> m a) -> m (t a);
 	mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
 
-	fixer :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
+	fixer :: (MonadFix m,ExtractableFunctor t,Scheme m r) =>
 	 t (t (ObjLocation r m) -> m (Object r m)) ->
 	 (t (ObjLocation r m) -> m a) ->
 	 m a;
