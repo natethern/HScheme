@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Evaluate where
 	{
 	import Object;
+	import Type;
 	
 	isNil :: Object r m -> Bool;
 	isNil NilObject = True;
@@ -58,6 +59,15 @@ module Evaluate where
 		VectorObject _ -> return a;
 		_ -> fail "unrecognised expression form";
 		};
+	
+	evaluateS ::
+		(
+		Scheme x m r,
+		?bindings		:: Bindings r m
+		) =>
+	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
+	evaluateS Type (obj,Just bindings) = evaluate obj with {?bindings = bindings};
+	evaluateS Type (obj,Nothing) = evaluate obj;
 	
 	evalList ::
 		(

@@ -126,6 +126,7 @@ SExpParser.o : Parser.hi
 SExpParser.o : Object.hi
 SExpParser.o : Procedures.hi
 Evaluate.o : Evaluate.hs
+Evaluate.o : Common/Type.hi
 Evaluate.o : Object.hi
 Procedures.o : Procedures.hs
 Procedures.o : Common/Type.hi
@@ -143,6 +144,7 @@ Bindings.o : Conversions.hi
 StandardBindings.o : StandardBindings.hs
 StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
+StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
 ContinuationPassing.o : ContinuationPassing.hs
 ContinuationPassing.o : Common/LiftedMonad.hi
@@ -151,7 +153,7 @@ FMapBindings.o : Object.hi
 SchemeCPS.o : SchemeCPS.hs
 SchemeCPS.o : Common/Subtype.hi
 SchemeCPS.o : Object.hi
-SchemeCPS.o : ContinuationPassing.hi
+SchemeCPS.o : ./ContinuationPassing.hi
 SchemeCPS.o : Conversions.hi
 Pure.o : Pure.hs
 Pure.o : Common/Subtype.hi
@@ -159,16 +161,16 @@ Pure.o : Object.hi
 Interactive.o : Interactive.hs
 Interactive.o : Common/Type.hi
 Interactive.o : Common/Subtype.hi
-Interactive.o : Pure.hi
-Interactive.o : SchemeCPS.hi
-Interactive.o : FMapBindings.hi
+Interactive.o : ./Pure.hi
+Interactive.o : ./SchemeCPS.hi
+Interactive.o : ./FMapBindings.hi
 Interactive.o : Common/LiftedMonad.hi
 Interactive.o : Parser.hi
 Interactive.o : Object.hi
 Interactive.o : Evaluate.hi
 Interactive.o : Procedures.hi
-Interactive.o : StandardBindings.hi
+Interactive.o : ./StandardBindings.hi
 Interactive.o : Bindings.hi
 Interactive.o : SExpParser.hi
-Interactive.o : ContinuationPassing.hi
+Interactive.o : ./ContinuationPassing.hi
 # DO NOT DELETE: End of Haskell dependencies

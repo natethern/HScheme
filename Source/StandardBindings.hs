@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module StandardBindings where
 	{
 	import Procedures;
+	import Evaluate;
 	import Bindings;
 	import Object;
 
@@ -35,6 +36,7 @@ module StandardBindings where
 		addProcBinding "print" printS,
 		addMacroBinding "quote" quoteS,
 		addProcBinding "values" valuesS,
-		addProcBinding "current-environment" currentEnvironmentS
+		addProcBinding "current-environment" currentEnvironmentS,
+		addProcBinding "eval" evaluateS
 		];
 	}

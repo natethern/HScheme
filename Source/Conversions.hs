@@ -69,7 +69,30 @@ module Conversions where
 			a2 <- convertFromObject o2;
 			return (a1,a2);
 			};
-		convertFromObjects [a1] = fail "not enough arguments";
+		convertFromObjects [o1] = fail "not enough arguments";
+		convertFromObjects [] = fail "not enough arguments";
+		convertFromObjects _ = fail "too many arguments";
+		};
+	
+	instance 
+		(
+		Scheme x m r,
+		MonadSubtype m (Object r m) a1,
+		MonadSubtype m (Object r m) a2
+		) =>
+		ArgumentList x m r (a1,Maybe a2) where
+		{
+		convertFromObjects [o1,o2] = do
+			{
+			a1 <- convertFromObject o1;
+			a2 <- convertFromObject o2;
+			return (a1,Just a2);
+			};
+		convertFromObjects [o1] = do
+			{
+			a1 <- convertFromObject o1;
+			return (a1,Nothing);
+			};
 		convertFromObjects [] = fail "not enough arguments";
 		convertFromObjects _ = fail "too many arguments";
 		};
