@@ -88,16 +88,19 @@ module Org.Org.Semantic.HScheme.Object where
 	type Syntax r m =
 	 [Object r m] -> m (Object r m);
 
+	type SRefArray r a = ArrayList (r a);
+
 	data Object r m =
 	 NilObject												|
 	 BooleanObject		Bool								|
 	 SymbolObject		Symbol								|
 	 NumberObject		Number								|
 	 CharObject			Char								|
-	 StringObject		[r Char]							|
+	 ByteArrayObject	(SRefArray r Word8)					|
+	 StringObject		(SRefArray r Char)					|
 	 ValuesObject		[Object r m]						|
 	 PairObject			(ObjLocation r m) (ObjLocation r m)	|
-	 VectorObject		[ObjLocation r m]					|
+	 VectorObject		(SRefArray r (Object r m))			|
 	 InputPortObject 	(InputPort Char m)					|
 	 OutputPortObject 	(OutputPort Char m)					|
 	 ProcedureObject	(Procedure r m)						|

@@ -136,8 +136,8 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	loadT :: (Scheme m r) =>
 	 PureSystemInterface m r ->
-	 Bindings r m -> (StringType,()) -> m (Bindings r m,ArgNoneType);
-	loadT psi bindings (MkStringType filename,()) = do
+	 Bindings r m -> (SList Char,()) -> m (Bindings r m,ArgNoneType);
+	loadT psi bindings (MkSList filename,()) = do
 		{
 		bindings' <- psiLoadBindings psi bindings filename;
 		return (bindings',MkArgNoneType);
@@ -160,13 +160,13 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 
 	openInputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> (StringType,()) -> m (InputPort Char m);
-	openInputFileP fsi Type (MkStringType name,()) = fsiOpenInputFile fsi name;
+	 Type (r ()) -> (SList Char,()) -> m (InputPort Char m);
+	openInputFileP fsi Type (MkSList name,()) = fsiOpenInputFile fsi name;
 
 	openOutputFileP :: (Scheme m r) =>
 	 FullSystemInterface m r ->
-	 Type (r ()) -> (StringType,()) -> m (OutputPort Char m);
-	openOutputFileP fsi Type (MkStringType name,()) = fsiOpenOutputFile fsi name;
+	 Type (r ()) -> (SList Char,()) -> m (OutputPort Char m);
+	openOutputFileP fsi Type (MkSList name,()) = fsiOpenOutputFile fsi name;
 
 	pureSystemBindings :: (Scheme m r) =>
 	 PureSystemInterface m r -> Bindings r m -> m (Bindings r m);

@@ -110,8 +110,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 	isSymbolP Type (_,()) = return False;
 
 	makeSymbolP :: (Scheme m r) =>
-	 Type (r ()) -> (StringType,()) -> m Symbol;
-	makeSymbolP Type (MkStringType s,()) = return (MkSymbol s);
+	 Type (r ()) -> (SList Char,()) -> m Symbol;
+	makeSymbolP Type (MkSList s,()) = return (MkSymbol s);
 
 
 	-- 6.3.4 Characters
@@ -142,16 +142,16 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 
 	makeStringP :: (Scheme m r) =>
-	 Type (r ()) -> (Integer,Maybe Char) -> m (StringRefType r);
+	 Type (r ()) -> (Integer,Maybe Char) -> m (SRefList r Char);
 	makeStringP Type (i,Nothing) = do
 		{
 		rs <- makeRefList i '\x0000';
-		return (MkStringRefType rs);
+		return (MkSRefList rs);
 		};
 	makeStringP Type (i,Just c) = do
 		{
 		rs <- makeRefList i c;
-		return (MkStringRefType rs);
+		return (MkSRefList rs);
 		};
 
 	makeList :: (Monad m) =>
@@ -165,34 +165,30 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 
 	stringP :: (Scheme m r) =>
-	 Type (r ()) -> [Char] -> m (StringRefType r);
-	stringP Type cs = do	
-		{
-		rs <- makeList new cs;
-		return (MkStringRefType rs);
-		};
+	 Type (r ()) -> [Char] -> m (SList Char);
+	stringP Type cs = return (MkSList cs);
 
 	stringLengthP :: (Scheme m r) =>
-	 Type (r ()) -> (StringRefType r,()) -> m Integer;
-	stringLengthP Type (MkStringRefType rs,()) = return (length rs);
+	 Type (r ()) -> (SRefArray r Char,()) -> m Int;
+	stringLengthP Type (s,()) = return (length s);
 
-	getListRef :: (Monad m) => Integer -> [a] -> m a;
-	getListRef i _ | i < 0 = fail "array out of range";
-	getListRef 0 (a:_) = return a;
-	getListRef _ [] = fail "array out of range";
-	getListRef i (_:as) = getListRef (i - 1) as;
+	getArrayRef :: (Monad m) => Integer -> ArrayList a -> m a;
+	getArrayRef i _ | i < 0 = fail "array out of range";
+	getArrayRef i arr | i >= convertFromInt (length arr) = fail "array out of range";
+	getArrayRef i arr = return (arr !! (convertToInt i));
 
 	stringRefP :: (Scheme m r) =>
-	 Type (r ()) -> (StringRefType r,(Integer,())) -> m Char;
-	stringRefP Type (MkStringRefType rs,(i,())) = do
+	 Type (r ()) -> (SRefArray r Char,(Integer,())) -> m Char;
+	stringRefP Type (arr,(i,())) = do
 		{
-		r <- getListRef i rs;
+		r <- getArrayRef i arr;
 		get r;
 		};
 
+	-- create a completely new string
 	stringAppendP :: (Scheme m r) =>
-	 Type (r ()) -> [StringType] -> m StringType;
-	stringAppendP Type = return . MkStringType . concatenateList . (fmap unStringType);
+	 Type (r ()) -> [SList Char] -> m (SList Char);
+	stringAppendP Type = return . MkSList . concatenateList . (fmap unSList);
 
 
 	-- 6.4 Control Features
@@ -261,6 +257,21 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (f++" "++r);
 		};
 
+	printByteArrayContents :: (Scheme m r) =>
+	 [r Word8] -> m String;
+	printByteArrayContents [] = return "";
+	printByteArrayContents [cr] = do
+		{
+		b <- get cr;
+		return (showFixedHex True 2 (convert b));
+		};
+	printByteArrayContents (cr:cs) = do
+		{
+		b <- get cr;
+		r <- printByteArrayContents cs;
+		return ((showFixedHex True 2 (convert b))++" "++r);
+		};
+
 	charToString :: Char -> String;
 	charToString c | (ordFromStart c) >= 0x10000 = "#\\U"++(showFixedHex True 6 (ordFromStart c));
 	charToString c | (ordFromStart c) > 126 = "#\\u"++(showFixedHex True 4 (ordFromStart c));
@@ -302,9 +313,14 @@ module Org.Org.Semantic.HScheme.Procedures where
 	toString (SymbolObject s)		= return (show s);
 	toString (NumberObject n)		= return (showNumber n);
 	toString (CharObject c)			= return (charToString c);
-	toString (StringObject s)		= do
+	toString (ByteArrayObject arr)	= do
 		{
-		text <- printString s;
+		text <- printByteArrayContents (toList arr);
+		return ("#x("++text++")");
+		};
+	toString (StringObject arr)		= do
+		{
+		text <- printString (toList arr);
 		return ("\""++text++"\"");
 		};
 	toString (ValuesObject [])		= return ("#<nothing>");
@@ -320,7 +336,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 		};
 	toString (VectorObject v)		= do
 		{
-		text <- printVector v;
+		text <- printVector (toList v);
 		return ("#("++text++")");
 		};
 	toString (InputPortObject _)	= return "#<input port>";
@@ -332,10 +348,10 @@ module Org.Org.Semantic.HScheme.Procedures where
 	toString (BindingsObject _)		= return "#<environment>";
 
 	toStringP :: (Scheme m r) =>
-	 Type (r ()) -> (Object r m,()) -> m StringType;
+	 Type (r ()) -> (Object r m,()) -> m (SList Char);
 	toStringP Type (o,()) = do
 		{
 		s <- toString o;
-		return (MkStringType s);
+		return (MkSList s);
 		};
 	}

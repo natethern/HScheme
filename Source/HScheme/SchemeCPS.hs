@@ -53,8 +53,8 @@ module Org.Org.Semantic.HScheme.SchemeCPS where
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
-		getConvert (ExceptionError x) = getConvert (MkStringType (show x));
-		getConvert (StringError s) = getConvert (MkStringType s);
+		getConvert (ExceptionError x) = getConvert (MkSList (show x));
+		getConvert (StringError s) = getConvert (MkSList s);
 		};
 
 	instance MaybeA (SchemeCPSError r p) String where

@@ -163,7 +163,10 @@ $(LIBFILE_PROF): $(patsubst %.hs,%.p_o,$(LIB_HC_SRCS))
 
 clean: haskellclean
 	rm -f Makefile.bak
+	rm -f *.ghc-pkg
 	rm -rf Doc
+	rm -f interpret.cgi
+	rm -f *.prof
 	rm -f $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE) $(COMMAND_REL) $(COMMAND_PROF)
 
 haskellclean: $(HROOT)
@@ -309,6 +312,8 @@ Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Numerics.hi
 Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Numerics.p_hi
 Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Object.hi
 Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Object.p_hi
+Org/Org/Semantic/HScheme/Equality.o : Org/Org/Semantic/HScheme/Conversions.hi
+Org/Org/Semantic/HScheme/Equality.p_o : Org/Org/Semantic/HScheme/Conversions.p_hi
 Org/Org/Semantic/HScheme/SExpChars.o Org/Org/Semantic/HScheme/SExpChars.p_o : Org/Org/Semantic/HScheme/SExpChars.hs
 Org/Org/Semantic/HScheme/SExpParser.o Org/Org/Semantic/HScheme/SExpParser.p_o : Org/Org/Semantic/HScheme/SExpParser.hs
 Org/Org/Semantic/HScheme/SExpParser.o : Org/Org/Semantic/HScheme/SExpChars.hi

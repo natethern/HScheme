@@ -73,17 +73,16 @@ module Org.Org.Semantic.HScheme.FullProcedures where
 	setCdrP Type (_,(obj,())) = fail "not a pair";	
 
 	-- 6.3.5 Strings
-	getListRef :: (Monad m) => Integer -> [a] -> m a;
-	getListRef i _ | i < 0 = fail "array out of range";
-	getListRef 0 (a:_) = return a;
-	getListRef _ [] = fail "array out of range";
-	getListRef i (_:as) = getListRef (i - 1) as;
+	getArrayRef :: (Monad m) => Integer -> ArrayList a -> m a;
+	getArrayRef i _ | i < 0 = fail "array out of range";
+	getArrayRef i arr | i >= convertFromInt (length arr) = fail "array out of range";
+	getArrayRef i arr = return (arr !! (convertToInt i));
 
 	stringSetP :: (FullScheme m r) =>
-	 Type (r ()) -> (StringRefType r,(Integer,(Char,()))) -> m ArgNoneType;
-	stringSetP Type (MkStringRefType rs,(i,(c,()))) = do
+	 Type (r ()) -> (SRefArray r Char,(Integer,(Char,()))) -> m ArgNoneType;
+	stringSetP Type (arr,(i,(c,()))) = do
 		{
-		r <- getListRef i rs;
+		r <- getArrayRef i arr;
 		set r c;
 		return MkArgNoneType;
 		};

@@ -334,7 +334,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		 (identifierParse >>= (return . SymbolObject . MkSymbol))	|||
 		 hashLiteralParse		|||
 		 quotedParse			|||
-		 (stringLiteralParse >>= ((plift t) . getConvert . MkStringType))	|||
+		 (stringLiteralParse >>= ((plift t) . getConvert . MkSList))	|||
 		 listParse				;
 		};
 

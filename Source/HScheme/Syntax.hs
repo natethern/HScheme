@@ -55,13 +55,21 @@ module Org.Org.Semantic.HScheme.Syntax where
 		tloc' <- new tail';
 		return (PairObject hloc' tloc')
 		};
-	substitute subs (VectorObject (loc:locs)) = do
+	substitute subs (VectorObject arr) = do
 		{
-		head <- get loc;
-		head' <- substitute subs head;
-		loc' <- new head';
-		VectorObject locs' <- substitute subs (VectorObject locs);
-		return (VectorObject (loc':locs'));
+		list' <- subList (toList arr);
+		return (VectorObject (fromList list'));
+		} where
+		{
+		subList [] = return [];
+		subList (loc:locs) = do
+			{
+			head <- get loc;
+			head' <- substitute subs head;
+			loc' <- new head';
+			locs' <- subList locs;
+			return (loc':locs');
+			};
 		};
 	substitute ((MkBinding patvar sub):subs) (SymbolObject name) =
 	 if name == patvar
