@@ -61,8 +61,9 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addMacroBinding	"if"					ifM,
 
 		-- 4.2.2 Binding Constructs
-		addMacroBinding	"let"					letM,
-		addMacroBinding	"let*"					letStarM
+		addMacroBinding	"let"					letSeparateM,
+		addMacroBinding	"let*"					letSequentialM,
+		addMacroBinding	"letrec"				letRecursiveM
 
 		-- 4.3.2 Pattern Language
 --		,addMacroBinding	"syntax-rules"			syntaxRulesM

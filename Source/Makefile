@@ -125,22 +125,29 @@ install:	\
 test: test-full test-pure test_p
 
 test-full: bin/$(COMMAND_REL)
-	./$< --noinit test/helloworld.scm
-	./$< --noinit test/binding.scm
-	./$< --noinit test/factorial.scm
-	./$< test/helloworld.scm
+	time ./$< --noinit test/helloworld.scm
+	time ./$< --noinit test/several.scm
+	time ./$< --noinit test/letrec.scm
+	time ./$< --noinit test/binding.scm
+	time ./$< --noinit test/boundlate.scm
+	time ./$< --noinit test/factorial.scm
+	time ./$< test/helloworld.scm
 
 test-pure: bin/$(COMMAND_REL)
-	./$< --pure --noinit test/helloworld.scm
-	./$< --pure --noinit test/binding.scm
-	./$< --pure --noinit test/factorial.scm
-	./$< --pure test/helloworld.scm
+	time ./$< --pure --noinit test/helloworld.scm
+	time ./$< --pure --noinit test/several.scm
+	time ./$< --pure --noinit test/binding.scm
+	time ./$< --pure --noinit test/boundlate.scm
+	time ./$< --pure --noinit test/factorial.scm
+	time ./$< --pure test/helloworld.scm
 
 test_p: bin/$(COMMAND_PROF)
-	./$< +RTS -p -RTS --noinit test/helloworld.scm
-	./$< +RTS -p -RTS --noinit test/binding.scm
-	./$< +RTS -p -RTS --noinit test/factorial.scm
-	./$< +RTS -p -RTS test/helloworld.scm
+	time ./$< +RTS -p -RTS --noinit test/helloworld.scm
+	time ./$< +RTS -p -RTS --noinit test/several.scm
+	time ./$< +RTS -p -RTS --noinit test/binding.scm
+	time ./$< +RTS -p -RTS --noinit test/boundlate.scm
+	time ./$< +RTS -p -RTS --noinit test/factorial.scm
+	time ./$< +RTS -p -RTS test/helloworld.scm
 
 
 # Documentation

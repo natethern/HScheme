@@ -26,6 +26,8 @@ module Main where
 	import Org.Org.Semantic.HBase;
 	import System.Exit;
 
+import Org.Org.Semantic.HScheme.SymbolExpression;
+
 	type CPS r = SchemeCPS r (IO ());
 
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
@@ -147,6 +149,8 @@ module Main where
 	optPrepend _ _ as = as;
 
 	main :: IO ();
+--	main = putStrLn (show test1);
+--	main1 :: IO ();
 	main = ioRunProgram (do
 		{
 		args <- ?getArgs;

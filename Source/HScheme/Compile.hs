@@ -113,28 +113,19 @@ module Org.Org.Semantic.HScheme.Compile where
 		return (fmap ((\ff list -> ff list ()) . map) (bindSyms (fmap (\f () -> f) expr)));
 		};
 
-	makeLetSingle :: (Scheme m r) =>
-	 (Symbol,SchemeExpression r m (m (Object r m))) ->
-	 SchemeExpression r m a ->
-	 SchemeExpression r m a;
-	makeLetSingle (sym,valueExpr) bodyExpr = liftF2 (\mvalue locmbody -> locmbody (do
+	convertToLocationExpression :: (Scheme m r) =>
+	 SchemeExpression r m (m (Object r m)) ->
+	 SchemeExpression r m (m (ObjLocation r m));
+	convertToLocationExpression = fmap (\mvalue -> (do
 	 	{
 	 	value <- mvalue;
 	 	new value;
-	 	})) valueExpr (fAbstract sym bodyExpr);
+	 	}));
 
-	makeLetStar :: (Scheme m r) =>
-	 [(Symbol,SchemeExpression r m (m (Object r m)))] ->
-	 SchemeExpression r m a ->
-	 SchemeExpression r m a;
-	makeLetStar [] body = body;
-	makeLetStar (bind:binds) body = makeLetSingle bind (makeLetStar binds body);
-
-	makeLet :: (Scheme m r) =>
-	 [(Symbol,SchemeExpression r m (m (Object r m)))] ->
-	 SchemeExpression r m a ->
-	 SchemeExpression r m a;
-	makeLet = makeLetStar; -- NYI
+	convertToLocationBinding :: (Scheme m r) =>
+	 (Symbol,SchemeExpression r m (m (Object r m))) ->
+	 (Symbol,SchemeExpression r m (m (ObjLocation r m)));
+	convertToLocationBinding (sym,valueExpr) = (sym,convertToLocationExpression valueExpr);
 
 	type Macro r m = [Object r m] -> m (SchemeExpression r m (m (Object r m)));
 	type Syntax r m = [Object r m] -> m (Object r m);
@@ -170,7 +161,7 @@ module Org.Org.Semantic.HScheme.Compile where
 		return ((sym,expr):bcs);
 		};
 
-	letStarM ::
+	letSequentialM ::
 		(
 		Scheme m r,
 		?syntacticbindings :: Binds Symbol (Syntax r m),
@@ -178,14 +169,14 @@ module Org.Org.Semantic.HScheme.Compile where
 		) =>
 	 ([(Symbol,(Object r m,()))],(Object r m,())) ->
 	 m (SchemeExpression r m (m (Object r m)));
-	letStarM (bindList,(exprObj,())) = do
+	letSequentialM (bindList,(exprObj,())) = do
 		{
 		binds <- compileBinds bindList;
 		expr <- compile exprObj;
-		return (makeLetStar binds expr);
+		return (fSubstSequential (fmap convertToLocationBinding binds) expr);
 		};
 
-	letM ::
+	letSeparateM ::
 		(
 		Scheme m r,
 		?syntacticbindings :: Binds Symbol (Syntax r m),
@@ -193,11 +184,26 @@ module Org.Org.Semantic.HScheme.Compile where
 		) =>
 	 ([(Symbol,(Object r m,()))],(Object r m,())) ->
 	 m (SchemeExpression r m (m (Object r m)));
-	letM (bindList,(exprObj,())) = do
+	letSeparateM (bindList,(exprObj,())) = do
 		{
 		binds <- compileBinds bindList;
 		expr <- compile exprObj;
-		return (makeLet binds expr);
+		return (fSubstSeparate (fmap convertToLocationBinding binds) expr);
+		};
+
+	letRecursiveM ::
+		(
+		Scheme m r,
+		?syntacticbindings :: Binds Symbol (Syntax r m),
+		?macrobindings :: Binds Symbol (Macro r m)
+		) =>
+	 ([(Symbol,(Object r m,()))],(Object r m,())) ->
+	 m (SchemeExpression r m (m (Object r m)));
+	letRecursiveM (bindList,(exprObj,())) = do
+		{
+		binds <- compileBinds bindList;
+		expr <- compile exprObj;
+		return (fSubstRecursive (fmap convertToLocationBinding binds) expr);
 		};
 
 {--
@@ -222,7 +228,7 @@ module Org.Org.Semantic.HScheme.Compile where
 		{
 		r <- compile val;
 		body <- beg objs;
-		return (makeLetSingle (sym,r) body);
+		return (fSubst sym (convertToLocationExpression r) body);
 		});
 	
 	defineSyntaxT ::
