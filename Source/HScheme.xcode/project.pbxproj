@@ -216,6 +216,14 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		AB8E1AA805E82CA8005D5644 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.yacc;
+			path = Parser.y;
+			refType = 4;
+			sourceTree = "<group>";
+		};
 		AB9AA28E0501FABF00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -754,6 +762,7 @@
 		ABAD377904A403EE00A80103 = {
 			children = (
 				AB07721D050866B800A80103,
+				AB8E1AA805E82CA8005D5644,
 				ABF00F9F04E5DAD000A80103,
 				ABF00FA004E5DB5A00A80103,
 				ABAD377A04A403EE00A80103,
