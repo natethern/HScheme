@@ -32,7 +32,7 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	fullStdBindings :: (FullScheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
 	fullStdBindings = chainList
 		[
-		monadicStdBindings,
+		monadContStdBindings,
 
 		-- 4.1.6 Assignments
 		addMacroBinding "set!"			setBangM,

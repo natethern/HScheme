@@ -69,23 +69,57 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	 OutputPort Char m -> Bindings r m -> Object r m -> m (Bindings r m);
 	printeval output bindings obj = doEval (printResult output) bindings obj;
 
-	readLoad :: (Scheme m r) =>
+	evalObjects :: (Scheme m r) =>
+	 (Object r m -> m ()) ->
+	 Bindings r m ->
+	 [Object r m] ->
+	 m (Bindings r m);
+	evalObjects foo bindings [] = return bindings;
+	evalObjects foo bindings (obj:objs) = do	
+		{
+		bindings' <- doEval foo bindings obj;
+		evalObjects foo bindings' objs;
+		};
+
+	parseEvalFromString :: (Scheme m r) =>
+	 (Object r m -> m ()) ->
+	 Bindings r m ->
+	 String ->
+	 m (Bindings r m);
+	parseEvalFromString foo bindings text = do	
+		{
+		objs <- parseAllFromString text;
+		evalObjects foo bindings objs;
+		};
+
+	parseEvalFromPortByLine :: (Scheme m r) =>
 	 (Object r m -> m ()) ->
 	 Bindings r m ->
 	 InputPort Char m ->
 	 m (Bindings r m);
-	readLoad foo bindings input = do	
+	parseEvalFromPortByLine foo bindings input = do	
 		{
-		mobject <- portRead input;
+		mobject <- parseFromPort input;
 		case mobject of
 			{
 			Nothing -> return bindings;
 			Just obj -> do
 				{
 				bindings' <- doEval foo bindings obj;
-				readLoad foo bindings' input;
+				parseEvalFromPortByLine foo bindings' input;
 				};
 			};
+		};
+
+	parseEvalFromPortBulk :: (Scheme m r) =>
+	 (Object r m -> m ()) ->
+	 Bindings r m ->
+	 InputPort Char m ->
+	 m (Bindings r m);
+	parseEvalFromPortBulk foo bindings input = do	
+		{
+		text <- ipReadAll input;
+		parseEvalFromString foo bindings text;
 		};
 
 	loadBindingsWithProcs :: (Scheme m r) =>
@@ -95,7 +129,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	loadBindingsWithProcs oif output bindings name = do
 		{
 		input <- oif name;
-		bindings' <- readLoad (printResult output) bindings input;
+		bindings' <- parseEvalFromPortBulk (printResult output) bindings input;
 		ipClose input;
 		return bindings';
 		};

@@ -25,35 +25,56 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
---	type M r = SchemeCPS r (IO ());
-	type M (r :: * -> *) = IO;
+	type CPS r = SchemeCPS r (IO ());
 
-	type Interact r = FullSystemInterface (M r) r -> (M r) ();
+	instance Show (SchemeCPSError IORef (IO ())) where
+		{
+		show (StringError s) = s;
+		show (ExceptionError ex) = show ex;
+		show (ObjError ex) = "Scheme object error";
+		};
 
-	getFull :: IO Bool;
-	getFull = return True;
-{--
-	doInteract :: 
+	type Interact m r = FullSystemInterface m r -> m ();
+
+	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
+
+	getFlavour :: IO SchemeFlavour;
+	getFlavour = return StrictPureFlavour;
+
+	cpsInteract :: 
 		(
 		MonadGettableReference IO r,
 		MonadCreatable IO r
 		) =>
-	 (FullSystemInterface (M r) r -> (M r) ()) -> IO ();
-	doInteract interact = runContinuationPass
+	 (Interact (CPS r) r) -> IO ();
+	cpsInteract interact = runContinuationPass
 	 (\_ -> fail "error in catch code!")
 	 return
 	 (interact ioFullSystemInterface);
---}
-
 
 	main :: IO ();
 	main = do
 		{
---		full <- getFull;
---		if full
---		 then doInteract (fullInteract :: Interact IORef)
---		 else doInteract (pureInteract :: Interact Constant);
---		 else
-		   (safePureInteract :: Interact Constant) ioFullSystemInterface;
+		flavour <- getFlavour;
+		case flavour of
+			{
+			FullFlavour -> cpsInteract (fullInteract :: Interact (CPS IORef) IORef);
+			PureFlavour -> (pureInteract :: Interact IO (Constant IO)) ioFullSystemInterface;
+			StrictPureFlavour -> (strictPureInteract :: Interact IO (Constant IO)) ioFullSystemInterface;
+			};
 		};
+
+
+{-- for profiling
+	rep :: Integer -> IO () -> IO ();
+	rep 0 f = return ();
+	rep n f = do
+		{
+		f;
+		rep (n-1) f;
+		};
+
+	main :: IO ();
+	main = rep 100 main';
+--}
 	}

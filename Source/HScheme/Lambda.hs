@@ -206,4 +206,13 @@ module Org.Org.Semantic.HScheme.Lambda where
 	  	(resultArg,()) <- convertFromObjects args;
 	  	cont resultArg;
 	  	})]);
+	
+	fixP ::
+		(
+		Scheme m r,
+		MonadFix m,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
+	fixP Type (proc,()) = mfix (\a -> proc ?bindings [a]);
 	}

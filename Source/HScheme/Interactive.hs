@@ -58,7 +58,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 			{
 			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
 			opFlush (fsiCurrentOutputPort fsi);
-			mobject <- portRead input;
+			mobject <- parseFromPort input;
 			case mobject of
 				{
 				Nothing -> return Nothing;
@@ -92,6 +92,28 @@ module Org.Org.Semantic.HScheme.Interactive where
 	interact ::
 		(
 		Scheme m r,
+		MonadBottom m,
+		MonadSingleException x m,
+		Show x
+		) =>
+	 Type (r ()) ->
+	 FullSystemInterface m r ->
+	 Bindings r m ->
+	 String ->
+	 m ();
+	interact t fsi bindings filename = catchSingle (do
+		{
+		bindings' <- psiLoadBindings (fsiPure fsi) bindings filename;
+		interactiveLoop t fsi bindings';
+		})
+		(\error -> do
+		{
+		reportError t (fsiCurrentErrorPort fsi) error;
+		});
+
+	interactWithExit ::
+		(
+		Scheme m r,
 		MonadCont m,
 		MonadBottom m,
 		MonadSingleException x m,
@@ -102,7 +124,7 @@ module Org.Org.Semantic.HScheme.Interactive where
 	 Bindings r m ->
 	 String ->
 	 m ();
-	interact t fsi rootBindings filename = callCC (\exitFunc -> do
+	interactWithExit t fsi rootBindings filename = callCC (\exitFunc -> do
 		{
 		bindings <- chainList
 			[
@@ -117,40 +139,28 @@ module Org.Org.Semantic.HScheme.Interactive where
 		interactiveLoop t fsi bindings';
 		});
 
-	safePureInteract ::
+	strictPureInteract ::
 		(
 		Scheme m r,
+		MonadFix m,
 		MonadBottom m,
 		MonadSingleException x m,
 		Show x
 		) =>
 	 FullSystemInterface m r -> m ();
-	safePureInteract fsi = do
+	strictPureInteract fsi = do
 		{
 		bindings <- chainList
 			[
-			stdBindings
+			strictPureBindings
 			] emptyBindings;
-		catchSingle (do
-			{
-			bindings' <- psiLoadBindings (fsiPure fsi) bindings "Prelude.pure.scm";
-			interactiveLoop t fsi bindings';
-			})
-			(\error -> do
-			{
-			reportError t (fsiCurrentErrorPort fsi) error;
-			});
-		} where
-		{
-		foo :: FullSystemInterface m r -> Type (r ());
-		foo _ =Type;
-		t = foo fsi
+		interact Type fsi bindings "Prelude.pure.scm";
 		};
 
 	pureInteract ::
 		(
 		Scheme m r,
-		MonadCont m,
+		MonadFix m,
 		MonadBottom m,
 		MonadSingleException x m,
 		Show x
@@ -160,10 +170,10 @@ module Org.Org.Semantic.HScheme.Interactive where
 		{
 		bindings <- chainList
 			[
-			monadicStdBindings,
+			pureBindings,
 			pureSystemBindings (fsiPure fsi)
 			] emptyBindings;
-		interact Type fsi bindings  "Prelude.pure.scm";
+		interact Type fsi bindings "Prelude.pure.scm";
 		};
 
 	fullInteract ::
@@ -182,6 +192,6 @@ module Org.Org.Semantic.HScheme.Interactive where
 			fullStdBindings,
 			fullSystemBindings fsi
 			] emptyBindings;
-		interact Type fsi bindings "Prelude.full.scm";
+		interactWithExit Type fsi bindings "Prelude.full.scm";
 		};
 	}

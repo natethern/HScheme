@@ -42,9 +42,9 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	stdBindings = chainList
 		[
 		addBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
---		addBinding		(MkSymbol "<loop>")				loop,									-- test
+		addBinding		(MkSymbol "<loop>")				loop,									-- test
 		addBinding		(MkSymbol "<undefined>")		undefined,								-- test
-		
+
 		-- 4.1.2 Literal Expressions
 		addMacroBinding	"quote"							quoteM,
 
@@ -63,10 +63,10 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 		-- 5.2 Definitions
 		addTopLevelMacroBinding	"define"				defineT,
-		
+
 		-- 6.1 Equivalence Predicates
 		addProcBinding	"equal?"						equalP,
-		
+
 		-- 6.2.5 Numerical Operations
 		addProcBinding	"number?"						isNumberP,
 		addProcBinding	"exact?"						isExactP,
@@ -148,16 +148,13 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		{
 		};
 
-	monadicStdBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadicStdBindings :: (Scheme m r) => Bindings r m -> m (Bindings r m);
 	monadicStdBindings = chainList
 		[
 		stdBindings,
 
 		-- 4.2.3 Sequencing
 		addMacroBinding	"begin"								beginM,
-
-		-- 6.4 Control Features
-		addProcBinding	"call-with-current-continuation"	callCCP,
 
 		-- 6.6.1 Ports
 		addProcBinding	"input-port?"						isInputPortP,
@@ -174,4 +171,27 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		-- 6.6.3 Output
 		addProcBinding	"port-write-char"					portWriteCharP						-- nonstandard
 		];
+
+	monadContBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadContBindings = chainList
+		[
+		-- 6.4 Control Features
+		addProcBinding	"call-with-current-continuation"	callCCP
+		];
+
+	monadFixBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
+	monadFixBindings = chainList
+		[
+		-- 6.4 Control Features
+		addProcBinding	"call-with-result"					fixP								-- nonstandard
+		];
+
+	monadContStdBindings :: (Scheme m r,MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadContStdBindings = chainList [monadicStdBindings,monadContBindings];
+
+	strictPureBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
+	strictPureBindings = chainList [stdBindings,monadFixBindings];
+
+	pureBindings :: (Scheme m r,MonadFix m) => Bindings r m -> m (Bindings r m);
+	pureBindings = chainList [monadicStdBindings,monadFixBindings];
 	}

@@ -32,6 +32,22 @@ module Org.Org.Semantic.HScheme.Port where
 		ipClose	:: m ()
 		};
 
+	ipReadAll :: (Monad m) =>
+	 InputPort c m -> m [c];
+	ipReadAll ip = do
+		{
+		mc <- ipRead ip;
+		case mc of
+			{
+			Nothing -> return [];
+			Just c -> do
+				{
+				s <- ipReadAll ip;
+				return (c:s);
+				};
+			};
+		};
+
 	referenceInputPort :: (MonadFixedReference m r) =>
 	 r [c] -> InputPort c m;
 	referenceInputPort ref = MkInputPort
