@@ -202,10 +202,10 @@ testrelease: test-pure test-full test-cgi
 	diff -u $^
 
 test/%.scm.initfull.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.full.scm
-	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
+	time bin/$(BATCH_COMMAND_REL) --noinit -I. init.full.scm $< > $@ || (rm $@; exit 1)
 
 test/%.scm.initpure.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.pure.scm init.full.scm
-	time bin/$(BATCH_COMMAND_REL) --mpure --noinit init.pure.scm $< > $@ || (rm $@; exit 1)
+	time bin/$(BATCH_COMMAND_REL) --mpure --noinit -I. init.pure.scm $< > $@ || (rm $@; exit 1)
 
 test/%.scm.full.out: test/%.scm bin/$(BATCH_COMMAND_REL)
 	time bin/$(BATCH_COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
@@ -259,7 +259,9 @@ test-full:	\
  test/load.scm.full.diff	\
  test/load.scm.initfull.diff	\
  test/helloworld.scm.initfull.diff	\
+ test/io.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
+# test/report-examples-4.scm.initfull.diff	\
 
 test-cgi: test/cgi-get.diff test/cgi-error.diff
 
@@ -273,7 +275,7 @@ testprof: $(BATCH_COMMAND_REL).prof
 
 $(BATCH_COMMAND_REL).prof: bin/$(BATCH_COMMAND_REL) init.full.scm test/helloworld.scm
 	rm -f $@
-	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm test/helloworld.scm +RTS -p
+	time bin/$(BATCH_COMMAND_REL) --noinit -I. init.full.scm test/helloworld.scm +RTS -p
 
 
 # Documentation
@@ -824,9 +826,9 @@ Org/Org/Semantic/HScheme/RunLib/PortProcedures.o Org/Org/Semantic/HScheme/RunLib
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.hi
-Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.q_hi
-Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : ./Org/Org/Semantic/HScheme/Interpret/Assemble.p_hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.o : ./Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.q_o : ./Org/Org/Semantic/HScheme/Parse.q_hi
+Org/Org/Semantic/HScheme/RunLib/PortProcedures.p_o : ./Org/Org/Semantic/HScheme/Parse.p_hi
 Org/Org/Semantic/HScheme/RunLib/ListProcedures.o Org/Org/Semantic/HScheme/RunLib/ListProcedures.q_o Org/Org/Semantic/HScheme/RunLib/ListProcedures.p_o : Org/Org/Semantic/HScheme/RunLib/ListProcedures.hs
 Org/Org/Semantic/HScheme/RunLib/ListProcedures.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/RunLib/ListProcedures.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi

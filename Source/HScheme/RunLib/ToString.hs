@@ -25,53 +25,53 @@ module Org.Org.Semantic.HScheme.RunLib.ToString where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	printList :: (ToString cm obj,Build cm r,ListObject r obj) =>
-	 r obj -> r obj -> cm String;
-	printList hl tl = do
+	printList :: (Build cm r,ListObject r obj) =>
+	 (obj -> cm String) -> r obj -> r obj -> cm String;
+	printList toStr hl tl = do
 		{
 		head <- get hl;
-		htext <- toString head;
+		htext <- toStr head;
 		tail <- get tl;
 		case objectCell tail of
 			{
 			Just Nothing -> return htext;
 			Just (Just (hl',tl')) -> do
 				{
-				rtext <- printList hl' tl';
+				rtext <- printList toStr hl' tl';
 				return (htext++" "++rtext);
 				};
 			Nothing -> do
 				{
-				rtext <- toString tail;
+				rtext <- toStr tail;
 				return (htext++" . "++rtext);
 				};
 			};
 		};
 	
-	printValues :: (ToString cm obj) =>
-	 [obj] -> cm String;
-	printValues [] = return "";
-	printValues [a] = toString a;
-	printValues (a:as) = do
+	printValues :: (Monad cm) =>
+	 (obj -> cm String) -> [obj] -> cm String;
+	printValues _ [] = return "";
+	printValues toStr [a] = toStr a;
+	printValues toStr (a:as) = do
 		{
-		f <- toString a;
-		r <- printValues as;
+		f <- toStr a;
+		r <- printValues toStr as;
 		return (f++" "++r);
 		};
 	
-	printVector :: (ToString cm obj,Build cm r) =>
-	 [r obj] -> cm String;
-	printVector [] = return "";
-	printVector [ar] = do
+	printVector :: (Build cm r) =>
+	 (obj -> cm String) -> [r obj] -> cm String;
+	printVector _ [] = return "";
+	printVector toStr [ar] = do
 		{
 		a <- get ar;
-		toString a;
+		toStr a;
 		};
-	printVector (ar:as) = do
+	printVector toStr (ar:as) = do
 		{
 		a <- get ar;
-		f <- toString a;
-		r <- printVector as;
+		f <- toStr a;
+		r <- printVector toStr as;
 		return (f++" "++r);
 		};
 
@@ -129,14 +129,15 @@ module Org.Org.Semantic.HScheme.RunLib.ToString where
 	class (Monad cm) =>
 	 ToString cm obj where
 		{
-		toString :: obj -> cm String;
+		toString :: obj -> cm String;	-- quote chars and strings
+		toDisplay :: obj -> cm String;	-- don't quote chars or strings
 		};
 
 	toStringP :: (ToString cm obj,?objType :: Type obj) =>
 	 (obj,()) -> cm (SList Char);
-	toStringP (obj,()) = do
-		{
-		s <- toString obj;
-		return (MkSList s);
-		};
+	toStringP (obj,()) = fmap MkSList (toString obj);
+
+	toDisplayP :: (ToString cm obj,?objType :: Type obj) =>
+	 (obj,()) -> cm (SList Char);
+	toDisplayP (obj,()) = fmap MkSList (toDisplay obj);
 	}

@@ -1,2 +1,8 @@
 12
 5
+(alit)
+wlblit
+(ab 3)
+(blit alit 4)
+(() () ())
+((a d 37 (a b)) (b e "hello" (c . d)) (c f () (e f g)))

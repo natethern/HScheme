@@ -51,7 +51,8 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		) =>
 	 InterpretObject m r obj;
 
-	class PatternError cm obj where
+	class (ProcedureError cm obj) =>
+	 PatternError cm obj where
 		{
 		throwBadPatternError :: forall a. (?objType :: Type obj) =>
 		 obj -> cm a;

@@ -95,33 +95,48 @@
 	)
 ))
 
-(define read (lambda rest
-	(port-read (optional-input-port rest))
-))
-
 (define read-byte (lambda rest
 	(port-read-byte (optional-input-port rest))
 ))
 
+(define peek-byte (lambda rest
+	(port-peek-byte (optional-input-port rest))
+))
+
+(define byte-ready? (lambda rest
+	(port-byte-ready? (optional-input-port rest))
+))
+
 (define read-char-latin1 (lambda rest
-	(port-read-char-latin1  (optional-input-port rest))
+	(port-read-char-latin1 (optional-input-port rest))
 ))
 
 (define read-char-utf8 (lambda rest
-	(port-read-char-utf8  (optional-input-port rest))
+	(port-read-char-utf8 (optional-input-port rest))
 ))
 
 (define peek-char-latin1 (lambda rest
-	(port-peek-char-latin1  (optional-input-port rest))
+	(port-peek-char-latin1 (optional-input-port rest))
 ))
+
+(define read-latin1 (lambda rest
+	(port-read-latin1 (optional-input-port rest))
+))
+
+(define read-utf8 (lambda rest
+	(port-read-utf8 (optional-input-port rest))
+))
+
+(define char-ready-latin1? byte-ready?)
+
 
 (define read-char read-char-latin1)
 
 (define peek-char peek-char-latin1)
 
-(define char-ready? (lambda rest
-	(port-char-ready?  (optional-input-port rest))
-))
+(define char-ready? char-ready-latin1?)
+
+(define read read-latin1)
 
 
 ; 6.6.3 Output
@@ -132,10 +147,54 @@
 	)
 ))
 
-(define write-char (lambda (c . rest)
-	(port-write-char c  (optional-output-port rest))
+(define write-byte (lambda (b . rest)
+	(port-write-byte b (optional-output-port rest))
+))
+
+(define write-byte-array (lambda (s . rest)
+	(port-write-byte-array s (optional-output-port rest))
+))
+
+(define write-char-latin1 (lambda (c . rest)
+	(port-write-char-latin1 c (optional-output-port rest))
+))
+
+(define write-char-utf8 (lambda (c . rest)
+	(port-write-char-utf8 c (optional-output-port rest))
+))
+
+(define write-string-latin1 (lambda (s . rest)
+	(port-write-string-latin1 s (optional-output-port rest))
+))
+
+(define write-string-utf8 (lambda (s . rest)
+	(port-write-string-utf8 s (optional-output-port rest))
+))
+
+(define write-latin1 (lambda (s . rest)
+	(apply write-string-latin1 (cons (to-string s) rest))
+))
+
+(define write-utf8 (lambda (s . rest)
+	(apply write-string-utf8 (cons (to-string s) rest))
+))
+
+(define display-latin1 (lambda (s . rest)
+	(apply write-string-latin1 (cons (to-display s) rest))
+))
+
+(define display-utf8 (lambda (s . rest)
+	(apply write-string-utf8 (cons (to-display s) rest))
 ))
 
 (define newline (lambda rest
-	(apply write-char (cons #\newline rest))
+	(apply write-char-latin1 (cons #\newline rest))
 ))
+
+(define write-char write-char-latin1)
+
+(define write-string write-string-latin1)
+
+(define write write-latin1)
+
+(define display display-latin1)

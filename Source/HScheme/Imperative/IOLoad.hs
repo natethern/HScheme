@@ -54,5 +54,5 @@ module Org.Org.Semantic.HScheme.Imperative.IOLoad where
 		) =>
 	 [String] -> 
 	 String -> IO [obj];
-	ioRead paths = readWithProcs (openInputFileWithPaths paths);
+	ioRead paths = readWithProcs parseUTF8Char (openInputFileWithPaths paths);
 	}

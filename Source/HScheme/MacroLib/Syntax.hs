@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	(
+	appendTwo,
 	MapObjects(..),SyntaxError(..),
 	defineSyntaxT,caseMatchM
 	) where
@@ -35,15 +36,40 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 
 	type Binding = Bind Symbol;
 
+	appendTwo ::
+		(
+		ProcedureError cm obj,
+		Build cm r,
+		ObjectSubtype r obj obj,
+		?objType :: Type obj
+		) =>
+	 obj -> obj -> cm obj;
+	appendTwo a b = do
+		{
+		epn <- fromObject a;
+		case epn of
+			{
+			Left () -> return b;
+			Right (head,tail) -> do
+				{
+				tb <- appendTwo tail b;
+				cons head tb;
+				};
+			};
+		};
+
 	class MapObjects r obj | obj -> r where
 		{
-		internalMap :: forall cm. (Build cm r) => (obj -> cm obj) -> obj -> cm obj;
+		internalMapWithEllipsis :: forall cm. (Build cm r,ProcedureError cm obj,?objType :: Type obj) =>
+		 (obj -> cm (Maybe obj)) -> obj -> cm obj;
 		};
 
 	substituteSymbol ::
 		(
 		ObjectSubtype r obj Symbol,
-		Build cm r
+		ProcedureError cm obj,
+		Build cm r,
+		?objType :: Type obj
 		) =>
 	 [Binding obj] -> Symbol -> cm obj;
 	substituteSymbol [] sym = getObject sym;
@@ -54,19 +80,21 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 
 	substitute ::
 		(
+		ProcedureError cm obj,
 		Build cm r,
 		MapObjects r obj,
-		ObjectSubtype r obj Symbol
+		ObjectSubtype r obj Symbol,
+		?objType :: Type obj
 		) =>
 	 [Binding obj] -> obj -> cm obj;
 	substitute [] = return;
-	substitute subs = internalMap (\obj -> do
+	substitute subs = internalMapWithEllipsis (\obj -> do
 		{
 		msym <- resultFromObject obj;
 		case msym of
 			{
-			SuccessResult sym -> substituteSymbol subs sym;
-			_ -> return obj;
+			SuccessResult sym -> fmap Just (substituteSymbol subs sym);
+			_ -> return Nothing;
 			};
 		});
 

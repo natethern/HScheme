@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.Pattern
 	(
 	Pattern(),SchemePattern,
-	makeObjectPattern,makeListPattern,
+	ellipsisSymbol,makeObjectPattern,makeListPattern,
 	patternZip,patternBind,
 	throwMismatchObjError,
 	mustMatch,makeLambda

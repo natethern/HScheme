@@ -120,6 +120,7 @@ others = () (Ps,Pe), '",;#\ (Po), ` (Sk)
 	symbolParse :: (MonadOrParser Char p) =>
 	 p Symbol;
 	symbolParse = fmap MkSymbol (
+	 (isListParse "...") |||
 	 (fmap (\c -> [c]) (isTokenParse '+'))	|||
 	 (fmap (\c -> [c]) (isTokenParse '-'))	|||
 	 (do

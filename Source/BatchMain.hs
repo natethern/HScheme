@@ -42,7 +42,11 @@ module Main where
 		(mflavour,mwm,paths,initfile,filenames,verbose) <- parseArgs args;
 		let
 			{
-			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
+			loadpaths = case paths of
+				{
+				[] -> [".","/usr/share/hscheme"];
+				_ -> paths;
+				};
 			whichmonad = unJust defaultWhichMonad mwm;
 			flavour = unJust (defaultStdBindings whichmonad) mflavour;
 			};

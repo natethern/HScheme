@@ -67,8 +67,8 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		ParserError m obj,
 		?objType :: Type obj
 		) =>
-	 InputPort Word8 m -> m (Maybe obj);
-	parseFromPort port = parseFromCharSource (parseUTF8Char (ipRead port));
+	 (m (Maybe Word8) -> m (Maybe Char)) -> InputPort Word8 m -> m (Maybe obj);
+	parseFromPort decoder port = parseFromCharSource (decoder (ipRead port));
 
 	parseFromString ::
 		(
@@ -130,6 +130,10 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		return ();
 		};
 
+	parseLatin1Char :: (Functor cm) =>
+	 cm (Maybe Word8) -> cm (Maybe Char);
+	parseLatin1Char = fmap (fmap decodeCharLatin1);
+
 	parseUTF8Char ::
 		(
 		ParserError cm obj,
@@ -145,11 +149,12 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		ParserError cm obj,
 		?objType :: Type obj
 		) =>
+	 (cm (Maybe Word8) -> cm (Maybe Char)) ->
 	 InputPort Word8 cm ->
 	 cm [obj];
-	parseFromPortBulk input = do	
+	parseFromPortBulk decoder input = do	
 		{
-		text <- accumulateMaybeSource (parseUTF8Char (ipRead input));
+		text <- accumulateMaybeSource (decoder (ipRead input));
 		parseAllFromString text;
 		};
 
@@ -160,12 +165,13 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		ParserError cm obj,
 		?objType :: Type obj
 		) =>
+	 (cm (Maybe Word8) -> cm (Maybe Char)) ->
 	 (String -> cm (InputPort Word8 cm)) ->
 	 String -> cm [obj];
-	readWithProcs oif name = do
+	readWithProcs decoder oif name = do
 		{
 		input <- oif name;
-		objects <- parseFromPortBulk input;
+		objects <- parseFromPortBulk decoder input;
 		ipClose input;
 		return objects;
 		};
@@ -178,16 +184,38 @@ module Org.Org.Semantic.HScheme.Parse.ParseObject where
 		ParserError m obj,
 		?objType :: Type obj
 		) =>
-	 (InputPort Word8 m,()) -> m obj;
-	portReadP (port,()) = do
+	 (m (Maybe Word8) -> m (Maybe Char)) -> (InputPort Word8 m,()) -> m obj;
+	portReadP decoder (port,()) = do
 		{
-		mobj <- parseFromPort port;
+		mobj <- parseFromPort decoder port;
 		case mobj of
 			{
 			Just obj -> return obj;
 			Nothing -> getObject MkEOFObjType;
 			};
 		};
+
+	portReadLatin1P ::
+		(
+		ObjectSubtype r obj EOFObjType,
+		ParseObject r obj,
+		Build m r,
+		ParserError m obj,
+		?objType :: Type obj
+		) =>
+	 (InputPort Word8 m,()) -> m obj;
+	portReadLatin1P = portReadP parseLatin1Char;
+
+	portReadUTF8P ::
+		(
+		ObjectSubtype r obj EOFObjType,
+		ParseObject r obj,
+		Build m r,
+		ParserError m obj,
+		?objType :: Type obj
+		) =>
+	 (InputPort Word8 m,()) -> m obj;
+	portReadUTF8P = portReadP parseUTF8Char;
 
 	-- conversion
 	parseUTF8P ::

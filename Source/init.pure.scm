@@ -2,8 +2,8 @@
 (define-syntax cond (syntax-rules (=> else)
 	((cond) (values))
 	((cond (else    . exprs)) (begin . exprs))
+	((cond (test => func) . rest) (let ((f func) (t test)) (if t (f t) (cond . rest))))
 	((cond (test    . exprs) . rest) (if test (begin . exprs) (cond . rest)))
-	((cond (test => . exprs) . rest) (if test (begin . exprs) (cond . rest)))
 ))
 
 (define-syntax case (syntax-rules (else)

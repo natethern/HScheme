@@ -11,6 +11,18 @@
 			path = ParserError.hs;
 			refType = 4;
 		};
+		AB103FD8050F23A300A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = io.scm;
+			refType = 4;
+		};
+		AB103FD9050F23B100A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = io.scm.ref;
+			refType = 4;
+		};
 		AB1182B204DB176200A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -719,9 +731,13 @@
 				ABB6927C04A4677500A80103,
 				ABB6927D04A4678C00A80103,
 				AB1182B404DB178200A80103,
+				AB103FD8050F23A300A80103,
+				AB103FD9050F23B100A80103,
 				AB1182B504DB178E00A80103,
 				AB1182B204DB176200A80103,
 				AB1182B304DB177600A80103,
+				ABEBAF00050EF5BE00A80103,
+				ABEBAF01050EF81700A80103,
 				ABC9354304B3FD4A00A80103,
 				ABC9354404B4054F00A80103,
 				AB1F27A104CA87A800A80103,
@@ -1055,6 +1071,18 @@
 			fileEncoding = 4;
 			isa = PBXFileReference;
 			path = Misc.hs;
+			refType = 4;
+		};
+		ABEBAF00050EF5BE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "report-examples-4.scm";
+			refType = 4;
+		};
+		ABEBAF01050EF81700A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "report-examples-4.scm.ref";
 			refType = 4;
 		};
 		ABF00F9D04E5AAC400A80103 = {

@@ -400,25 +400,61 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 
 	instance MapObjects r (CompleteObject r m) where
 		{
-		internalMap map (VectorObject arr) = do
+		internalMapWithEllipsis map (VectorObject arr) = do
 			{
 			list' <- for (\loc -> do
 				{
 				obj <- get loc;
-				obj' <- internalMap map obj;
+				obj' <- internalMapWithEllipsis map obj;
 				new obj';
 				}) (toList arr);
 			return (VectorObject (fromList list'));
 			};
-		internalMap map (PairObject hloc tloc) = do
+		internalMapWithEllipsis map (PairObject hloc tloc) = do
 			{
 			head <- get hloc;
-			head' <- internalMap map head;
 			tail <- get tloc;
-			tail' <- internalMap map tail;
-			cons head' tail';
+			msub <- case tail of
+				{
+				PairObject h2loc t2loc -> do
+					{
+					head2 <- get h2loc;
+					case head2 of
+						{
+						SymbolObject sym | sym == ellipsisSymbol -> do
+							{
+							mh <- map head;
+							case mh of
+								{
+								Just subObj -> do
+									{
+									tail2 <- get t2loc;
+									fmap Just (appendTwo subObj tail2);
+									};
+								_ -> return Nothing;
+								};
+							};
+						_ -> return Nothing;
+						};
+					};
+				_ -> return Nothing;
+				};
+			case msub of
+				{
+				Just sub -> return sub;
+				Nothing -> do
+					{
+					head' <- internalMapWithEllipsis map head;
+					tail' <- internalMapWithEllipsis map tail;
+					cons head' tail';
+					};
+				};
 			};
-		internalMap map obj = map obj;
+		internalMapWithEllipsis map obj = fmap (\msub -> case msub of
+			{
+			Just sub -> sub;
+			Nothing -> obj; 
+			}) (map obj);
 		};
 
 
@@ -573,12 +609,12 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 			};
 		toString (PairObject	hl tl)	= do
 			{
-			list <- printList hl tl;
+			list <- printList toString hl tl;
 			return ("("++list++")");
 			};
 		toString (VectorObject v)		= do
 			{
-			text <- printVector (toList v);
+			text <- printVector toString (toList v);
 			return ("#("++text++")");
 			};
 		toString VoidObject				= return "#<void>";
@@ -586,6 +622,20 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject1 where
 		toString (OutputPortObject _)	= return "#<output port>";
 		toString (ProcedureObject _)	= return "#<procedure>";
 		toString (EnvironmentObject _)	= return "#<environment>";
+
+		toDisplay (CharObject c) = return [c];
+		toDisplay (StringObject arr)		= getSRefArrayList arr;
+		toDisplay (PairObject	hl tl)	= do
+			{
+			list <- printList toDisplay hl tl;
+			return ("("++list++")");
+			};
+		toDisplay (VectorObject v)		= do
+			{
+			text <- printVector toDisplay (toList v);
+			return ("#("++text++")");
+			};
+		toDisplay obj	= toString obj;
 		};
 
 

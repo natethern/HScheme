@@ -173,6 +173,15 @@ module Org.Org.Semantic.HScheme.Parse.Numeric where
 		(i,md) <- digitsPointParse;
 		(pre,post,e) <- case md of
 			{
+			Just [] -> do
+				{
+				case i of
+					{
+					[] -> mOneOrMore (isTokenParse '#'); -- got nothing but a ".", so must have #s to be a number
+					_ -> mZeroOrMore (isTokenParse '#');
+					};
+				return (i,[],False);
+				};
 			Just d -> do
 				{
 				mZeroOrMore (isTokenParse '#');

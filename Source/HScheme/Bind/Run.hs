@@ -295,7 +295,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 --		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
 
 		-- Misc
-		addProcBinding	"to-string"						toStringP								-- nonstandard
+		addProcBinding	"to-string"						toStringP,								-- nonstandard
+		addProcBinding	"to-display"					toDisplayP								-- nonstandard
 		];
 
 	monadContBindings ::
@@ -359,6 +360,8 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		ObjectSubtype r obj Bool,
 		ObjectSubtype r obj Word8,
+		ObjectSubtype r obj Char,
+		ObjectSubtype r obj (SList Word8),
 		ObjectSubtype r obj (InputPort Word8 m),
 		ObjectSubtype r obj (OutputPort Word8 m),
 		ObjectSubtype r obj EOFObjType,
@@ -377,14 +380,23 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcNBinding	"close-output-port"				outputPortClosePN,
 
 		-- 6.6.2 Input
-		addProcBinding	"port-read"						portReadP,								-- nonstandard
+		addProcBinding	"eof-object?"					isEOFObjectP,
 		addProcBinding	"port-read-byte"				portReadByteP,							-- nonstandard
 		addProcBinding	"port-peek-byte"				portPeekByteP,							-- nonstandard
-		addProcBinding	"eof-object?"					isEOFObjectP,
 		addProcBinding	"port-byte-ready?"				portByteReadyP,							-- nonstandard
+		addProcBinding	"port-read-char-latin1"			portReadCharLatin1P,					-- nonstandard
+		addProcBinding	"port-read-char-utf8"			portReadCharUTF8P,						-- nonstandard
+		addProcBinding	"port-peek-char-latin1"			portPeekCharLatin1P,					-- nonstandard
+		addProcBinding	"port-read-latin1"				portReadLatin1P,						-- nonstandard
+		addProcBinding	"port-read-utf8"				portReadUTF8P,							-- nonstandard
 
 		-- 6.6.3 Output
-		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
+		addProcNBinding	"port-write-byte"				portWriteBytePN,						-- nonstandard
+		addProcNBinding	"port-write-byte-array"			portWriteByteArrayPN,					-- nonstandard
+		addProcNBinding	"port-write-char-latin1"		portWriteCharLatin1PN,					-- nonstandard
+		addProcNBinding	"port-write-char-utf8"			portWriteCharUTF8PN,					-- nonstandard
+		addProcNBinding	"port-write-string-latin1"		portWriteStringLatin1PN,				-- nonstandard
+		addProcNBinding	"port-write-string-utf8"		portWriteStringUTF8PN					-- nonstandard
 		];
 
 	setBindings ::
