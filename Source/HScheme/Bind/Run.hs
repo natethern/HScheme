@@ -168,7 +168,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"*"								(foldingLP ((*) :: Number -> Number -> Number) 1),
 		addProcBinding	"-"								subtractP,
 		addProcBinding	"/"								divideP,
-		addProcBinding	"abs"							(unaryP (abs :: Number -> EIReal)),
+		addProcBinding	"abs"							(unaryP (absolute :: Number -> EIReal)),
 		addProcBinding	"quotient"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingIntegerDivideModal :: EIReal -> EIReal -> Integer)),
 		addProcBinding	"remainder"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingModuloModal :: EIReal -> EIReal -> EIReal)),
 		addProcBinding	"modulo"						(binaryP (switchArgs failingModulo :: EIReal -> EIReal -> EIReal)),
@@ -182,27 +182,27 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"round"							(unaryRoundP (let {?rounding = roundHalfEven} in failingRound :: EIReal -> Integer)),
 		addProcBinding	"rationalize"					rationalizeP,
 		addProcBinding	"rationalize-exact"				rationalizeExactP,
-		addProcBinding	"exp"							(unaryNumberP exp),
-		addProcBinding	"log"							(unaryNumberP log),
-		addProcBinding	"sin"							(unaryNumberP sin),
-		addProcBinding	"cos"							(unaryNumberP cos),
-		addProcBinding	"tan"							(unaryNumberP tan),
-		addProcBinding	"sinh"							(unaryNumberP sinh),
-		addProcBinding	"cosh"							(unaryNumberP cosh),
-		addProcBinding	"tanh"							(unaryNumberP tanh),
-		addProcBinding	"asin"							(unaryNumberP asin),
-		addProcBinding	"acos"							(unaryNumberP acos),
-		addProcBinding	"atan"							(unaryNumberP atan),
-		addProcBinding	"asinh"							(unaryNumberP asinh),
-		addProcBinding	"acosh"							(unaryNumberP acosh),
-		addProcBinding	"atanh"							(unaryNumberP atanh),
-		addProcBinding	"sqrt"							(unaryNumberP sqrt),
+		addProcBinding	"exp"							(unaryNumberP exponent),
+		addProcBinding	"log"							(unaryNumberP logarithm),
+		addProcBinding	"sin"							(unaryNumberP sine),
+		addProcBinding	"cos"							(unaryNumberP cosine),
+		addProcBinding	"tan"							(unaryNumberP tangent),
+		addProcBinding	"sinh"							(unaryNumberP hypsine),
+		addProcBinding	"cosh"							(unaryNumberP hypcosine),
+		addProcBinding	"tanh"							(unaryNumberP hyptangent),
+		addProcBinding	"asin"							(unaryNumberP arcsine),
+		addProcBinding	"acos"							(unaryNumberP arccosine),
+		addProcBinding	"atan"							(unaryNumberP arctangent),
+		addProcBinding	"asinh"							(unaryNumberP archypsine),
+		addProcBinding	"acosh"							(unaryNumberP archypcosine),
+		addProcBinding	"atanh"							(unaryNumberP archyptangent),
+		addProcBinding	"sqrt"							(unaryNumberP squareroot),
 		addProcBinding	"expt"							(binaryP ((**) :: Number -> Number -> Number)),
 		addProcBinding	"make-rectangular"				(binaryP ((:+) :: EIReal -> EIReal -> Number)),
 		addProcBinding	"make-polar"					(binaryP (polarComplex :: EIReal -> EIReal -> Number)),
 		addProcBinding	"real-part"						realPartP,
 		addProcBinding	"imag-part"						imagPartP,
-		addProcBinding	"magnitude"						(unaryP (abs :: Number -> EIReal)),
+		addProcBinding	"magnitude"						(unaryP (absolute :: Number -> EIReal)),
 		addProcBinding	"angle"							(unaryP (phase :: Number -> EIReal)),
 		addProcBinding	"exact->inexact"				(unaryP (toInexactN :: Number -> Number)),
 		addProcBinding	"inexact->exact"				(unaryP (toExactN :: Number -> Number)),
@@ -334,13 +334,15 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		(
 		InterpretObject m r obj,
 		MonadCont m,
+		MonadExit (cm ()) m,
 		Build cm r
 		) =>
 	 RefBindings cm r obj;
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
-		addProcLBinding	"call-with-current-continuation"	callCCPL
+		addProcLBinding	"call-with-current-continuation"	callCCPL,
+		addProcLBinding "exit" exitWith
 		];
 
 	monadGuardBindings ::

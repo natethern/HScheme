@@ -104,7 +104,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 	instance (MonadException (SchemeGCPSObject (cm ()) mobj) cm) =>
 	 Runnable cm (SchemeGCPS (cm ()) mobj) where
 		{
-		rsRun ma = runGuardContinuationPass return
+		rsRun ma = runMonad return
 		 (exRun (\err -> lift (case err of
 			{
 			GCPSStringError s -> fail s;

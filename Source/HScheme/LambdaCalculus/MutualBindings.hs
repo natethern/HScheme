@@ -26,7 +26,7 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.MutualBindings
 	bindSeparate,bindRecursive
 	) where
 	{
-	import Org.Org.Semantic.HScheme.LambdaCalculus.FixedList;
+--	import Org.Org.Semantic.HScheme.LambdaCalculus.FixedList;
 	import Org.Org.Semantic.HBase;
 
 	data MutualBindings f a v = forall t. (ExtractableFunctor t) =>

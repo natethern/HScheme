@@ -47,7 +47,7 @@
 
 (define xml:escape (lambda (text)
 	text
-;  (apply string-append (map xml:escape-char (string-chars text)))
+  (apply string-append (map xml:escape-char (string-chars text)))
 ))
 
 (define xml:attrs-text (lambda (attrs)

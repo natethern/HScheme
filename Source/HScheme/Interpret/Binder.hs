@@ -43,8 +43,8 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 		) =>
 	 [Symbol] -> SchemeExpression r obj (m a) -> SchemeExpression r obj (m a);
 	schemeExprLetNewRefs [] bodyexpr = bodyexpr;
-	schemeExprLetNewRefs (sym:rest) bodyexpr = 
-	 schemeExprLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefs rest bodyexpr);
+	schemeExprLetNewRefs (sym:syms) bodyexpr = 
+	 schemeExprLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefs syms bodyexpr);
 
 	bindsToSetSequence ::
 		(
@@ -55,8 +55,8 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
 	bindsToSetSequence [] bodyexpr = bodyexpr;
-	bindsToSetSequence ((sym,bindexpr):rest) bodyexpr = 
-	 liftF3 setBindValue (schemeExprSymbol sym) bindexpr (bindsToSetSequence rest bodyexpr) where
+	bindsToSetSequence ((sym,bindexpr):binds) bodyexpr = 
+	 liftF3 setBindValue (schemeExprSymbol sym) bindexpr (bindsToSetSequence binds bodyexpr) where
 		{
 		setBindValue ref bindaction bodyaction =
 		 {-# SCC "setBindValue" #-}
@@ -79,11 +79,11 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 	interactiveBind binds expr = schemeExprLetNewRefsCollectLocs binds (bindsToSetSequence binds expr) where
 		{
 		schemeExprLetNewRefsCollectLocs [] bodyexpr = fmap (fmap (\a -> (a,[]))) bodyexpr;
-		schemeExprLetNewRefsCollectLocs ((sym,_):rest) bodyexpr = 
+		schemeExprLetNewRefsCollectLocs ((sym,_):rbinds) bodyexpr = 
 		 {-# SCC "schemeExprLetNewRefsCollectLocs" #-}
-		 gather sym (schemeExprLocLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefsCollectLocs rest bodyexpr));
+		 gather sym (schemeExprLocLet sym (newSymbolBindingExpression sym) (schemeExprLetNewRefsCollectLocs rbinds bodyexpr));
 
-		gather sym = fmap (fmap (\((a,binds),loc) -> (a,(sym,loc):binds)))
+		gather sym = fmap (fmap (\((a,rbinds),loc) -> (a,(sym,loc):rbinds)))
 		};
 
 	recursiveBinder ::

@@ -3,97 +3,134 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 38;
+	objectVersion = 39;
 	objects = {
 		AB07721D050866B800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ParserError.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB103FD8050F23A300A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = io.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB103FD9050F23B100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = io.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB1182B204DB176200A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = load.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB1182B304DB177600A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = load.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB1182B404DB178200A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = load1.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB1182B504DB178E00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = load2.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB1F27A104CA87A800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "cgi-get.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB2F614D04CC34A100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "cgi-error.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB36E53104E5E1EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = List.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB36E53204E5E53B00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ParseObject.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB36E53304E5F6B800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SimpleObject.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB36E54504E761AC00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ListProcedures.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB36E54604E7680900A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ToString.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB3D178A04C6704100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Arguments.hs;
 			refType = 4;
+			sourceTree = "<group>";
+		};
+		AB4904B60581CEDA00986CAA = {
+			containerPortal = ABAD36BC04A4020700A80103;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = ABAD36C004A4029400A80103;
+			remoteInfo = Build;
 		};
 		AB4CB45704B819E300A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME";
@@ -114,85 +151,105 @@
 			name = Dependencies;
 			passBuildSettingsInEnvironment = 1;
 			productName = Dependencies;
-			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
-			settingsToPassOnCommandLine = 280;
 		};
 		AB4CB45804B81D3500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Abstract.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB4CB45904B81E6200A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Binder.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB6A465604BFA6B500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SchemeGCPS.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB734B5804BB8F7F00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "parse-num.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB734B5904BB8F9000A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "parse-num.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB7DB57105145B0800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "let-syntax.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB7DB57205145B8E00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "let-syntax.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB8CD80204D8DDF100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = CGI.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		AB9AA28E0501FABF00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Procedure.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABA0E2D40538033500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = eq.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABA0E2D50538034400A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = eq.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABA6AB99050C861C00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = CompleteObject1.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABA84482051DC6E600A80103 = {
 			children = (
-				ABA84483051DC87400A80103,
 				ABC55D420519C04B00A80103,
 				ABAD376904A403EE00A80103,
 				ABAD376D04A403EE00A80103,
@@ -207,12 +264,7 @@
 			isa = PBXGroup;
 			path = LambdaCalculus;
 			refType = 4;
-		};
-		ABA84483051DC87400A80103 = {
-			fileEncoding = 4;
-			isa = PBXFileReference;
-			path = FixedList.hs;
-			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD36B804A4020700A80103 = {
 			children = (
@@ -226,6 +278,7 @@
 			);
 			isa = PBXGroup;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD36BA04A4020700A80103 = {
 			buildRules = (
@@ -246,6 +299,8 @@
 			name = Release;
 		};
 		ABAD36BC04A4020700A80103 = {
+			buildSettings = {
+			};
 			buildStyles = (
 				ABAD36BF04A4026C00A80103,
 				ABAD36BE04A4025C00A80103,
@@ -302,19 +357,20 @@
 			name = Build;
 			passBuildSettingsInEnvironment = 1;
 			productName = HScheme;
-			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
-			settingsToPassOnCommandLine = 280;
 		};
 		ABAD373A04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = BatchMain.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374904A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = CGIMain.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374A04A403EE00A80103 = {
 			children = (
@@ -333,6 +389,7 @@
 			isa = PBXGroup;
 			path = HScheme;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374B04A403EE00A80103 = {
 			children = (
@@ -346,37 +403,50 @@
 			isa = PBXGroup;
 			path = Bind;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Add.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374D04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = FMapBindings.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374E04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Macro.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD374F04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Run.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375004A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = TopLevel.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375104A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = Bind.hs;
 			path = ../Bind.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375204A403EE00A80103 = {
 			children = (
@@ -395,52 +465,71 @@
 			isa = PBXGroup;
 			path = Core;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375304A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Binding.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Build.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375504A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Conversions.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Numerics.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375704A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Reference.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Port.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375B04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Symbol.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Throw.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375D04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = Core.hs;
 			path = ../Core.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375E04A403EE00A80103 = {
 			children = (
@@ -455,37 +544,50 @@
 			isa = PBXGroup;
 			path = Imperative;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD375F04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = IOLoad.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376004A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = IOSystem.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376104A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SchemeCPS.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376204A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SchemeIdentity.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376304A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SchemeIO.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = Imperative.hs;
 			path = ../Imperative.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376504A403EE00A80103 = {
 			children = (
@@ -501,57 +603,78 @@
 			isa = PBXGroup;
 			path = Interpret;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Assemble.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376704A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Evaluate.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = LookupLambdaExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376904A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = LambdaExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376A04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Interpret.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376B04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ListSymbolExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Pattern.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376D04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SymbolLambdaExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376E04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = TopLevel.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD376F04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = Interpret.hs;
 			path = ../Interpret.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377004A403EE00A80103 = {
 			children = (
@@ -563,27 +686,36 @@
 			isa = PBXGroup;
 			path = MacroLib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377104A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Load.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377204A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Macros.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377304A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Syntax.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = MacroLib.hs;
 			path = ../MacroLib.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377504A403EE00A80103 = {
 			children = (
@@ -595,22 +727,29 @@
 			isa = PBXGroup;
 			path = MainProg;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Batch.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377704A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Interactive.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = MainProg.hs;
 			path = ../MainProg.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377904A403EE00A80103 = {
 			children = (
@@ -629,17 +768,22 @@
 			isa = PBXGroup;
 			path = Parse;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377A04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Symbol.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = Parse.hs;
 			path = ../Parse.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377D04A403EE00A80103 = {
 			children = (
@@ -658,84 +802,115 @@
 			isa = PBXGroup;
 			path = RunLib;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377E04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = ArgumentList.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD377F04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Control.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378004A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Equality.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378104A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = FullProcedures.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378204A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = NumericProcedures.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378304A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = PortProcedures.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Procedures.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378504A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SystemPorts.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = RunLib.hs;
 			path = ../RunLib.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378704A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.m4;
 			path = "HScheme.ghc-pkg.m4";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = HScheme.hs;
 			path = ../HScheme.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = init.full.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378D04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = init.pure.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378E04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = InteractiveMain.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD378F04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.make;
 			path = Makefile;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379004A403EE00A80103 = {
 			children = (
@@ -797,182 +972,247 @@
 			isa = PBXGroup;
 			path = test;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379204A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = begin.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379304A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = begin.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = binding.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379504A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = binding.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = bindingbody.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379704A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = bindingbody.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = boundlate.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379904A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = boundlate.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379A04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "case-match.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379B04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "case-match.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379C04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = constants.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379D04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = constants.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379E04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = equal.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD379F04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = equal.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A004A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = factorial.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A104A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = factorial.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A204A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = helloworld.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A304A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = helloworld.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A404A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = letbinding.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A504A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = letbinding.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A604A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "letrec-fix.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A704A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "letrec-fix.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A804A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = letrec.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37A904A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = letrec.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AA04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = setvar.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AB04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = setvar.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AC04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = several.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AD04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = several.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AE04A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "syntax-rec.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37AF04A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "syntax-rec.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37B004A403EE00A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = syntax.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37B104A403EE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = syntax.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37B204A4051F00A80103 = {
 			children = (
@@ -982,6 +1222,7 @@
 			isa = PBXGroup;
 			name = Inits;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37B304A4053000A80103 = {
 			children = (
@@ -993,6 +1234,7 @@
 			isa = PBXGroup;
 			name = Mains;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABAD37B404A40F0D00A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME$STYLE";
@@ -1013,9 +1255,6 @@
 			name = Test;
 			passBuildSettingsInEnvironment = 1;
 			productName = Test;
-			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
-			settingsToPassOnCommandLine = 280;
 		};
 		ABAD37B504A40F3E00A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME";
@@ -1037,45 +1276,54 @@
 			name = Documentation;
 			passBuildSettingsInEnvironment = 1;
 			productName = Documentation;
-			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
-			settingsToPassOnCommandLine = 280;
 		};
 		ABB6927C04A4677500A80103 = {
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = vector.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABB6927D04A4678C00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = vector.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABBA7567051DCA6300A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = TrackingLambdaExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABBA7568051DCCA900A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = TrackingLambdaFunctorExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABBA7569051E97C500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			name = LambdaCalculus.hs;
 			path = ../LambdaCalculus.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABC55D420519C04B00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = MutualBindings.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABC8301704C8719700A80103 = {
 			buildArgumentsString = "./make $ACTION$PRODUCT_NAME$STYLE";
@@ -1097,79 +1345,99 @@
 			name = Install;
 			passBuildSettingsInEnvironment = 1;
 			productName = Install;
-			settingsToExpand = 6;
-			settingsToPassInEnvironment = 287;
-			settingsToPassOnCommandLine = 280;
 		};
 		ABC8301804C871BD00A80103 = {
 			isa = PBXTargetDependency;
 			target = ABAD36C004A4029400A80103;
+			targetProxy = AB4904B60581CEDA00986CAA;
 		};
 		ABC9354304B3FD4A00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "report-examples.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABC9354404B4054F00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "report-examples.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABCC3AD104DFAF1800A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = speed.scm;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABCC3AD204DFAFC000A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = speed.scm.ref;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABCD883F04D703AC00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Mismatch.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABCE423304C1152600A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "R5RS Compliance";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABD1F9E905044B6500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Misc.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABD5655D051E9A8B00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SymbolLambdaFunctorExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABD5655E051E9ABF00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = LambdaFunctorExpression.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABEBAF00050EF5BE00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
 			path = "report-examples-4.scm";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABEBAF01050EF81700A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = text;
 			path = "report-examples-4.scm.ref";
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00F9D04E5AAC400A80103 = {
 			children = (
@@ -1180,42 +1448,55 @@
 			isa = PBXGroup;
 			path = Object;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00F9E04E5AB0F00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = CompleteObject.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00F9F04E5DAD000A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SchemeParser.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00FA004E5DB5A00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = WhiteSpace.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00FA104E5DBB500A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Numeric.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00FA204E5DC5100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = Text.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 		ABF00FA304E5DD3C00A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.haskell;
 			path = SpecialForm.hs;
 			refType = 4;
+			sourceTree = "<group>";
 		};
 	};
 	rootObject = ABAD36BC04A4020700A80103;

@@ -232,10 +232,10 @@ module Org.Org.Semantic.HScheme.RunLib.Procedures where
 		};
 
 	makeVector :: Int -> obj -> SList obj;
-	makeVector i fill = MkSList (makeList i fill) where
+	makeVector i fill = MkSList (makeObjList i fill) where
 		{
-		makeList 0 a = [];
-		makeList i a = (a:(makeList (i - 1) a));
+		makeObjList 0 a = [];
+		makeObjList n a = (a:(makeObjList (n - 1) a));
 		};
 
 	makeVectorP :: (Monad m,ListObject r obj,?objType :: Type obj) =>

@@ -64,13 +64,13 @@ swing = N*, -+.@
 others = () (Ps,Pe), '",;#\ (Po), ` (Sk)
 
 --}
-
+{-
 	allowed :: Char -> Bool;
 	allowed '\t' = True;
 	allowed '\r' = True;
 	allowed '\n' = True;
 	allowed i = gcMajorClass (getGeneralCategory i) /= ClOther;
-	
+-}	
 	allowedIdentifier1 :: Char -> Bool;
 
 	allowedIdentifier1 '+' = False;

@@ -75,8 +75,8 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 	 String ->
 	 String ->
 	 IO ();
-	runSchemeProgram outproc macroBindings tlBindings runBindings initfilename source =
-	 mutualBind macroBindings tlBindings (do
+	runSchemeProgram outproc mcBindings tlBindings runBindings initfilename source =
+	 mutualBind mcBindings tlBindings (do
 		{
 		bindings <- runBindings emptyBindings;
 		initCommand <- readLoad initfilename;

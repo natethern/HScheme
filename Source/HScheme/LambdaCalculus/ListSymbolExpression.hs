@@ -62,11 +62,11 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression
 			(syms',map) = findSym ((==) abssym) syms;
 
 			findSym :: (sym -> Bool) -> [sym] -> ([sym],([val] -> r) -> [val] -> val -> r);
-			findSym match [] = ([],\func -> const . func);
-			findSym match (sym:syms) | match sym = (syms,\func vals absval -> func (absval:vals));
-			findSym match (sym:syms) = (sym:syms',\func (val:vals) -> map (\vals' -> func (val:vals')) vals) where
+			findSym match [] = ([],\f -> const . f);
+			findSym match (s:ss) | match s = (ss,\f vals absval -> f (absval:vals));
+			findSym match (s:ss) = (s:ss',\f (val:vals) -> map (\vals' -> f (val:vals')) vals) where
 				{
-				(syms',map) = findSym match syms;
+				(ss',_) = findSym match ss;
 				};
 			};
 		};

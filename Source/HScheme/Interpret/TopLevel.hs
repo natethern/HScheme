@@ -151,11 +151,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 TopLevelListCommand r obj m ->
 	 [obj] ->
 	 cm (TopLevelCommand r obj m a);
-	beginCommand none one conn command1 objs = do
+	beginCommand noResult oneResult conn command1 objs = do
 		{
 		commandr <- let
 		 {?syntacticbindings = newBindings ?syntacticbindings (tleSyntaxes command1)} in
-		 begin none one conn objs;
+		 begin noResult oneResult conn objs;
 		return (liftF2 conn command1 commandr);
 		};
 
@@ -174,16 +174,16 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 (m [obj] -> a -> a) ->
 	 [obj] ->
 	 cm (TopLevelCommand r obj m a);
-	begin none one conn [] = return (return none);
-	begin none one conn [obj] = do
+	begin noResult oneResult conn [] = return (return noResult);
+	begin noResult oneResult conn [obj] = do
 		{
 		command <- assembleTopLevelListCommand obj;
-		return (fmap one command);
+		return (fmap oneResult command);
 		};
-	begin none one conn (obj:objs) = do
+	begin noResult oneResult conn (obj:objs) = do
 		{
 		command <- assembleTopLevelListCommand obj;
-		beginCommand none one conn command objs;
+		beginCommand noResult oneResult conn command objs;
 		};
 
 	assembleTopLevelExpressions ::
@@ -203,9 +203,9 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 TopLevelListCommand r obj m ->
 	 [obj] ->
 	 cm (SchemeExpression r obj (m a));
-	assembleTopLevelExpressions none one conn command objs = do
+	assembleTopLevelExpressions noResult oneResult conn command objs = do
 		{
-		MkTopLevelCommand expr binds _ <- beginCommand none one conn command objs;
+		MkTopLevelCommand expr binds _ <- beginCommand noResult oneResult conn command objs;
 		return (unTopLevelBinder ?binder binds expr);
 		};
 

@@ -121,13 +121,13 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	tryEach :: (Monad m) =>
 	 m a -> [m (Result ex (m a))] -> m a;		
 	tryEach none [] = none;
-	tryEach none (action:rest) = do
+	tryEach none (action:actions) = do
 		{
 		rma <- action;
 		case rma of
 			{
 			SuccessResult ma -> ma;
-			_ -> tryEach none rest;
+			_ -> tryEach none actions;
 			};
 		};
 
@@ -192,14 +192,14 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		 [((Symbol,obj),(obj,()))] ->
 		 [obj] ->
 		 cm (ListSchemeExpression r obj m);
-		transform _ rules args = tryEach
+		transform _ rules' args = tryEach
 		 (throwPatternNotMatchedError args)
 		 (fmap (\((_,patternObj),(template,_)) -> do
 			{
 			pattern <- makeListPattern literals patternObj;
 			nlist <- patternZip pattern args;
 			return (fmap (\subs -> substituteAssemble subs template) nlist);
-			}) rules)
+			}) rules')
 		};
 
 	class (ProcedureError cm obj) =>

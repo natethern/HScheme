@@ -50,8 +50,8 @@ module Org.Org.Semantic.HScheme.Object.CompleteObject
 			};
 		throwUTF8Error err = do
 			{
-			err <- getObject (MkSList (show err));
-			throwArgError "bad-utf8-parse" [err];
+			errObj <- getObject (MkSList (show err));
+			throwArgError "bad-utf8-parse" [errObj];
 			};
 		};
 	}

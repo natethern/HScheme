@@ -26,8 +26,8 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaFunctorExpression
 --	,runSymbolLambdaFunctorExpression,runSymbolLambdaFunctorExpressionF
 	) where
 	{
-	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaFunctorExpression;
-	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression;
+--	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaFunctorExpression;
+--	import Org.Org.Semantic.HScheme.LambdaCalculus.LambdaExpression;
 	import Org.Org.Semantic.HBase;
 
 	data SymbolLambdaFunctorExpression sym val f a = Closed (f a) |
@@ -39,13 +39,14 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.SymbolLambdaFunctorExpression
 		return = Closed . return;
 		};
 
+{-
 	ffmap :: (FunctorApply f) =>
 	 f (a -> b) ->
 	 SymbolLambdaFunctorExpression sym val f a ->
 	 SymbolLambdaFunctorExpression sym val f b;
 	ffmap fab (Closed fa) = Closed (fapply fab fa);
 	ffmap fab (Open sym exp) = Open sym (ffmap (fmap (.) fab) exp);
-
+-}
 	instance (Functor f) =>
 	 Functor (SymbolLambdaFunctorExpression sym val f) where
 		{

@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity where
 	{
 	import Org.Org.Semantic.HScheme.Object.CompleteObject;
 	import Org.Org.Semantic.HScheme.RunLib;
-	import Org.Org.Semantic.HScheme.Core;
+--	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	instance MonadCreatable IO (Constant Identity) where

@@ -150,6 +150,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 		 t (t a -> m a) -> m (t a);
 		mfixExFunctor t = mfix (\p -> for (\x -> x p) t);
 
+{-
 		refFixer :: (MonadCreatable m r,MonadFix m,ExtractableFunctor t) =>
 		 t (t (r v) -> m v) ->
 		 (t (r v) -> m a) ->
@@ -159,7 +160,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 			obj <- tlocmobj tloc;
 			new obj;
 			}) bindsT)) >>= bodyT;
-
+-}
 		valueFixer :: (MonadCreatable m r,MonadFix m,ExtractableFunctor t) =>
 		 t (t (r v) -> m v) ->
 		 (t (r v) -> m a) ->
