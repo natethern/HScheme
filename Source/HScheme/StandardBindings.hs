@@ -129,6 +129,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"string"						stringP,
 		addProcBinding	"string-length"					stringLengthP,
 		addProcBinding	"string-ref"					stringRefP,
+		addProcBinding	"string-append"					stringAppendP,
 
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,

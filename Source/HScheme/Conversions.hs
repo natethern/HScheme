@@ -549,7 +549,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	-- StringType
 
-	newtype StringType = MkStringType String;
+	newtype StringType = MkStringType {unStringType :: String};
 
 	instance (Scheme m r) => MonadIsA m (Object r m) StringType where
 		{
@@ -593,7 +593,7 @@ module Org.Org.Semantic.HScheme.Conversions where
 
 	-- StringRefType
 
-	newtype StringRefType r = MkStringRefType [r Char];
+	newtype StringRefType r = MkStringRefType {unStringRefType :: [r Char]};
 
 	instance (Scheme m r) => MonadIsA m (Object r m) (StringRefType r) where
 		{

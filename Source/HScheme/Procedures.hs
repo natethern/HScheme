@@ -28,6 +28,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	import Org.Org.Semantic.HScheme.Numerics;
 	import Org.Org.Semantic.HBase;
 
+
 	-- 4.1.2 Literal Expressions
 	quote :: (Scheme m r) =>
 	 Object r m -> m (Object r m);
@@ -36,7 +37,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 	quoteM :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m (Object r m);
 	quoteM Type (q,()) = quote q;
-	
+
+
 	-- 4.1.5 Conditionals
 	ifM ::
 		(
@@ -57,6 +59,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 			};
 		};
 
+
 	-- 6.3.1 Booleans
 	notP :: (Scheme m r) =>
 	 Type (r ()) -> (Bool,()) -> m Bool;
@@ -66,6 +69,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 Type (r ()) -> (Object r m,()) -> m Bool;
 	isBooleanP Type (BooleanObject _,()) = return True;
 	isBooleanP Type (_,()) = return False;
+
 
 	-- 6.3.2 Pairs and Lists
 	isPairP :: (Scheme m r) =>
@@ -98,6 +102,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 Type (r ()) -> [[Object r m]] -> m [Object r m];
 	appendP Type listlist = return (concatenateList listlist);
 
+
 	-- 6.3.3 Symbols
 	isSymbolP :: (Scheme m r) =>
 	 Type (r ()) -> (Object r m,()) -> m Bool;
@@ -108,6 +113,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 Type (r ()) -> (StringType,()) -> m Symbol;
 	makeSymbolP Type (MkStringType s,()) = return (MkSymbol s);
 
+
 	-- 6.3.4 Characters
 	charTestP :: (Scheme m r) =>
 	 (Char -> Bool) -> Type (r ()) -> (Object r m,()) -> m Bool;
@@ -117,6 +123,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	charFuncP :: (Scheme m r) =>
 	 (Char -> a) -> Type (r ()) -> (Char,()) -> m a;
 	charFuncP f Type (c,()) = return (f c);
+
 
 	-- 6.3.5 Strings
 	isStringP :: (Scheme m r) =>
@@ -183,6 +190,11 @@ module Org.Org.Semantic.HScheme.Procedures where
 		get r;
 		};
 
+	stringAppendP :: (Scheme m r) =>
+	 Type (r ()) -> [StringType] -> m StringType;
+	stringAppendP Type = return . MkStringType . concatenateList . (fmap unStringType);
+
+
 	-- 6.4 Control Features
 	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
@@ -196,7 +208,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 Type (r ()) -> (Object r m,()) -> m [Object r m];
 	valuesToListP Type (ValuesObject list,()) = return list;
 	valuesToListP Type (obj,()) = return [obj];
-	
+
+
 	-- 6.5 Eval
 	currentEnvironmentP ::
 		(

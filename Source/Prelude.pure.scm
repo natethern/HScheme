@@ -3,6 +3,45 @@
 (define let-syntax let)
 ;(define letrec-syntax letrec)
 
+; 4.2.1 Conditionals
+(define cond (syntax-rules (=> else)
+	((cond) <nothing>)
+	((cond (else    . exprs)) (begin . exprs))
+	((cond (test    . exprs) . rest) (if test (begin . exprs) (cond . rest)))
+	((cond (test => . exprs) . rest) (if test (begin . exprs) (cond . rest)))
+))
+
+(define case (syntax-rules (else)
+	((case key) <nothing>)
+	((case key (else . exprs)) (begin . exprs))
+	((case key (() . exprs) . rest) (case key . rest))
+	((case key ((datum . data) . exprs) . rest) (if (eqv? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
+))
+
+(define and (syntax-rules ()
+	((and) #t)
+	((and first . rest) (if first (and . rest) #f))
+))
+
+(define or (syntax-rules ()
+	((or) #f)
+	((or first . rest) (if first #t (or . rest)))
+))
+
+
+; 6.2.5 Numerical Operations
+(define complex? number?)
+
+(define real? (lambda (n)
+	(and (complex? n) (zero? (imag-part n)))
+))
+
+(define rational? (lambda (n)
+	(and (real? n) (exact? n))
+))
+
+
+; 6.3.2 Pairs and Lists
 (define caar (lambda (x) (car (car x))))
 (define cadr (lambda (x) (car (cdr x))))
 (define cdar (lambda (x) (cdr (car x))))
@@ -34,43 +73,6 @@
 (define cdddar (lambda (x) (cdr (cdr (cdr (car x))))))
 (define cddddr (lambda (x) (cdr (cdr (cdr (cdr x))))))
 
-; 4.2.1 Conditionals
-(define cond (syntax-rules (=> else)
-	((cond) <nothing>)
-	((cond (else    . exprs)) (begin . exprs))
-	((cond (test    . exprs) . rest) (if test (begin . exprs) (cond . rest)))
-	((cond (test => . exprs) . rest) (if test (begin . exprs) (cond . rest)))
-))
-
-(define case (syntax-rules (else)
-	((case key) <nothing>)
-	((case key (else . exprs)) (begin . exprs))
-	((case key (() . exprs) . rest) (case key . rest))
-	((case key ((datum . data) . exprs) . rest) (if (eqv? key 'datum) (begin . exprs) (case key (data . exprs) . rest)))
-))
-
-(define and (syntax-rules ()
-	((and) #t)
-	((and first . rest) (if first (and . rest) #f))
-))
-
-(define or (syntax-rules ()
-	((or) #f)
-	((or first . rest) (if first #t (or . rest)))
-))
-
-; 6.2.5 Numerical Operations
-(define complex? number?)
-
-(define real? (lambda (n)
-	(and (complex? n) (zero? (imag-part n)))
-))
-
-(define rational? (lambda (n)
-	(and (real? n) (exact? n))
-))
-
-; 6.3.2 Pairs and Lists
 (define reverse (lambda (x)       
 	(if (null? x) x (append (reverse (cdr x)) (list (car x))))
 ))
@@ -128,6 +130,7 @@
 	)
 ))
 
+
 ; 6.3.3 Symbols
 (define symbol->string to-string)
 
@@ -180,6 +183,13 @@
 	(>= (char->integer (char-upcase a)) (char->integer (char-upcase b)))
 ))
 
+
+; 6.3.5 Strings
+(define string-copy (lambda (s)
+	(string-append s)
+))
+
+
 ; 6.4 Control Features
 (define call-with-values (lambda (producer consumer)
 	(apply consumer (values->list (producer)))
@@ -208,6 +218,7 @@
 	(apply map args)
 	<nothing>
 ))
+
 
 ;
 (define _null-environment (current-environment))
