@@ -169,17 +169,22 @@ module Org.Org.Semantic.HScheme.Lambda where
 		return bindings'';
 		};
 
-	lambda :: (Scheme m r) => Object r m -> [Object r m] -> m (Procedure r m);
+	lambda :: (Scheme m r,?bindings :: Bindings r m) =>
+	 Object r m -> [Object r m] -> m (Procedure r m);
 	lambda argNames body = do
 		{
 		return (\bindings args -> do
 			{
-			bindings' <- matchBindings bindings argNames args;
+			bindings' <- matchBindings ?bindings argNames args;
 			begin bindings' body;
 			});
 		};
 
-	lambdaM :: (Scheme m r) =>
+	lambdaM ::
+		(
+		Scheme m r,
+		?bindings :: Bindings r m
+		) =>
 	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
 	lambdaM Type (argBindings,body) = lambda argBindings body;
 
