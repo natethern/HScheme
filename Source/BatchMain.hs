@@ -93,78 +93,88 @@ module Main where
 		return (f,m,paths,initfile,(file:files));
 		};
 
-	cpsRun :: (?objType :: Type (Object r m)) =>
-	 CPS r () -> IO ();
-	cpsRun ma = runExceptionContinuationPass
-	 (\_ -> fail "error in catch code!") return ma;
-
 	defaultFlavour :: SchemeFlavour;
 	defaultFlavour = FullFlavour;
 
-	withRefType ::
-	 Type (r ()) -> ((?objType :: Type (Object r m)) => a) -> a;
-	withRefType _ a = let {?objType = Type} in a;
-
-	boundRun ::
+	mutualBind ::
 		(
-		MonadBottom m,
-		MonadException (Object r m) m,
-		MonadGettableReference m r,
-		MonadCreatable m r,
+		RunnableScheme IO m r,
 		?objType :: Type (Object r m),
 		?stderr :: FlushSink IO Word8,
 		?stdout :: FlushSink IO Word8,
 		?stdin :: PeekSource IO (Maybe Word8)
 		) =>
-	 ((?macrobindings :: Binds Symbol (Macro m r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax m r m),
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-	 	?system :: FullSystemInterface m m r
-	 	) => Bindings r m -> m result) ->
 	 [String] ->
-	 (forall a. IO a -> m a) ->
-	 	((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-	 	?macrobindings :: Binds Symbol (Macro m r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax m r m)
-	 	) => Binds Symbol (Macro m r m) -> Binds Symbol (Macro m r m)) ->
-	 	((
-	 	?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-	 	?macrobindings :: Binds Symbol (Macro m r m),
-	 	?syntacticbindings :: Binds Symbol (Syntax m r m)
-	 	) => Binds Symbol (TopLevelMacro m r m) -> Binds Symbol (TopLevelMacro m r m)) ->
-	 ((?system :: FullSystemInterface m m r) => Bindings r m -> m (Bindings r m)) ->
-	 m result;
-	boundRun interacter loadpaths lifter macroBinds tlBinds symbolBinds = 
-	 let {?syntacticbindings = emptyBindings} in
+	 ((
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
+	 	?macrobindings :: Binds Symbol (Macro IO r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax IO r m)
+	 	) => Binds Symbol (Macro IO r m) -> Binds Symbol (Macro IO r m)) ->
+	 ((
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
+	 	?macrobindings :: Binds Symbol (Macro IO r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax IO r m)
+	 	) => Binds Symbol (TopLevelMacro IO r m) -> Binds Symbol (TopLevelMacro IO r m)) ->
+	 ((?macrobindings :: Binds Symbol (Macro IO r m),
+	 	?syntacticbindings :: Binds Symbol (Syntax IO r m),
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro IO r m),
+	 	?system :: FullSystemInterface IO m r
+	 	) => a) ->
+	 a;
+	mutualBind loadpaths macroBinds tlBinds a = 
+	 let
+	 	{
+	 	?syntacticbindings = emptyBindings;
+	 	?system = ioFullSystemInterface id loadpaths;
+	 	} in
 	 let
 		{
 		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
 		 macroBinds emptyBindings;
-		system = let {?macrobindings = mb} in
-		 ioFullSystemInterface lifter loadpaths;
 		tlb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 systemMacroBindings (fsiPure system) (tlBinds emptyBindings);
+		 systemMacroBindings (fsiPure ?system) (tlBinds emptyBindings);
 		} in
 	 let
 	 	{
 	 	?macrobindings = mb;
-	 	?system = system;
 	 	?toplevelbindings = tlb;
-	 	} in
-	 do
-		{
-		bindings <- symbolBinds emptyBindings;
-		interacter bindings;
-		};
+	 	} in a;
 
 	optPrepend :: Bool -> a -> [a] -> [a];
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
 
+	instance
+		(
+		MonadGettableReference m r,
+		MonadCreatable m r,
+		MonadException (Object r m) m
+		) =>
+	 RunnableScheme m m r where
+		{
+		rsRun = id;
+		rsLift = id;
+		};
+
+	instance
+		(
+		MonadGettableReference m r,
+		MonadCreatable m r,
+		MonadException (Object r (SchemeCPS r (m ()))) m
+		) =>
+	 RunnableScheme m (SchemeCPS r (m ())) r where
+		{
+		rsRun ma = runExceptionContinuationPass
+		 (\err -> case err of
+			{
+			StringError s -> fail s;
+			ExceptionError ex -> fail (show ex);
+			ObjError obj -> throw obj;
+			}) return ma;
+		rsLift = lift;
+		};
+
 	main :: IO ();
---	main = putStrLn (show test1);
---	main1 :: IO ();
 	main = ioRunProgram (do
 		{
 		args <- ?getArgs;
@@ -178,29 +188,60 @@ module Main where
 				FullFlavour -> CPSWhichMonad;
 				_ -> IOWhichMonad;
 				}) mwm;
+			allFileNames initFile = optPrepend initfile initFile filenames
 			};
 		case flavour of
 			{
 			FullFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> withRefType ioRefType (cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.full.scm" filenames)) loadpaths lift
-				 fullMacroBindings fullTopLevelBindings (monadContFullBindings ++ fullSystemBindings ?system)));
-				IOWhichMonad -> withRefType ioRefType (boundRun (runProgram exitFailure (optPrepend initfile "init.full.scm" filenames)) loadpaths id
-				 fullMacroBindings fullTopLevelBindings (monadFixFullBindings ++ fullSystemBindings ?system));
+				CPSWhichMonad -> let {?objType = Type::Type (Object IORef (CPS IORef))} in
+				 (mutualBind loadpaths fullMacroBindings fullTopLevelBindings
+				  (do
+					{
+					bindings <- (monadContFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
+					runProgramBindingsWithExit exitFailure (allFileNames "init.full.scm") bindings;
+					}));
+				IOWhichMonad -> let {?objType = Type::Type (Object IORef IO)} in
+				 (mutualBind loadpaths fullMacroBindings fullTopLevelBindings
+				  (do
+					{
+					bindings <- (monadFixFullBindings ++ fullSystemBindings (ioFullSystemInterface rsLift loadpaths)) emptyBindings;
+					runProgramBindings exitFailure (allFileNames "init.full.scm") bindings;
+					}));
 				};
 			PureFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> withRefType ioConstType (cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
-				 pureMacroBindings pureTopLevelBindings monadContPureBindings));
-				IOWhichMonad -> withRefType ioConstType (boundRun (runProgram exitFailure (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
-				 pureMacroBindings pureTopLevelBindings monadFixPureBindings);
+				CPSWhichMonad -> let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
+				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
+				  (do
+					{
+					bindings <- monadContPureBindings emptyBindings;
+					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
+					}));
+				IOWhichMonad -> let {?objType = Type::Type (Object IOConst IO)} in
+				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
+				  (do
+					{
+					bindings <- monadFixPureBindings emptyBindings;
+					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;
+					}));
 				};
 			StrictPureFlavour -> case whichmonad of
 				{
-				CPSWhichMonad -> withRefType ioConstType (cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
-				 macroBindings pureTopLevelBindings monadContStrictPureBindings));
-				IOWhichMonad -> withRefType ioConstType (boundRun (runProgram exitFailure (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
-				 macroBindings pureTopLevelBindings monadFixStrictPureBindings);
+				CPSWhichMonad -> let {?objType = Type::Type (Object IOConst (CPS IOConst))} in
+				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
+				  (do
+					{
+					bindings <- monadContStrictPureBindings emptyBindings;
+					runProgramBindingsWithExit exitFailure (allFileNames "init.pure.scm") bindings;
+					}));
+				IOWhichMonad -> let {?objType = Type::Type (Object IOConst IO)} in
+				 (mutualBind loadpaths pureMacroBindings pureTopLevelBindings
+				  (do
+					{
+					bindings <- monadFixStrictPureBindings emptyBindings;
+					runProgramBindings exitFailure (allFileNames "init.pure.scm") bindings;
+					}));
 				};
 			};
 		});

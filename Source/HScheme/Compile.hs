@@ -20,7 +20,12 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.Compile where
+module Org.Org.Semantic.HScheme.Compile
+	(
+	SchemeExpression,
+	Macro,Syntax,
+	assembleExpression
+	) where
 	{
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
@@ -68,7 +73,7 @@ module Org.Org.Semantic.HScheme.Compile where
 	 SchemeExpression r m (m (Object r m));
 	makeApply f args = fApply (fmap doApply f) (fmap execList (fExtract args));
 
-	compileApply ::
+	assembleApplyExpression ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -76,14 +81,14 @@ module Org.Org.Semantic.HScheme.Compile where
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 Object r m -> [Object r m] -> cm (SchemeExpression r m (m (Object r m)));
-	compileApply f arglist = do
+	assembleApplyExpression f arglist = do
 		{
-		fe <- compileExpression f;
-		ae <- sinkList compileExpression arglist;
+		fe <- assembleExpression f;
+		ae <- sinkList assembleExpression arglist;
 		return (makeApply fe ae);
 		};
 
-	compileExpression ::
+	assembleExpression ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -91,12 +96,12 @@ module Org.Org.Semantic.HScheme.Compile where
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 Object r m -> cm (SchemeExpression r m (m (Object r m)));
-	compileExpression (SymbolObject sym) = return (fmap (\mloc -> do
+	assembleExpression (SymbolObject sym) = return (fmap (\mloc -> do
 		{
 		loc <- mloc;
 		get loc;
 		}) (fSymbol sym));
-	compileExpression (PairObject head tail) = do
+	assembleExpression (PairObject head tail) = do
 		{
 		h <- get head;
 		t <- get tail;
@@ -111,19 +116,19 @@ module Org.Org.Semantic.HScheme.Compile where
 					Just syntax -> do
 						{
 						obj <- syntax arglist;
-						compileExpression obj;
+						assembleExpression obj;
 						};
 					Nothing -> case getBinding ?macrobindings sym of
 						{
 						Just macro -> macro arglist;
-						Nothing -> compileApply h arglist;
+						Nothing -> assembleApplyExpression h arglist;
 						};
 					};
-				_ -> compileApply h arglist;
+				_ -> assembleApplyExpression h arglist;
 				};
 			};
 		};
-	compileExpression a = case a of
+	assembleExpression a = case a of
 		{
 		BooleanObject _ -> return (return' (return a));
 		NumberObject _ -> return (return' (return a));

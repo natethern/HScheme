@@ -33,8 +33,8 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	printResult :: (Scheme m r) =>
-	 OutputPort Word8 m -> Object r m -> m ();
+	printResult :: (Build cm r) =>
+	 OutputPort Word8 cm -> Object r m -> cm ();
 	printResult output obj = if (isNullObject obj)
 	 then (return ())
 	 else do
@@ -110,7 +110,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m)
 		) =>
 	 PureSystemInterface cm m r ->
-	 (SList Char,()) -> cm (TopLevelExpression cm r m);
+	 (SList Char,()) -> cm (TopLevelObjectCommand cm r m);
 	loadT psi (MkSList filename,()) = do
 		{
 		readObjects <- psiReadFile psi filename;

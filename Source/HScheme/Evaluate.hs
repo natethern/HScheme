@@ -61,68 +61,86 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	 String -> [Object r m] -> cm a;
 	throwArgError = throwSchemeError;
 
-
-	-- 6.5 Eval
-
 	isNil :: Object r m -> Bool;
 	isNil NilObject = True;
-	isNil _ = True;
+	isNil _ = False;
 
+	getLoc ::
+		(
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 (Symbol -> Maybe (ObjLocation r m)) -> Symbol -> m (ObjLocation r m);
+	getLoc getter sym = case (getter sym) of
+		{
+		Just loc -> return loc;
+		Nothing -> throwArgError "unbound-symbol" ([SymbolObject sym]);
+		};
+{--
 	getSymbolBinding ::
 		(
 		Scheme m r
 		) =>
 	 Bindings r m -> Symbol -> m (ObjLocation r m);
-	getSymbolBinding bindings sym = case (getBinding bindings sym) of
-		{
-		Just loc -> return loc;
-		Nothing -> let {?objType = Type} in throwArgError "unbound-symbol" (tt bindings [SymbolObject sym]);
-		} where
-		{
-		tt :: Bindings r m -> [Object r m] -> [Object r m];
-		tt _ a = a;
-		};
-
-	evaluate ::
+	getSymbolBinding bindings sym = getLoc (getBinding bindings);
+--}
+	interpretTopLevelExpression ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-		?syntacticbindings :: Binds Symbol (Syntax m r m),
-		?macrobindings :: Binds Symbol (Macro m r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 Bindings r m -> Object r m -> m (Object r m);
-	evaluate bindings obj = do
+	 Object r m -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m (Object r m));
+	interpretTopLevelExpression obj = let {?objType = Type} in do
 		{
-		rr <- compileTopLevelExpression obj;
-		runSymbolExpression (getSymbolBinding bindings) rr;
+		rr <- assembleTopLevelExpression obj;
+		return (\lookup -> runSymbolExpression (getLoc lookup) rr);
 		};
 
-	evalObjects ::
+	interpretTopLevelExpressionsEat ::
 		(
+		Build cm r,
 		Scheme m r,
-		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-		?syntacticbindings :: Binds Symbol (Syntax m r m),
-		?macrobindings :: Binds Symbol (Macro m r m)
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 (Object r m -> m ()) ->
-	 Bindings r m -> [Object r m] -> m ();
-	evalObjects eat bindings objs = do	
+	 [Object r m] -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ());
+	interpretTopLevelExpressionsEat eat objs = let {?objType = Type} in do	
 		{
-		rr <- bodyListEat eat objs;
-		runSymbolExpression (getSymbolBinding bindings) rr;
+		rr <- assembleTopLevelExpressionsEat eat objs;
+		return (\lookup -> runSymbolExpression (getLoc lookup) rr);
+		};
+
+
+	-- 6.5 Eval
+
+	evaluateObject ::
+		(
+		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
+		?syntacticbindings :: Binds Symbol (Syntax m r m),
+		?macrobindings :: Binds Symbol (Macro m r m)
+		) =>
+	 Object r m -> (Symbol -> Maybe (ObjLocation r m)) -> m (Object r m);
+	evaluateObject obj lookup = do
+		{
+		mobj <- interpretTopLevelExpression obj;
+		mobj lookup;
 		};
 
 	evaluateP ::
 		(
 		Scheme m r,
-		?bindings		:: Bindings r m,
 		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
 		?syntacticbindings :: Binds Symbol (Syntax m r m),
 		?macrobindings :: Binds Symbol (Macro m r m)
 		) =>
-	 (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateP (obj,Just bindings) = evaluate bindings obj;
-	evaluateP (obj,Nothing) = evaluate ?bindings obj;
+	 (Object r m,(Bindings r m,())) -> m (Object r m);
+	evaluateP (obj,(bindings,())) = evaluateObject obj (getBinding bindings);
 
 	currentEnvironmentP ::
 		(

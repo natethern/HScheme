@@ -36,7 +36,7 @@ module Org.Org.Semantic.HScheme.SchemeIO where
 	ioRefType = Type;
 
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadThrow (Object r IO) IO where
+	 MonadThrow (Object r m) IO where
 		{
 		throw obj = do
 			{
@@ -46,11 +46,11 @@ module Org.Org.Semantic.HScheme.SchemeIO where
 		};
 
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
-	 MonadException (Object r IO) IO where
+	 MonadException (Object r m) IO where
 		{
 		catch foo cc = catchSingle foo (\ex -> do
 			{
-			obj <- getConvert (MkSymbol "failure",MkSList (show ex));
+			obj <- getConvert (MkSymbol "failure",(MkSList (show ex),()));
 			cc obj;
 			});
 		};

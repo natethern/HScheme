@@ -72,10 +72,11 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 
 	simpleFullBindings ::
 		(
+		Build cm r,
 		FullScheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Bindings r m -> m (Bindings r m);
+	 Bindings r m -> cm (Bindings r m);
 	simpleFullBindings = concatenateList
 		[
 		commonPureBindings,
@@ -95,14 +96,24 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 		addProcBinding			"byte-array-set!"	byteArraySetP
 		];
 
-	monadFixFullBindings :: (FullScheme m r,MonadFix m,
-		?objType :: Type (Object r m)) =>
-	 Bindings r m -> m (Bindings r m);
+	monadFixFullBindings ::
+		(
+		Build cm r,
+		FullScheme m r,
+		MonadFix m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadFixFullBindings = simpleFullBindings ++ monadFixBindings;
 
 	-- this one is closest to R5RS
-	monadContFullBindings :: (FullScheme m r,MonadCont m,
-		?objType :: Type (Object r m)) =>
-	 Bindings r m -> m (Bindings r m);
+	monadContFullBindings ::
+		(
+		Build cm r,
+		FullScheme m r,
+		MonadCont m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadContFullBindings = simpleFullBindings ++ monadContBindings;
 	}

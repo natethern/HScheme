@@ -20,7 +20,12 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
+module Org.Org.Semantic.HScheme.BatchRun
+	(
+	RunnableScheme(..),
+	runProgram,
+	runProgramBindings,runProgramBindingsWithExit
+	) where
 	{
 	import Org.Org.Semantic.HScheme.Evaluate;
 	import Org.Org.Semantic.HScheme.SystemInterface;
@@ -33,8 +38,8 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
 
-	reportError :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 OutputPort Word8 m -> Object r m -> m ();
+	reportError :: (Build cm r,?objType :: Type (Object r m)) =>
+	 OutputPort Word8 cm -> Object r m -> cm ();
 	reportError errPort errObj = do
 		{
 		text <- toString errObj;
@@ -42,26 +47,39 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		opFlush errPort;
 		};
 
+	class
+		(
+		Build cm r,
+		Scheme m r,
+		MonadException (Object r m) cm
+		) =>
+	 RunnableScheme cm m r where
+		{
+		rsRun :: (?objType :: Type (Object r m)) =>
+		 m () -> cm ();
+		rsLift :: forall a. (?objType :: Type (Object r m)) =>
+		 cm a -> m a;
+		};
+
 	runProgram ::
 		(
-		Scheme m r,
-		MonadBottom m,
-		MonadException (Object r m) m,
+		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro m r m),
-		?syntacticbindings :: Binds Symbol (Syntax m r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-		?system :: FullSystemInterface m m r
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
 		) =>
-	 m () ->
+	 (((Symbol -> Maybe (ObjLocation r m)) -> m ()) -> m ()) ->
+	 cm () ->
 	 [String] ->
-	 Bindings r m ->
-	 m ();
-	runProgram failproc filenames bindings =
+	 cm ();
+	runProgram mrun failproc filenames =
 	 catch (do
 		{
-		objects <- readFiles (fsiOpenInputFile ?system) filenames; 		
-		evalObjects (printResult (fsiCurrentOutputPort ?system)) bindings objects;
+		objects <- readFiles (fsiOpenInputFile ?system) filenames;
+		program <- interpretTopLevelExpressionsEat (\obj -> rsLift (printResult (fsiCurrentOutputPort ?system) obj)) objects;
+		rsRun (mrun program);
 		})
 		(\errObj -> do
 		{
@@ -69,39 +87,49 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		failproc;
 		});
 
-	runProgramWithExit ::
+	runProgramBindings ::
 		(
-		Scheme m r,
-		MonadCont m,
-		MonadBottom m,
-		MonadException (Object r m) m,
+		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Binds Symbol (Macro m r m),
-		?syntacticbindings :: Binds Symbol (Syntax m r m),
-		?toplevelbindings :: Binds Symbol (TopLevelMacro m r m),
-		?system :: FullSystemInterface m m r
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
 		) =>
-	 m () ->
+	 cm () ->
 	 [String] ->
 	 Bindings r m ->
-	 m ();
-	runProgramWithExit failproc filenames rootBindings = callCC (\exitFunc -> do
+	 cm ();
+	runProgramBindings failproc filenames bindings =
+	 runProgram mrun failproc filenames where
 		{
-		bindings <- concatenateList
-			[
-			addProcBinding "exit" (exitFuncProc exitFunc)
-			] rootBindings;		
-		catch
-		 	(do
-		 	{
-			objects <- readFiles (fsiOpenInputFile ?system) filenames; 		
-			evalObjects (printResult (fsiCurrentOutputPort ?system)) bindings objects;
-		 	})
-			(\errObj -> do
+		mrun lm = lm (getBinding bindings);
+		};
+
+	runProgramBindingsWithExit ::
+		(
+		RunnableScheme cm m r,
+		MonadCont m,
+		?objType :: Type (Object r m),
+		?macrobindings :: Binds Symbol (Macro cm r m),
+		?syntacticbindings :: Binds Symbol (Syntax cm r m),
+		?toplevelbindings :: Binds Symbol (TopLevelMacro cm r m),
+		?system :: FullSystemInterface cm m r
+		) =>
+	 cm () ->
+	 [String] ->
+	 Bindings r m ->
+	 cm ();
+	runProgramBindingsWithExit failproc filenames rootBindings =
+	 runProgram mrun failproc filenames where
+		{
+		mrun lm = callCC (\exitFunc -> do
 			{
-			reportError (fsiCurrentErrorPort ?system) errObj;
-			failproc;
---			exitFunc ();
+			bindings <- concatenateList
+				[
+				addProcBinding "exit" (exitFuncProc exitFunc)
+				] rootBindings;		
+			lm (getBinding bindings);
 			});
-		});
+		};
 	}

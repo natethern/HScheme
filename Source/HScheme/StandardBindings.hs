@@ -132,10 +132,11 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 	commonStrictPureBindings ::
 		(
+		Build cm r,
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Bindings r m -> m (Bindings r m);
+	 Bindings r m -> cm (Bindings r m);
 	commonStrictPureBindings = concatenateList
 		[
 		addLocationBinding		(MkSymbol "<nothing>")			nullObject,								-- nonstandard
@@ -244,18 +245,20 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 
 	simpleStrictPureBindings ::
 		(
+		Build cm r,
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Bindings r m -> m (Bindings r m);
+	 Bindings r m -> cm (Bindings r m);
 	simpleStrictPureBindings = commonStrictPureBindings;
 
 	commonPureBindings ::
 		(
+		Build cm r,
 		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 Bindings r m -> m (Bindings r m);
+	 Bindings r m -> cm (Bindings r m);
 	commonPureBindings = concatenateList
 		[
 		commonStrictPureBindings,
@@ -277,36 +280,80 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"port-write-byte"				portWriteByteP							-- nonstandard
 		];
 
-	simplePureBindings :: (Scheme m r,?objType :: Type (Object r m)) => Bindings r m -> m (Bindings r m);
+	simplePureBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	simplePureBindings = commonPureBindings;
 
-	monadContBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) => Bindings r m -> m (Bindings r m);
+	monadContBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadCont m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadContBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-current-continuation"	callCCP
 		];
 
-	monadFixBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) => Bindings r m -> m (Bindings r m);
+	monadFixBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadFix m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadFixBindings = concatenateList
 		[
 		-- 6.4 Control Features
 		addProcBinding	"call-with-result"				fixP									-- nonstandard
 		];
 
-	monadFixStrictPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) =>
-	 Bindings r m -> m (Bindings r m);
+	monadFixStrictPureBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadFix m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadFixStrictPureBindings = simpleStrictPureBindings ++ monadFixBindings;
 
-	monadContStrictPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) =>
-	 Bindings r m -> m (Bindings r m);
+	monadContStrictPureBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadCont m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadContStrictPureBindings = simpleStrictPureBindings ++ monadContBindings;
 
-	monadFixPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadFix m) =>
-	 Bindings r m -> m (Bindings r m);
+	monadFixPureBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadFix m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadFixPureBindings = simplePureBindings ++ monadFixBindings;
 
-	monadContPureBindings :: (Scheme m r,?objType :: Type (Object r m),MonadCont m) =>
-	 Bindings r m -> m (Bindings r m);
+	monadContPureBindings ::
+		(
+		Build cm r,
+		Scheme m r,
+		MonadCont m,
+		?objType :: Type (Object r m)
+		) =>
+	 Bindings r m -> cm (Bindings r m);
 	monadContPureBindings = simplePureBindings ++ monadContBindings;
 	}

@@ -266,8 +266,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 --}
 
 	-- Misc
-	printList :: (Scheme m r) =>
-	 ObjLocation r m -> ObjLocation r m -> m String;
+	printList :: (Build cm r) =>
+	 ObjLocation r m -> ObjLocation r m -> cm String;
 	printList hl tl = do
 		{
 		head <- get hl;
@@ -289,8 +289,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 			};
 		};
 	
-	printValues :: (Scheme m r) =>
-	 [Object r m] -> m String;
+	printValues :: (Build cm r) =>
+	 [Object r m] -> cm String;
 	printValues [] = return "";
 	printValues [a] = toString a;
 	printValues (a:as) = do
@@ -300,8 +300,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (f++" "++r);
 		};
 	
-	printVector :: (Scheme m r) =>
-	 [ObjLocation r m] -> m String;
+	printVector :: (Build cm r) =>
+	 [ObjLocation r m] -> cm String;
 	printVector [] = return "";
 	printVector [ar] = do
 		{
@@ -316,8 +316,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return (f++" "++r);
 		};
 
-	printByteArrayContents :: (Scheme m r) =>
-	 [r Word8] -> m String;
+	printByteArrayContents :: (Build cm r) =>
+	 [r Word8] -> cm String;
 	printByteArrayContents [] = return "";
 	printByteArrayContents [cr] = do
 		{
@@ -354,8 +354,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 		schemeQuote' (c:cs) = (escapeChar c) ++ (schemeQuote' cs)
 		};
 
-	printString :: (Scheme m r) =>
-	 [r Char] -> m String;
+	printString :: (Build cm r) =>
+	 [r Char] -> cm String;
 	printString [] = return "";
 	printString (cr:cs) = do
 		{
@@ -364,8 +364,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 		return ((escapeChar c)++r);
 		};	
 
-	toString :: (Scheme m r) =>
-	 Object r m -> m String;
+	toString :: (Build cm r) =>
+	 Object r m -> cm String;
 	toString NilObject				= return "()";
 	toString (BooleanObject True)	= return "#t";
 	toString (BooleanObject False)	= return "#f";

@@ -23,7 +23,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.IOBindings where
 	{
 	import Org.Org.Semantic.HScheme.SystemInterface;
-	import Org.Org.Semantic.HScheme.Compile;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.Port;
 	import Org.Org.Semantic.HBase;
@@ -92,40 +91,32 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?objType :: Type (Object r m),
-		?stdout :: FlushSink IO Word8
+		?objType :: Type (Object r m)
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m m r;
+	 (forall a. IO a -> cm a) -> [String] -> PureSystemInterface cm m r;
 	ioPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdOutputPort)--});
+	 (readWithProcs (openInputFileWithPaths remonad loadpaths));
 
 	ioQuietPureSystemInterface ::
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
-		?objType :: Type (Object r m),
-		?stderr :: FlushSink IO Word8
+		?objType :: Type (Object r m)
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> PureSystemInterface m m r;
+	 (forall a. IO a -> cm a) -> [String] -> PureSystemInterface cm m r;
 	ioQuietPureSystemInterface remonad loadpaths = MkPureSystemInterface
-	 (readWithProcs (openInputFileWithPaths remonad loadpaths) {--(remonadOutputPort remonad stdErrorPort)--});
+	 (readWithProcs (openInputFileWithPaths remonad loadpaths));
 
 	ioFullSystemInterface ::
 		(
 		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?macrobindings :: Binds Symbol (Macro cm r m),
-		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?objType :: Type (Object r m),
 		?stdin :: PeekSource IO (Maybe Word8),
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>
-	 (forall a. IO a -> m a) -> [String] -> FullSystemInterface m m r;
+	 (forall a. IO a -> cm a) -> [String] -> FullSystemInterface cm m r;
 	ioFullSystemInterface remonad loadpaths = MkFullSystemInterface
 		{
 		fsiPure = ioPureSystemInterface remonad loadpaths,

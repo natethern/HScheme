@@ -52,12 +52,12 @@ module Org.Org.Semantic.HScheme.Macros where
 	 cm (SchemeExpression r m (m (Object r m)));
 	ifM (condObj,(thenObj,mElseObj)) = do
 		{
-		condExpr <- compileExpression condObj;
-		thenExpr <- compileExpression thenObj;
+		condExpr <- assembleExpression condObj;
+		thenExpr <- assembleExpression thenObj;
 		elseExpr <- case mElseObj of
 			{
 			Nothing -> return (return' (return nullObject));
-			Just elseObj -> compileExpression elseObj;
+			Just elseObj -> assembleExpression elseObj;
 			};
 		return (liftF3 (\mcond mthen melse -> do
 			{
@@ -80,7 +80,7 @@ module Org.Org.Semantic.HScheme.Macros where
 	 (Symbol,(Object r m,())) -> cm (SchemeExpression r m (m (Object r m)));
 	setBangM (sym,(obj,())) = do
 		{
-		expr <- compileExpression obj;
+		expr <- assembleExpression obj;
 		return (liftF2 (\mloc mval -> do
 			{
 			loc <- mloc;

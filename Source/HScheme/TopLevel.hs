@@ -22,11 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.TopLevel
 	(
-	TopLevelExp(..),TopLevelExpression,TopLevelMacro,
+	TopLevelCommand(..),TopLevelObjectCommand,TopLevelMacro,
 	lambdaM,letSequentialM,letSeparateM,letRecursiveM,
-	compileTopLevelExpression,
+	assembleTopLevelExpression,assembleTopLevelExpressionsEat,
 	pureDefineT,fullDefineT,
-	beginM,bodyM,bodyListM,bodyListEat,
+	beginM,bodyM,bodyListM,
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Compile;
@@ -148,16 +148,16 @@ module Org.Org.Semantic.HScheme.TopLevel
 	 (Symbol,SchemeExpression r m (m (ObjLocation r m)));
 	convertToLocationBinding (sym,valueExpr) = (sym,convertToLocationExpression valueExpr);
 
-	data TopLevelExp cm r m a = MkTopLevelExpression
+	data TopLevelCommand cm r m a = MkTopLevelExpression
 		{
 		tleExpression :: SchemeExpression r m a,
 		tleInitialBindings :: [(Symbol,SchemeExpression r m (m (Object r m)))],
 		tleSyntaxes :: [(Symbol,Syntax cm r m)]
 		};
 
-	type TopLevelExpression cm r m = TopLevelExp cm r m (m (Object r m));
+	type TopLevelObjectCommand cm r m = TopLevelCommand cm r m (m (Object r m));
 
-	type TopLevelMacro cm r m = [Object r m] -> cm (TopLevelExpression cm r m);
+	type TopLevelMacro cm r m = [Object r m] -> cm (TopLevelObjectCommand cm r m);
 
 	lambdaM ::
 		(
@@ -188,7 +188,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	compileBinds [] = return [];
 	compileBinds ((sym,(obj,())):bs) = do
 		{
-		expr <- compileExpression obj;
+		expr <- assembleExpression obj;
 		bcs <- compileBinds bs;
 		return ((sym,expr):bcs);
 		};
@@ -253,7 +253,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 		return (fSubstMapRecursive substMap binds body);
 		};
 
-	compileTopLevel ::
+	assembleTopLevelObjectCommand ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -261,8 +261,8 @@ module Org.Org.Semantic.HScheme.TopLevel
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 Object r m -> cm (TopLevelExpression cm r m);
-	compileTopLevel obj = do
+	 Object r m -> cm (TopLevelObjectCommand cm r m);
+	assembleTopLevelObjectCommand obj = do
 		{
 		mpair <- getMaybeConvert obj;
 		case mpair of
@@ -278,12 +278,12 @@ module Org.Org.Semantic.HScheme.TopLevel
 		{
 		compileExprTopLevel = do
 			{
-			expr <- compileExpression obj;
+			expr <- assembleExpression obj;
 			return (MkTopLevelExpression expr [] []);
 			};
 		};
 
-	compileTopLevelExpression ::
+	assembleTopLevelExpression ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -292,9 +292,9 @@ module Org.Org.Semantic.HScheme.TopLevel
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 Object r m -> cm (SchemeExpression r m (m (Object r m)));
-	compileTopLevelExpression obj = do
+	assembleTopLevelExpression obj = do
 		{
-		MkTopLevelExpression expr _ _ <- compileTopLevel obj;
+		MkTopLevelExpression expr _ _ <- assembleTopLevelObjectCommand obj;
 		return expr;
 		};
 
@@ -306,10 +306,10 @@ module Org.Org.Semantic.HScheme.TopLevel
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	pureDefineT (sym,(val,())) = do
 		{
-		valExpr <- compileExpression val;
+		valExpr <- assembleExpression val;
 		return (MkTopLevelExpression (return' (return nullObject)) [(sym,valExpr)] []);
 		};
 
@@ -320,10 +320,10 @@ module Org.Org.Semantic.HScheme.TopLevel
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	fullDefineT (sym,(val,())) = do
 		{
-		valExpr <- compileExpression val;
+		valExpr <- assembleExpression val;
 		return (MkTopLevelExpression 
 		 (liftF2 (\mloc mval -> do
 		 	{
@@ -346,11 +346,11 @@ module Org.Org.Semantic.HScheme.TopLevel
 	 a -> 
 	 (m (Object r m) -> a -> a) ->
 	 [Object r m] ->
-	 cm (TopLevelExp cm r m a);
+	 cm (TopLevelCommand cm r m a);
 	begin none conn [] = return (MkTopLevelExpression (return' none) [] []);
 	begin none conn (obj:objs) = do
 		{
-		(MkTopLevelExpression expr1 binds1 syntax1) <- compileTopLevel obj;
+		(MkTopLevelExpression expr1 binds1 syntax1) <- assembleTopLevelObjectCommand obj;
 		(MkTopLevelExpression exprr bindsr syntaxr) <- let
 		 {?syntacticbindings = newBinds ?syntacticbindings syntax1} in
 		 begin none conn objs;
@@ -366,10 +366,10 @@ module Org.Org.Semantic.HScheme.TopLevel
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
 	 [Object r m] ->
-	 cm (TopLevelExpression cm r m);
+	 cm (TopLevelObjectCommand cm r m);
 	beginM = begin (return nullObject) (>>);
 
-	body ::
+	assembleTopLevelExpressions ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -381,7 +381,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	 (m (Object r m) -> m a -> m a) ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m a));
-	body none conn objs = do
+	assembleTopLevelExpressions none conn objs = do
 		{
 		MkTopLevelExpression expr binds _ <- begin none conn objs;
 --		return (fSubstMapRecursive substMap binds expr);
@@ -398,9 +398,9 @@ module Org.Org.Semantic.HScheme.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m (Object r m)));
-	bodyM = body (return nullObject) (>>);
+	bodyM = assembleTopLevelExpressions (return nullObject) (>>);
 
-	bodyList ::
+	assembleTopLevelExpressionsList ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -410,7 +410,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m [Object r m]));
-	bodyList = body
+	assembleTopLevelExpressionsList = assembleTopLevelExpressions
 	 (return [])
 	 (\mr mrs -> do
 		{
@@ -432,9 +432,9 @@ module Org.Org.Semantic.HScheme.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m (Object r m)));
-	bodyListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (bodyList obj);
+	bodyListM obj = fmap' (fmap (\mlist -> mlist >>= getConvert)) (assembleTopLevelExpressionsList obj);
 
-	bodyListEat ::
+	assembleTopLevelExpressionsEat ::
 		(
 		Build cm r,
 		Scheme m r,
@@ -445,7 +445,7 @@ module Org.Org.Semantic.HScheme.TopLevel
 	 (Object r m -> m ()) ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m ()));
-	bodyListEat eat = body
+	assembleTopLevelExpressionsEat eat = assembleTopLevelExpressions
 	 (return ())
 	 (\mr mrs -> do
 		{

@@ -159,9 +159,9 @@ module Org.Org.Semantic.HScheme.Syntax where
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) -> m (Object r m);
 	caseMatchM (argExpr,(literals,cases)) = do
 		{
-		arg <- evaluate argExpr;
+		arg <- evaluateObject argExpr;
 		(subs,expr) <- caseMatch (arg,(literals,cases));
-		let {?bindings = addBindings subs ?bindings;} in evaluate expr;
+		let {?bindings = addBindings subs ?bindings;} in evaluateObject expr;
 		};
 --}
 	syntaxRulesM :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
@@ -221,7 +221,7 @@ module Org.Org.Semantic.HScheme.Syntax where
 		?syntacticbindings :: Binds Symbol (Syntax cm r m),
 		?macrobindings :: Binds Symbol (Macro cm r m)
 		) =>
-	 (Symbol,(Object r m,())) -> cm (TopLevelExpression cm r m);
+	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand cm r m);
 	defineSyntaxT (sym,(obj,())) = do
 		{
 		syntax <- let {?objType = Type} in compileSyntax obj;

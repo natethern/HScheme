@@ -62,7 +62,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 		ArgumentList cm m r args,
 		?objType :: Type (Object r m)
 		) =>
-	 (args -> cm (TopLevelExpression cm r m)) ->
+	 (args -> cm (TopLevelObjectCommand cm r m)) ->
 	 (TopLevelMacro cm r m);
 	convertToTopLevelMacro foo argObjs = do
 		{
@@ -87,7 +87,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 		?objType :: Type (Object r m)
 		) =>
 	 String ->
-	 (args -> cm (TopLevelExpression cm r m)) ->
+	 (args -> cm (TopLevelObjectCommand cm r m)) ->
 	 Binds Symbol (TopLevelMacro cm r m) ->
 	 Binds Symbol (TopLevelMacro cm r m);
 	addTopLevelMacroBinding name p b = addBinding (MkSymbol name) (convertToTopLevelMacro p) b;
