@@ -28,18 +28,6 @@ module Org.Org.Semantic.HScheme.Parse.SchemeParser where
 
 	class
 		(
-		ObjectSubtype r obj Symbol
-		) =>
-	 Parsable r obj | obj -> r;
-
-	instance
-		(
-		ObjectSubtype r obj Symbol
-		) =>
-	 Parsable r obj;
-
-	class
-		(
 		Build cm r,
 		ObjectSubtype r obj obj,
 		ParserError cm obj,

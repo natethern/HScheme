@@ -28,7 +28,7 @@ module Org.Org.Semantic.HScheme.Parse.SpecialForm (quotedParse) where
 
 	specialCharParse ::
 		(
-		Parsable r obj,
+		ObjectSubtype r obj Symbol,
 		?objType :: Type obj,
 		SchemeParser cm obj r p
 		) =>
@@ -47,7 +47,7 @@ module Org.Org.Semantic.HScheme.Parse.SpecialForm (quotedParse) where
 
 	quotedParse :: 
 		(
-		Parsable r obj,
+		ObjectSubtype r obj Symbol,
 		?objType :: Type obj,
 		SchemeParser cm obj r p
 		) =>
