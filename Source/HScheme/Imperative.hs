@@ -24,7 +24,7 @@ module Org.Org.Semantic.HScheme.Imperative
 	(
 	module Org.Org.Semantic.HScheme.Imperative.IOSystem,
 	module Org.Org.Semantic.HScheme.Imperative.IOLoad,
---	module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity,
+	module Org.Org.Semantic.HScheme.Imperative.SchemeIdentity,
 	module Org.Org.Semantic.HScheme.Imperative.SchemeIO,
 	module Org.Org.Semantic.HScheme.Imperative.SchemeCPS,
 	module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS
@@ -33,7 +33,7 @@ module Org.Org.Semantic.HScheme.Imperative
 	import Org.Org.Semantic.HScheme.Imperative.SchemeGCPS;
 	import Org.Org.Semantic.HScheme.Imperative.SchemeCPS;
 	import Org.Org.Semantic.HScheme.Imperative.SchemeIO;
---	import Org.Org.Semantic.HScheme.Imperative.SchemeIdentity;
+	import Org.Org.Semantic.HScheme.Imperative.SchemeIdentity();
 	import Org.Org.Semantic.HScheme.Imperative.IOLoad;
 	import Org.Org.Semantic.HScheme.Imperative.IOSystem;
 	}

@@ -938,6 +938,8 @@
 				ABAD37A904A403EE00A80103,
 				ABAD37A604A403EE00A80103,
 				ABAD37A704A403EE00A80103,
+				ABD4442D05C5127C001DF40B,
+				ABD4443005C512A0001DF40B,
 				ABAD379604A403EE00A80103,
 				ABAD379704A403EE00A80103,
 				ABAD379404A403EE00A80103,
@@ -1404,6 +1406,22 @@
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.haskell;
 			path = Misc.hs;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		ABD4442D05C5127C001DF40B = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.lisp.scheme;
+			path = "letrec-cont.scm";
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		ABD4443005C512A0001DF40B = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = "letrec-cont.scm.ref";
 			refType = 4;
 			sourceTree = "<group>";
 		};

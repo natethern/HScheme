@@ -68,7 +68,7 @@ module Org.Org.Semantic.HScheme.Core.Reference where
 		eq1 :: forall a. (Eq a) => r a -> r a -> Bool;
 		};
 
-	instance Eq1 (Constant m) where
+	instance Eq1 Constant where
 		{
 		eq1 = (==);
 		};

@@ -27,8 +27,6 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	type IOConst = Constant IO;
-
 	instance (MonadGettableReference IO r,MonadCreatable IO r) =>
 	 MonadThrow (CompleteObject r m) IO where
 		{

@@ -49,7 +49,7 @@ module Org.Org.Semantic.HScheme.LambdaCalculus.ListSymbolExpression
 			MkListSymbolExpression (sym:syms') valsb where
 			{
 			MkListSymbolExpression syms' valsva = (exprAbstract sym rda);
-			valsb (val:vals) = valsab vals (valsva vals val);
+			valsb ~(val:vals) = valsab vals (valsva vals val);
 			};
 		};
 

@@ -63,7 +63,7 @@ CGI_COMMAND			= interpret.cgi
 
 # Flags
 
-HCWARNFLAGS		= -Wall -Werror -fno-warn-unused-matches
+HCWARNFLAGS		= -Wall -Werror -fno-warn-unused-matches -fno-warn-unused-imports
 HCLANGFLAGS		= -package-name $(PACKAGENAME)
 HCPACKAGES		= -package HBase
 HCIMPORTDIRS	= -i.
@@ -260,6 +260,7 @@ test-full:	\
  test/letbinding.scm.full.diff	\
  test/letrec.scm.full.diff	\
  test/letrec-fix.scm.full.diff	\
+ test/letrec-cont.scm.full.diff	\
  test/bindingbody.scm.full.diff	\
  test/binding.scm.full.diff	\
  test/setvar.scm.full.diff	\
@@ -1138,6 +1139,9 @@ Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IO
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/IOLoad.hi
 Org/Org/Semantic/HScheme/Imperative.q_o : Org/Org/Semantic/HScheme/Imperative/IOLoad.q_hi
 Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/IOLoad.p_hi
+Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.hi
+Org/Org/Semantic/HScheme/Imperative.q_o : Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.q_hi
+Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIdentity.p_hi
 Org/Org/Semantic/HScheme/Imperative.o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.hi
 Org/Org/Semantic/HScheme/Imperative.q_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.q_hi
 Org/Org/Semantic/HScheme/Imperative.p_o : Org/Org/Semantic/HScheme/Imperative/SchemeIO.p_hi

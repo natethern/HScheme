@@ -29,8 +29,6 @@ module Main where
 	type CPS r = SchemeCPS (IO ()) (CompleteObject r);
 	type GCPS r = SchemeGCPS (IO ()) (CompleteObject r);
 
-	type IdentityConst = Constant Identity;
-
 	optPrepend :: Bool -> a -> [a] -> [a];
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
@@ -82,7 +80,7 @@ module Main where
 					 then readLoad "init.full.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -100,7 +98,7 @@ module Main where
 					 then readLoad "init.pure.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -114,7 +112,7 @@ module Main where
 					 then readLoad "init.pure.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				};
 			CPSWhichMonad ->
@@ -143,7 +141,7 @@ module Main where
 					 then readLoad "init.full.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -160,7 +158,7 @@ module Main where
 					 then readLoad "init.pure.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				StrictPureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
@@ -174,7 +172,7 @@ module Main where
 					 then readLoad "init.pure.scm"
 					 else return nothing;
 					objects <- readFiles filenames;
-					runObjectsWithExit printResult initCommand objects bindings;
+					runObjects printResult initCommand objects bindings;
 					});
 				};
 			IOWhichMonad ->
@@ -238,8 +236,8 @@ module Main where
 					});
 				};
 			IdentityWhichMonad ->
-			 let {?objType = MkType::Type (CompleteObject IdentityConst Identity)} in
-			 let {?binder = recursiveBinder} in
+			 let {?objType = MkType::Type (CompleteObject Constant Identity)} in
+			 let {?binder = fixedPointBinder} in
 			 let {?read = ioRead loadpaths} in
 			 case flavour of
 				{

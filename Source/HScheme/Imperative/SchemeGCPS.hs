@@ -26,10 +26,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	data SchemeGCPSError p mobj = 
-		GCPSStringError String				|
-		GCPSExceptionError Exception		|
-		GCPSObjError (mobj (SchemeGCPS p mobj))	;
+	newtype SchemeGCPSError p mobj = MkSchemeGCPSError (mobj (SchemeGCPS p mobj));
 
 	type SchemeGCPS p mobj = ExceptionMonad (GuardContinuationPass Unique p) (SchemeGCPSError p mobj);
 
@@ -37,86 +34,29 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 
 	instance Show (SchemeGCPSError p mobj) where
 		{
-		show (GCPSStringError s) = s;
-		show (GCPSExceptionError ex) = show ex;
-		show (GCPSObjError ex) = "Scheme object error";
+		show (MkSchemeGCPSError ex) = "Scheme object error";
 		};
 
 	instance MonadThrow (SchemeGCPSObject p mobj) (SchemeGCPS p mobj) where
 		{
-		throw = throw . GCPSObjError;
+		throw = throw . MkSchemeGCPSError;
 		};
 
-	instance
-		(
-		ObjectSubtype r (SchemeGCPSObject p mobj) Symbol,
-		ObjectSubtype r (SchemeGCPSObject p mobj) (SList Char),
-		Build (SchemeGCPS p mobj) r
-		) =>
-	 MonadException (SchemeGCPSObject p mobj) (SchemeGCPS p mobj) where
+	instance MonadException (SchemeGCPSObject p mobj) (SchemeGCPS p mobj) where
 		{
-		catch foo cc = catchSingle foo (\ex -> do
-			{
-			obj <- getConvert ex;
-			cc obj;
-			});
+		catch foo cc = catchSingle foo (\(MkSchemeGCPSError obj) -> cc obj);
 		};
 
-	instance (Monad m) =>
-	 MonadIsA m (SchemeGCPSError p mobj) (SchemeGCPSObject p mobj) where
+	instance (MonadThrow (mobj (SchemeGCPS (IO ()) mobj)) IO) =>
+	 MonadThrow (SchemeGCPSError (IO ()) mobj) IO where
 		{
-		getConvert = return . GCPSObjError;
-		};
-
-	instance
-		(
-		ObjectSubtype r (SchemeGCPSObject p mobj) Symbol,
-		ObjectSubtype r (SchemeGCPSObject p mobj) (SList Char),
-		Build (SchemeGCPS p mobj) r
-		) =>
-	 MonadIsA (SchemeGCPS p mobj) (SchemeGCPSObject p mobj) (SchemeGCPSError p mobj) where
-		{
-		getConvert (GCPSObjError a) = return a;
-		getConvert (GCPSExceptionError x) = getObject (MkSymbol "failure",MkSList (show x));
-		getConvert (GCPSStringError s) = getObject (MkSymbol "failure",MkSList s);
-		};
-
-	instance MaybeA (SchemeGCPSError p mobj) String where
-		{
-		maybeConvert = Just . convert;
-		};
-
-	instance IsA (SchemeGCPSError p mobj) String where
-		{
-		convert = GCPSStringError;
-		};
-
-	instance MaybeA (SchemeGCPSError p mobj) Exception where
-		{
-		maybeConvert = Just . convert;
-		};
-
-	instance IsA (SchemeGCPSError p mobj) Exception where
-		{
-		convert = GCPSExceptionError;
-		};
-
-	instance (MonadException (SchemeGCPSObject (cm ()) mobj) cm) =>
-	 Runnable cm (SchemeGCPS (cm ()) mobj) where
-		{
-		rsRun ma = runMonad return
-		 (exRun (\err -> lift (case err of
-			{
-			GCPSStringError s -> fail s;
-			GCPSExceptionError ex -> fail (show ex);
-			GCPSObjError obj -> throw obj;
-			})) ma);
+		throw (MkSchemeGCPSError obj) = throw obj;
 		};
 
 	instance
 		(
 		Build cm r,
-		MonadException (SchemeGCPSObject (cm ()) mobj) cm,
+		MonadThrow (SchemeGCPSError (cm ()) mobj) cm,
 		ListObject r (SchemeGCPSObject (cm ()) mobj)
 		) =>
 	 RunnableScheme cm (SchemeGCPS (cm ()) mobj) r (SchemeGCPSObject (cm ()) mobj) where
@@ -124,7 +64,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 		rsRunInterp outproc mrun interpList interpEat = do
 			{
 			program <- interpEat (lift . lift . outproc);
-			rsRun (mrun program);
+			convertMonad (mrun program);
 			};
 		};
 	}

@@ -27,7 +27,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	schemeExprLet,
 	schemeExprLetSeparate,
 	schemeExprLetSequential,
-	schemeExprLetRecursive,
+	schemeExprLetRecursiveFixed,
 	schemeExprLocLet
 	) where
 	{
@@ -133,7 +133,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	 SchemeExpression r obj (m a);
 	schemeExprLetSequential = exprLetMapSequential mSubstMap;
 
-	schemeExprLetRecursive ::
+	schemeExprLetRecursiveFixed ::
 		(
 		MonadFix m,
 		InterpretObject m r obj
@@ -141,7 +141,7 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
-	schemeExprLetRecursive = exprLetMapRecursive valueFixer where
+	schemeExprLetRecursiveFixed = exprLetMapRecursive valueFixer where
 		{
 --		fixFunctor :: (Functor t) => t (t a -> a) -> t a;
 --		fixFunctor t = fix (\p -> (fmap (\x -> x p) t));

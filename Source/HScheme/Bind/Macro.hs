@@ -56,7 +56,8 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		-- 4.2.2 Binding Constructs
 		addMacroBinding	"let"				(addM letSeparateM namedLetM),
 		addMacroBinding	"let*"				letSequentialM,
-		addMacroBinding	"letrec"			letRecursiveM,
+		addMacroBinding	"letrec"			letRecursiveBinderM,
+		addMacroBinding	"letfix"			letRecursiveFixM,
 
 		-- 4.2.4 Iteration
 		addMacroBinding	"do"				doM,

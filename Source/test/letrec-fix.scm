@@ -1,4 +1,4 @@
-(letrec
+(letfix
 	(
 		(a b)
 		(b 7)
@@ -6,7 +6,7 @@
 	(list a b)
 )
 
-(letrec
+(letfix
 	(
 		(a 2)
 		(b a)
@@ -14,7 +14,7 @@
 	(list a b)
 )
 
-(letrec
+(letfix
 	(
 		(e d)
 		(b a)
@@ -25,7 +25,7 @@
 	e
 )
 
-(letrec
+(letfix
 	(
 		(pq '(p q))
 		(rpq (cons 'r pq))
@@ -37,7 +37,7 @@
 
 (hello-goodbye-etc '(a b c))
 
-(define hello-goodbyes1 (letrec
+(define hello-goodbyes1 (letfix
 	((h (hello-goodbye-etc h)))
 	h
 ))

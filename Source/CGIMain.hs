@@ -31,8 +31,6 @@ module Main where
 	type CPS r = SchemeCPS (IO ()) (CompleteObject r);
 	type GCPS r = SchemeGCPS (IO ()) (CompleteObject r);
 
-	type IdentityConst = Constant Identity;
-
 	getStdBindings :: SchemeWhichMonad -> QueryParameters -> SchemeStdBindings;
 	getStdBindings whichmonad params = case findQueryParameter (encodeLatin1 "bindings") params of
 		{
@@ -219,8 +217,8 @@ module Main where
 				 "init.pure.scm" source;
 				};
 			IdentityWhichMonad -> 
-			 let {?objType = MkType::Type (CompleteObject IdentityConst Identity)} in
-			 let {?binder = recursiveBinder} in
+			 let {?objType = MkType::Type (CompleteObject Constant Identity)} in
+			 let {?binder = fixedPointBinder} in
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
 			 case stdbindings of
 				{

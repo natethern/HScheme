@@ -20,8 +20,7 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.MainProg.Interactive
-	(interact,interactWithExit) where
+module Org.Org.Semantic.HScheme.MainProg.Interactive (interact) where
 	{
 	import Org.Org.Semantic.HScheme.Bind;
 	import Org.Org.Semantic.HScheme.RunLib;
@@ -196,47 +195,8 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 	interact bindings commands =
 	 catch (do
 		{
-		env' <- concatenateList (fmap envProc commands) (MkEnvironment ?syntacticbindings bindings);
-		interactiveLoop env';
+		env <- concatenateList (fmap envProc commands) (MkEnvironment ?syntacticbindings bindings);
+		interactiveLoop env;
 		})
-	 (\errObj -> do
-		{
-		reportError errObj;
-		});
-
-	interactWithExit ::
-		(
-		AssembleError m obj,
-		ParserError m obj,
-		ParseObject r obj,
-		ToString m obj,
-		InterpretObject m r obj,
-		FullBuild m r,
-		MonadCont m,
-		MonadBottom m,
-		MonadException obj m,
-		?objType :: Type obj,
-		?macrobindings :: Symbol -> Maybe (Macro m r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r obj m),
-		?system :: System m
-		) =>
-	 SymbolBindings (r obj) ->
-	 [TopLevelListCommand r obj m] ->
-	 m ();
-	interactWithExit rootBindings commands = callCC (\exitFunc -> do
-		{
-		bindings <- concatenateList
-			[
-			addProcBinding "exit" (exitFuncProc exitFunc)
-			] rootBindings;
-		env' <- catch
-		 (concatenateList (fmap envProc commands) (MkEnvironment ?syntacticbindings bindings))
-		 (\errObj -> do
-			{
-			reportError errObj;
-			exitFunc ();
-			});
-		interactiveLoop env';
-		});
+	 reportError;
 	}

@@ -22,10 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MainProg.Batch
 	(
-	Runnable(..),
 	RunnableScheme(..),
 	runObjects,
-	runObjectsWithExit,
 	printResult
 	) where
 	{
@@ -37,18 +35,8 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	class
 		(
-		Monad m,
-		Monad cm
-		) =>
-	 Runnable cm m where
-		{
-		rsRun :: m () -> cm ();
-		};
-
-	class
-		(
 		Build cm r,
-		Runnable cm m
+		MonadRun (cm ()) m
 		) =>
 	 RunnableScheme cm m r obj where
 		{
@@ -60,16 +48,10 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		 cm ();
 		};
 
-	instance (Monad m) =>
-	 Runnable m m where
-		{
-		rsRun = id;
-		};
-
 	instance
 		(
 		Build m r,
-		Monad m,
+		MonadRun (m ()) m,
 		ListObject r obj
 		) =>
 	 RunnableScheme m m r obj where
@@ -79,11 +61,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 			program <- interpEat outproc;
 			mrun program;
 			};
-		};
-
-	instance Runnable IO Identity where
-		{
-		rsRun _ = return ();
 		};
 
 	instance
@@ -155,35 +132,5 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 	 evaluateObjects mrun outproc command objects where
 		{
 		mrun lm = lm (getBinding bindings);
-		};
-
-	runObjectsWithExit ::
-		(
-		InterpretObject m r obj,
-		AssembleError cm obj,
-		RunnableScheme cm m r obj,
-		MonadCont m,
-		?objType :: Type obj,
-		?binder :: TopLevelBinder r obj m,
-		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
-		?syntacticbindings :: SymbolBindings (Syntax r obj m),
-		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
-		) =>
-	 (obj -> cm ()) ->
-	 TopLevelListCommand r obj m ->
-	 [obj] ->
-	 SymbolBindings (r obj) ->
-	 cm ();
-	runObjectsWithExit outproc command objects rootBindings =
-	 evaluateObjects mrun outproc command objects where
-		{
-		mrun lm = callCC (\exitFunc -> do
-			{
-			bindings <- concatenateList
-				[
-				addProcBinding "exit" (exitFuncProc exitFunc)
-				] rootBindings;		
-			lm (getBinding bindings);
-			});
 		};
 	}

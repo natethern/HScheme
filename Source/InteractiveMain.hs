@@ -29,8 +29,6 @@ module Main where
 	type CPS r = SchemeCPS (IO ()) (CompleteObject r);
 	type GCPS r = SchemeGCPS (IO ()) (CompleteObject r);
 
-	type IdentityConst = Constant Identity;
-
 	optPrepend :: Bool -> a -> [a] -> [a];
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
@@ -92,10 +90,10 @@ module Main where
 						systemBindings (lift . lift),
 						systemPortBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.full.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				PureStdBindings ->
@@ -110,10 +108,10 @@ module Main where
 						evalBindings id,
 						portBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				StrictPureStdBindings ->
@@ -124,10 +122,10 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				};
@@ -153,10 +151,10 @@ module Main where
 						systemBindings lift,
 						systemPortBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.full.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				PureStdBindings ->
@@ -170,10 +168,10 @@ module Main where
 						evalBindings id,
 						portBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				StrictPureStdBindings ->
@@ -184,10 +182,10 @@ module Main where
 						baseBindings,
 						monadFixBindings
 						]) emptyBindings;
-					rsRun (do
+					convertMonad (do
 						{
 						commands <- fextract (fmap readLoad (allFileNames "init.pure.scm"));
-						interactWithExit bindings commands;
+						interact bindings commands;
 						});
 					});
 				};

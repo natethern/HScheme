@@ -23,7 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.Binder
 	(
 	interactiveBind,schemeExprLetNewRefs,
-	setBinder,recursiveBinder
+	setBinder,fixedPointBinder
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.TopLevel;
@@ -86,12 +86,12 @@ module Org.Org.Semantic.HScheme.Interpret.Binder
 		gather sym = fmap (fmap (\((a,rbinds),loc) -> (a,(sym,loc):rbinds)))
 		};
 
-	recursiveBinder ::
+	fixedPointBinder ::
 		(
 		MonadFix m,
 		InterpretObject m r obj
 		) => TopLevelBinder r obj m;
-	recursiveBinder = MkTopLevelBinder schemeExprLetRecursive;
+	fixedPointBinder = MkTopLevelBinder schemeExprLetRecursiveFixed;
 
 	setBinder ::
 		(

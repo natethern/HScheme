@@ -204,7 +204,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		return (schemeExprLetSeparate binds body);
 		};
 
-	letRecursiveM ::
+	letRecursiveBinderM ::
 		(
 		AssembleError cm obj,
 		MonadFix m,
@@ -218,11 +218,32 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 		) =>
 	 ([(Symbol,(obj,()))],[obj]) ->
 	 cm (ListSchemeExpression r obj m);
-	letRecursiveM (bindList,bodyObj) = do
+	letRecursiveBinderM (bindList,bodyObj) = do
 		{
 		binds <- assembleBinds bindList;
 		body <- bodyM bodyObj;
-		return (schemeExprLetRecursive binds body);
+		return (unTopLevelBinder ?binder binds body);
+		};
+
+	letRecursiveFixM ::
+		(
+		AssembleError cm obj,
+		MonadFix m,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
+		) =>
+	 ([(Symbol,(obj,()))],[obj]) ->
+	 cm (ListSchemeExpression r obj m);
+	letRecursiveFixM (bindList,bodyObj) = do
+		{
+		binds <- assembleBinds bindList;
+		body <- bodyM bodyObj;
+		return (unTopLevelBinder fixedPointBinder binds body);
 		};
 
 
@@ -387,7 +408,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 			{
 			exp = schemeExprAbstractList (fmap fst bindlist) bodyExpr;
 			} in
-		 schemeExprLetRecursive [(var,fmap getObject exp)] (liftF2 (\objsf mobjs -> do
+		 unTopLevelBinder ?binder [(var,fmap getObject exp)] (liftF2 (\objsf mobjs -> do
 			{
 			objs <- fextract mobjs;
 			objsf objs;
