@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Lambda where
 	{
+	import TopLevel;
 	import Evaluate;
 	import Procedures;
 	import Conversions;
@@ -38,12 +39,12 @@ module Lambda where
 	begin bindings [] = fail "not enough arguments";
 	begin bindings [obj] = do
 		{
-		(_,result) <- defineEvaluate bindings obj;
+		(_,result) <- topLevelEvaluate bindings obj;
 		return result;
 		};
 	begin bindings (obj:objs) = do
 		{
-		(newBindings,_) <- defineEvaluate bindings obj;
+		(newBindings,_) <- topLevelEvaluate bindings obj;
 		begin newBindings objs;
 		};
 

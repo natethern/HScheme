@@ -195,6 +195,7 @@ module Procedures where
 	toString (OutputPortObject _)	= return "#<output port>";
 	toString (ProcedureObject _)	= return "#<procedure>";
 	toString (MacroObject _)		= return "#<macro>";
+	toString (TopLevelMacroObject _)= return "#<top-level macro>";
 	toString (SyntaxObject _)		= return "#<syntax>";
 	toString (BindingsObject _)		= return "#<environment>";
 

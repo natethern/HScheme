@@ -98,6 +98,8 @@ module Object where
 	 Bindings r m -> [Object r m] -> m (Object r m);
 	type Macro r m =
 	 Bindings r m -> Object r m -> m (Object r m);
+	type TopLevelMacro r m =
+	 Bindings r m -> Object r m -> m (Bindings r m,Object r m);
 	type Syntax r m =
 	 [Object r m] -> m (Object r m);
 
@@ -116,7 +118,8 @@ module Object where
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
 	 SyntaxObject		(Syntax r m)						|
-	 MacroObject		(Macro r m)							;
+	 MacroObject		(Macro r m)							|
+	 TopLevelMacroObject(TopLevelMacro r m)					;
 
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;

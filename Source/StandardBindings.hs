@@ -27,6 +27,7 @@ module StandardBindings where
 	import Equality;
 	import NumericProcedures;
 	import Procedures;
+	import TopLevel;
 	import Evaluate;
 	import Bindings;
 	import Object;
@@ -35,6 +36,7 @@ module StandardBindings where
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
+		addTopLevelMacroBinding	"define"	defineTM,
 		addProcBinding	"car"	carS,
 		addProcBinding	"cdr"	cdrS,
 		addProcBinding	"cons"	consS,

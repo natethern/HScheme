@@ -30,6 +30,7 @@ module Interactive where
 	import Bindings;
 	import PortProcedures;
 	import Procedures;
+	import TopLevel;
 	import Evaluate;
 	import Conversions;
 	import Object;
@@ -47,7 +48,7 @@ module Interactive where
 	printeval port bindings [] = return bindings;
 	printeval port bindings (obj:objs) = do
 		{
-		(newBindings,result) <- defineEvaluate bindings obj;
+		(newBindings,result) <- topLevelEvaluate bindings obj;
 		str <- toString result;
 		opWriteStrLn port str;
 		printeval port newBindings objs;	

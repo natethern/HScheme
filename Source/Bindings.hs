@@ -67,6 +67,21 @@ module Bindings where
 		addBinding name (MacroObject (convertToMacro (p Type))) b;
 		};
 
+	addTopLevelMacroBinding ::
+		(
+		Scheme x m r,
+		MonadMaybeA m args (Object r m),
+		MonadIsA m (Object r m) ret
+		) =>
+	 String ->
+	 (Bindings r m -> args -> m (Bindings r m,ret)) ->
+	 Bindings r m ->
+	 m (Bindings r m);
+	addTopLevelMacroBinding name p b = do
+		{
+		addBinding name (TopLevelMacroObject (convertToTopLevelMacro p)) b;
+		};
+
 	exitFuncProc :: (() -> m ()) -> (Type (r ()) -> () -> m ());
 	exitFuncProc exitFunc Type = exitFunc;
 

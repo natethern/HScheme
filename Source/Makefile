@@ -48,6 +48,7 @@ HC_SRCS			= \
 	SExpChars.hs	\
 	SExpParser.hs	\
 	Evaluate.hs	\
+	TopLevel.hs	\
 	Procedures.hs	\
 	Lambda.hs	\
 	PortProcedures.hs	\
@@ -166,6 +167,11 @@ SExpParser.o : Procedures.hi
 Evaluate.o : Evaluate.hs
 Evaluate.o : Common/Type.hi
 Evaluate.o : Object.hi
+TopLevel.o : TopLevel.hs
+TopLevel.o : Common/Type.hi
+TopLevel.o : Object.hi
+TopLevel.o : Conversions.hi
+TopLevel.o : Evaluate.hi
 Procedures.o : Procedures.hs
 Procedures.o : Common/Type.hi
 Procedures.o : Common/Subtype.hi
@@ -179,6 +185,7 @@ Lambda.o : Object.hi
 Lambda.o : Conversions.hi
 Lambda.o : Procedures.hi
 Lambda.o : Evaluate.hi
+Lambda.o : TopLevel.hi
 PortProcedures.o : PortProcedures.hs
 PortProcedures.o : Common/Type.hi
 PortProcedures.o : Port.hi
@@ -203,6 +210,7 @@ StandardBindings.o : Numerics.hi
 StandardBindings.o : Object.hi
 StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
+StandardBindings.o : TopLevel.hi
 StandardBindings.o : Procedures.hi
 StandardBindings.o : NumericProcedures.hi
 StandardBindings.o : Equality.hi
@@ -252,6 +260,7 @@ Interactive.o : InputPortParser.hi
 Interactive.o : Object.hi
 Interactive.o : Conversions.hi
 Interactive.o : Evaluate.hi
+Interactive.o : TopLevel.hi
 Interactive.o : Procedures.hi
 Interactive.o : PortProcedures.hi
 Interactive.o : Bindings.hi

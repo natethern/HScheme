@@ -126,6 +126,22 @@ module Conversions where
 		r <- foo args with {?bindings=bindings;};
 		getConvert r;
 		};
+	
+	convertToTopLevelMacro ::
+		(
+		Scheme x m r,
+		MonadMaybeA m args (Object r m),
+		MonadIsA m (Object r m) ret
+		) =>
+	 (Bindings r m -> args -> m (Bindings r m,ret)) -> TopLevelMacro r m;
+	
+	convertToTopLevelMacro foo bindings obj = do
+		{
+		args <- convertFromObject obj;
+		(bindings',r) <- foo bindings args;
+		result <- getConvert r;
+		return (bindings',result);
+		};
 
 	
 	-- ArgNoneType
