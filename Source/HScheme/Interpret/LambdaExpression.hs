@@ -159,7 +159,7 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 
 	instance (Functor t) => Functor (NextList t) where
 		{
-		fmap map (MkNextList a ta) = MkNextList (map a) (fmap map ta);
+		fmap map ~(MkNextList a ta) = MkNextList (map a) (fmap map ta);
 		};
 
 	instance ExtractableFunctor ZeroList where
@@ -169,7 +169,7 @@ module Org.Org.Semantic.HScheme.Interpret.LambdaExpression
 
 	instance (ExtractableFunctor t) => ExtractableFunctor (NextList t) where
 		{
-		fExtract (MkNextList ga tga) = liftF2 MkNextList ga (fExtract tga);
+		fExtract ~(MkNextList ga tga) = liftF2 MkNextList ga (fExtract tga);
 		};
 
 

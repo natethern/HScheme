@@ -248,6 +248,7 @@ test-full:	\
  test/syntax-rec.scm.full.diff	\
  test/letbinding.scm.full.diff	\
  test/letrec.scm.full.diff	\
+ test/letrec-fix.scm.full.diff	\
  test/bindingbody.scm.full.diff	\
  test/binding.scm.full.diff	\
  test/setvar.scm.full.diff	\

@@ -108,23 +108,38 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	 [(Symbol,ObjectSchemeExpression r obj m)] ->
 	 SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj (m a);
-	schemeExprLetRecursive = exprLetMapRecursive fixer where
+	schemeExprLetRecursive = exprLetMapRecursive valueFixer where
 		{
 --		fixFunctor :: (Functor t) => t (t a -> a) -> t a;
 --		fixFunctor t = fix (\p -> (fmap (\x -> x p) t));
 
 		mfixExFunctor :: (MonadFix m,ExtractableFunctor t) =>
 		 t (t a -> m a) -> m (t a);
-		mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
+		mfixExFunctor t = mfix (\p -> for (\x -> x p) t);
 
-		fixer :: (MonadCreatable m r,MonadFix m,ExtractableFunctor t) =>
+		refFixer :: (MonadCreatable m r,MonadFix m,ExtractableFunctor t) =>
 		 t (t (r v) -> m v) ->
 		 (t (r v) -> m a) ->
 		 m a;
-		fixer bindsT bodyT = (mfixExFunctor (fmap (\tlocmobj tloc -> do
+		refFixer bindsT bodyT = (mfixExFunctor (fmap (\tlocmobj tloc -> do
 			{
 			obj <- tlocmobj tloc;
 			new obj;
 			}) bindsT)) >>= bodyT;
+
+		valueFixer :: (MonadCreatable m r,MonadFix m,ExtractableFunctor t) =>
+		 t (t (r v) -> m v) ->
+		 (t (r v) -> m a) ->
+		 m a;
+		valueFixer bindsT bodyT = do
+			{
+			tval <- mfixExFunctor (fmap (\tlocmobj tval -> do
+				{
+				tloc <- for new tval;
+				tlocmobj tloc;
+				}) bindsT);
+			tloc <- for new tval;
+			bodyT tloc;
+			};
 		};
 	}
