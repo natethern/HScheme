@@ -1,3 +1,5 @@
 Org
 bin
 HScheme.ghc-pkg
+*.cgi
+build
