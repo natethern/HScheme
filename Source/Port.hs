@@ -74,4 +74,17 @@ module Port where
 		opWrite = \_ -> return (),
 		opFlush = return ()
 		};
+	
+	nothingEOT :: (Monad m) => Maybe Char -> m (Maybe Char);
+	nothingEOT (Just '\EOT') = return Nothing;
+	nothingEOT x = return x;
+	
+	trapEOT :: (Monad m) => InputPort Char m -> InputPort Char m;
+	trapEOT port = MkInputPort
+		{
+		ipRead = (ipRead port) >>= nothingEOT,
+		ipPeek = (ipPeek port) >>= nothingEOT,
+		ipReady = ipReady port,
+		ipClose = ipClose port
+		};
 	}

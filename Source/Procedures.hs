@@ -161,6 +161,23 @@ module Procedures where
 		return (f++" "++r);
 		};
 	
+	hexDigit n = hd (mod n 16) where
+		{
+		hd i | i < 10 = toEnum ((fromEnum '0') + i);
+		hd i = toEnum ((fromEnum 'A') + i - 10);
+		};
+
+	hexCode4 i =
+	 [hexDigit (div i 0x1000)] ++
+	 [hexDigit (div i 0x100)] ++
+	 [hexDigit (div i 0x10)] ++
+	 [hexDigit i];
+
+	charToString :: Char -> String;
+	charToString c | (fromEnum c) < 32 = "#\\u"++(hexCode4 (fromEnum c));
+	charToString c | (fromEnum c) > 127 = "#\\u"++(hexCode4 (fromEnum c));
+	charToString c = "#\\"++[c];
+	
 	escapeChar :: Char -> String;
 	escapeChar '\\' = "\\\\";
 	escapeChar '\"' = "\\\"";
@@ -183,7 +200,7 @@ module Procedures where
 	toString (BooleanObject False)	= return "#f";
 	toString (SymbolObject s)		= return (show s);
 	toString (NumberObject n)		= return (show n);
-	toString (CharObject c)			= return ("#\\"++[c]);
+	toString (CharObject c)			= return (charToString c);
 	toString (StringObject s)		= do
 		{
 		text <- printString s;

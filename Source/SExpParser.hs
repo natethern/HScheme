@@ -458,7 +458,7 @@ module SExpParser where
 			mc <- currentC;
 			case mc of
 				{
-				Just c -> fail ("unrecognised char, '"++[c]++"'");
+				Just c -> fail ("unrecognised char, '"++(charToString c)++"'");
 				Nothing -> return Nothing;
 				};
 			})))))));

@@ -51,11 +51,12 @@ module Interactive where
 	 Type (r ()) -> FullSystemInterface m r -> Bindings r m -> m ();
 	interactiveLoop t fsi bindings = do
 		{
+		let {input = trapEOT (fsiCurrentInputPort fsi);};
 		mbindings' <- catchError (do
 			{
 			opWriteList (fsiCurrentOutputPort fsi) "hscheme> ";
 			opFlush (fsiCurrentOutputPort fsi);
-			mobject <- portRead (fsiCurrentInputPort fsi);
+			mobject <- portRead input;
 			case mobject of
 				{
 				Nothing -> return Nothing;
@@ -68,7 +69,7 @@ module Interactive where
 			})
 			(\error -> do
 			{
-			runParser (fsiCurrentInputPort fsi) restOfLineParser;
+			runParser input restOfLineParser;
 			reportError t (fsiCurrentErrorPort fsi) error;
 			return (Just bindings);
 			});
