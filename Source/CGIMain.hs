@@ -41,7 +41,7 @@ module Main where
 			monadFixPureBindings,
 			pureSystemBindings (ioPureSystemInterface id ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "Prelude.pure.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "init.pure.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
@@ -55,7 +55,7 @@ module Main where
 			monadContPureBindings,
 			pureSystemBindings (ioPureSystemInterface (lift . lift) ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "Prelude.pure.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "init.pure.scm";
 		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};
@@ -69,7 +69,7 @@ module Main where
 			monadFixFullBindings,
 			pureSystemBindings (ioQuietPureSystemInterface id ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "Prelude.full.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface id ["."]) bindings "init.full.scm";
 		parseEvalFromString (printResult stdOutputPort) bindings' source;
 		return ();
 		};
@@ -83,7 +83,7 @@ module Main where
 			monadContFullBindings,
 			pureSystemBindings (ioQuietPureSystemInterface (lift . lift) ["."])
 			] emptyBindings;
-		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "Prelude.full.scm";
+		bindings' <- psiLoadBindings (ioQuietPureSystemInterface (lift . lift) ["."]) bindings "init.full.scm";
 		parseEvalFromString (printResult (remonadOutputPort (lift . lift) stdOutputPort)) bindings' source;
 		return ();
 		};

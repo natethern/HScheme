@@ -67,7 +67,7 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 		convertFromObjects' (obj:objs) = do
 			{
 			a <- convertFromObject obj;
-			b <- convertFromObjects' objs;
+			b <- convertFromObjects objs;
 			return (a,b);
 			};
 		};
@@ -99,7 +99,7 @@ module Org.Org.Semantic.HScheme.ArgumentList where
 		convertFromObjects' (obj:objs) = do
 			{
 			a <- convertFromObject obj;
-			as <- convertFromObjects' objs;
+			as <- convertFromObjects objs;
 			return (a:as);
 			};
 		};
