@@ -916,9 +916,6 @@ Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/MacroLib.
 Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Parse.hi
 Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Parse.q_hi
 Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Parse.p_hi
-Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/RunLib.hi
-Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
-Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
 Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Bind.hi
 Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
 Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi

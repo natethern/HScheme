@@ -53,7 +53,7 @@ module Main where
 		};
 
 	main :: IO ();
-	main = cgiRunProgram (do
+	main = cgiRunProgram printError (do
 		{
 		putStrLn "Content-Type: text/plain\n";
 		params <- cgiGetQueryParameters;
@@ -85,6 +85,7 @@ module Main where
 			 case stdbindings of
 				{
 				FullStdBindings -> runSchemeProgram
+				 printResult
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -99,6 +100,7 @@ module Main where
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -112,6 +114,7 @@ module Main where
 					])
 				 "init.pure.scm" source;
 				StrictPureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -129,6 +132,7 @@ module Main where
 			 case stdbindings of
 				{
 				FullStdBindings -> runSchemeProgram
+				 printResult
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -142,6 +146,7 @@ module Main where
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -154,6 +159,7 @@ module Main where
 					])
 				 "init.pure.scm" source;
 				StrictPureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -171,6 +177,7 @@ module Main where
 			 case stdbindings of
 				{
 				FullStdBindings -> runSchemeProgram
+				 printResult
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -183,6 +190,7 @@ module Main where
 					])
 				 "init.full.scm" source;
 				PureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -194,6 +202,7 @@ module Main where
 					])
 				 "init.pure.scm" source;
 				StrictPureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -211,6 +220,7 @@ module Main where
 				{
 				FullStdBindings -> fail "can't use pure monad with full bindings";
 				PureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -221,6 +231,7 @@ module Main where
 					])
 				 "init.pure.scm" source;
 				StrictPureStdBindings -> runSchemeProgram
+				 printResult
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList

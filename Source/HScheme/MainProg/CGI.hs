@@ -24,7 +24,6 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 	{
 	import Org.Org.Semantic.HScheme.MainProg.Batch;
 	import Org.Org.Semantic.HScheme.Bind;
-	import Org.Org.Semantic.HScheme.RunLib;
 	import Org.Org.Semantic.HScheme.Parse;
 	import Org.Org.Semantic.HScheme.MacroLib;
 	import Org.Org.Semantic.HScheme.Interpret;
@@ -46,57 +45,43 @@ module Org.Org.Semantic.HScheme.MainProg.CGI where
 		paramBinding _ = nothing;
 		};
 
+	printError ::
+		(
+		Show a,
+		?stdout :: FlushSink IO Word8
+		) =>
+	 a -> IO ();
+	printError a = do
+		{
+		fsSinkList ?stdout (encodeUTF8 ("Error: "++(show a)++"\n"));
+		fsFlush ?stdout;
+		};
+
 	runSchemeProgram ::
 		(
 		RunnableScheme IO m r,
 		?objType :: Type (Object r m),
 		?read :: String -> IO [Object r m],
-		?binder :: TopLevelBinder r m,
-		?stdout :: FlushSink IO Word8
+		?binder :: TopLevelBinder r m
 		) =>
+	 (Object r m -> IO ()) ->
 	 MacroBindings IO r m ->
 	 ((?syntacticbindings :: Bindings Symbol (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
 	 ((?macrobindings :: Symbol -> Maybe (Macro IO r m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r m)) => LocationBindings IO r m) ->
 	 String ->
 	 String ->
 	 IO ();
-	runSchemeProgram macroBindings tlBindings runBindings initfilename source =
+	runSchemeProgram outproc macroBindings tlBindings runBindings initfilename source =
 	 mutualBind macroBindings tlBindings (do
 		{
 		bindings <- runBindings emptyBindings;
 		initObjects <- readFiles [initfilename];
 		progObjects <- parseAllFromString source;
-		runObjects printResult (initObjects ++ progObjects) bindings;
-		}) where
-		{
-		printResult ::
-			(
-			Build IO r,
-			?objType :: Type (Object r m),
-			?stdout :: FlushSink IO Word8
-			) =>
-		Object r m -> IO ();
-		printResult obj = do
-			{
-			str <- toString obj;
-			fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
-			};
-		};
+		runObjects outproc (initObjects ++ progObjects) bindings;
+		});
 
 	cgiRunProgram ::
+	 (forall a. (Show a,?stdout :: FlushSink IO Word8,?stderr :: FlushSink IO Word8) => a -> IO ()) ->
 	 ((?stdin :: PeekSource IO (Maybe Word8),?stdout :: FlushSink IO Word8,?getEnvVar :: String -> IO (Maybe String)) => IO ()) -> IO ();
-	cgiRunProgram prog = ioRunProgram (catchBottom (catchSingle prog printError) printError) where
-		{
-		printError ::
-			(
-			Show a,
-			?stdout :: FlushSink IO Word8
-			) =>
-		a -> IO ();
-		printError a = do
-			{
-			fsSinkList ?stdout (encodeUTF8 ("Error: "++(show a)++"\n"));
-			fsFlush ?stdout;
-			};
-		};
+	cgiRunProgram errproc prog = ioRunProgram (catchBottom (catchSingle prog errproc) errproc);
 	}

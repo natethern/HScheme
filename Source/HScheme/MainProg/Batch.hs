@@ -25,7 +25,8 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 	Runnable(..),
 	RunnableScheme(..),
 	runObjects,
-	runObjectsWithExit
+	runObjectsWithExit,
+	printResult
 	) where
 	{
 	import Org.Org.Semantic.HScheme.RunLib;
@@ -100,6 +101,19 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 			forDo outproc results;
 			return ();
 			};
+		};
+
+	printResult ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stdout :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	printResult obj = do
+		{
+		str <- toString obj;
+		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
 		};
 
 	evaluateObjects ::

@@ -35,19 +35,6 @@ module Main where
 	optPrepend True a as = (a:as);
 	optPrepend _ _ as = as;
 
-	printResult ::
-		(
-		Build IO r,
-		?objType :: Type (Object r m),
-		?stdout :: FlushSink IO Word8
-		) =>
-	 Object r m -> IO ();
-	printResult obj = do
-		{
-		str <- toString obj;
-		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
-		};
-
 	main :: IO ();
 	main = ioRunProgram (do
 		{
