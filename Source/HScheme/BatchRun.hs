@@ -54,10 +54,11 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
 		?system :: FullSystemInterface m r
 		) =>
+	 m () ->
 	 [String] ->
 	 Bindings r m ->
 	 m ();
-	runProgram filenames bindings =
+	runProgram failproc filenames bindings =
 	 catch (do
 		{
 		objects <- readFiles (fsiOpenInputFile ?system) filenames; 		
@@ -66,6 +67,7 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		(\errObj -> do
 		{
 		reportError (fsiCurrentErrorPort ?system) errObj;
+		failproc;
 		});
 
 	runProgramWithExit ::
@@ -80,10 +82,11 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
 		?system :: FullSystemInterface m r
 		) =>
+	 m () ->
 	 [String] ->
 	 Bindings r m ->
 	 m ();
-	runProgramWithExit filenames rootBindings = callCC (\exitFunc -> do
+	runProgramWithExit failproc filenames rootBindings = callCC (\exitFunc -> do
 		{
 		bindings <- concatenateList
 			[
@@ -98,7 +101,8 @@ module Org.Org.Semantic.HScheme.BatchRun(runProgram,runProgramWithExit) where
 			(\errObj -> do
 			{
 			reportError (fsiCurrentErrorPort ?system) errObj;
-			exitFunc ();
+			failproc;
+--			exitFunc ();
 			});
 		});
 	}

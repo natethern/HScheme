@@ -24,6 +24,7 @@ module Main where
 	{
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
+	import System.Exit;
 
 	type CPS r = SchemeCPS r (IO ());
 
@@ -134,7 +135,7 @@ module Main where
 			mb = let {?macrobindings = mb} in macroBinds emptyBindings;
 			} in mb} in
 	 let {?system = ioFullSystemInterface lifter loadpaths} in
-	 let {?toplevelbindings = systemMacroBindings (fsiPure ?system) emptyBindings} in
+	 let {?toplevelbindings = systemMacroBindings (fsiPure ?system) (topLevelBindings emptyBindings)} in
 	 do
 		{
 		bindings <- symbolBinds emptyBindings;
@@ -164,23 +165,23 @@ module Main where
 			{
 			FullFlavour -> withRefType ioRefType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.full.scm" filenames)) loadpaths lift
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.full.scm" filenames)) loadpaths lift
 				 fullMacroBindings (monadContFullBindings ++ fullSystemBindings ?system));
-				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.full.scm" filenames)) loadpaths id
+				IOWhichMonad -> boundRun (runProgram exitFailure (optPrepend initfile "init.full.scm" filenames)) loadpaths id
 				 fullMacroBindings (monadFixFullBindings ++ fullSystemBindings ?system);
 				});
 			PureFlavour -> withRefType ioConstType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
 				 macroBindings monadContPureBindings);
-				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
+				IOWhichMonad -> boundRun (runProgram exitFailure (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
 				 macroBindings monadFixPureBindings;
 				});
 			StrictPureFlavour -> withRefType ioConstType (case whichmonad of
 				{
-				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
+				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
 				 macroBindings monadContStrictPureBindings);
-				IOWhichMonad -> boundRun (runProgram (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
+				IOWhichMonad -> boundRun (runProgram exitFailure (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
 				 macroBindings monadFixStrictPureBindings;
 				});
 			};

@@ -122,19 +122,25 @@ install:	\
 
 # Test
 
-test: test-full
+test: test-full test-pure test_p
 
 test-full: bin/$(COMMAND_REL)
 	./$< --noinit test/helloworld.scm
+	./$< --noinit test/binding.scm
 	./$< --noinit test/factorial.scm
+	./$< test/helloworld.scm
 
 test-pure: bin/$(COMMAND_REL)
 	./$< --pure --noinit test/helloworld.scm
+	./$< --pure --noinit test/binding.scm
 	./$< --pure --noinit test/factorial.scm
+	./$< --pure test/helloworld.scm
 
 test_p: bin/$(COMMAND_PROF)
 	./$< +RTS -p -RTS --noinit test/helloworld.scm
+	./$< +RTS -p -RTS --noinit test/binding.scm
 	./$< +RTS -p -RTS --noinit test/factorial.scm
+	./$< +RTS -p -RTS test/helloworld.scm
 
 
 # Documentation
