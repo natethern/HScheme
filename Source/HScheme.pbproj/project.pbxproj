@@ -1,0 +1,814 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 38;
+	objects = {
+		ABAD36B804A4020700A80103 = {
+			children = (
+				ABAD378F04A403EE00A80103,
+				ABAD374A04A403EE00A80103,
+				ABAD378704A403EE00A80103,
+				ABAD37B304A4053000A80103,
+				ABAD37B204A4051F00A80103,
+				ABAD379004A403EE00A80103,
+			);
+			isa = PBXGroup;
+			refType = 4;
+		};
+		ABAD36BA04A4020700A80103 = {
+			buildRules = (
+			);
+			buildSettings = {
+				STYLE = prof;
+			};
+			isa = PBXBuildStyle;
+			name = Profiling;
+		};
+		ABAD36BB04A4020700A80103 = {
+			buildRules = (
+			);
+			buildSettings = {
+				STYLE = release;
+			};
+			isa = PBXBuildStyle;
+			name = Release;
+		};
+		ABAD36BC04A4020700A80103 = {
+			buildStyles = (
+				ABAD36BF04A4026C00A80103,
+				ABAD36BE04A4025C00A80103,
+				ABAD36BB04A4020700A80103,
+				ABAD36BA04A4020700A80103,
+			);
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = ABAD36B804A4020700A80103;
+			projectDirPath = "";
+			targets = (
+				ABAD36C004A4029400A80103,
+				ABAD37B404A40F0D00A80103,
+				ABAD37B504A40F3E00A80103,
+			);
+		};
+		ABAD36BE04A4025C00A80103 = {
+			buildRules = (
+			);
+			buildSettings = {
+				STYLE = quick;
+			};
+			isa = PBXBuildStyle;
+			name = Quick;
+		};
+		ABAD36BF04A4026C00A80103 = {
+			buildRules = (
+			);
+			buildSettings = {
+				STYLE = "";
+			};
+			isa = PBXBuildStyle;
+			name = Everything;
+		};
+		ABAD36C004A4029400A80103 = {
+			buildArgumentsString = $ACTION$STYLE;
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = HScheme;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/gnumake;
+			buildWorkingDirectory = .;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = Build;
+			passBuildSettingsInEnvironment = 1;
+			productName = HScheme;
+			settingsToExpand = 6;
+			settingsToPassInEnvironment = 287;
+			settingsToPassOnCommandLine = 280;
+		};
+		ABAD373A04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = BatchMain.hs;
+			refType = 4;
+		};
+		ABAD374904A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = CGIMain.hs;
+			refType = 4;
+		};
+		ABAD374A04A403EE00A80103 = {
+			children = (
+				ABAD375204A403EE00A80103,
+				ABAD376504A403EE00A80103,
+				ABAD377004A403EE00A80103,
+				ABAD377904A403EE00A80103,
+				ABAD377D04A403EE00A80103,
+				ABAD374B04A403EE00A80103,
+				ABAD377504A403EE00A80103,
+				ABAD375E04A403EE00A80103,
+				ABAD378804A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = HScheme;
+			refType = 4;
+		};
+		ABAD374B04A403EE00A80103 = {
+			children = (
+				ABAD374C04A403EE00A80103,
+				ABAD374E04A403EE00A80103,
+				ABAD375004A403EE00A80103,
+				ABAD374F04A403EE00A80103,
+				ABAD374D04A403EE00A80103,
+				ABAD375104A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = Bind;
+			refType = 4;
+		};
+		ABAD374C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Add.hs;
+			refType = 4;
+		};
+		ABAD374D04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = FMapBindings.hs;
+			refType = 4;
+		};
+		ABAD374E04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Macro.hs;
+			refType = 4;
+		};
+		ABAD374F04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Run.hs;
+			refType = 4;
+		};
+		ABAD375004A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = TopLevel.hs;
+			refType = 4;
+		};
+		ABAD375104A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = Bind.hs;
+			path = ../Bind.hs;
+			refType = 4;
+		};
+		ABAD375204A403EE00A80103 = {
+			children = (
+				ABAD375604A403EE00A80103,
+				ABAD375804A403EE00A80103,
+				ABAD375404A403EE00A80103,
+				ABAD375B04A403EE00A80103,
+				ABAD375304A403EE00A80103,
+				ABAD375704A403EE00A80103,
+				ABAD375904A403EE00A80103,
+				ABAD375504A403EE00A80103,
+				ABAD375C04A403EE00A80103,
+				ABAD375A04A403EE00A80103,
+				ABAD375D04A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = Core;
+			refType = 4;
+		};
+		ABAD375304A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Binding.hs;
+			refType = 4;
+		};
+		ABAD375404A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Build.hs;
+			refType = 4;
+		};
+		ABAD375504A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Conversions.hs;
+			refType = 4;
+		};
+		ABAD375604A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Numerics.hs;
+			refType = 4;
+		};
+		ABAD375704A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Object.hs;
+			refType = 4;
+		};
+		ABAD375804A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Port.hs;
+			refType = 4;
+		};
+		ABAD375904A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Scheme.hs;
+			refType = 4;
+		};
+		ABAD375A04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Stream.hs;
+			refType = 4;
+		};
+		ABAD375B04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Symbol.hs;
+			refType = 4;
+		};
+		ABAD375C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Throw.hs;
+			refType = 4;
+		};
+		ABAD375D04A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = Core.hs;
+			path = ../Core.hs;
+			refType = 4;
+		};
+		ABAD375E04A403EE00A80103 = {
+			children = (
+				ABAD376004A403EE00A80103,
+				ABAD375F04A403EE00A80103,
+				ABAD376204A403EE00A80103,
+				ABAD376304A403EE00A80103,
+				ABAD376104A403EE00A80103,
+				ABAD376404A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = Imperative;
+			refType = 4;
+		};
+		ABAD375F04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = IOLoad.hs;
+			refType = 4;
+		};
+		ABAD376004A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = IOSystem.hs;
+			refType = 4;
+		};
+		ABAD376104A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SchemeCPS.hs;
+			refType = 4;
+		};
+		ABAD376204A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SchemeIdentity.hs;
+			refType = 4;
+		};
+		ABAD376304A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SchemeIO.hs;
+			refType = 4;
+		};
+		ABAD376404A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = Imperative.hs;
+			path = ../Imperative.hs;
+			refType = 4;
+		};
+		ABAD376504A403EE00A80103 = {
+			children = (
+				ABAD376904A403EE00A80103,
+				ABAD376D04A403EE00A80103,
+				ABAD376B04A403EE00A80103,
+				ABAD376804A403EE00A80103,
+				ABAD376604A403EE00A80103,
+				ABAD376C04A403EE00A80103,
+				ABAD376E04A403EE00A80103,
+				ABAD376A04A403EE00A80103,
+				ABAD376704A403EE00A80103,
+				ABAD376F04A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = Interpret;
+			refType = 4;
+		};
+		ABAD376604A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Assemble.hs;
+			refType = 4;
+		};
+		ABAD376704A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Evaluate.hs;
+			refType = 4;
+		};
+		ABAD376804A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = FuncSymbolExpression.hs;
+			refType = 4;
+		};
+		ABAD376904A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = FunctorLambda.hs;
+			refType = 4;
+		};
+		ABAD376A04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Interpret.hs;
+			refType = 4;
+		};
+		ABAD376B04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = ListSymbolExpression.hs;
+			refType = 4;
+		};
+		ABAD376C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Pattern.hs;
+			refType = 4;
+		};
+		ABAD376D04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SymbolExpression.hs;
+			refType = 4;
+		};
+		ABAD376E04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = TopLevel.hs;
+			refType = 4;
+		};
+		ABAD376F04A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = Interpret.hs;
+			path = ../Interpret.hs;
+			refType = 4;
+		};
+		ABAD377004A403EE00A80103 = {
+			children = (
+				ABAD377304A403EE00A80103,
+				ABAD377204A403EE00A80103,
+				ABAD377104A403EE00A80103,
+				ABAD377404A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = MacroLib;
+			refType = 4;
+		};
+		ABAD377104A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Load.hs;
+			refType = 4;
+		};
+		ABAD377204A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Macros.hs;
+			refType = 4;
+		};
+		ABAD377304A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Syntax.hs;
+			refType = 4;
+		};
+		ABAD377404A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = MacroLib.hs;
+			path = ../MacroLib.hs;
+			refType = 4;
+		};
+		ABAD377504A403EE00A80103 = {
+			children = (
+				ABAD377704A403EE00A80103,
+				ABAD377604A403EE00A80103,
+				ABAD377804A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = MainProg;
+			refType = 4;
+		};
+		ABAD377604A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Batch.hs;
+			refType = 4;
+		};
+		ABAD377704A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Interactive.hs;
+			refType = 4;
+		};
+		ABAD377804A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = MainProg.hs;
+			path = ../MainProg.hs;
+			refType = 4;
+		};
+		ABAD377904A403EE00A80103 = {
+			children = (
+				ABAD377A04A403EE00A80103,
+				ABAD377B04A403EE00A80103,
+				ABAD377C04A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = Parse;
+			refType = 4;
+		};
+		ABAD377A04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SExpChars.hs;
+			refType = 4;
+		};
+		ABAD377B04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SExpParser.hs;
+			refType = 4;
+		};
+		ABAD377C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = Parse.hs;
+			path = ../Parse.hs;
+			refType = 4;
+		};
+		ABAD377D04A403EE00A80103 = {
+			children = (
+				ABAD377E04A403EE00A80103,
+				ABAD378004A403EE00A80103,
+				ABAD377F04A403EE00A80103,
+				ABAD378204A403EE00A80103,
+				ABAD378304A403EE00A80103,
+				ABAD378404A403EE00A80103,
+				ABAD378104A403EE00A80103,
+				ABAD378504A403EE00A80103,
+				ABAD378604A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = RunLib;
+			refType = 4;
+		};
+		ABAD377E04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = ArgumentList.hs;
+			refType = 4;
+		};
+		ABAD377F04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Control.hs;
+			refType = 4;
+		};
+		ABAD378004A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Equality.hs;
+			refType = 4;
+		};
+		ABAD378104A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = FullProcedures.hs;
+			refType = 4;
+		};
+		ABAD378204A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = NumericProcedures.hs;
+			refType = 4;
+		};
+		ABAD378304A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = PortProcedures.hs;
+			refType = 4;
+		};
+		ABAD378404A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = Procedures.hs;
+			refType = 4;
+		};
+		ABAD378504A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = SystemPorts.hs;
+			refType = 4;
+		};
+		ABAD378604A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = RunLib.hs;
+			path = ../RunLib.hs;
+			refType = 4;
+		};
+		ABAD378704A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = "HScheme.ghc-pkg.m4";
+			refType = 4;
+		};
+		ABAD378804A403EE00A80103 = {
+			isa = PBXFileReference;
+			name = HScheme.hs;
+			path = ../HScheme.hs;
+			refType = 4;
+		};
+		ABAD378C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = init.full.scm;
+			refType = 4;
+		};
+		ABAD378D04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = init.pure.scm;
+			refType = 4;
+		};
+		ABAD378E04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = InteractiveMain.hs;
+			refType = 4;
+		};
+		ABAD378F04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = Makefile;
+			refType = 4;
+		};
+		ABAD379004A403EE00A80103 = {
+			children = (
+				ABAD379204A403EE00A80103,
+				ABAD379304A403EE00A80103,
+				ABAD379404A403EE00A80103,
+				ABAD379504A403EE00A80103,
+				ABAD379604A403EE00A80103,
+				ABAD379704A403EE00A80103,
+				ABAD379804A403EE00A80103,
+				ABAD379904A403EE00A80103,
+				ABAD379A04A403EE00A80103,
+				ABAD379B04A403EE00A80103,
+				ABAD379C04A403EE00A80103,
+				ABAD379D04A403EE00A80103,
+				ABAD379E04A403EE00A80103,
+				ABAD379F04A403EE00A80103,
+				ABAD37A004A403EE00A80103,
+				ABAD37A104A403EE00A80103,
+				ABAD37A204A403EE00A80103,
+				ABAD37A304A403EE00A80103,
+				ABAD37A404A403EE00A80103,
+				ABAD37A504A403EE00A80103,
+				ABAD37A604A403EE00A80103,
+				ABAD37A704A403EE00A80103,
+				ABAD37A804A403EE00A80103,
+				ABAD37A904A403EE00A80103,
+				ABAD37AA04A403EE00A80103,
+				ABAD37AB04A403EE00A80103,
+				ABAD37AC04A403EE00A80103,
+				ABAD37AD04A403EE00A80103,
+				ABAD37AE04A403EE00A80103,
+				ABAD37AF04A403EE00A80103,
+				ABAD37B004A403EE00A80103,
+				ABAD37B104A403EE00A80103,
+			);
+			isa = PBXGroup;
+			path = test;
+			refType = 4;
+		};
+		ABAD379204A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = begin.scm;
+			refType = 4;
+		};
+		ABAD379304A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = begin.scm.ref;
+			refType = 4;
+		};
+		ABAD379404A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = binding.scm;
+			refType = 4;
+		};
+		ABAD379504A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = binding.scm.ref;
+			refType = 4;
+		};
+		ABAD379604A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = bindingbody.scm;
+			refType = 4;
+		};
+		ABAD379704A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = bindingbody.scm.ref;
+			refType = 4;
+		};
+		ABAD379804A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = boundlate.scm;
+			refType = 4;
+		};
+		ABAD379904A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = boundlate.scm.ref;
+			refType = 4;
+		};
+		ABAD379A04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = "case-match.scm";
+			refType = 4;
+		};
+		ABAD379B04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "case-match.scm.ref";
+			refType = 4;
+		};
+		ABAD379C04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = constants.scm;
+			refType = 4;
+		};
+		ABAD379D04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = constants.scm.ref;
+			refType = 4;
+		};
+		ABAD379E04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = equal.scm;
+			refType = 4;
+		};
+		ABAD379F04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = equal.scm.ref;
+			refType = 4;
+		};
+		ABAD37A004A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = factorial.scm;
+			refType = 4;
+		};
+		ABAD37A104A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = factorial.scm.ref;
+			refType = 4;
+		};
+		ABAD37A204A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = helloworld.scm;
+			refType = 4;
+		};
+		ABAD37A304A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = helloworld.scm.ref;
+			refType = 4;
+		};
+		ABAD37A404A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = letbinding.scm;
+			refType = 4;
+		};
+		ABAD37A504A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = letbinding.scm.ref;
+			refType = 4;
+		};
+		ABAD37A604A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = "letrec-fix.scm";
+			refType = 4;
+		};
+		ABAD37A704A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "letrec-fix.scm.ref";
+			refType = 4;
+		};
+		ABAD37A804A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = letrec.scm;
+			refType = 4;
+		};
+		ABAD37A904A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = letrec.scm.ref;
+			refType = 4;
+		};
+		ABAD37AA04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = setvar.scm;
+			refType = 4;
+		};
+		ABAD37AB04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = setvar.scm.ref;
+			refType = 4;
+		};
+		ABAD37AC04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = several.scm;
+			refType = 4;
+		};
+		ABAD37AD04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = several.scm.ref;
+			refType = 4;
+		};
+		ABAD37AE04A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = "syntax-rec.scm";
+			refType = 4;
+		};
+		ABAD37AF04A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "syntax-rec.scm.ref";
+			refType = 4;
+		};
+		ABAD37B004A403EE00A80103 = {
+			isa = PBXFileReference;
+			path = syntax.scm;
+			refType = 4;
+		};
+		ABAD37B104A403EE00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = syntax.scm.ref;
+			refType = 4;
+		};
+		ABAD37B204A4051F00A80103 = {
+			children = (
+				ABAD378C04A403EE00A80103,
+				ABAD378D04A403EE00A80103,
+			);
+			isa = PBXGroup;
+			name = Inits;
+			refType = 4;
+		};
+		ABAD37B304A4053000A80103 = {
+			children = (
+				ABAD373A04A403EE00A80103,
+				ABAD374904A403EE00A80103,
+				ABAD378E04A403EE00A80103,
+			);
+			isa = PBXGroup;
+			name = Mains;
+			refType = 4;
+		};
+		ABAD37B404A40F0D00A80103 = {
+			buildArgumentsString = $ACTION$PRODUCT_NAME$STYLE;
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = test;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/gnumake;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = Test;
+			passBuildSettingsInEnvironment = 1;
+			productName = Test;
+			settingsToExpand = 6;
+			settingsToPassInEnvironment = 287;
+			settingsToPassOnCommandLine = 280;
+		};
+		ABAD37B504A40F3E00A80103 = {
+			buildArgumentsString = $ACTION$PRODUCT_NAME;
+			buildPhases = (
+			);
+			buildSettings = {
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = doc;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			buildToolPath = /usr/bin/gnumake;
+			buildWorkingDirectory = .;
+			dependencies = (
+			);
+			isa = PBXLegacyTarget;
+			name = Documentation;
+			passBuildSettingsInEnvironment = 1;
+			productName = Documentation;
+			settingsToExpand = 6;
+			settingsToPassInEnvironment = 287;
+			settingsToPassOnCommandLine = 280;
+		};
+	};
+	rootObject = ABAD36BC04A4020700A80103;
+}

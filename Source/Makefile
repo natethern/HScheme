@@ -157,7 +157,9 @@ install:	\
 
 # Test
 
-test: test-pure test-full
+test: testrelease
+
+testrelease: test-pure test-full
 
 %.full.diff: %.ref %.full.out
 	diff -u $^
@@ -207,7 +209,7 @@ test-full:	\
  test/case-match.scm.full.diff
 	time bin/$(COMMAND_REL) --noinit init.full.scm test/helloworld.scm
 
-prof: $(COMMAND_PROF).prof
+testprof: $(COMMAND_PROF).prof
 
 $(COMMAND_PROF).prof: bin/$(COMMAND_PROF) init.full.scm test/helloworld.scm
 	rm -f $@
@@ -228,7 +230,13 @@ Doc/index.html: $(LIB_HC_SRCS)
 
 # Building
 
-build: $(LIBFILE_QUICK) $(LIBFILE_REL) $(LIBFILE_PROF) bin/$(COMMAND_QUICK) bin/$(COMMAND_REL) bin/$(COMMAND_PROF) $(PACKAGEFILE) cgi
+build: quick release prof $(PACKAGEFILE)
+
+quick: $(LIBFILE_QUICK) bin/$(COMMAND_QUICK)
+
+release: $(LIBFILE_REL) bin/$(COMMAND_REL) cgi
+
+prof: $(LIBFILE_PROF) bin/$(COMMAND_PROF)
 
 cgi: interpret.cgi
 
@@ -268,19 +276,31 @@ $(LIBFILE_QUICK): $(patsubst %.hs,%.q_o,$(LIB_HC_SRCS))
 
 # Clean
 
-clean: haskellclean cleantest
+clean: cleanquick cleanrelease cleanprof cleantest cleandoc
+	rm -rf bin
+	rm -f $(PACKAGEFILE)
 	rm -f Makefile.bak
-	rm -f *.ghc-pkg
-	rm -rf Doc bin
-	rm -f interpret.cgi
-	rm -f *.prof
-	rm -f $(LIBFILE_QUICK) $(LIBFILE_REL) $(LIBFILE_PROF) $(PACKAGEFILE)
 
-haskellclean: $(HROOT)
-	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.hi $${ff}.o $${ff}.p_hi $${ff}.p_o $${ff}.q_hi $${ff}.q_o; done
+cleanquick: $(HROOT)
+	rm -f $(LIBFILE_QUICK)
+	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.q_hi $${ff}.q_o; done
+
+cleanrelease: $(HROOT)
+	rm -f interpret.cgi
+	rm -f $(LIBFILE_REL)
+	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.hi $${ff}.o; done
+
+cleanprof: $(HROOT)
+	rm -f *.prof
+	rm -f $(LIBFILE_PROF)
+	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.p_hi $${ff}.p_o; done
 
 cleantest:
 	rm -f test/*.out
+
+cleandoc:
+	rm -rf Doc
+
 
 # Standard Suffix Rules for Installing
 
@@ -315,6 +335,8 @@ $(bindir)/%: bin/%
 
 # switch off intermediate file deletion
 .SECONDARY:
+
+.PHONY: default build
 
 %.ghc-pkg: %.ghc-pkg.m4
 	m4 \
