@@ -9,6 +9,7 @@
 (eqv? (cons 1 2) (cons 1 2))			;===>  #f
 (eqv? (lambda () 1) (lambda () 2))		;===>  #f
 (eqv? #f 'nil)							;===>  #f
+"eqv? on procedures"
 (let ((p (lambda (x) x))) (eqv? p p))	;===>  #t
 
 (eqv? "" "")							;===>  unspecified	#t
@@ -21,6 +22,7 @@
 		(lambda () (set! n (+ n 1)) n)
 	)
 ))
+"eqv? on procedures"
 (let ((g (gen-counter))) (eqv? g g))	;===>  #t
 (eqv? (gen-counter) (gen-counter))		;===>  #f
 (define gen-loser (lambda ()
@@ -28,6 +30,7 @@
 		(lambda () (set! n (+ n 1)) 27)
 	)
 ))
+"eqv? on procedures"
 (let ((g (gen-loser))) (eqv? g g))		;===>  #t
 (eqv? (gen-loser) (gen-loser))			;===>  unspecified	#f
 
@@ -61,10 +64,12 @@
 (eq? '() '())							;===>  #t
 (eq? 2 2)								;===>  unspecified	#t
 (eq? #\A #\A)							;===>  unspecified	#t
+"eq? on car procedures"
 (eq? car car)							;===>  #t
 (let ((n (+ 2 3))) (eq? n n))			;===>  unspecified	#t
 (let ((x '(a))) (eq? x x))				;===>  #t
 (let ((x '#())) (eq? x x))				;===>  #t
+"eq? on procedures"
 (let ((p (lambda (x) x))) (eq? p p))	;===>  #t
 
 "library procedure:  (equal? obj1 obj2)"
@@ -84,16 +89,16 @@
 
 "procedure:  (number? obj)"
 "procedure:  (complex? obj)"
-"procedure:  (real? obj)"
-"procedure:  (rational? obj)"
-"procedure:  (integer? obj)"
 (complex? 3+4i)							;===>  #t
 (complex? 3)							;===>  #t
+"procedure:  (real? obj)"
 (real? 3)								;===>  #t
 (real? -2.5+0.0i)						;===>  #t
 (real? #e1e10)							;===>  #t
+"procedure:  (rational? obj)"
 (rational? 6/10)						;===>  #t
 (rational? 6/3)							;===>  #t
+"procedure:  (integer? obj)"
 (integer? 3+0i)							;===>  #t
 (integer? 3.0)							;===>  #t
 (integer? 8/4)							;===>  #t
@@ -141,10 +146,10 @@
 "library procedure:  (gcd n1 ...)"
 "library procedure:  (lcm n1 ...)"
 (gcd 32 -36)							;===>  4
-"omit" ;(gcd)									;===>  0
+(gcd)									;===>  0
 (lcm 32 -36)							;===>  288
 (lcm 32.0 -36)							;===>  288.0  ; inexact
-"omit" ;(lcm)									;===>  1
+(lcm)									;===>  1
 
 "procedure:  (numerator q)"
 "procedure:  (denominator q)"
@@ -156,10 +161,10 @@
 "procedure:  (ceiling x)"
 "procedure:  (truncate x)"
 "procedure:  (round x)"
-(floor -4.3)							;===>  -5.0				SHOULD BE 5
-(ceiling -4.3)							;===>  -4.0				SHOULD BE 4
-(truncate -4.3)							;===>  -4.0				SHOULD BE 4
-(round -4.3)							;===>  -4.0				SHOULD BE 4
+(floor -4.3)							;===>  -5.0				SHOULD BE -5
+(ceiling -4.3)							;===>  -4.0				SHOULD BE -4
+(truncate -4.3)							;===>  -4.0				SHOULD BE -4
+(round -4.3)							;===>  -4.0				SHOULD BE -4
 (floor 3.5)								;===>  3.0				SHOULD BE 3
 (ceiling 3.5)							;===>  4.0				SHOULD BE 4
 (truncate 3.5)							;===>  3.0				SHOULD BE 3
@@ -248,7 +253,9 @@ y										;===>  (a . 4)
 (define (f) (list 'not-a-constant-list))
 (define (g) '(constant-list))
 (set-car! (f) 3)						;===>  unspecified	nothing
+(f)
 (set-car! (g) 3)						;===>  error
+(g)
 
 "library procedure:  (list? obj)"
 (list? '(a b c))						;===>  #t
@@ -344,8 +351,12 @@ y										;===>  (a . 4)
 (define (f) (make-string 3 #\*))
 (define (g) "***")
 (string-set! (f) 0 #\?)          ;===>  unspecified
+(f)
 (string-set! (g) 0 #\?)          ;===>  error
-(string-set! (symbol->string 'immutable) 0 #\?)          ;===>  error
+(g)
+(define a 'immutable)
+(string-set! (symbol->string a) 0 #\?)          ;===>  error
+a
 
 
 "6.3.6  Vectors"
@@ -366,6 +377,9 @@ y										;===>  (a . 4)
 "procedure:  (vector-set! vector k obj)"
 (let ((vec (vector 0 '(2 2 2 2) "Anna"))) (vector-set! vec 1 '("Sue" "Sue")) vec)	;===>  #(0 ("Sue" "Sue") "Anna")
 (vector-set! '#(0 1 2) 1 "doe")			;===>  error  ; constant vector
+(define constvec '#(0 1 2))
+(vector-set! constvec 1 "doe")			;===>  error  ; constant vector
+constvec
 
 "library procedure:  (vector->list vector)"
 "library procedure:  (list->vector list)"

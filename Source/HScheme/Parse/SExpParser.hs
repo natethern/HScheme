@@ -237,7 +237,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	 Bool -> NaNExtended Rational -> EIReal;
 	convertRational exactnessGuess r = if unJust exactnessGuess ?exactness
 	 then convert (fmap Finite r)
-	 else convert (approximate (fmap Finite r) :: Double);
+	 else InexactReal (approximate (fmap Finite r) :: Double);
 
 	uintegerParse :: (MonadOrParser Char p,?radix :: Word8) =>
 	 p (Integer,Bool);

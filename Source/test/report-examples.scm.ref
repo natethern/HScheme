@@ -8,14 +8,17 @@
 #f
 #f
 #f
-#t
+"eqv? on procedures"
+#f
 #t
 #t
 #f
 #f
-#t
+"eqv? on procedures"
 #f
-#t
+#f
+"eqv? on procedures"
+#f
 #f
 #f
 #f
@@ -32,11 +35,13 @@
 #t
 #t
 #t
+"eq? on car procedures"
+#f
 #t
 #t
 #t
-#t
-#t
+"eq? on procedures"
+#f
 "library procedure:  (equal? obj1 obj2)"
 #t
 #t
@@ -48,22 +53,22 @@
 "6.2.5  Numerical operations"
 "procedure:  (number? obj)"
 "procedure:  (complex? obj)"
+#t
+#t
 "procedure:  (real? obj)"
+#t
+#t
+#t
 "procedure:  (rational? obj)"
+#t
+#t
 "procedure:  (integer? obj)"
-#t
-#t
-#t
-#t
-#t
-#t
-#t
 #t
 #t
 #t
 "library procedure:  (max x1 x2 ...)"
 4
-4.0
+4
 "procedure:  (+ z1 ...)"
 "procedure:  (* z1 ...)"
 7
@@ -95,7 +100,7 @@
 1
 -1
 -1
--1
+-1.0
 "library procedure:  (gcd n1 ...)"
 "library procedure:  (lcm n1 ...)"
 4
@@ -107,24 +112,24 @@
 "procedure:  (denominator q)"
 3
 2
-2.0
+2
 "procedure:  (floor x)"
 "procedure:  (ceiling x)"
 "procedure:  (truncate x)"
 "procedure:  (round x)"
--5.0
--4.0
--4.0
--4.0
-3.0
-4.0
-3.0
-4.0
+-5
+-4
+-4
+-4
+3
+4
+3
+4
 4
 7
 "library procedure:  (rationalize x y)"
 1/3
-#i1/3
+1/3
 "6.2.6  Numerical input and output"
 "procedure:  (string->number string radix)"
 100
@@ -158,7 +163,7 @@
 #t
 (a . 4)
 #f
-#f
+"omit"
 "procedure:  (pair? obj)"
 #t
 #t
@@ -174,18 +179,19 @@
 a
 (a)
 1
-error
+"error"
 "procedure:  (cdr pair)"
 (b c d)
 2
-error
+"error"
 "procedure:  (set-car! pair obj)"
-error
+(not-a-constant-list)
+(3)
 "library procedure:  (list? obj)"
 #t
 #t
 #f
-#f
+"omit"
 "library procedure:  (list obj ...)"
 (a 7 c)
 ()
@@ -251,8 +257,9 @@ mISSISSIppi
 #\space
 #\newline
 "procedure:  (string-set! string k char)"
-error
-error
+"***"
+"?**"
+immutable
 "6.3.6  Vectors"
 #(0 (2 2 2 2) "Anna")
 "library procedure:  (vector obj ...)"
@@ -262,7 +269,7 @@ error
 13
 "procedure:  (vector-set! vector k obj)"
 #(0 ("Sue" "Sue") "Anna")
-error  ; constant vector
+#(0 "doe" 2)
 "library procedure:  (vector->list vector)"
 "library procedure:  (list->vector list)"
 (dah dah didah)
@@ -303,5 +310,5 @@ error  ; constant vector
 (connect talk1 disconnect connect talk2 disconnect)
 "6.5  Eval"
 "procedure:  (eval expression environment-specifier)"
-21
-20
+"omit"
+"omit"

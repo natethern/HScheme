@@ -381,7 +381,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n ::Number) <- mn;
-				maybeConvert n;
+				maybeApproximate n;
 				});
 			};
 		};
@@ -404,7 +404,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: EIReal) <- mn;
-				maybeConvert n;
+				maybeApproximate n;
 				});
 			};
 		};
@@ -427,7 +427,7 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			return (do
 				{
 				(n :: EIReal) <- mn;
-				maybeConvert n;
+				maybeApproximate n;
 				});
 			};
 		};

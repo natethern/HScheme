@@ -49,6 +49,10 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 	 (a -> x) -> (a,()) -> m x;
 	unaryP f (a,()) = return (f a);
 
+	objPropertyP :: (Scheme m r,?objType :: Type (Object r m)) =>
+	 (Object r m -> m Bool) -> (Object r m,()) -> m Bool;
+	objPropertyP f (a,()) = f a;
+
 	binaryP :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 (a -> b -> x) -> (a,(b,())) -> m x;
 	binaryP f (a,(b,())) = return (f a b);
@@ -93,7 +97,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		--				"complex?"						init.pure.scm
 		--				"real?"							init.pure.scm
 		--				"rational?"						init.pure.scm
-		addProcBinding	"integer?"						(unaryP (isIntegerN :: Number -> Bool)),
+		addProcBinding	"integer?"						(objPropertyP (getIs (MkType :: Type Integer))),
 		addProcBinding	"exact?"						isExactP,
 		addProcBinding	"inexact?"						isInexactP,
 		addProcBinding	"="								(pairCheckP ((==) :: Number -> Number -> Bool)),
@@ -101,7 +105,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	">"								(pairCheckP ((>) :: EIReal -> EIReal -> Bool)),
 		addProcBinding	"<="							(pairCheckP ((<=) :: EIReal -> EIReal -> Bool)),
 		addProcBinding	">="							(pairCheckP ((>=) :: EIReal -> EIReal -> Bool)),
-		addProcBinding	"zero?"							(unaryP (isZero :: Number -> Bool)),
+		addProcBinding	"zero?"							(unaryP ((==) zero :: Number -> Bool)),
 		addProcBinding	"positive?"						(unaryP (isPositiveStrict :: EIReal -> Bool)),
 		addProcBinding	"negative?"						(unaryP (isNegativeStrict :: EIReal -> Bool)),
 		addProcBinding	"odd?"							(unaryP (isOdd :: Integer -> Bool)),
@@ -115,7 +119,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"abs"							(unaryP (abs :: Number -> EIReal)),
 		addProcBinding	"quotient"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingIntegerDivideModal :: EIReal -> EIReal -> Integer)),
 		addProcBinding	"remainder"						(binaryP (let {?rounding = roundTowardZero} in switchArgs failingModuloModal :: EIReal -> EIReal -> EIReal)),
-		addProcBinding	"modulo"						(binaryP (failingModulo :: EIReal -> EIReal -> EIReal)),
+		addProcBinding	"modulo"						(binaryP (switchArgs failingModulo :: EIReal -> EIReal -> EIReal)),
 		addProcBinding	"gcd"							(listaryP (gcd :: [Integer] -> Integer)),
 		addProcBinding	"lcm"							(listaryP (lcm :: [Integer] -> Integer)),
 		addProcBinding	"numerator"						(unaryP (numerator :: Rational -> Integer)),
@@ -130,9 +134,15 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		addProcBinding	"sin"							(unaryNumberP sin),
 		addProcBinding	"cos"							(unaryNumberP cos),
 		addProcBinding	"tan"							(unaryNumberP tan),
+		addProcBinding	"sinh"							(unaryNumberP sinh),
+		addProcBinding	"cosh"							(unaryNumberP cosh),
+		addProcBinding	"tanh"							(unaryNumberP tanh),
 		addProcBinding	"asin"							(unaryNumberP asin),
 		addProcBinding	"acos"							(unaryNumberP acos),
 		addProcBinding	"atan"							(unaryNumberP atan),
+		addProcBinding	"asinh"							(unaryNumberP asinh),
+		addProcBinding	"acosh"							(unaryNumberP acosh),
+		addProcBinding	"atanh"							(unaryNumberP atanh),
 		addProcBinding	"sqrt"							(unaryNumberP sqrt),
 		addProcBinding	"expt"							(binaryP ((**) :: Number -> Number -> Number)),
 		addProcBinding	"make-rectangular"				(binaryP ((:+) :: EIReal -> EIReal -> Number)),

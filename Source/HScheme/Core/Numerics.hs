@@ -40,14 +40,10 @@ module Org.Org.Semantic.HScheme.Core.Numerics where
 	isExactN _ = False;
 
 	toInexactN :: Number -> Number;
-	toInexactN n = (convert (convert n :: Complex Double));
+	toInexactN = fmap (InexactReal . toInexact);
 
 	toExactN :: Number -> Number;
-	toExactN n = case maybeConvert n of
-		{
-		Just (cir :: Complex (InfExtended Rational)) -> convert cir;
-		Nothing -> nan;
-		};
+	toExactN = fmap (convert . toExact);
 
 	isIntegerN :: Number -> Bool;
 	isIntegerN n = isJust (do
