@@ -99,7 +99,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		-- 6.3.4 Characters
 		addProcBinding	"char?"							(charTestP (const True)),
 		addProcBinding	"char-alphabetic?"				(charTestP isAlphabetic),
-		addProcBinding	"char-whitespace?"				(charTestP isWhitespace),
+		addProcBinding	"char-whitespace?"				(charTestP isWhiteSpace),
 		addProcBinding	"char-upper-case?"				(charTestP isUppercase),
 		addProcBinding	"char-lower-case?"				(charTestP isLowercase),
 		addProcBinding	"char-title-case?"				(charTestP isTitlecase),				-- nonstandard
@@ -120,8 +120,8 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"char-titlecase"				(charFuncP toTitleCase),				-- nonstandard
 		addProcBinding	"char-number"					(charFuncP getNumber),					-- nonstandard
 		addProcBinding	"char-decimal-digit"			(charFuncP getDecimalDigit),			-- nonstandard
-		addProcBinding	"char->integer"					(charFuncP valueNthFromStart),
-		addProcBinding	"integer->char"					(\_ (i,()) -> return (failingUnJust (nthValueFromStart i) :: Char)),
+		addProcBinding	"char->integer"					(charFuncP ordFromStart),
+		addProcBinding	"integer->char"					(\_ (i,()) -> return (failingUnJust (nthFromStart i) :: Char)),
 
 		-- 6.3.5 Strings
 		addProcBinding	"string?"						isStringP,

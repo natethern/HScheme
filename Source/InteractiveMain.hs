@@ -51,8 +51,9 @@ module Main where
 		MonadCreatable IO r
 		) =>
 	 (FullSystemInterface (M r) r -> (M r) ()) -> IO ();
-	doInteract interact = doMonadContinuationPass
-	 (\_ -> return "error in catch code!")
+	doInteract interact = runContinuationPass
+	 (\_ -> fail "error in catch code!")
+	 return
 	 (interact ioFullSystemInterface);
 
 	main :: IO ();

@@ -268,8 +268,8 @@ module Org.Org.Semantic.HScheme.Procedures where
 	 [hexDigit i];
 
 	charToString :: Char -> String;
-	charToString c | (valueNthFromStart c) < 32 = "#\\u"++(hexCode4 (valueNthFromStart c));
-	charToString c | (valueNthFromStart c) > 127 = "#\\u"++(hexCode4 (valueNthFromStart c));
+	charToString c | (ordFromStart c) < 32 = "#\\u"++(hexCode4 (ordFromStart c));
+	charToString c | (ordFromStart c) > 127 = "#\\u"++(hexCode4 (ordFromStart c));
 	charToString c = "#\\"++[c];
 	
 	escapeChar :: Char -> String;

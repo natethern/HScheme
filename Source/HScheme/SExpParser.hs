@@ -55,7 +55,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 p ();
 	optionalWhitespaceParse = do
 		{
-		mZeroOrMore (((matchCharacterParse isWhitespace) >> (return ())) ||| commentParse);
+		mZeroOrMore (((matchCharacterParse isWhiteSpace) >> (return ())) ||| commentParse);
 		return ();
 		};
 
@@ -63,7 +63,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	 p ();
 	whitespaceParse = do
 		{
-		mOneOrMore (((matchCharacterParse isWhitespace) >> (return ())) ||| commentParse);
+		mOneOrMore (((matchCharacterParse isWhiteSpace) >> (return ())) ||| commentParse);
 		return ();
 		};
 
