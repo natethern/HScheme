@@ -147,6 +147,21 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 
 	instance
 		(
+		MonadException (SchemeCPSObject r (m ())) m
+		) =>
+	 Runnable m (SchemeCPS r (m ())) where
+		{
+		rsRun ma = runExceptionContinuationPass
+		 (\err -> case err of
+			{
+			StringError s -> fail s;
+			ExceptionError ex -> fail (show ex);
+			ObjError obj -> throw obj;
+			}) return ma;
+		};
+
+	instance
+		(
 		MonadGettableReference m r,
 		MonadCreatable m r,
 		MonadException (SchemeCPSObject r (m ())) m
@@ -157,15 +172,6 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 			{
 			program <- interpEat (lift . outproc);
 			rsRun (mrun program);
-			} where
-			{
-			rsRun ma = runExceptionContinuationPass
-			 (\err -> case err of
-				{
-				StringError s -> fail s;
-				ExceptionError ex -> fail (show ex);
-				ObjError obj -> throw obj;
-				}) return ma;
 			};
 		};
 	}

@@ -59,45 +59,7 @@ module Main where
 		str <- toString obj;
 		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
 		};
-{-
-	boundInteraction ::
-		(
-		MonadBottom m,
-		MonadException (Object r m) m,
-		MonadGettableReference m r,
-		MonadCreatable m r,
-		?refType :: Type (r ()),
-		?stderr :: FlushSink IO Word8,
-		?stdout :: FlushSink IO Word8,
-		?stdin :: PeekSource IO Word8
-		) =>
-	 ((?macrobindings :: SymbolBindings (Macro r m),
-	 	?syntacticbindings :: SymbolBindings (Syntax r m),
-	 	?toplevelbindings :: SymbolBindings (TopLevelMacro r m),
-	 	?system :: FullSystemInterface m r
-	 	) => Bindings r m -> String -> m result) ->
-	 [String] ->
-	 (forall a. IO a -> m a) ->
-	 	((?macrobindings :: SymbolBindings (Macro r m),
-	 	?syntacticbindings :: SymbolBindings (Syntax r m)
-	 	) => SymbolBindings (Macro r m) -> SymbolBindings (Macro r m)) ->
-	 ((?system :: FullSystemInterface m r) => Bindings r m -> m (Bindings r m)) ->
-	 String ->
-	 m result;
-	boundInteraction interacter loadpaths lifter macroBinds symbolBinds filename = 
-	 let {?syntacticbindings = emptyBindings} in
-	 let {?macrobindings = let
-			{
-			mb = let {?macrobindings = mb} in macroBinds emptyBindings;
-			} in mb} in
-	 let {?system = ioFullSystemInterface lifter loadpaths} in
-	 let {?toplevelbindings = systemMacroBindings (fsiPure ?system) emptyBindings} in
-	 do
-		{
-		bindings <- symbolBinds emptyBindings;
-		interacter bindings filename;
-		};
--}
+
 	main :: IO ();
 	main = ioRunProgram (do
 		{
@@ -124,68 +86,64 @@ module Main where
 		 else return ();
 		case whichmonad of
 			{
-{-
 			GCPSWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
 			 let {?binder = setBinder} in
-			 let {?read = ioRead loadpaths} in
+			 let {?read = lift . lift . (ioRead loadpaths)} in
+			 let {?system = ioSystem (lift . lift)} in
 			 case flavour of
 				{
 				FullStdBindings ->
-				 let {?system = ioSystem (lift . lift)} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					interactWithExit bindings "";
+--					objects <- readFiles (allFileNames "init.full.scm");
+					rsRun (interactWithExit bindings "");
 					}));
 				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					interactWithExit bindings "";
+--					objects <- readFiles (allFileNames "init.pure.scm");
+					rsRun (interactWithExit bindings "");
 					}));
 				StrictPureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					interactWithExit bindings "";
+--					objects <- readFiles (allFileNames "init.pure.scm");
+					rsRun (interactWithExit bindings "");
 					}));
 				};
 			CPSWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
 			 let {?binder = setBinder} in
-			 let {?read = ioRead loadpaths} in
+			 let {?read = lift . (ioRead loadpaths)} in
+			 let {?system = ioSystem lift} in
 			 case flavour of
 				{
 				FullStdBindings ->
-				 let {?system = ioSystem lift} in
 				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.full.scm");
-					interactWithExit bindings "";
---					runObjectsWithExit printResult objects bindings;
+--					objects <- readFiles (allFileNames "init.full.scm");
+					rsRun (interactWithExit bindings "" :: CPS IORef ());
 					}));
 				PureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					interactWithExit bindings "";
+--					objects <- readFiles (allFileNames "init.pure.scm");
+					rsRun (interactWithExit bindings "");
 					}));
 				StrictPureStdBindings ->
 				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
 					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
-					objects <- readFiles (allFileNames "init.pure.scm");
-					runObjectsWithExit printResult objects bindings;
-					interactWithExit bindings "";
+--					objects <- readFiles (allFileNames "init.pure.scm");
+					rsRun (interactWithExit bindings "");
 					}));
 				};
--}
 			IOWhichMonad ->
 			 let {?objType = MkType::Type (Object IORef IO)} in
 			 let {?binder = setBinder} in

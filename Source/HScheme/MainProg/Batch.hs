@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MainProg.Batch
 	(
+	Runnable(..),
 	RunnableScheme(..),
 	runObjects,
 	runObjectsWithExit
@@ -35,9 +36,20 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	class
 		(
+		Monad m,
+		Monad cm
+		) =>
+	 Runnable cm m where
+		{
+		rsRun :: m () -> cm ();
+		};
+
+	class
+		(
 		Build cm r,
 		Scheme m r,
-		MonadException (Object r m) cm
+		MonadException (Object r m) cm,
+		Runnable cm m
 		) =>
 	 RunnableScheme cm m r where
 		{
@@ -47,6 +59,12 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		 cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]) ->
 		 ((Object r m -> m ()) -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ())) ->
 		 cm ();
+		};
+
+	instance (Monad m) =>
+	 Runnable m m where
+		{
+		rsRun = id;
 		};
 
 	instance
@@ -61,7 +79,12 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 			{
 			program <- interpEat outproc;
 			mrun program;
-			}
+			};
+		};
+
+	instance Runnable IO Identity where
+		{
+		rsRun _ = return ();
 		};
 
 	instance
@@ -78,7 +101,7 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 			results <- return (unIdentity (mrun program));
 			sinkList outproc results;
 			return ();
-			}
+			};
 		};
 
 	evaluateObjects ::

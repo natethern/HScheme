@@ -149,6 +149,21 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 
 	instance
 		(
+		MonadException (SchemeGCPSObject r (m ())) m
+		) =>
+	 Runnable m (SchemeGCPS r (m ())) where
+		{
+		rsRun ma = runGuardContinuationPass return
+		 (exRun (\err -> lift (case err of
+			{
+			GCPSStringError s -> fail s;
+			GCPSExceptionError ex -> fail (show ex);
+			GCPSObjError obj -> throw obj;
+			})) ma);
+		};
+
+	instance
+		(
 		MonadGettableReference m r,
 		MonadCreatable m r,
 		MonadException (SchemeGCPSObject r (m ())) m
@@ -159,15 +174,6 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeGCPS where
 			{
 			program <- interpEat (lift . lift . outproc);
 			rsRun (mrun program);
-			} where
-			{
-			rsRun ma = runGuardContinuationPass
-			  return (exRun (\err -> lift (case err of
-				{
-				GCPSStringError s -> fail s;
-				GCPSExceptionError ex -> fail (show ex);
-				GCPSObjError obj -> throw obj;
-				})) ma);
 			};
 		};
 	}
