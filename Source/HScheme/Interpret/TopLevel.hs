@@ -219,23 +219,22 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		return (fSubstMapSeparate substMap binds body);
 		};
 
-	fixFunctor :: (Functor t) => t (t a -> a) -> t a;
-	fixFunctor t = fix (\p -> (fmap (\x -> x p) t));
+--	fixFunctor :: (Functor t) => t (t a -> a) -> t a;
+--	fixFunctor t = fix (\p -> (fmap (\x -> x p) t));
 
 	mfixExFunctor :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t) =>
 	 t (t a -> m a) -> m (t a);
 	mfixExFunctor t = mfix (\p -> fExtract (fmap (\x -> x p) t));
 
-	foo :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
-	 t (t (ObjLocation r m) -> m (Object r m)) ->
-	 m (t (ObjLocation r m));
-	foo tt = error "recursive subst not defined";
-
 	fixer :: (MonadFix m,FunctorApplyReturn m,ExtractableFunctor t,Scheme m r) =>
 	 t (t (ObjLocation r m) -> m (Object r m)) ->
 	 (t (ObjLocation r m) -> m (Object r m)) ->
 	 m (Object r m);
-	fixer bindsT bodyT = (foo bindsT) >>= bodyT;
+	fixer bindsT bodyT = (mfixExFunctor (fmap (\tlocmobj tloc -> do
+		{
+		obj <- tlocmobj tloc;
+		new obj;
+		}) bindsT)) >>= bodyT;
 
 	letRecursiveM ::
 		(
@@ -351,16 +350,22 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 a -> 
+	 (m (Object r m) -> a) ->
 	 (m (Object r m) -> a -> a) ->
 	 [Object r m] ->
 	 cm (TopLevelCommand r m a);
-	begin none conn [] = return (MkTopLevelCommand (return' none) [] []);
-	begin none conn (obj:objs) = do
+	begin none one conn [] = return (MkTopLevelCommand (return' none) [] []);
+	begin none one conn [obj] = do
+		{
+		(MkTopLevelCommand expr binds syntax) <- assembleTopLevelObjectCommand obj;
+		return (MkTopLevelCommand (fmap one expr) binds syntax);
+		};
+	begin none one conn (obj:objs) = do
 		{
 		(MkTopLevelCommand expr1 binds1 syntax1) <- assembleTopLevelObjectCommand obj;
 		(MkTopLevelCommand exprr bindsr syntaxr) <- let
 		 {?syntacticbindings = newBindings ?syntacticbindings syntax1} in
-		 begin none conn objs;
+		 begin none one conn objs;
 		return (MkTopLevelCommand (liftF2 conn expr1 exprr) (binds1 ++ bindsr) (syntax1 ++ syntaxr));
 		};
 
@@ -375,7 +380,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (TopLevelObjectCommand r m);
-	beginM = begin (return nullObject) (>>);
+	beginM = begin (return nullObject) id (>>);
 
 	assembleTopLevelExpressions ::
 		(
@@ -387,12 +392,13 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		?macrobindings :: SymbolBindings (Macro cm r m)
 		) =>
 	 m a -> 
+	 (m (Object r m) -> m a) ->
 	 (m (Object r m) -> m a -> m a) ->
 	 [Object r m] ->
 	 cm (SchemeExpression r m (m a));
-	assembleTopLevelExpressions none conn objs = do
+	assembleTopLevelExpressions none one conn objs = do
 		{
-		MkTopLevelCommand expr binds _ <- begin none conn objs;
+		MkTopLevelCommand expr binds _ <- begin none one conn objs;
 --		return (fSubstMapRecursive substMap binds expr);
 		return (fSubstMapSequential substMap binds expr);
 		};
@@ -408,7 +414,7 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 		) =>
 	 [Object r m] ->
 	 cm (ObjectSchemeExpression r m);
-	bodyM = assembleTopLevelExpressions (return nullObject) (>>);
+	bodyM = assembleTopLevelExpressions (return nullObject) id (>>);
 
 	lambdaM ::
 		(
@@ -441,6 +447,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 cm (SchemeExpression r m (m [Object r m]));
 	assembleTopLevelExpressionsList = assembleTopLevelExpressions
 	 (return [])
+	 (\mr -> do
+	 	{
+		r <- mr;
+		return [r];
+	 	})
 	 (\mr mrs -> do
 		{
 		r <- mr;
@@ -478,6 +489,11 @@ module Org.Org.Semantic.HScheme.Interpret.TopLevel
 	 cm (SchemeExpression r m (m ()));
 	assembleTopLevelExpressionsEat eat = assembleTopLevelExpressions
 	 (return ())
+	 (\mr -> do
+	 	{
+		r <- mr;
+		eat r;
+	 	})
 	 (\mr mrs -> do
 		{
 		r <- mr;

@@ -95,14 +95,15 @@ module Org.Org.Semantic.HScheme.Interpret.FunctorLambda
 	applyMutualBindings fixer (MkMutualBindings bindValues abstracter) body =
 	 liftF2 fixer (fExtract (fmap abstracter bindValues)) (abstracter body);
 
+	-- uses irrefutable patterns (~) here to get mfix to work
 	makeMutualBindings :: (FunctorLambda sym val f) =>
 	 [(sym,f a)] -> MutualBindings f a val;
-	makeMutualBindings [] = MkMutualBindings MkZeroList (fmap (\r MkZeroList -> r));
+	makeMutualBindings [] = MkMutualBindings MkZeroList (fmap (\r ~MkZeroList -> r));
 	makeMutualBindings ((sym,fval):restb) = case (makeMutualBindings restb) of
 		{
 		(MkMutualBindings bindValues abstracter) -> MkMutualBindings
 		 (MkNextList fval bindValues)
-		 (\body -> fmap (\atar (MkNextList a ta) -> atar a ta) ((fAbstract sym) (abstracter body)));
+		 (\body -> fmap (\atar ~(MkNextList a ta) -> atar a ta) ((fAbstract sym) (abstracter body)));
 		};
 
 	fSubstMapRecursive :: (FunctorLambda sym val f) =>
