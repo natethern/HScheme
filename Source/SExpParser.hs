@@ -55,6 +55,24 @@ module SExpParser where
 			};
 		};
 
+	tokenEndP :: (Monad m) => TextParser m Bool;
+	tokenEndP = do
+		{
+		ws <- whitespaceP;
+		if ws
+		 then (return True)
+		 else do
+			{
+			mc <- currentC;
+			case mc of
+				{
+				Nothing -> return True;
+				Just ')' -> return True;
+				Just _ -> return False;
+				};
+			};
+		};
+
 	identifierRestP :: (Monad m) => TextParser m String;
 	identifierRestP = do
 		{
@@ -67,7 +85,11 @@ module SExpParser where
 				rest <- identifierRestP;
 				return (toLowerCase c:rest);
 				};
-			Nothing -> return [];
+			Nothing -> do
+				{
+				end <- tokenEndP;
+				if end then (return []) else fail "junk char in identifier";
+				};
 			};
 		};
 
@@ -93,7 +115,11 @@ module SExpParser where
 		mc <- currentC;
 		case mc of
 			{
-			Nothing -> return prev;
+			Nothing -> do
+				{
+				end <- tokenEndP;
+				if end then (return prev) else fail "junk char in integer";
+				};
 			Just c -> case (getDecimalDigit c) of
 				{
 				Nothing -> return prev;
@@ -190,6 +216,53 @@ module SExpParser where
 				nextC;
 				list <- listRestP;
 				return (Just list);
+				};
+			_ -> return Nothing;
+			};
+		};
+
+	plusMinusRestP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe Integer);
+	plusMinusRestP Type = do
+		{
+		end <- tokenEndP;
+		if end
+		 then return Nothing
+		 else do
+			{
+			mi <- integerP;
+			case mi of
+				{
+				Nothing -> fail "bad '+'/'-' token";
+				Just _ -> return mi;
+				};
+			};
+		};
+
+	plusMinusP :: (Scheme x m r) => Type (r ()) -> TextParser m (Maybe (Object r m));
+	plusMinusP t = do
+		{
+		mc <- currentC;
+		case mc of
+			{
+			Just '+' -> do
+				{
+				nextC;
+				mi <- plusMinusRestP t;
+				case mi of
+					{
+					Nothing -> return (Just (SymbolObject (MkSymbol "+")));
+					Just i -> return (Just (NumberObject (fromInteger i)));
+					};
+				};
+			Just '-' -> do
+				{
+				nextC;
+				mi <- plusMinusRestP t;
+				case mi of
+					{
+					Nothing -> return (Just (SymbolObject (MkSymbol "-")));
+					Just i -> return (Just (NumberObject (fromInteger (- i))));
+					};
 				};
 			_ -> return Nothing;
 			};
@@ -336,7 +409,8 @@ module SExpParser where
 		  (checkParse hashLiteralP return
 		   (checkParse quotedP return
 		    (checkParse (stringLiteralP t) (mlift . getConvert . MkStringType)
-		     (checkParse listP return (do
+		     (checkParse (plusMinusP t) return
+		      (checkParse listP return (do
 			{
 			mc <- currentC;
 			case mc of
@@ -344,7 +418,7 @@ module SExpParser where
 				Just c -> fail ("unrecognised char, '"++[c]++"'");
 				Nothing -> return Nothing;
 				};
-			}))))));
+			})))))));
 		};
 	
 	expressionP :: (Scheme x m r) => TextParser m (Maybe (Object r m));
