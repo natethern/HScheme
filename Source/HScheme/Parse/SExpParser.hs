@@ -81,7 +81,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 	 String -> p a;
 	unexpectedCharError context = do
 		{
-		contextObj <- parserLift (getConvert (MkSList context));
+		contextObj <- parserLift (getObject (MkSList context));
 		(do
 			{
 			t <- tokenParse;
@@ -643,7 +643,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		 (identifierParse >>= (return . SymbolObject . MkSymbol))	|||
 		 hashLiteralParse		|||
 		 quotedParse			|||
-		 (stringLiteralParse >>= (plift . getConvert . MkSList))	|||
+		 (stringLiteralParse >>= (plift . getObject . MkSList))	|||
 		 listParse				|||
 		 ((streamEndParse ||| (unexpectedCharError "input")) >> mzero);
 		};

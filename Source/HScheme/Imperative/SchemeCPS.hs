@@ -79,8 +79,8 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeCPS where
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
-		getConvert (ExceptionError x) = getConvert (MkSymbol "failure",MkSList (show x));
-		getConvert (StringError s) = getConvert (MkSymbol "failure",MkSList s);
+		getConvert (ExceptionError x) = getObject (MkSymbol "failure",MkSList (show x));
+		getConvert (StringError s) = getObject (MkSymbol "failure",MkSList s);
 		};
 
 	instance MaybeA (SchemeCPSError r p) String where

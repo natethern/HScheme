@@ -34,9 +34,9 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 	evaluateObject ::
 		(
 		Scheme m r,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro m r m)
+		?macrobindings :: Symbol -> Maybe (Macro m r m)
 		) =>
 	 Object r m -> (Symbol -> Maybe (ObjLocation r m)) -> m (Object r m);
 	evaluateObject obj lookupSym = do
@@ -49,11 +49,17 @@ module Org.Org.Semantic.HScheme.Interpret.Evaluate where
 		(
 		Scheme m r,
 		?objType :: Type (Object r m),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
-		?macrobindings :: SymbolBindings (Macro m r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
+	 (forall a. cm a -> m a) ->
 	 (Object r m,(Environment r (Object r m),())) -> m (Object r m);
-	evaluateP (obj,(MkEnvironment syn loc,())) = let {?syntacticbindings = syn} in
+	evaluateP remonad (obj,(MkEnvironment syn loc,())) = let
+		{
+		?syntacticbindings = syn;
+		?toplevelbindings = fmap (fmap (remonadTopLevelMacro remonad)) ?toplevelbindings;
+		?macrobindings = fmap (fmap (remonadMacro remonad)) ?macrobindings;
+		} in
 	 evaluateObject obj (getBinding loc);
 
 {--

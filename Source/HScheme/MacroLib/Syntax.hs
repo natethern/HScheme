@@ -68,97 +68,14 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	 then return sub
 	 else substitute subs (SymbolObject name);
 	substitute _ x = return x;
-{--
-	matchBinding :: (Build cm r) =>
-	 [Symbol] -> Object r m -> Object r m -> cm (Maybe [Binding r m]);
-	matchBinding literals NilObject NilObject = return (Just []);
-	matchBinding literals NilObject _ = return Nothing;
-	matchBinding literals (PairObject phl ptl) (PairObject ahl atl) = do
-		{
-		ph <- get phl;
-		ah <- get ahl;
-		mhmatch <- matchBinding literals ph ah;
-		case mhmatch of
-			{
-			Nothing -> return Nothing;
-			Just hmatch -> do
-				{
-				pt <- get ptl;
-				at <- get atl;
-				mtmatch <- matchBinding literals pt at;
-				case mtmatch of
-					{
-					Nothing -> return Nothing;
-					Just tmatch -> return (Just (hmatch ++ tmatch));
-					};
-				};
-			};
-		};
-	matchBinding literals (PairObject _ _) _ = return Nothing;
-	matchBinding literals (SymbolObject name) args =
-	 if hasElement name literals
-	 then case args of
-	 	{
-	 	SymbolObject name' | name == name' -> return (Just []);
-	 	_ -> return Nothing;
-	 	}
-	 else return (Just [MkBind name args]);
-	matchBinding literals _ _ = return Nothing;
-	
-	matchBindings :: (Build cm r) =>
-	 [Symbol] -> Object r m -> [Object r m] -> cm (Maybe [Binding r m]);
-	matchBindings literals NilObject [] = return (Just []);
-	matchBindings literals (PairObject phl ptl) (a1:as) = do
-		{
-		ph <- get phl;
-		mmatch1 <- matchBinding literals ph a1;
-		case mmatch1 of
-			{
-			Nothing -> return Nothing;
-			Just match1 -> do
-				{
-				pt <- get ptl;
-				mmatchs <- matchBindings literals pt as;
-				case mmatchs of
-					{
-					Nothing -> return Nothing;
-					Just matchs -> return (Just (match1 ++ matchs));
-					};
-				};
-			};
-		};
-	matchBindings literals (SymbolObject name) args =
-	 if hasElement name literals
-	 then return Nothing
-	 else do
-		{
-		argList <- getConvert args;
-		return (Just [MkBind name argList]);
-		};
-	matchBindings literals _ _ = return Nothing;
 
-	caseMatch :: (BuildThrow cm (Object r m) r,?objType :: Type (Object r m)) =>
-	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
-	 cm ([Binding r m],Object r m);
-	caseMatch (arg,(literals,[])) = throwArgError "no-match" [arg];
-	caseMatch (arg,(literals,((patternObj,(expr,())):rs))) = do
-		{
-		pattern <- makeObjectPattern literals patternObj;
-		msubs <- matchBinding literals pattern arg;
-		case msubs of
-			{
-			Nothing -> caseMatch (arg,(literals,rs));
-			Just subs -> return (subs,expr);
-			};
-		};
---}
 	caseMatchM ::
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
 		?objType :: Type (Object r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
+		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 (Object r m,([Symbol],[(Object r m,(Object r m,()))])) ->
 	 cm (ObjectSchemeExpression r m);
@@ -240,7 +157,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			SymbolObject (MkSymbol "syntax-rules") -> do
 				{
 				t <- get tail;
-				margs <- getMaybeConvert t;
+				margs <- fromObject t;
 				case margs of
 					{
 					Nothing -> throwArgError "bad-syntax-rules-syntax" [t];
@@ -258,7 +175,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		BuildThrow cm (Object r m) r,
 		Monad m,
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?macrobindings :: SymbolBindings (Macro cm r m)
+		?macrobindings :: Symbol -> Maybe (Macro cm r m)
 		) =>
 	 (Symbol,(Object r m,())) -> cm (TopLevelObjectCommand r m);
 	defineSyntaxT (sym,(obj,())) = do

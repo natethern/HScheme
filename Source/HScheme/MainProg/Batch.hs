@@ -46,16 +46,15 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 
 	class
 		(
-		Build cm r,
+		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		MonadException (Object r m) cm,
 		Runnable cm m
 		) =>
 	 RunnableScheme cm m r where
 		{
 		rsRunInterp ::
 		 (Object r m -> cm ()) ->
-		 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
+		 (forall a. (ArgumentList r (Object r m) a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
 		 cm ((Symbol -> Maybe (ObjLocation r m)) -> m [Object r m]) ->
 		 ((Object r m -> m ()) -> cm ((Symbol -> Maybe (ObjLocation r m)) -> m ())) ->
 		 cm ();
@@ -90,7 +89,6 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 	instance
 		(
 		BuildThrow IO (Object r Identity) r,
-		MonadException (Object r Identity) IO,
 		BuildThrow Identity (Object r Identity) r
 		) =>
 	 RunnableScheme IO Identity r where
@@ -109,11 +107,11 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?binder :: TopLevelBinder r m,
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
 		) =>
-	 (forall a. (ArgumentList m m r a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
+	 (forall a. (ArgumentList r (Object r m) a) => ((Symbol -> Maybe (ObjLocation r m)) -> m a) -> m a) ->
 	 (Object r m -> cm ()) ->
 	 [Object r m] ->
 	 cm ();
@@ -126,9 +124,9 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		RunnableScheme cm m r,
 		?objType :: Type (Object r m),
 		?binder :: TopLevelBinder r m,
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
 	 [Object r m] ->
@@ -146,9 +144,9 @@ module Org.Org.Semantic.HScheme.MainProg.Batch
 		MonadCont m,
 		?objType :: Type (Object r m),
 		?binder :: TopLevelBinder r m,
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
 		) =>
 	 (Object r m -> cm ()) ->
 	 [Object r m] ->

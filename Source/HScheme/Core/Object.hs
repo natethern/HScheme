@@ -61,6 +61,15 @@ module Org.Org.Semantic.HScheme.Core.Object where
 
 	type ObjLocation r m = r (Object r m);
 
+	instance SchemeObject ref (Object ref m) where
+		{
+		objectCell NilObject = Just Nothing;
+		objectCell (PairObject hr tr) = Just (Just (hr,tr));
+		objectCell _ = Nothing;
+		pairObject = PairObject;
+		nilObject = NilObject;
+		};
+
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;
 	mkValuesObject a = ValuesObject a;
@@ -71,13 +80,4 @@ module Org.Org.Semantic.HScheme.Core.Object where
 	isNullObject :: Object r m -> Bool;
 	isNullObject (ValuesObject []) = True;
 	isNullObject _ = False;
-
-	cons :: (Build cm r) =>
-	 Object r m -> Object r m -> cm (Object r m);
-	cons head tail = do
-		{
-		h <- new head;
-		t <- new tail;
-		return (PairObject h t);
-		};
 	}

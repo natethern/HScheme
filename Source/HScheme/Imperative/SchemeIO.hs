@@ -43,7 +43,7 @@ module Org.Org.Semantic.HScheme.Imperative.SchemeIO where
 		{
 		catch foo cc = catchSingle foo (\ex -> do
 			{
-			obj <- getConvert (MkSymbol "failure",(MkSList (show ex),()));
+			obj <- getObject (MkSymbol "failure",(MkSList (show ex),()));
 			cc obj;
 			});
 		};

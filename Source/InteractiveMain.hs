@@ -86,7 +86,7 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
@@ -96,7 +96,7 @@ module Main where
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings id)) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -124,7 +124,7 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadContFullBindings ++ monadFixBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
@@ -134,7 +134,7 @@ module Main where
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (monadContPureBindings ++ monadFixBindings ++ (evalBindings id)) emptyBindings;
 					rsRun (do
 						{
 						commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
@@ -162,14 +162,14 @@ module Main where
 				FullStdBindings ->
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
 					commands <- fExtract (fmap readLoad (allFileNames "init.full.scm"));
 					interact bindings commands;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixPureBindings ++ monadGuardBindings) emptyBindings;
+					bindings <- (monadFixPureBindings ++ monadGuardBindings ++ (evalBindings id)) emptyBindings;
 					commands <- fExtract (fmap readLoad (allFileNames "init.pure.scm"));
 					interact bindings commands;
 					});

@@ -34,8 +34,8 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		(
 		FullScheme m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Bindings Symbol (Macro m r m),
-		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
 		) =>
 	 Environment r (Object r m) -> TopLevelCommand r m (m a) -> m (Environment r (Object r m),a);
 	runTopLevelInEnvironment
@@ -50,8 +50,8 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		(
 		FullScheme m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Bindings Symbol (Macro m r m),
-		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
 		) =>
 	 Environment r (Object r m) -> Object r m -> m (Environment r (Object r m),Object r m);
 	runObjectInEnvironment env obj =  do
@@ -102,8 +102,8 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro m r m),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
 		?system :: System m
 		) =>
 	 Environment r (Object r m) -> m ();
@@ -131,7 +131,7 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 			}) (\ex -> do
 				{
 				runParser input restOfLineParse;
-				errObj <- getConvert (MkSymbol "failure",MkSList (show ex));
+				errObj <- getObject (MkSymbol "failure",MkSList (show ex));
 				reportError errObj;
 				return (Just environment);
 				})
@@ -154,8 +154,8 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		(
 		FullScheme m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Bindings Symbol (Macro m r m),
-		?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m)
 		) =>
 	 TopLevelCommand r m (m a) -> Environment r (Object r m) -> m (Environment r (Object r m));
 	envProc command env = do
@@ -170,9 +170,9 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro m r m),
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
@@ -196,9 +196,9 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro m r m),
+		?macrobindings :: Symbol -> Maybe (Macro m r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro m r m),
 		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->

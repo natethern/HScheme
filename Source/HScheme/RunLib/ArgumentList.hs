@@ -25,12 +25,18 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
-	class (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r a where
+	class (SchemeObject r obj) =>
+	 ArgumentList r obj a | obj -> r where
 		{
-		maybeConvertFromObjects :: (?objType :: Type (Object r m)) => [Object r m] -> cm (Maybe a);
+		maybeConvertFromObjects :: forall cm. (Build cm r,?objType :: Type obj) => [obj] -> cm (Maybe a);
 		};
 
-	convertFromObjects :: (ArgumentList cm m r a,?objType :: Type (Object r m)) =>
+	convertFromObjects ::
+		(
+		BuildThrow cm (Object r m) r,
+		ArgumentList r (Object r m) a,
+		?objType :: Type (Object r m)
+		) =>
 	 [Object r m] -> cm a;
 	convertFromObjects args = do
 		{
@@ -42,7 +48,8 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 			};
 		};
 
-	instance (Build cm r,MonadThrow (Object r m) cm) => ArgumentList cm m r () where
+	instance (SchemeObject r obj) =>
+	 ArgumentList r obj () where
 		{
 		maybeConvertFromObjects [] = return (Just ());
 		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
@@ -50,15 +57,15 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	instance
 		(
-		MonadMaybeA cm a (Object r m),
-		ArgumentList cm m r b
+		ObjectSubtype r obj a,
+		ArgumentList r obj b
 		) =>
-	 ArgumentList cm m r (a,b) where
+ 	 ArgumentList r obj (a,b) where
 		{
 		maybeConvertFromObjects [] = return Nothing;	-- throwSimpleError "too-few-args";
 		maybeConvertFromObjects (obj:objs) = do
 			{
-			ma <- getMaybeConvert obj;
+			ma <- fromObject obj;
 			mb <- maybeConvertFromObjects objs;
 			return (liftF2 (,) ma mb);
 			};
@@ -66,16 +73,14 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	instance
 		(
-		Build cm r,
-		MonadThrow (Object r m) cm,
-		MonadMaybeA cm a (Object r m)
+		ObjectSubtype r obj a
 		) =>
-	 ArgumentList cm m r (Maybe a) where
+	 ArgumentList r obj (Maybe a) where
 		{
 		maybeConvertFromObjects [] = return (Just Nothing);
 		maybeConvertFromObjects [obj] = do
 			{
-			ma <- getMaybeConvert obj;
+			ma <- fromObject obj;
 			return (fmap Just ma);
 			};
 		maybeConvertFromObjects args = return Nothing;	-- throwArgError "too-many-args" args;
@@ -83,16 +88,14 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	instance
 		(
-		Build cm r,
-		MonadThrow (Object r m) cm,
-		MonadMaybeA cm a (Object r m)
+		ObjectSubtype r obj a
 		) =>
-	 ArgumentList cm m r [a] where
+	 ArgumentList r obj [a] where
 		{
 		maybeConvertFromObjects [] = return (Just []);
 		maybeConvertFromObjects (obj:objs) = do
 			{
-			ma <- getMaybeConvert obj;
+			ma <- fromObject obj;
 			mas <- maybeConvertFromObjects objs;
 			return (liftF2 (:) ma mas);
 			};
@@ -100,10 +103,10 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	instance
 		(
-		ArgumentList cm m r a,
-		ArgumentList cm m r b
+		ArgumentList r obj a,
+		ArgumentList r obj b
 		) =>
-	 ArgumentList cm m r (Either a b) where
+	 ArgumentList r obj (Either a b) where
 		{
 		maybeConvertFromObjects args = do
 			{
@@ -126,8 +129,9 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 
 	convertToProcedure ::
 		(
-		ArgumentList m m r args,
-		MonadIsA m (Object r m) ret,
+		BuildThrow m (Object r m) r,
+		ArgumentList r (Object r m) args,
+		ObjectSubtype r (Object r m) ret,
 		?objType :: Type (Object r m)
 		) =>
 	 (args -> m ret) -> Procedure (Object r m) m;
@@ -135,6 +139,6 @@ module Org.Org.Semantic.HScheme.RunLib.ArgumentList where
 		{
 		args <- convertFromObjects objs;
 		r <- foo args;
-		getConvert r;
+		getObject r;
 		};
 	}

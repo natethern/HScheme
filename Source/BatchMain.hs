@@ -83,17 +83,17 @@ module Main where
 			 case flavour of
 				{
 				FullStdBindings ->
-				 let {?system = ioSystem (lift . lift)} in
+				 let {?system = ioSystem (lift . lift)} in				 
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings (lift . lift)) ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings ++ (evalBindings (lift . lift))) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
@@ -115,14 +115,14 @@ module Main where
 				 let {?system = ioSystem lift} in
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadContFullBindings ++ monadFixBindings ++ (evalBindings lift) ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
+					bindings <- (monadContPureBindings ++ monadFixBindings ++ (evalBindings lift)) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjectsWithExit printResult objects bindings;
 					});
@@ -144,14 +144,14 @@ module Main where
 				 let {?system = ioSystem id} in
 				 mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ fullSystemBindings) emptyBindings;
+					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ (evalBindings id) ++ fullSystemBindings) emptyBindings;
 					objects <- readFiles (allFileNames "init.full.scm");
 					runObjects printResult objects bindings;
 					});
 				PureStdBindings ->
 				 mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
 					{
-					bindings <- (monadFixPureBindings ++ monadGuardBindings) emptyBindings;
+					bindings <- (monadFixPureBindings ++ monadGuardBindings ++ (evalBindings id)) emptyBindings;
 					objects <- readFiles (allFileNames "init.pure.scm");
 					runObjects printResult objects bindings;
 					});

@@ -30,13 +30,11 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	commonTopLevelBindings ::
 		(
-		Scheme m r,
 		BuildThrow cm (Object r m) r,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
+		Scheme m r,
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (TopLevelMacro cm r m) ->
-	 SymbolBindings (TopLevelMacro cm r m);
+	 TopLevelBindings cm r m;
 	commonTopLevelBindings = concatenateList
 		[
 		-- 4.2.3 Sequencing
@@ -48,14 +46,12 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	pureTopLevelBindings ::
 		(
-		Scheme m r,
 		BuildThrow cm (Object r m) r,
+		Scheme m r,
 		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (TopLevelMacro cm r m) ->
-	 SymbolBindings (TopLevelMacro cm r m);
+	 TopLevelBindings cm r m;
 	pureTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -66,14 +62,12 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 
 	fullTopLevelBindings ::
 		(
-		FullScheme m r,
 		BuildThrow cm (Object r m) r,
+		FullScheme m r,
 		?binder :: TopLevelBinder r m,
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
 		?objType :: Type (Object r m)
 		) =>
-	 SymbolBindings (TopLevelMacro cm r m) ->
-	 SymbolBindings (TopLevelMacro cm r m);
+	 TopLevelBindings cm r m;
 	fullTopLevelBindings = concatenateList
 		[
 		commonTopLevelBindings,
@@ -86,12 +80,10 @@ module Org.Org.Semantic.HScheme.Bind.TopLevel where
 		(
 		BuildThrow cm (Object r m) r,
 		Scheme m r,
-		?objType :: Type (Object r m),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?objType :: Type (Object r m)
 		) =>
 	 (String -> cm (TopLevelObjectCommand r m)) ->
-	 SymbolBindings (TopLevelMacro cm r m) ->
-	 SymbolBindings (TopLevelMacro cm r m);
+	 TopLevelBindings cm r m;
 	loadTopLevelBindings load = concatenateList
 		[
 		-- 6.6.4 System Interface

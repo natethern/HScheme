@@ -36,29 +36,24 @@ module Org.Org.Semantic.HScheme.Bind
 	import Org.Org.Semantic.HScheme.Bind.Macro;
 	import Org.Org.Semantic.HScheme.Bind.Add;
 
-	import Org.Org.Semantic.HScheme.Interpret;
+--	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	mutualBind ::
-		(
-		BuildThrow cm (Object r m) r,
-		Scheme m r,
-		?objType :: Type (Object r m)
-		) =>
 	 ((
-	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-	 	?macrobindings :: SymbolBindings (Macro cm r m),
-	 	?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
-	 	) => SymbolBindings (Macro cm r m) -> SymbolBindings (Macro cm r m)) ->
+	 	?toplevelbindings	:: Symbol -> Maybe tlmacro,
+	 	?macrobindings		:: Symbol -> Maybe macro,
+	 	?syntacticbindings	:: SymbolBindings syntax
+	 	) => SymbolBindings macro -> SymbolBindings macro) ->
 	 ((
-	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-	 	?macrobindings :: SymbolBindings (Macro cm r m),
-	 	?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
-	 	) => SymbolBindings (TopLevelMacro cm r m) -> SymbolBindings (TopLevelMacro cm r m)) ->
-	 ((?macrobindings :: SymbolBindings (Macro cm r m),
-	 	?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-	 	?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+	 	?toplevelbindings	:: Symbol -> Maybe tlmacro,
+	 	?macrobindings		:: Symbol -> Maybe macro,
+	 	?syntacticbindings	:: SymbolBindings syntax
+	 	) => SymbolBindings tlmacro -> SymbolBindings tlmacro) ->
+	 ((?macrobindings		:: Symbol -> Maybe macro,
+	 	?syntacticbindings	:: SymbolBindings syntax,
+	 	?toplevelbindings	:: Symbol -> Maybe tlmacro
 	 	) => a) ->
 	 a;
 	mutualBind macroBinds tlBinds a = 
@@ -69,9 +64,9 @@ module Org.Org.Semantic.HScheme.Bind
 	 let
 		{
 		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 macroBinds emptyBindings;
+		 getBinding (macroBinds emptyBindings);
 		tlb = let {?macrobindings = mb;?toplevelbindings = tlb} in
-		 tlBinds emptyBindings;
+		 getBinding (tlBinds emptyBindings);
 		} in
 	 let
 	 	{

@@ -30,9 +30,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	macroBindings ::
 		(
+		BuildThrow cm (Object r m) r,
 		MonadFix m,
 		Scheme m r,
-		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
 		?objType :: Type (Object r m)
 		) =>
@@ -62,9 +62,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	pureMacroBindings ::
 		(
+		BuildThrow cm (Object r m) r,
 		MonadFix m,
 		Scheme m r,
-		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
 		?objType :: Type (Object r m)
 		) =>
@@ -83,9 +83,9 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 
 	fullMacroBindings ::
 		(
+		BuildThrow cm (Object r m) r,
 		MonadFix m,
 		FullScheme m r,
-		BuildThrow cm (Object r m) r,
 		?binder :: TopLevelBinder r m,
 		?objType :: Type (Object r m)
 		) =>

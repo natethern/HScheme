@@ -41,17 +41,39 @@ module Org.Org.Semantic.HScheme.Core.Build where
 	class
 		(
 		Build m r,
-		MonadThrow obj m
+		MonadThrow ex m
 		) =>
-	 BuildThrow m obj r;
+	 BuildThrow m ex r;
 
 	instance
 		(
 		Build m r,
-		MonadThrow obj m
+		MonadThrow ex m
 		) =>
-	 BuildThrow m obj r;
+	 BuildThrow m ex r;
 
+	class SchemeObject ref obj | obj -> ref where
+		{
+		objectCell :: obj -> Maybe (Maybe (ref obj,ref obj));
+		pairObject :: ref obj -> ref obj -> obj;
+		nilObject :: obj;
+		};
+
+	cons :: (Build m ref,SchemeObject ref obj) => obj -> obj -> m obj;
+	cons h t = do
+		{
+		hr <- new h;
+		tr <- new t;
+		return (pairObject hr tr);
+		};
+
+{-
+	class
+		(
+		BuildThrow m obj r
+		) =>
+	 BuildObject m obj r | obj -> r;
+-}
 
 	-- throw, etc.
 

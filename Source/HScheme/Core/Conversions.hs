@@ -29,6 +29,21 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 	import Org.Org.Semantic.HScheme.Core.Numerics;
 	import Org.Org.Semantic.HBase;
 
+
+	class (SchemeObject r obj) =>
+	 ObjectSubtype r obj a | obj -> r where
+		{
+		getObject :: forall cm. (Build cm r) => a -> cm obj;
+		fromObject :: forall cm. (Build cm r) => obj -> cm (Maybe a);
+		
+		getObjectIs :: forall cm. (Build cm r) => Type a -> obj -> cm Bool;
+		getObjectIs _ obj = do
+			{
+			(ma :: Maybe a) <- fromObject obj;
+			return (isJust ma);
+			};
+		};
+
 	
 	-- NullObjType
 
@@ -41,46 +56,33 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		 else Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) NullObjType where
+	instance ObjectSubtype r (Object r m) NullObjType where
 		{
-		getConvert MkNullObjType = return nullObject;
+		getObject MkNullObjType = return nullObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm NullObjType (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) NullObjType;
 
 
 	-- Either
 
 	instance
 		(
-		MonadIsA cm (Object r m) a,
-		MonadIsA cm (Object r m) b
-		) => MonadIsA cm (Object r m) (Either a b) where
+		ObjectSubtype r obj a,
+		ObjectSubtype r obj b
+		) =>
+	 ObjectSubtype r obj (Either a b) where
 		{
-		getConvert (Left a) = getConvert a;
-		getConvert (Right b) = getConvert b;
-		};
-
-	instance
-		(
-		MonadMaybeA cm a (Object r m),
-		MonadMaybeA cm b (Object r m)
-		) => MonadMaybeA cm (Either a b) (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject (Left a) = getObject a;
+		getObject (Right b) = getObject b;
+		fromObject obj = do
 			{
-			ma <- getMaybeConvert obj;
+			ma <- fromObject obj;
 			case ma of
 				{
 				Just a -> return (return (Left a));
 				Nothing -> do
 					{
-					mb <- getMaybeConvert obj;
+					mb <- fromObject obj;
 					return (do
 						{
 						b <- mb;
@@ -90,124 +92,69 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				};
 			};
 		};
-	
-	instance
-		(
-		MonadSubtype cm (Object r m) a,
-		MonadSubtype cm (Object r m) b
-		) =>
-	 MonadSubtype cm (Object r m) (Either a b);
 
 	
 	-- NilType
 
 	type NilType = ();
 
-	instance MaybeA  NilType (Object r m) where
+	instance (SchemeObject r obj) =>
+	 ObjectSubtype r obj NilType where
 		{
-		maybeConvert NilObject = Just ();
-		maybeConvert _ = Nothing;
+		getObject () = return nilObject;
+		fromObject obj | Just Nothing <- objectCell obj = return (Just ());
+		fromObject _ = return Nothing;
 		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) NilType where
-		{
-		getConvert () = return NilObject;
-		};
-
-	instance (Monad cm) => MonadMaybeA cm NilType (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) NilType;
 
 	
 	-- Maybe a
 
-	instance
-		(
-		Build cm r,
-		MonadIsA cm (Object r m) a
-		) =>
-	 MonadIsA cm (Object r m) (Maybe a) where
+	instance (ObjectSubtype r obj a) =>
+	 ObjectSubtype r obj (Maybe a) where
 		{
-		getConvert Nothing = getConvert ();
-		getConvert (Just a) = getConvert (a,());
-		};
+		getObject Nothing = getObject ();
+		getObject (Just a) = getObject (a,());
 
-	instance
-		(
-		Build cm r,
-		MonadMaybeA cm a (Object r m)
-		) =>
-	 MonadMaybeA cm (Maybe a) (Object r m) where
-		{
-		getMaybeConvert p@ (PairObject hloc tloc) = do
+		fromObject obj = case objectCell obj of
 			{
-			mh <- getMaybeConvert p;
-			return (do
+			Just (Just (hloc,tloc)) -> do
 				{
-				(h,()) <- mh;
-				return (Just h);
-				});
+				mh <- fromObject obj;
+				return (do
+					{
+					(h,()) <- mh;
+					return (Just h);
+					});
+				};
+			Just Nothing -> return (Just Nothing);
+			Nothing ->  return Nothing;
 			};
-		getMaybeConvert obj = return (case obj of
-			{
-			NilObject -> Just Nothing;
-			_ -> Nothing;
-			});
 		};
-	
-	instance
-		(
-		Build cm r,
-		MonadSubtype cm (Object r m) a
-		) =>
-	 MonadSubtype cm (Object r m) (Maybe a);
 
 	
 	-- []
 
-	instance
-		(
-		Build cm r,
-		MonadIsA cm (Object r m) a
-		) =>
-	 MonadIsA cm (Object r m) [a] where
+	instance (ObjectSubtype r obj a) =>
+	 ObjectSubtype r obj [a] where
 		{
-		getConvert [] = getConvert ();
-		getConvert (ah:at) = getConvert (ah,at);
-		};
+		getObject [] = getObject ();
+		getObject (ah:at) = getObject (ah,at);
 
-	instance
-		(
-		Build cm r,
-		MonadMaybeA cm a (Object r m)
-		) =>
-	 MonadMaybeA cm [a] (Object r m) where
-		{
-		getMaybeConvert p@ (PairObject hloc tloc) = do
+		fromObject obj = case objectCell obj of
 			{
-			mht <- getMaybeConvert p;
-			return (do
+			Just (Just (hloc,tloc)) -> do
 				{
-				(h,t) <- mht;
-				return (h:t);
-				});
+				mht <- fromObject obj;
+				return (do
+					{
+					(h,t) <- mht;
+					return (h:t);
+					});
+				};
+			Just Nothing -> return (Just []);
+			Nothing ->  return Nothing;
 			};
-		getMaybeConvert obj = return (case obj of
-			{
-			NilObject -> Just [];
-			_ -> Nothing;
-			});
 		};
-	
-	instance
-		(
-		Build cm r,
-		MonadSubtype cm (Object r m) a
-		) =>
-	 MonadSubtype cm (Object r m) [a];
 
 	
 	-- PairType
@@ -216,43 +163,23 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 
 	instance
 		(
-		Build cm r,
-		MonadIsA cm (Object r m) ah,
-		MonadIsA cm (Object r m) at
+		ObjectSubtype r obj ah,
+		ObjectSubtype r obj at
 		) =>
-	 MonadIsA cm (Object r m) (PairType ah at) where
+	 ObjectSubtype r obj (PairType ah at) where
 		{
-		getConvert (ah,at) = do
+		getObject (ah,at) = do
 			{
-			objH <- getConvert ah;
-			objT <- getConvert at;
+			objH <- getObject ah;
+			objT <- getObject at;
 			cons objH objT;
 			};
-		};
-{--
-	swapMonadMaybe :: (Monad m) =>
-	 Maybe (m a) -> m (Maybe a);
-	swapMonadMaybe Nothing = return Nothing;
-	swapMonadMaybe (Just ma) = do
-		{
-		a <- ma;
-		return (Just a);
-		};
---}
-	instance
-		(
-		Build cm r,
-		MonadMaybeA cm ah (Object r m),
-		MonadMaybeA cm at (Object r m)
-		) =>
-	 MonadMaybeA cm (PairType ah at) (Object r m) where
-		{
-		getMaybeConvert (PairObject hloc tloc) = do
+		fromObject obj | Just (Just (hloc,tloc)) <- objectCell obj = do
 			{
 			h <- get hloc;
 			t <- get tloc;
-			mobjH <- getMaybeConvert h;
-			mobjT <- getMaybeConvert t;
+			mobjH <- fromObject h;
+			mobjT <- fromObject t;
 			return (do
 				{	-- this one's in Maybe. Clever, huh?
 				objH <- mobjH;
@@ -260,31 +187,17 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				return (objH,objT);
 				});
 			};
-		getMaybeConvert _ = return Nothing;
+		fromObject _ = return Nothing;
 		};
-	
-	instance
-		(
-		Build cm r,
-		MonadSubtype cm (Object r m) ah,
-		MonadSubtype cm (Object r m) at
-		) =>
-	 MonadSubtype cm (Object r m) (PairType ah at);
 
 	
 	-- Object
 
-	instance (Monad cm) => MonadMaybeA cm (Object r m) (Object r m) where
+	instance ObjectSubtype r (Object r m) (Object r m) where
 		{
-		getMaybeConvert = return . Just;
+		getObject = return;
+		fromObject = return . Just;
 		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) (Object r m) where
-		{
-		getConvert = return;
-		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Object r m);
 
 	
 	-- Bool
@@ -302,26 +215,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		convert _ = True;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Bool where
+	instance ObjectSubtype r (Object r m) Bool where
 		{
-		getConvert = return . BooleanObject;
+		getObject = return . BooleanObject;
+		fromObject obj = return (Just (convert obj));
 		};
-
-	instance (Monad cm) => MonadIsA cm Bool (Object r m) where
-		{
-		getConvert = return . convert;
-		};
-
-	instance (Monad cm) => MonadMaybeA cm Bool (Object r m) where
-		{
-		getMaybeConvert obj = do
-			{
-			result <- getConvert obj;
-			return (Just result);
-			};
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) Bool;
 
 	
 	-- Char
@@ -332,17 +230,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Char where
+	instance ObjectSubtype r (Object r m) Char where
 		{
-		getConvert = return . CharObject;
+		getObject = return . CharObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm Char (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) Char;
 
 	
 	-- Number
@@ -353,54 +245,38 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Number where
+	instance ObjectSubtype r (Object r m) Number where
 		{
-		getConvert = return . NumberObject;
+		getObject = return . NumberObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm Number (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) Number;
 
 
 	-- EIReal
 
-	instance (Monad cm) => MonadIsA cm (Object r m) EIReal where
+	instance ObjectSubtype r (Object r m) EIReal where
 		{
-		getConvert i = getConvert (convert i :: Number);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm EIReal (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject i = getObject (convert i :: Number);
+		fromObject obj = do
 			{
-			mn <- getMaybeConvert obj;
+			mn <- fromObject obj;
 			return (do
 				{
-				(n ::Number) <- mn;
+				(n :: Number) <- mn;
 				maybeApproximate n;
 				});
 			};
 		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) EIReal;
 
 
 	-- Rational
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Rational where
+	instance ObjectSubtype r (Object r m) Rational where
 		{
-		getConvert i = getConvert (convert i :: EIReal);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm Rational (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject i = getObject (convert i :: EIReal);
+		fromObject obj = do
 			{
-			mn <- getMaybeConvert obj;
+			mn <- fromObject obj;
 			return (do
 				{
 				(n :: EIReal) <- mn;
@@ -408,22 +284,16 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				});
 			};
 		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) Rational;
 
 
 	-- Integer
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Integer where
+	instance ObjectSubtype r (Object r m) Integer where
 		{
-		getConvert i = getConvert (convert i :: EIReal);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm Integer (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject i = getObject (convert i :: EIReal);
+		fromObject obj = do
 			{
-			mn <- getMaybeConvert obj;
+			mn <- fromObject obj;
 			return (do
 				{
 				(n :: EIReal) <- mn;
@@ -432,21 +302,15 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 			};
 		};
 
-	instance (Monad cm) => MonadSubtype cm (Object r m) Integer;
-
 
 	-- Int
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Int where
+	instance ObjectSubtype r (Object r m) Int where
 		{
-		getConvert i = getConvert (convert i :: Integer);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm Int (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject i = getObject (convert i :: Integer);
+		fromObject obj = do
 			{
-			mn <- getMaybeConvert obj;
+			mn <- fromObject obj;
 			return (do
 				{
 				(n :: Integer) <- mn;
@@ -454,22 +318,16 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				});
 			};
 		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) Int;
 
 
 	-- Word8
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Word8 where
+	instance ObjectSubtype r (Object r m) Word8 where
 		{
-		getConvert i = getConvert (convert i :: Integer);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm Word8 (Object r m) where
-		{
-		getMaybeConvert obj = do
+		getObject i = getObject (convert i :: Integer);
+		fromObject obj = do
 			{
-			mn <- getMaybeConvert obj;
+			mn <- fromObject obj;
 			return (do
 				{
 				(n :: Integer) <- mn;
@@ -477,8 +335,6 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 				});
 			};
 		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) Word8;
 
 	
 	-- Symbol
@@ -489,17 +345,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) Symbol where
+	instance ObjectSubtype r (Object r m) Symbol where
 		{
-		getConvert = return . SymbolObject;
+		getObject = return . SymbolObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm Symbol (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) Symbol;
 
 	
 	-- Environment
@@ -510,17 +360,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (Environment r (Object r m)) where
+	instance ObjectSubtype r (Object r m) (Environment r (Object r m)) where
 		{
-		getConvert = return . EnvironmentObject;
+		getObject = return . EnvironmentObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm (Environment r (Object r m)) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Environment r (Object r m));
 
 	
 	-- InputPort
@@ -531,17 +375,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (InputPort Word8 m) where
+	instance ObjectSubtype r (Object r m) (InputPort Word8 m) where
 		{
-		getConvert = return . InputPortObject;
+		getObject = return . InputPortObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm (InputPort Word8 m) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (InputPort Word8 m);
 
 	
 	-- OutputPort
@@ -552,17 +390,11 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (OutputPort Word8 m) where
+	instance ObjectSubtype r (Object r m) (OutputPort Word8 m) where
 		{
-		getConvert = return . OutputPortObject;
+		getObject = return . OutputPortObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm (OutputPort Word8 m) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (OutputPort Word8 m);
 
 
 	-- SRefArray r Word8
@@ -573,46 +405,66 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefArray r Word8) where
+	instance ObjectSubtype r (Object r m) (SRefArray r Word8) where
 		{
-		getConvert rs = return (ByteArrayObject rs);
+		getObject = return . ByteArrayObject;
+		fromObject = return . maybeConvert;
 		};
 
-	instance (Monad cm) => MonadMaybeA cm (SRefArray r Word8) (Object r m) where
+
+	-- SRefArray r Char
+
+	instance MaybeA (SRefArray r Char) (Object r m) where
 		{
-		getMaybeConvert = return . maybeConvert;
+		maybeConvert (StringObject a) = Just a;
+		maybeConvert _ = Nothing;
 		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefArray r Word8);
+
+	instance ObjectSubtype r (Object r m) (SRefArray r Char) where
+		{
+		getObject = return . StringObject;
+		fromObject = return . maybeConvert;
+		};
 
 
-	-- SRefList r Word8
+	-- SRefArray r (Object r m)
+
+	instance MaybeA (SRefArray r (Object r m)) (Object r m) where
+		{
+		maybeConvert (VectorObject a) = Just a;
+		maybeConvert _ = Nothing;
+		};
+
+	instance ObjectSubtype r (Object r m) (SRefArray r (Object r m)) where
+		{
+		getObject = return . VectorObject;
+		fromObject = return . maybeConvert;
+		};
+
+
+	-- SRefList r t
 
 	newtype SRefList r a = MkSRefList {unSRefList :: [r a]};
 
-	instance MaybeA (SRefList r Word8) (Object r m) where
+	instance (MaybeA (SRefArray r t) (Object r m)) =>
+	 MaybeA (SRefList r t) (Object r m) where
 		{
 		maybeConvert obj = do
 			{
-			(arr :: SRefArray r Word8) <- maybeConvert obj;
+			(arr :: SRefArray r t) <- maybeConvert obj;
 			return (MkSRefList (toList arr));
 			};
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefList r Word8) where
+	instance (MaybeA (SRefArray r t) (Object r m),ObjectSubtype r (Object r m) (SRefArray r t)) =>
+	 ObjectSubtype r (Object r m) (SRefList r t) where
 		{
-		getConvert (MkSRefList rs) = return (ByteArrayObject (fromList rs));
+		getObject (MkSRefList rs) = getObject (fromList rs :: SRefArray r t);
+		fromObject = return . maybeConvert;
 		};
 
-	instance (Monad cm) => MonadMaybeA cm (SRefList r Word8) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
 
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefList r Word8);
-
-
-	-- SList Word8
+	-- SList t
 
 	getSRefArrayList :: (Build cm r) =>
 	 SRefArray r a -> cm [a];
@@ -646,168 +498,29 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 
 	newtype SList a = MkSList {unSList :: [a]};
 
-	instance (Build cm r) => MonadIsA cm (Object r m) (SList Word8) where
+	instance (ObjectSubtype r (Object r m) (SRefArray r t)) =>
+	 ObjectSubtype r (Object r m) (SList t) where
 		{
-		getConvert (MkSList list) = do
+		getObject (MkSList list) = do
 			{
-			arr <- makeSRefArray list;
-			return (ByteArrayObject arr);
+			(arr :: SRefArray r t) <- makeSRefArray list;
+			getObject arr;
+			};
+
+		fromObject obj = do
+			{
+			mrarray <- fromObject obj;
+			case mrarray of
+				{
+				Just (rarray :: SRefArray r t) -> do
+					{
+					slist <- getSRefArrayList rarray;
+					return (Just (MkSList slist));
+					};
+				Nothing -> return Nothing;
+				};
 			};
 		};
-
-	instance (Build cm r) => MonadMaybeA cm (SList Word8) (Object r m) where
-		{
-		getMaybeConvert (ByteArrayObject rarray) = do
-			{
-			slist <- getSRefArrayList rarray;
-			return (Just (MkSList slist));
-			};
-		getMaybeConvert _ = return Nothing;
-		};
-	
-	instance (Build cm r) => MonadSubtype cm (Object r m) (SList Word8);
-
-
-	-- SRefArray r Char
-
-	instance MaybeA (SRefArray r Char) (Object r m) where
-		{
-		maybeConvert (StringObject a) = Just a;
-		maybeConvert _ = Nothing;
-		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefArray r Char) where
-		{
-		getConvert rs = return (StringObject rs);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm (SRefArray r Char) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefArray r Char);
-
-
-	-- SRefList r Char
-
-	type StringRefType r = SRefList r Char;
-
-	instance MaybeA (SRefList r Char) (Object r m) where
-		{
-		maybeConvert obj = do
-			{
-			(arr :: SRefArray r Char) <- maybeConvert obj;
-			return (MkSRefList (toList arr));
-			};
-		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefList r Char) where
-		{
-		getConvert (MkSRefList rs) = return (StringObject (fromList rs));
-		};
-
-	instance (Monad cm) => MonadMaybeA cm (SRefList r Char) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefList r Char);
-
-
-	-- SList Char
-
-	type StringType = SList Char;
-
-	instance (Build cm r) => MonadIsA cm (Object r m) (SList Char) where
-		{
-		getConvert (MkSList list) = do
-			{
-			arr <- makeSRefArray list;
-			return (StringObject arr);
-			};
-		};
-
-	instance (Build cm r) => MonadMaybeA cm (SList Char) (Object r m) where
-		{
-		getMaybeConvert (StringObject rarray) = do
-			{
-			slist <- getSRefArrayList rarray;
-			return (Just (MkSList slist));
-			};
-		getMaybeConvert _ = return Nothing;
-		};
-	
-	instance (Build cm r) => MonadSubtype cm (Object r m) (SList Char);
-
-
-	-- SRefArray r (Object r m)
-
-	instance MaybeA (SRefArray r (Object r m)) (Object r m) where
-		{
-		maybeConvert (VectorObject a) = Just a;
-		maybeConvert _ = Nothing;
-		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefArray r (Object r m)) where
-		{
-		getConvert rs = return (VectorObject rs);
-		};
-
-	instance (Monad cm) => MonadMaybeA cm (SRefArray r (Object r m)) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefArray r (Object r m));
-
-
-	-- SRefList r (Object r m)
-
-	instance MaybeA (SRefList r (Object r m)) (Object r m) where
-		{
-		maybeConvert obj = do
-			{
-			(arr :: SRefArray r (Object r m)) <- maybeConvert obj;
-			return (MkSRefList (toList arr));
-			};
-		};
-
-	instance (Monad cm) => MonadIsA cm (Object r m) (SRefList r (Object r m)) where
-		{
-		getConvert (MkSRefList rs) = return (VectorObject (fromList rs));
-		};
-
-	instance (Monad cm) => MonadMaybeA cm (SRefList r (Object r m)) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-
-	instance (Monad cm) => MonadSubtype cm (Object r m) (SRefList r (Object r m));
-
-
-	-- SList (Object r m)
-
-	instance (Build cm r) => MonadIsA cm (Object r m) (SList (Object r m)) where
-		{
-		getConvert (MkSList list) = do
-			{
-			arr <- makeSRefArray list;
-			return (VectorObject arr);
-			};
-		};
-
-	instance (Build cm r) => MonadMaybeA cm (SList (Object r m)) (Object r m) where
-		{
-		getMaybeConvert (VectorObject rarray) = do
-			{
-			slist <- getSRefArrayList rarray;
-			return (Just (MkSList slist));
-			};
-		getMaybeConvert _ = return Nothing;
-		};
-	
-	instance (Build cm r) => MonadSubtype cm (Object r m) (SList (Object r m));
 
 	
 	-- Procedure
@@ -818,15 +531,9 @@ module Org.Org.Semantic.HScheme.Core.Conversions where
 		maybeConvert _ = Nothing;
 		};
 
-	instance (Monad cm) => MonadIsA cm (Object r m) (Procedure (Object r m) m) where
+	instance ObjectSubtype r (Object r m) (Procedure (Object r m) m) where
 		{
-		getConvert = return . ProcedureObject;
+		getObject = return . ProcedureObject;
+		fromObject = return . maybeConvert;
 		};
-
-	instance (Monad cm) => MonadMaybeA cm (Procedure (Object r m) m) (Object r m) where
-		{
-		getMaybeConvert = return . maybeConvert;
-		};
-	
-	instance (Monad cm) => MonadSubtype cm (Object r m) (Procedure (Object r m) m);
 	}

@@ -126,7 +126,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 [Object r m] ->
 	 [Object r m] ->
 	 [pm (Object r m)];
-	bar objs objrs = fmap (\(obj,objr) -> getConvert (obj,objr)) (zip objs objrs);
+	bar objs objrs = fmap (\(obj,objr) -> getObject (obj,objr)) (zip objs objrs);
 
 	makeEllipsisPatternFunc ::
 		(
@@ -139,7 +139,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 (Object r m -> pm (MatchMonad r m [Object r m]));
 	makeEllipsisPatternFunc syms func subject = do
 		{
-		msubjs <- getMaybeConvert subject;
+		msubjs <- fromObject subject;
 		case msubjs of
 			{
 			Just subjs -> makeEllipsisPatternFunc' syms func subjs;
@@ -161,7 +161,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 cm (SchemePattern pm r m (Object r m));
 	makeObjectPattern _ NilObject = return (MkPattern [] (\obj -> do
 		{
-		mobj <- getMaybeConvert obj;
+		mobj <- fromObject obj;
 		case mobj of
 			{
 			Nothing -> mismatch NullExpected obj;
@@ -171,7 +171,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	makeObjectPattern literals (SymbolObject sym) | hasElement sym literals =
 	 return (MkPattern [] (\obj -> do
 		{
-		mobj <- getMaybeConvert obj;
+		mobj <- fromObject obj;
 		case mobj of
 			{
 			Just sym' | sym' == sym -> return (return []);
@@ -184,9 +184,9 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	 ));
 	makeObjectPattern literals pobj@(PairObject _ _) = do
 		{
-		Just (hobj,tobj) <- getMaybeConvert pobj;
+		Just (hobj,tobj) <- fromObject pobj;
 		MkPattern hsyms hfunc <- makeObjectPattern literals hobj;
-		mellipsis <- getMaybeConvert tobj;
+		mellipsis <- fromObject tobj;
 		case mellipsis of
 			{
 			Just (sym,()) | sym == ellipsisSymbol ->
@@ -196,7 +196,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 				MkPattern tsyms tfunc <- makeObjectPattern literals tobj;
 				return (MkPattern (hsyms ++ tsyms) (\subj -> do
 					{
-					msubj <- getMaybeConvert subj;
+					msubj <- fromObject subj;
 					case msubj of
 						{
 						Nothing -> mismatch PairTypeExpected subj;
@@ -232,7 +232,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 		MkPattern syms func <- makeObjectPattern literals pattern;
 		return (MkPattern syms (\list -> do
 			{
-			obj <- getConvert list;
+			obj <- getObject list;
 			func obj;
 			}));
 		};
@@ -270,7 +270,7 @@ module Org.Org.Semantic.HScheme.Interpret.Pattern
 	mustMatch (SuccessExceptionResult ma) = ma;
 	mustMatch (ExceptionExceptionResult (MkMismatch exp obj)) = do
 		{
-		expected <- getConvert (show exp);
+		expected <- getObject (show exp);
 		throwArgError "pattern-mismatch" [expected,obj];
 		};
 

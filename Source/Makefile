@@ -130,8 +130,8 @@ LIB_HC_SRCS			= \
 	$(HIER)/Bind/FMapBindings.hs	\
 	$(HIER)/Bind.hs	\
 	\
-	$(HIER)/MainProg/Interactive.hs	\
 	$(HIER)/MainProg/Batch.hs	\
+	$(HIER)/MainProg/Interactive.hs	\
 	$(HIER)/MainProg.hs	\
 	\
 	$(HIER)/Imperative/IOSystem.hs	\
@@ -830,9 +830,6 @@ Org/Org/Semantic/HScheme/Bind.o Org/Org/Semantic/HScheme/Bind.q_o Org/Org/Semant
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Interpret.hi
-Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
-Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Bind/Add.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Bind/Add.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/Add.p_hi
@@ -848,6 +845,19 @@ Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/Run.p_hi
 Org/Org/Semantic/HScheme/Bind.o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.hi
 Org/Org/Semantic/HScheme/Bind.q_o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.q_hi
 Org/Org/Semantic/HScheme/Bind.p_o : ./Org/Org/Semantic/HScheme/Bind/FMapBindings.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o Org/Org/Semantic/HScheme/MainProg/Batch.q_o Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.hs
+Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Bind.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
+Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.o Org/Org/Semantic/HScheme/MainProg/Interactive.q_o Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : Org/Org/Semantic/HScheme/MainProg/Interactive.hs
 Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -864,19 +874,6 @@ Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/R
 Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/Bind.hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o Org/Org/Semantic/HScheme/MainProg/Batch.q_o Org/Org/Semantic/HScheme/MainProg/Batch.p_o : Org/Org/Semantic/HScheme/MainProg/Batch.hs
-Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Core.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Interpret.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/Bind.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/RunLib.hi
-Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
-Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
 Org/Org/Semantic/HScheme/MainProg.o Org/Org/Semantic/HScheme/MainProg.q_o Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg.hs
 Org/Org/Semantic/HScheme/MainProg.o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.hi
 Org/Org/Semantic/HScheme/MainProg.q_o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.q_hi

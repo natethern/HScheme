@@ -47,9 +47,9 @@ module Org.Org.Semantic.HScheme.MacroLib.Load where
 		Scheme m r,
 		?objType :: Type (Object r m),
 		?read :: String -> cm [Object r m],
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: Symbol -> Maybe (Macro cm r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m)
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r m)
 		) =>
 	 String -> cm (TopLevelObjectCommand r m);
 	readLoad filename = do

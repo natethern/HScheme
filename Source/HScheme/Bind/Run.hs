@@ -97,7 +97,7 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		--				"complex?"						init.pure.scm
 		--				"real?"							init.pure.scm
 		--				"rational?"						init.pure.scm
-		addProcBinding	"integer?"						(objPropertyP (getIs (MkType :: Type Integer))),
+		addProcBinding	"integer?"						(objPropertyP (getObjectIs (MkType :: Type Integer))),
 		addProcBinding	"exact?"						isExactP,
 		addProcBinding	"inexact?"						isInexactP,
 		addProcBinding	"="								(pairCheckP ((==) :: Number -> Number -> Bool)),
@@ -282,14 +282,15 @@ module Org.Org.Semantic.HScheme.Bind.Run where
 		Build cm r,
 		Scheme m r,
 		?objType :: Type (Object r m),
-		?macrobindings :: Bindings Symbol (Macro m r m),
-        ?toplevelbindings :: Bindings Symbol (TopLevelMacro m r m)
+		?macrobindings :: Symbol -> Maybe (Macro im r m),
+        ?toplevelbindings :: Symbol -> Maybe (TopLevelMacro im r m)
 		) =>
+	 (forall a. im a -> m a) ->
 	 SymbolBindings (ObjLocation r m) -> cm (SymbolBindings (ObjLocation r m));
-	evalBindings = concatenateList
+	evalBindings remonad = concatenateList
 		[
 		-- 6.5 Eval
-		addProcBinding	"eval"							evaluateP
+		addProcBinding	"eval"							(evaluateP remonad)
 		];
 
 	simpleStrictPureBindings ::

@@ -102,7 +102,7 @@ module Org.Org.Semantic.HScheme.RunLib.PortProcedures where
 		mc <- parseUTF8Char (do
 			{
 			obj <- source [];
-			meb <- getMaybeConvert obj;
+			meb <- fromObject obj;
 			case meb of
 				{
 				Just (Right b) -> return (Just (b :: Word8));

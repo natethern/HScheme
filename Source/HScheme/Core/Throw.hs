@@ -30,14 +30,15 @@ module Org.Org.Semantic.HScheme.Core.Throw where
 
 	throwSchemeError ::
 		(
-		BuildThrow cm (Object r m) r,
-		?objType :: Type (Object r m),
-		MonadIsA cm (Object r m) rest
+		BuildThrow cm obj r,
+		?objType :: Type obj,
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj rest
 		) =>
 	 String -> rest -> cm a;
 	throwSchemeError name errRest = do
 		{
-		errorObj <- getConvert (MkSymbol name,errRest);
+		errorObj <- getObject (MkSymbol name,errRest);
 		throwObject errorObj;
 		};
 
