@@ -368,6 +368,7 @@ module Org.Org.Semantic.HScheme.Parse.SExpParser where
 		 (do
 			{
 			isTokenParse '.';
+			whitespaceParse;
 			mOrUnexpectedCharError "dotted pair tail"  expressionParse; 
 			}) |||
 		 (do
