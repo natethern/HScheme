@@ -125,19 +125,30 @@ import Org.Org.Semantic.HScheme.SymbolExpression;
 	 	) => Bindings r m -> m result) ->
 	 [String] ->
 	 (forall a. IO a -> m a) ->
-	 	((?macrobindings :: Binds Symbol (Macro r m),
+	 	((
+	 	?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
+	 	?macrobindings :: Binds Symbol (Macro r m),
 	 	?syntacticbindings :: Binds Symbol (Syntax r m)
 	 	) => Binds Symbol (Macro r m) -> Binds Symbol (Macro r m)) ->
 	 ((?system :: FullSystemInterface m r) => Bindings r m -> m (Bindings r m)) ->
 	 m result;
 	boundRun interacter loadpaths lifter macroBinds symbolBinds = 
 	 let {?syntacticbindings = emptyBindings} in
-	 let {?macrobindings = let
-			{
-			mb = let {?macrobindings = mb} in macroBinds emptyBindings;
-			} in mb} in
-	 let {?system = ioFullSystemInterface lifter loadpaths} in
-	 let {?toplevelbindings = systemMacroBindings (fsiPure ?system) (topLevelBindings emptyBindings)} in
+	 let
+		{
+		mb = let {?macrobindings = mb;?toplevelbindings = tlb} in
+		 macroBinds emptyBindings;
+		system = let {?macrobindings = mb} in
+		 ioFullSystemInterface lifter loadpaths;
+		tlb = let {?macrobindings = mb} in
+		 systemMacroBindings (fsiPure system) (topLevelBindings emptyBindings);
+		} in
+	 let
+	 	{
+	 	?macrobindings = mb;
+	 	?system = system;
+	 	?toplevelbindings = tlb;
+	 	} in
 	 do
 		{
 		bindings <- symbolBinds emptyBindings;
@@ -177,9 +188,9 @@ import Org.Org.Semantic.HScheme.SymbolExpression;
 			PureFlavour -> withRefType ioConstType (case whichmonad of
 				{
 				CPSWhichMonad -> cpsRun (boundRun (runProgramWithExit (lift exitFailure) (optPrepend initfile "init.pure.scm" filenames)) loadpaths lift
-				 macroBindings monadContPureBindings);
+				 pureMacroBindings monadContPureBindings);
 				IOWhichMonad -> boundRun (runProgram exitFailure (optPrepend initfile "init.pure.scm" filenames)) loadpaths id
-				 macroBindings monadFixPureBindings;
+				 pureMacroBindings monadFixPureBindings;
 				});
 			StrictPureFlavour -> withRefType ioConstType (case whichmonad of
 				{

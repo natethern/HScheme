@@ -35,6 +35,7 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	fullMacroBindings ::
 		(
 		FullScheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
 		?macrobindings :: Binds Symbol (Macro r m),
 		?syntacticbindings :: Binds Symbol (Syntax r m),
 		?refType :: Type (r ())
@@ -43,7 +44,7 @@ module Org.Org.Semantic.HScheme.FullStandardBindings where
 	 Binds Symbol (Macro r m);
 	fullMacroBindings = concatenateList
 		[
-		macroBindings,
+		pureMacroBindings,
 
 		-- 4.1.6 Assignments
 		addMacroBinding			"set!"				setBangM

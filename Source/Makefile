@@ -129,6 +129,7 @@ test-full: bin/$(COMMAND_REL)
 	time ./$< --noinit test/several.scm
 	time ./$< --noinit test/letrec.scm
 	time ./$< --noinit test/binding.scm
+	time ./$< --noinit test/setvar.scm
 	time ./$< --noinit test/boundlate.scm
 	time ./$< --noinit test/factorial.scm
 	time ./$< test/helloworld.scm
@@ -145,6 +146,7 @@ test_p: bin/$(COMMAND_PROF)
 	time ./$< +RTS -p -RTS --noinit test/helloworld.scm
 	time ./$< +RTS -p -RTS --noinit test/several.scm
 	time ./$< +RTS -p -RTS --noinit test/binding.scm
+	time ./$< +RTS -p -RTS --noinit test/setvar.scm
 	time ./$< +RTS -p -RTS --noinit test/boundlate.scm
 	time ./$< +RTS -p -RTS --noinit test/factorial.scm
 	time ./$< +RTS -p -RTS test/helloworld.scm

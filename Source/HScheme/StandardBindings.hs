@@ -43,6 +43,7 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 	macroBindings ::
 		(
 		Scheme m r,
+		?toplevelbindings :: Binds Symbol (TopLevelMacro r m),
 		?macrobindings :: Binds Symbol (Macro r m),
 		?syntacticbindings :: Binds Symbol (Syntax r m),
 		?refType :: Type (r ())
@@ -84,7 +85,8 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		macroBindings,
 
 		-- 4.2.3 Sequencing
-		addMacroBinding	"begin"					beginM
+		addMacroBinding	"begin"					beginM,
+		addMacroBinding	"begin-list"			beginListM
 		];
 
 	topLevelBindings ::
