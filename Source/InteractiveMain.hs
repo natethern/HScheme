@@ -57,6 +57,6 @@ module Main where
 
 	main :: IO ();
 	main = if full
-	 then doInteract (pureInteract :: Interact Constant)
-	 else doInteract (fullInteract :: Interact IORef);
+	 then doInteract (fullInteract :: Interact IORef)
+	 else doInteract (pureInteract :: Interact Constant);
 	}
