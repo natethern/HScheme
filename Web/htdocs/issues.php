@@ -14,6 +14,7 @@
 <LI><P>The <TT>quasiquote</TT> implementation isn't standard.</P>
 <LI><P>The procedure <TT>eval</TT> exists, but no environments are available to use it with.</P>
 <LI><P>I expect there are missing and broken procedures and macros. I haven't yet checked every one.</P>
+<LI><P>Also, the parser is very slow, many times slower than it needs to be.</P>
 </UL>
 <P CLASS=path>
 <A HREF="./">HScheme</A> -&gt;
