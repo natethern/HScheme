@@ -137,6 +137,12 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"byte-array-ref"				byteArrayRefP,
 		addProcBinding	"byte-array-append"				byteArrayAppendP,
 
+		-- Encoding (all nonstandard)
+		addProcBinding	"encode-utf8"					(encodeP encodeUTF8),
+		addProcBinding	"decode-utf8"					(decodeP decodeUTF8),
+		addProcBinding	"encode-latin1"					(encodeP encodeLatin1),
+		addProcBinding	"decode-latin1"					(decodeP (return . decodeLatin1)),
+
 		-- 6.4 Control Features
 		addProcBinding	"procedure?"					isProcedureP,
 		addProcBinding	"apply"							applyP,

@@ -224,6 +224,30 @@ module Org.Org.Semantic.HScheme.Procedures where
 	byteArrayAppendP = return . MkSList . concatenateList . (fmap unSList);
 
 
+	-- Encoding
+	accreteEitherList :: [Either a (SList a)] -> [a];
+	accreteEitherList [] = [];
+	accreteEitherList (Left a:r) = (a:accreteEitherList r);
+	accreteEitherList (Right (MkSList al):r) = al ++ (accreteEitherList r);
+
+	encodeP :: (Scheme m r,?refType :: Type (r ())) =>
+	 (String -> [Word8]) -> [Either Char (SList Char)] -> m (SList Word8);
+	encodeP enc el = return (MkSList (enc (accreteEitherList el)));
+
+	decodeP :: (Scheme m r,?refType :: Type (r ())) =>
+	 ([Word8] -> ExceptionMonad m x String) ->
+	 [Either Word8 (SList Word8)] -> m (Either (SList Char) Bool);
+	decodeP dec el = do
+		{
+		result <- unExceptionMonad (dec (accreteEitherList el));
+		case result of
+			{
+			SuccessExceptionResult text -> return (Left (MkSList text));
+			_ -> return (Right False);
+			};
+		};
+
+
 	-- 6.4 Control Features
 	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
 	 (Procedure r m,([Object r m],())) -> m (Object r m);
