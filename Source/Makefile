@@ -17,12 +17,16 @@
 # along with HScheme; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-PREFIX			= /usr
-IMPORT_DIR		= $(PREFIX)/share/haskell-import
+prefix			= /usr
+datadir			= $(prefix)/share
+libdir			= $(prefix)/lib
+bindir			= $(prefix)/bin
+importdir		= $(datadir)/haskell-import
 HC				= ghc
 HCI				= ghci
-HCPACKAGES		=
-HCIMPORTDIRS	= -i. -i$(IMPORT_DIR)
+HC_PKG			= ghc-pkg
+HCPACKAGES		= -package HBase
+HCIMPORTDIRS	= -i.
 HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fno-implicit-prelude
 #HCOPTS			= -fglasgow-exts -fallow-undecidable-instances -fallow-overlapping-instances -fno-implicit-prelude
 HCFLAGS			= $(HCOPTS) $(HCPACKAGES) $(HCIMPORTDIRS)
@@ -31,7 +35,8 @@ LDFLAGS			=
 HDOC			= haddock -h
 HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
-LIBNAME			= HScheme
+PACKAGENAME		= HScheme
+LIBNAME			= $(PACKAGENAME)
 LIBFILE			= lib$(LIBNAME).a
 COMMAND			= hscheme.cmd
 
@@ -83,26 +88,38 @@ haskellclean:
 test: $(COMMAND)
 	./$<
 
-install:	\
-	$(PREFIX)/lib/$(LIBFILE)	\
-	$(patsubst %.hs,$(IMPORT_DIR)/%.hi,$(LIB_HC_SRCS))	\
-	$(PREFIX)/bin/$(COMMAND)
+postinstall: install HScheme.ghc-pkg
+	-$(HC_PKG) -r $(PACKAGENAME)
+	$(HC_PKG) -a < HScheme.ghc-pkg
 
-$(IMPORT_DIR)/%.hi: %.hi
+%.ghc-pkg: %.ghc-pkg.m4
+	m4 \
+	 -Dimportdir="$(importdir)" \
+	 -Dlibdir="$(libdir)" \
+	 -DPACKAGENAME="$(PACKAGENAME)" \
+	 -DLIBNAME="$(LIBNAME)" \
+	 $< > $@
+
+install:	\
+	$(libdir)/$(LIBFILE)	\
+	$(patsubst %.hs,$(importdir)/%.hi,$(LIB_HC_SRCS))	\
+	$(bindir)/$(COMMAND)
+
+$(importdir)/%.hi: %.hi
 	install -d -m 755 $(dir $@)
 	install -c -p -m 644 $< $@
 
-$(PREFIX)/lib/$(LIBFILE): $(LIBFILE)
+$(libdir)/$(LIBFILE): $(LIBFILE)
 	install -c -p -m 644 $< $@
 	ranlib $@
 
-$(PREFIX)/bin/%: %
+$(bindir)/%: %
 	install -c -p -m 755 $< $@
 
-build: $(LIBFILE) $(COMMAND)
+build: $(LIBFILE) $(COMMAND) HScheme.ghc-pkg
 
-$(COMMAND): InteractiveMain.o $(LIBFILE) $(PREFIX)/lib/libHBase.a
-	$(LDH) $(filter %.o,$^) $(filter %.a,$^) $(LDFLAGS) -o $@
+$(COMMAND): InteractiveMain.o $(LIBFILE) $(libdir)/libHBase.a
+	$(LDH) $(filter %.o,$^) $(LIBFILE) $(LDFLAGS) -o $@
 
 doc: Doc/index.html
 
@@ -122,7 +139,7 @@ $(LIBFILE): $(LIB_OBJS)
 .SUFFIXES: .o .hs .hi .lhs .hc .s
 
 %.int:
-	$(HCI) $(HCOPTS) -package lang -i../../JVM-Bridge/Current/source/Haskell $(HCIMPORTDIRS) $*
+	$(HCI) $(HCOPTS) -package lang $(HCIMPORTDIRS) $*
 
 %.hi: %.o
 	@:
