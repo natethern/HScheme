@@ -59,14 +59,14 @@
 (define assq (lambda (key alist)
 	(case-match alist ()
 		(() #f)
-		(((k v) . rest) (if (eq? k key) v (assq key rest)))
+		(((k . v) . rest) (if (eq? k key) (cons k v) (assq key rest)))
 	)
 ))
 
 (define assv (lambda (key alist)
 	(case-match alist ()
 		(() #f)
-		(((k v) . rest) (if (eqv? k key) v (assv key rest)))
+		(((k . v) . rest) (if (eqv? k key) (cons k v) (assv key rest)))
 	)
 ))
 

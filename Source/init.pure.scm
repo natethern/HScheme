@@ -110,7 +110,7 @@
 (define assoc (lambda (key alist)
 	(case-match alist ()
 		(() #f)
-		(((k v) . rest) (if (equal? k key) v (assoc key rest)))
+		(((k . v) . rest) (if (equal? k key) (cons k v) (assoc key rest)))
 	)
 ))
 
@@ -118,6 +118,7 @@
 (define (append . p)
 	(case-match p ()
 		(() '())
+		((p) p)
 		((p . rest) (letrec
 			((append-two (lambda (a b)
 				(case-match a ()

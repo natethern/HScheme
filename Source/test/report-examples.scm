@@ -271,8 +271,8 @@ y                               ;===>  (a . 4)
 (append '(x) '(y))                      ;===>  (x y)
 (append '(a) '(b c d))                  ;===>  (a b c d)
 (append '(a (b)) '((c)))                ;===>  (a (b) (c))
-"omit" ;(append '(a b) '(c . d))                ;===>  (a b c . d)
-"omit" ;(append '() 'a)                         ;===>  a
+(append '(a b) '(c . d))                ;===>  (a b c . d)
+(append '() 'a)                         ;===>  a
 
 "library procedure:  (reverse list)"
 (reverse '(a b c))                      ;===>  (c b a)
@@ -300,8 +300,8 @@ y                               ;===>  (a . 4)
 (assq 'a e)             ;===>  (a 1)
 (assq 'b e)             ;===>  (b 2)
 (assq 'd e)             ;===>  #f
-"omit" ;(assq (list 'a) '(((a)) ((b)) ((c))))	;===>  #f
-"omit" ;(assoc (list 'a) '(((a)) ((b)) ((c))))	;===>  ((a))
+(assq (list 'a) '(((a)) ((b)) ((c))))	;===>  #f
+(assoc (list 'a) '(((a)) ((b)) ((c))))	;===>  ((a))
 (assq 5 '((2 3) (5 7) (11 13)))	;===>  unspecified
 (assv 5 '((2 3) (5 7) (11 13)))	;===>  (5 7)
 
@@ -428,10 +428,6 @@ p                             ;===>  a promise
 p                             ;===>  a promise, still
 (begin (set! x 10)
        (force p))             ;===>  6
-
-
-
-"omit" ;(+ (delay (* 3 7)) 13)          ;===>  34
 
 "procedure:  (call-with-current-continuation proc)"
 (call-with-current-continuation

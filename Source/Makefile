@@ -176,11 +176,11 @@ testrelease: test-pure test-full
 %.pure.diff: %.ref %.pure.out
 	diff -u $^
 
-test/%.scm.initfull.out: test/%.scm bin/$(COMMAND_REL)
+test/%.scm.initfull.out: test/%.scm bin/$(COMMAND_REL) init.full.scm
 	time bin/$(COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.initpure.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --mpure --noinit init.full.scm $< > $@ || (rm $@; exit 1)
+test/%.scm.initpure.out: test/%.scm bin/$(COMMAND_REL) init.pure.scm init.full.scm
+	time bin/$(COMMAND_REL) --mpure --noinit init.pure.scm $< > $@ || (rm $@; exit 1)
 
 test/%.scm.full.out: test/%.scm bin/$(COMMAND_REL)
 	time bin/$(COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)

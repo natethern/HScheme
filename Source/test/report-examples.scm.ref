@@ -17,6 +17,7 @@
 #f
 ?*3
 #t
+"procedure:  (eq? obj1 obj2)"
 #t
 unspecified
 #f
@@ -37,7 +38,7 @@ unspecified
 #t
 #t
 #t
-unspecified
+#f
 "6.2.5  Numerical operations"
 "procedure:  (number? obj)"
 "procedure:  (complex? obj)"
@@ -216,7 +217,7 @@ c
 #f
 #f
 ((a))
-unspecified
+(5 7)
 (5 7)
 "6.3.3  Symbols"
 "procedure:  (symbol? obj)"
@@ -240,7 +241,7 @@ mISSISSIppi
 #\a
 #\A
 #\(
-#\ 
+#\space
 #\space
 #\newline
 "procedure:  (string-set! string k char)"
@@ -285,7 +286,6 @@ error  ; constant vector
 6
 #<procedure>
 6
-34
 "procedure:  (call-with-current-continuation proc)"
 -3
 4
