@@ -1,12 +1,15 @@
 (hello q)
+"get-type"
 other
 q
 empty
 pair
 pair
+"subst-other"
 x
-bb
-(bb)
+(x)
+b
+(b)
 ()
-(x (bb x) dd)
+(x (b x) d)
 (x x x . x)
