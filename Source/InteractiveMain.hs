@@ -197,6 +197,7 @@ module Main where
 						[
 						baseBindings,
 						monadFixBindings,
+						monadGuardBindings,
 						evalBindings id,
 						setBindings,
 						portBindings,
@@ -212,6 +213,7 @@ module Main where
 						[
 						baseBindings,
 						monadFixBindings,
+						monadGuardBindings,
 						evalBindings id,
 						portBindings
 						]) emptyBindings;
