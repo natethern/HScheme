@@ -2,4 +2,5 @@ list? loops on circular lists
 procedures always compare false
 various maths functions sometimes return exact results when R5RS prefers inexact
 no such thing as "immutable" pairs, strings & vectors
-no eval
+no environments for eval
+syntax ellipsis
