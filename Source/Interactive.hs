@@ -28,6 +28,7 @@ module Interactive where
 	import StandardBindings;
 	import Procedures;
 	import Evaluate;
+	import Conversions;
 	import Object;
 	import Parser;
 	import LiftedMonad;
@@ -56,7 +57,7 @@ module Interactive where
 	printeval bindings (obj:objs) = do
 		{
 		(newBindings,result) <- defineEvaluate bindings obj;
-		str <- printS Type result;
+		str <- toString result;
 		call (putStrLn str);
 		printeval newBindings objs;	
 		};
@@ -82,7 +83,7 @@ module Interactive where
 			{
 			clearToReturn reader;
 			errObj <- getConvert error;
-			errText <- printS t errObj;
+			(MkStringType errText) <- toStringS t (errObj,());
 			call (putStrLn ("error: "++errText));
 			return bindings;
 			});

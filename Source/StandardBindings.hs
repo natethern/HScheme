@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module StandardBindings where
 	{
+	import Lambda;
 	import Equality;
 	import Procedures;
 	import Evaluate;
@@ -31,15 +32,20 @@ module StandardBindings where
 	stdBindings :: (Scheme x m r) => Bindings r m -> m (Bindings r m);
 	stdBindings = chainList
 		[
-		addProcBinding "car" carS,
-		addProcBinding "cdr" cdrS,
-		addProcBinding "cons" consS,
-		addProcBinding "print" printS,
-		addMacroBinding "quote" quoteS,
-		addProcBinding "values" valuesS,
-		addProcBinding "current-environment" currentEnvironmentS,
-		addProcBinding "eval" evaluateS,
-		addProcBinding "equal?" equalS,
-		addProcBinding "procedure?" isProcedureS
+		addProcBinding	"car"	carS,
+		addProcBinding	"cdr"	cdrS,
+		addProcBinding	"cons"	consS,
+		addProcBinding	"list"	listS,
+		addProcBinding	"to-string"	toStringS,
+		addMacroBinding	"quote"	quoteS,
+		addProcBinding	"values"	valuesS,
+		addProcBinding	"current-environment"	currentEnvironmentS,
+		addProcBinding	"eval"	evaluateS,
+		addProcBinding	"equal?"	equalS,
+		addProcBinding	"procedure?"	isProcedureS,
+		addMacroBinding	"begin"	beginS,
+		addMacroBinding	"let"	letS,
+		addMacroBinding	"let*"	letStarS
+--		,addMacroBinding	"lambda"	lambdaS
 		];
 	}

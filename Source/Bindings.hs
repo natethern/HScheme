@@ -54,7 +54,8 @@ module Bindings where
 
 	addMacroBinding ::
 		(
-		ArgumentList x m r args,
+		Scheme x m r,
+		MonadMaybeA m args (Object r m),
 		MonadIsA m (Object r m) ret
 		) =>
 	 String ->

@@ -145,7 +145,7 @@ module SExpParser where
 					Just head -> do
 						{
 						tail <- listRestP;
-						mlift (cons (head,tail));
+						mlift (cons head tail);
 						};
 					};
 				};
@@ -178,8 +178,8 @@ module SExpParser where
 			Nothing -> fail ("unexpected EOF after "++(unSymbol symbol));
 			Just h2 -> do
 				{					
-				tail <- mlift (cons (h2,NilObject));
-				qf <- mlift (cons (SymbolObject symbol,tail));
+				tail <- mlift (cons h2 NilObject);
+				qf <- mlift (cons (SymbolObject symbol) tail);
 				return (Just qf);
 				};
 			};

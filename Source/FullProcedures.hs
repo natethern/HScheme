@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module FullProcedures where
 	{
 	import Evaluate;
+	import Conversions;
 	import Object;
 	import Type;
 
@@ -43,10 +44,11 @@ module FullProcedures where
 		FullScheme x m r,
 		?bindings :: Bindings r m
 		) =>
-	 Type (r ()) -> (Symbol,Object r m) -> m ();
-	setBangS Type (name,obj) = do
+	 Type (r ()) -> (Symbol,(Object r m,())) -> m ArgNoneType;
+	setBangS Type (name,(obj,())) = do
 		{
 		res <- evaluate obj;
 		setBang name res;
+		return MkArgNoneType;
 		};
 	}

@@ -108,21 +108,21 @@ module Evaluate where
 		?bindings		:: Bindings r m
 		) =>
 	 Object r m -> Object r m -> m (Object r m);
-	applyEval (ProcedureObject f) arglist = do
-		{
-		args <- evalList arglist;
-		f ?bindings args;
-		};
 	applyEval (SyntaxObject f) arglist = do
 		{
 		args <- macroToList arglist;
 		res <- f args;
 		evaluate res;
 		};
+	applyEval (ProcedureObject f) arglist = do
+		{
+		result <- evalList arglist;
+		f ?bindings result;
+		};
 	applyEval (MacroObject f) arglist = do
 		{
-		args <- macroToList arglist;
-		f ?bindings args;
+--		args <- macroToList arglist;
+		f ?bindings arglist;
 		};
 	applyEval _ _ = fail "wrong type to apply";
 

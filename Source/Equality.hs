@@ -102,14 +102,14 @@ module Equality where
 	eq a b = eqv a b;
 	
 	eqS ::  (FullScheme x m r) => 
-	 Type (r ()) -> (Object r m,Object r m) -> m Bool;
-	eqS Type (a,b) = eq a b;
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
+	eqS Type (a,(b,())) = eq a b;
 	
 	eqvS ::  (FullScheme x m r) => 
-	 Type (r ()) -> (Object r m,Object r m) -> m Bool;
-	eqvS Type (a,b) = eqv a b;
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
+	eqvS Type (a,(b,())) = eqv a b;
 	
 	equalS ::  (Scheme x m r) => 
-	 Type (r ()) -> (Object r m,Object r m) -> m Bool;
-	equalS Type (a,b) = equal a b;
+	 Type (r ()) -> (Object r m,(Object r m,())) -> m Bool;
+	equalS Type (a,(b,())) = equal a b;
 	}

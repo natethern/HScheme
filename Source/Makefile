@@ -46,6 +46,7 @@ HC_SRCS			= \
 	Evaluate.hs	\
 	Procedures.hs	\
 	Conversions.hs	\
+	Lambda.hs	\
 	Bindings.hs	\
 	Equality.hs	\
 	StandardBindings.hs	\
@@ -148,10 +149,17 @@ Procedures.o : Procedures.hs
 Procedures.o : Common/Type.hi
 Procedures.o : Common/Subtype.hi
 Procedures.o : Object.hi
+Procedures.o : Conversions.hi
 Conversions.o : Conversions.hs
 Conversions.o : Common/Type.hi
 Conversions.o : Common/Subtype.hi
 Conversions.o : Object.hi
+Lambda.o : Lambda.hs
+Lambda.o : Common/Type.hi
+Lambda.o : Common/Subtype.hi
+Lambda.o : Object.hi
+Lambda.o : Procedures.hi
+Lambda.o : Evaluate.hi
 Bindings.o : Bindings.hs
 Bindings.o : Common/Type.hi
 Bindings.o : Common/Subtype.hi
@@ -167,6 +175,7 @@ StandardBindings.o : Bindings.hi
 StandardBindings.o : Evaluate.hi
 StandardBindings.o : Procedures.hi
 StandardBindings.o : Equality.hi
+StandardBindings.o : Lambda.hi
 ContinuationPassing.o : ContinuationPassing.hs
 ContinuationPassing.o : Common/LiftedMonad.hi
 FMapBindings.o : FMapBindings.hs
@@ -188,6 +197,7 @@ Full.o : Object.hi
 FullProcedures.o : FullProcedures.hs
 FullProcedures.o : Common/Type.hi
 FullProcedures.o : Object.hi
+FullProcedures.o : Conversions.hi
 FullProcedures.o : Evaluate.hi
 FullStandardBindings.o : FullStandardBindings.hs
 FullStandardBindings.o : Object.hi
@@ -202,6 +212,7 @@ Interactive.o : FMapBindings.hi
 Interactive.o : Common/LiftedMonad.hi
 Interactive.o : Parser.hi
 Interactive.o : Object.hi
+Interactive.o : Conversions.hi
 Interactive.o : Evaluate.hi
 Interactive.o : Procedures.hi
 Interactive.o : StandardBindings.hi

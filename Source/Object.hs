@@ -95,6 +95,10 @@ module Object where
 
 	type Procedure r m =
 	 Bindings r m -> [Object r m] -> m (Object r m);
+	type Macro r m =
+	 Bindings r m -> Object r m -> m (Object r m);
+	type Syntax r m =
+	 [Object r m] -> m (Object r m);
 
 	data Object r m =
 	 NilObject												|
@@ -109,12 +113,21 @@ module Object where
 	 PortObject 		()									|
 	 ProcedureObject	(Procedure r m)						|
 	 BindingsObject		(Bindings r m)						|
-	 SyntaxObject		([Object r m] -> m (Object r m))	|
-	 MacroObject		(Procedure r m)						;
+	 SyntaxObject		(Syntax r m)						|
+	 MacroObject		(Macro r m)							;
 
 	mkValuesObject :: [Object r m] -> Object r m;
 	mkValuesObject [a] = a;
 	mkValuesObject a = ValuesObject a;
 	
 	nullObject = mkValuesObject [];
+	
+	cons :: (Scheme x m r) =>
+	 Object r m -> Object r m -> m (Object r m);
+	cons head tail = do
+		{
+		h <- newLocation head;
+		t <- newLocation tail;
+		return (PairObject h t);
+		};
 	}

@@ -49,7 +49,7 @@ module SchemeCPS where
 	 MonadIsA (SchemeCPS r p) (SchemeCPSObject r p) (SchemeCPSError r p) where
 		{
 		getConvert (ObjError a) = return a;
-		getConvert (StringError s) = getConvert s;
+		getConvert (StringError s) = getConvert (MkStringType s);
 		};
 
 	instance Error (SchemeCPSError r p) where
