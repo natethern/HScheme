@@ -24,14 +24,14 @@ module Org.Org.Semantic.HScheme.Port where
 	{
 	import Org.Org.Semantic.HBase;
 
-	type InputPort c m = Closeable m (PeekSource m c);
+	type InputPort c m = Closeable m (PeekSource m (Maybe c));
 	ipClose = clClose;
 	ipRead = psSource . clItem;
 	ipPeek = psPeek . clItem;
 	ipReady = psReady . clItem;
 	ipReadAll :: (Monad m) =>
-	 Closeable m (PeekSource m c) -> m [c];
-	ipReadAll = getPeekSourceContents . clItem;
+	 Closeable m (PeekSource m (Maybe c)) -> m [c];
+	ipReadAll = getMaybePeekSourceContents . clItem;
 
 	type OutputPort c m = Closeable m (FlushSink m c);
 	opClose = clClose;
@@ -54,48 +54,4 @@ module Org.Org.Semantic.HScheme.Port where
 		opWriteStr op s;
 		opWriteOne op '\n';
 		};
-
-{--
-	data (Monad m) => InputPort c m = MkInputPort
-		{
-		ipRead	:: m (Maybe c),
-		ipPeek	:: m (Maybe c),
-		ipReady	:: m Bool,
-		ipClose	:: m ()
-		};
-
-	ipReadAll :: (Monad m) =>
-	 InputPort c m -> m [c];
-	ipReadAll ip = accumulateSource (ipRead ip);
-
-	data (Monad m) => OutputPort c m = MkOutputPort
-		{
-		opWrite	:: Maybe c -> m (),
-		opFlush :: m ()
-		};
-
-	opWriteOne :: (Monad m) => OutputPort c m -> c -> m ();
-	opWriteOne port c = opWrite port (Just c);
-
-	opWriteList :: (Monad m) => OutputPort c m -> [c] -> m ();
-	opWriteList port [] = return ();
-	opWriteList port (c:cs) = do
-		{
-		opWriteOne port c;
-		opWriteList port cs;
-		};
-
-	opWriteStr :: (Monad m) => OutputPort Char m -> String -> m ();
-	opWriteStr = opWriteList;
-
-	opWriteStrLn :: (Monad m) => OutputPort Char m -> String -> m ();
-	opWriteStrLn port s = do
-		{
-		opWriteStr port s;
-		opWriteOne port '\n';
-		};
-
-	opClose :: (Monad m) => OutputPort c m -> m ();
-	opClose port = opWrite port Nothing;
---}
 	}

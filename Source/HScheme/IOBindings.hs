@@ -42,7 +42,7 @@ module Org.Org.Semantic.HScheme.IOBindings where
 	 (forall a. m a -> n a) -> OutputPort c m -> OutputPort c n;
 	remonadOutputPort remonad op = fmap (remonadFlushSink remonad) (remonadCloseable remonad op);
 
-	stdInputPort :: (?stdin :: PeekSource IO Word8) =>
+	stdInputPort :: (?stdin :: PeekSource IO (Maybe Word8)) =>
 	 InputPort Word8 IO;
 	stdInputPort = nullCloseable ?stdin;
 
@@ -118,7 +118,7 @@ module Org.Org.Semantic.HScheme.IOBindings where
 		?macrobindings :: Binds Symbol (Macro r m),
 		?syntacticbindings :: Binds Symbol (Syntax r m),
 		?refType :: Type (r ()),
-		?stdin :: PeekSource IO Word8,
+		?stdin :: PeekSource IO (Maybe Word8),
 		?stdout :: FlushSink IO Word8,
 		?stderr :: FlushSink IO Word8
 		) =>

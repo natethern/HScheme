@@ -32,26 +32,25 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	class
 		(
-		Monad m,
-		StoppableMonadOrParser String (Maybe Char) p,
-		LiftedParser (Maybe Char) m p
+		Scheme m r,
+		StoppableMonadOrParser (Object r m) Char p,
+		LiftedParser Char m p
 		) =>
-	 SchemeParser m p | p -> m;
+	 SchemeParser m r p | p -> m;
 
-	instance (Monad m) =>
-	 SchemeParser m (RecoverableStreamParser m (Maybe Char));
-	instance (Monad m) =>
-	 SchemeParser m (RecoverableListParser Char m);
+	instance
+		(
+		Scheme m r,
+		StoppableMonadOrParser (Object r m) Char p,
+		LiftedParser Char m p
+		) =>
+	 SchemeParser m r p;
 
-	runParser :: (Monad m) =>
-	 m t -> RecoverableStreamParser m t a -> m a;
-	runParser = runRecoverableStreamParser;
-
-	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
-	 [c] -> RecoverableListParser c m a -> m ([c],a);
-	runParserString text parser = do
+	runParser :: (Scheme m r,?refType :: Type (r ())) =>
+	 m (Maybe t) -> OrStreamParser m t a -> m a;
+	runParser source parser = do
 		{
-		mr <- doRecoverableListParser text parser;
+		mr <- runOrStreamParser source parser;
 		case mr of
 			{
 			Just r -> return r;
@@ -59,55 +58,84 @@ module Org.Org.Semantic.HScheme.SExpParser where
 			};
 		};
 
+	runParserString :: (Scheme m r,?refType :: Type (r ())) =>
+	 [t] -> OrListParser m t a -> m ([t],a);
+	runParserString text parser = do
+		{
+		mr <- doOrListParser text parser;
+		case mr of
+			{
+			Just r -> return r;
+			Nothing -> throwSimpleError "no-parse";
+			};
+		};
+
+	unexpectedCharError :: (SchemeParser m r p,?refType :: Type (r ())) =>
+	 String -> p a;
+	unexpectedCharError context = do
+		{
+		contextObj <- parserLift (getConvert (MkSList context));
+		(do
+			{
+			t <- tokenParse;
+			parserLift (throwArgError "inappropriate-character" [CharObject t,contextObj]);
+			}) |||
+		 (parserLift (throwArgError "inappropriate-stream-end" [contextObj]));
+		};
+
+	mOrUnexpectedCharError :: (SchemeParser m r p,?refType :: Type (r ())) =>
+	 String -> p a -> p a;
+	mOrUnexpectedCharError s ma = ma ||| (unexpectedCharError s);
+
 
 	-- Parsers
 
-	restOfLineParse :: (MonadOrParser (Maybe Char) p) =>
+	restOfLineParse :: (MonadOrParser Char p) =>
 	 p ();
 	restOfLineParse = do
 		{
-		mZeroOrMore (matchCharacterParse (not . isLineBreak));
-		((matchCharacterParse isLineBreak) >> (return ())) ||| (return ());
+		mZeroOrMore (matchTokenParse (not . isLineBreak));
+		((matchTokenParse isLineBreak) >> (return ())) ||| (return ());
 		};
 
-	commentParse :: (MonadOrParser (Maybe Char) p) =>
+	commentParse :: (MonadOrParser Char p) =>
 	 p ();
 	commentParse = do
 		{
-		isCharacterParse ';';
+		isTokenParse ';';
 		restOfLineParse;
 		};
 
-	optionalWhitespaceParse :: (MonadOrParser (Maybe Char) p) =>
+	optionalWhitespaceParse :: (MonadOrParser Char p) =>
 	 p ();
 	optionalWhitespaceParse = do
 		{
-		mZeroOrMore (((matchCharacterParse isWhiteSpace) >> (return ())) ||| commentParse);
+		mZeroOrMore (((matchTokenParse isWhiteSpace) >> (return ())) ||| commentParse);
 		return ();
 		};
 
-	whitespaceParse :: (MonadOrParser (Maybe Char) p) =>
+	whitespaceParse :: (MonadOrParser Char p) =>
 	 p ();
 	whitespaceParse = do
 		{
-		mOneOrMore (((matchCharacterParse isWhiteSpace) >> (return ())) ||| commentParse);
+		mOneOrMore (((matchTokenParse isWhiteSpace) >> (return ())) ||| commentParse);
 		return ();
 		};
 
-	identifierParse :: (MonadOrParser (Maybe Char) p) =>
+	identifierParse :: (MonadOrParser Char p) =>
 	 p String;
 	identifierParse = do
 		{
-		n <- matchCharacterParse allowedIdentifier1;
-		ns <- mZeroOrMore ((matchCharacterParse allowedIdentifierR) >>= (return . toLowerCase));
+		n <- matchTokenParse allowedIdentifier1;
+		ns <- mZeroOrMore ((matchTokenParse allowedIdentifierR) >>= (return . toLowerCase));
 		return (toLowerCase n:ns);
 		};
 
-	digitParse :: (MonadOrParser (Maybe Char) p) =>
+	digitParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	digitParse = do
 		{
-		c <- characterParse;
+		c <- tokenParse;
 		case (getDecimalDigit c) of
 			{
 			Nothing -> mzero;
@@ -119,7 +147,7 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	assembleDigits i (n:ns) = assembleDigits (i*10 + n) ns;
 	assembleDigits i [] = i;
 
-	digitsParse :: (MonadOrParser (Maybe Char) p) =>
+	digitsParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	digitsParse = do
 		{
@@ -127,31 +155,31 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		return (assembleDigits 0 digits);
 		};
 	
-	plusDigitsParse :: (MonadOrParser (Maybe Char) p) =>
+	plusDigitsParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	plusDigitsParse = do
 		{
-		isCharacterParse '+';
+		isTokenParse '+';
 		digitsParse;
 		};
 	
-	minusDigitsParse :: (MonadOrParser (Maybe Char) p) =>
+	minusDigitsParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	minusDigitsParse = do
 		{
-		isCharacterParse '-';
+		isTokenParse '-';
 		n <- digitsParse;
 		return (- n);
 		};
 
-	integerParse :: (MonadOrParser (Maybe Char) p) =>
+	integerParse :: (MonadOrParser Char p) =>
 	 p Integer;
 	integerParse = digitsParse ||| plusDigitsParse ||| minusDigitsParse;
 	
 	listContentsParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p (Object r m);
 	listContentsParse = do
@@ -159,8 +187,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		optionalWhitespaceParse;
 		 (do
 			{
-			isCharacterParse '.';
-			mOrFail "dotted pair tail"  expressionParse; 
+			isTokenParse '.';
+			mOrUnexpectedCharError "dotted pair tail"  expressionParse; 
 			}) |||
 		 (do
 			{
@@ -173,23 +201,23 @@ module Org.Org.Semantic.HScheme.SExpParser where
 	
 	listParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p (Object r m);
 	listParse = do
 		{
-		isCharacterParse '(';
+		isTokenParse '(';
 		list <- listContentsParse;
 		optionalWhitespaceParse;
-		mOrFail "list" (isCharacterParse ')');
+		mOrUnexpectedCharError "list" (isTokenParse ')');
 		return list;
 		};
 	
 	vectorContentsParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p [Object r m];
 	vectorContentsParse = do
@@ -206,8 +234,8 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	byteArrayContentsParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p [Word8];
 	byteArrayContentsParse = do
@@ -224,22 +252,22 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	specialCharParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 String -> Symbol -> p (Object r m);
 	specialCharParse s symbol = do
 		{
-		isStringParse s;
-		h2 <- mOrFail (s++"-form") expressionParse;
+		isListParse s;
+		h2 <- mOrUnexpectedCharError (s++"-form") expressionParse;
 		tail <- parserLift (cons h2 NilObject);
 		parserLift (cons (SymbolObject symbol) tail);
 		};
 
 	quotedParse :: 
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p (Object r m);
 	quotedParse =
@@ -248,129 +276,130 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		(specialCharParse ",@" (MkSymbol "unquote-splicing")) |||
 		(specialCharParse "," (MkSymbol "unquote"));
 
-	characterConstantParse :: (MonadOrParser (Maybe Char) p) =>
+	characterConstantParse :: (MonadOrParser Char p) =>
 	 p Char;
 	characterConstantParse = (do
 		{
-		isStringParse "space";
+		isListParse "space";
 		return ' ';
 		}) ||| (do
 		{
-		isStringParse "newline";
+		isListParse "newline";
 		return '\n';
 		}) ||| (do
 		{
-		isStringParse "tab";
+		isListParse "tab";
 		return '\t';
 		}) ||| (do
 		{
-		(isCharacterParse 'u' ||| isCharacterParse 'U');
+		(isTokenParse 'u' ||| isTokenParse 'U');
 		i <- readHexDigits;
 		return (nthWrap i);
-		}) ||| characterParse;
+		}) ||| tokenParse;
 
 	hashLiteralParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) => 
 	 p (Object r m);
 	hashLiteralParse = do
 		{
-		isCharacterParse '#';
-		mOrFail "# literal" ((do
+		isTokenParse '#';
+		mOrUnexpectedCharError "# literal" ((do
 			{
-			isCharacterParse 't';
+			isTokenParse 't';
 			return (BooleanObject True);
 			}) ||| (do
 			{
-			isCharacterParse 'f';
+			isTokenParse 'f';
 			return (BooleanObject False);
 			}) ||| (do
 			{
-			isCharacterParse '\\';
-			c <- mOrFail "character literal" characterConstantParse;
+			isTokenParse '\\';
+			c <- mOrUnexpectedCharError "character literal" characterConstantParse;
 			return (CharObject c);
 			}) ||| (do
 			{
-			isCharacterParse '(';
-			mOrFail "vector" (do
+			isTokenParse '(';
+			mOrUnexpectedCharError "vector" (do
 				{
 				vector <- vectorContentsParse;
 				optionalWhitespaceParse;
-				isCharacterParse ')';
+				isTokenParse ')';
 				arr <- plift (makeSRefArray vector);
 				return (VectorObject arr);
 				});
 			}) ||| (do
 			{
-			isCharacterParse 'x';
-			mOrFail "byte array" (do
+			isTokenParse 'x';
+			mOrUnexpectedCharError "byte array" (do
 				{
-				isCharacterParse '(';
+				isTokenParse '(';
 				bytes <- byteArrayContentsParse;
 				optionalWhitespaceParse;
-				isCharacterParse ')';
+				isTokenParse ')';
 				arr <- plift (makeSRefArray bytes);
 				return (ByteArrayObject arr);
 				});
 			}));
 		};
 
-	escapedCharInStringParse :: (MonadOrParser (Maybe Char) p) =>
+	escapedCharInStringParse :: (MonadOrParser Char p) =>
 	 p Char;
 	escapedCharInStringParse = do
 		{
-		isCharacterParse '\\';
+		isTokenParse '\\';
 		(do
 			{
-			isCharacterParse 'n';
+			isTokenParse 'n';
 			return '\n';
 			})
 		||| (do
 			{
-			isCharacterParse 't';
+			isTokenParse 't';
 			return '\t';
 			})
 		||| (do
 			{
-			isCharacterParse 'u';
+			isTokenParse 'u';
 			i <- readHexFixedDigits 4;
 			return (nthWrap i);
 			})
 		||| (do
 			{
-			isCharacterParse 'U';
+			isTokenParse 'U';
 			i <- readHexFixedDigits 6;
 			return (nthWrap i);
 			})
-		||| characterParse;
+		||| tokenParse;
 		};
 
-	charInStringParse :: (MonadOrParser (Maybe Char) p) =>
+	charInStringParse :: (MonadOrParser Char p) =>
 	 p Char;
-	charInStringParse = escapedCharInStringParse ||| (isntCharacterParse '"');
+	charInStringParse = escapedCharInStringParse ||| (isntTokenParse '"');
 
 	stringLiteralParse ::
 		(
-		StoppableMonadOrParser String (Maybe Char) p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p String;
 	stringLiteralParse = do
 		{
-		isCharacterParse '"';
-		mOrFail "string literal" (do
+		isTokenParse '"';
+		mOrUnexpectedCharError "string literal" (do
 			{
 			s <- mZeroOrMore charInStringParse;
-			isCharacterParse '"';
+			isTokenParse '"';
 			return s;
 			});
 		};
 
 	plift ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 --	 m (Object r m) -> p (Object r m);
 	 m a -> p a;
@@ -378,16 +407,16 @@ module Org.Org.Semantic.HScheme.SExpParser where
 
 	expressionParse ::
 		(
-		Scheme m r,?refType :: Type (r ()),
-		SchemeParser m p
+		?refType :: Type (r ()),
+		SchemeParser m r p
 		) =>
 	 p (Object r m);
 	expressionParse = do
 		{
 		optionalWhitespaceParse;
 		 (integerParse >>= (return . NumberObject . fromInteger))	|||
-		 ((isCharacterParse '+') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
-		 ((isCharacterParse '-') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
+		 ((isTokenParse '+') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
+		 ((isTokenParse '-') >>= (\c -> return (SymbolObject (MkSymbol [c]))))	|||
 		 (identifierParse >>= (return . SymbolObject . MkSymbol))	|||
 		 hashLiteralParse		|||
 		 quotedParse			|||
@@ -395,24 +424,16 @@ module Org.Org.Semantic.HScheme.SExpParser where
 		 listParse				;
 		};
 
-	expressionOrEndParse ::
-		(
-		Scheme m r,
-		SchemeParser m p
-		) =>
+	expressionOrEndParse :: (SchemeParser m r p) =>
 	 p (Maybe (Object r m));
-	expressionOrEndParse =
-		((let {?refType=Type} in expressionParse) >>= (return . Just)) |||
+	expressionOrEndParse = let {?refType=Type} in 
+		(expressionParse >>= (return . Just)) |||
 		(optionalWhitespaceParse >> streamEndParse >> (return Nothing)) |||
-		(unexpectedCharacterError "input");
+		(unexpectedCharError "input");
 
-	expressionsParse ::
-		(
-		Scheme m r,
-		SchemeParser m p
-		) =>
+	expressionsParse :: (SchemeParser m r p) =>
 	 p [Object r m];
-	expressionsParse = accumulateSource expressionOrEndParse;
+	expressionsParse = accumulateMaybeSource expressionOrEndParse;
 
 	parseFromCharSource :: (Scheme m r,?refType :: Type (r ())) =>
 	 m (Maybe Char) -> m (Maybe (Object r m));

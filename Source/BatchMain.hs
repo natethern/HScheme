@@ -26,8 +26,6 @@ module Main where
 	import Org.Org.Semantic.HBase;
 	import System.Exit;
 
-import Org.Org.Semantic.HScheme.SymbolExpression;
-
 	type CPS r = SchemeCPS r (IO ());
 
 	data SchemeFlavour = FullFlavour | PureFlavour | StrictPureFlavour;
@@ -97,7 +95,7 @@ import Org.Org.Semantic.HScheme.SymbolExpression;
 
 	cpsRun :: (?refType :: Type (r ())) =>
 	 CPS r () -> IO ();
-	cpsRun ma = runContinuationPass
+	cpsRun ma = runExceptionContinuationPass
 	 (\_ -> fail "error in catch code!") return ma;
 
 	defaultFlavour :: SchemeFlavour;
@@ -116,7 +114,7 @@ import Org.Org.Semantic.HScheme.SymbolExpression;
 		?refType :: Type (r ()),
 		?stderr :: FlushSink IO Word8,
 		?stdout :: FlushSink IO Word8,
-		?stdin :: PeekSource IO Word8
+		?stdin :: PeekSource IO (Maybe Word8)
 		) =>
 	 ((?macrobindings :: Binds Symbol (Macro r m),
 	 	?syntacticbindings :: Binds Symbol (Syntax r m),

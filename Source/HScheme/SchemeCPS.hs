@@ -26,7 +26,7 @@ module Org.Org.Semantic.HScheme.SchemeCPS where
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
 
-	type SchemeCPS r p = ContinuationPass p (SchemeCPSError r p);
+	type SchemeCPS r p = ExceptionContinuationPass p (SchemeCPSError r p);
 
 	type SchemeCPSObject r p = Object r (SchemeCPS r p);
 

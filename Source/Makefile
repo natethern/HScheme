@@ -574,6 +574,8 @@ Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/SchemeCPS.p_hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/BatchRun.hi
 Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/BatchRun.p_hi
 BatchMain.o BatchMain.p_o : BatchMain.hs
+BatchMain.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
+BatchMain.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
 BatchMain.o : Org/Org/Semantic/HScheme.hi
 BatchMain.p_o : Org/Org/Semantic/HScheme.p_hi
 InteractiveMain.o InteractiveMain.p_o : InteractiveMain.hs

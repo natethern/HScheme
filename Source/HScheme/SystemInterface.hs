@@ -153,7 +153,7 @@ module Org.Org.Semantic.HScheme.SystemInterface where
 	 m [Object r m];
 	parseFromPortBulk input = do	
 		{
-		text <- accumulateSource (parseUTF8Char (ipRead input));
+		text <- accumulateMaybeSource (parseUTF8Char (ipRead input));
 		parseAllFromString text;
 		};
 
