@@ -1,0 +1,7 @@
+(let ((x 'outer))
+	(let-syntax ((m (syntax-rules () ((m y) (list x y)))))
+		(let ((x 'inner))
+			(m x)
+		)
+	)
+)

@@ -31,10 +31,12 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 	macroBindings ::
 		(
 		IsA Bool obj,
-		PatternError m obj,
-		AssembleError cm obj,
+		MapObjects r obj,
 		Build cm r,
+		SyntaxError cm obj,
+		AssembleError cm obj,
 		MonadFix m,
+		PatternError m obj,
 		InterpretObject m r obj,
 		?binder :: TopLevelBinder r obj m,
 		?objType :: Type obj
@@ -57,7 +59,12 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 		addMacroBinding	"letrec"			letRecursiveM,
 
 		-- 4.2.4 Iteration
---		addMacroBinding	"do"				doM,
+		addMacroBinding	"do"				doM,
+
+
+		-- 4.3.1 Binding constructs for syntactic keywords
+		addMacroBinding	"let-syntax"		letSyntaxM,
+		addMacroBinding	"letrec-syntax"		letSyntaxM,
 
 		-- Misc
 		addMacroBinding	"case-match"		caseMatchM		-- nonstandard
@@ -66,10 +73,12 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 	pureMacroBindings ::
 		(
 		IsA Bool obj,
-		PatternError m obj,
-		AssembleError cm obj,
+		MapObjects r obj,
 		Build cm r,
+		SyntaxError cm obj,
+		AssembleError cm obj,
 		MonadFix m,
+		PatternError m obj,
 		InterpretObject m r obj,
 		?binder :: TopLevelBinder r obj m,
 		?objType :: Type obj
@@ -90,12 +99,14 @@ module Org.Org.Semantic.HScheme.Bind.Macro where
 	fullMacroBindings ::
 		(
 		IsA Bool obj,
-		PatternError m obj,
-		AssembleError cm obj,
+		MapObjects r obj,
 		Build cm r,
+		SyntaxError cm obj,
+		AssembleError cm obj,
 		MonadFix m,
-		FullBuild m r,
+		PatternError m obj,
 		InterpretObject m r obj,
+		FullBuild m r,
 		?binder :: TopLevelBinder r obj m,
 		?objType :: Type obj
 		) =>

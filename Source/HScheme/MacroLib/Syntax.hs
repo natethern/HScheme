@@ -24,9 +24,10 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	(
 	appendTwo,
 	MapObjects(..),SyntaxError(..),
-	defineSyntaxT,caseMatchM
+	defineSyntaxT,caseMatchM,letSyntaxM
 	) where
 	{
+	import Org.Org.Semantic.HScheme.MacroLib.Macros;
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
@@ -125,7 +126,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 	 cm (ListSchemeExpression r obj m);
 	caseMatchM (argExprObj,(literals,rules)) = do
 		{
-		argExpr <- assembleSingleExpression argExprObj;
+		argExpr <- assembleExpressionSingle argExprObj;
 		sExprs <- for (\(patternObj,(bodyObj,())) -> do
 			{
 			pattern <- makeObjectPattern literals patternObj;
@@ -217,6 +218,24 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 			};
 		};
 
+	compileSyntaxBinding ::
+		(
+		ObjectSubtype r obj Symbol,
+		ObjectSubtype r obj obj,
+		MapObjects r obj,
+		SyntaxError cm obj,
+		Build cm r,
+		Monad m,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
+		) =>
+	 (Symbol,(obj,())) -> cm (Symbol,Syntax r obj);
+	compileSyntaxBinding (sym,(obj,())) = do
+		{
+		syntax <- let {?objType = MkType} in compileSyntax obj;
+		return (sym,syntax);
+		};
+
 	defineSyntaxT ::
 		(
 		ObjectSubtype r obj Symbol,
@@ -229,10 +248,30 @@ module Org.Org.Semantic.HScheme.MacroLib.Syntax
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 (Symbol,(obj,())) -> cm (TopLevelListCommand r obj m);
-	defineSyntaxT (sym,(obj,())) = do
+	defineSyntaxT synspec = do
 		{
-		syntax <- let {?objType = MkType} in compileSyntax obj;
-		return (MkTopLevelCommand (return (return [])) []
-		 [(sym,syntax)]);
+		synBinding <- compileSyntaxBinding synspec;
+		return (MkTopLevelCommand (return (return [])) [] [synBinding]);
+		};
+
+	letSyntaxM ::
+		(
+		AssembleError cm obj,
+		SyntaxError cm obj,
+		MapObjects r obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m),
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m)
+		) =>
+	 ([(Symbol,(obj,()))],[obj]) -> cm (ListSchemeExpression r obj m);
+	letSyntaxM (synspecs,bodyObjs) = do
+		{
+		synBindings <- for compileSyntaxBinding synspecs;
+		let {?syntacticbindings = newBindings ?syntacticbindings synBindings} in
+		 bodyM bodyObjs;
 		};
 	}

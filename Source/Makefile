@@ -106,8 +106,8 @@ LIB_HC_SRCS			= \
 	$(HIER)/Interpret/Evaluate.hs	\
 	$(HIER)/Interpret.hs	\
 	\
-	$(HIER)/MacroLib/Syntax.hs	\
 	$(HIER)/MacroLib/Macros.hs	\
+	$(HIER)/MacroLib/Syntax.hs	\
 	$(HIER)/MacroLib/Load.hs	\
 	$(HIER)/MacroLib.hs	\
 	\
@@ -201,10 +201,10 @@ testrelease: test-pure test-full test-cgi
 %.diff: %.ref %.out
 	diff -u $^
 
-test/%.scm.initfull.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.full.scm
+test/%.scm.initfull.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.pure.scm init.full.scm
 	time bin/$(BATCH_COMMAND_REL) --noinit -I. init.full.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.initpure.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.pure.scm init.full.scm
+test/%.scm.initpure.out: test/%.scm bin/$(BATCH_COMMAND_REL) init.pure.scm
 	time bin/$(BATCH_COMMAND_REL) --mpure --noinit -I. init.pure.scm $< > $@ || (rm $@; exit 1)
 
 test/%.scm.full.out: test/%.scm bin/$(BATCH_COMMAND_REL)
@@ -221,6 +221,7 @@ test-pure:	\
  test/equal.scm.pure.diff	\
  test/syntax.scm.pure.diff	\
  test/syntax-rec.scm.pure.diff	\
+ test/let-syntax.scm.pure.diff	\
  test/letbinding.scm.pure.diff	\
  test/letrec.scm.pure.diff	\
  test/letrec-fix.scm.pure.diff	\
@@ -246,6 +247,7 @@ test-full:	\
  test/equal.scm.full.diff	\
  test/syntax.scm.full.diff	\
  test/syntax-rec.scm.full.diff	\
+ test/let-syntax.scm.full.diff	\
  test/letbinding.scm.full.diff	\
  test/letrec.scm.full.diff	\
  test/letrec-fix.scm.full.diff	\
@@ -261,8 +263,8 @@ test-full:	\
  test/load.scm.initfull.diff	\
  test/helloworld.scm.initfull.diff	\
  test/io.scm.initfull.diff	\
+ test/report-examples-4.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
-# test/report-examples-4.scm.initfull.diff	\
 
 test-cgi: test/cgi-get.diff test/cgi-error.diff
 
@@ -666,13 +668,6 @@ Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/In
 Org/Org/Semantic/HScheme/Interpret.o : ./Org/Org/Semantic/HScheme/Interpret/Evaluate.hi
 Org/Org/Semantic/HScheme/Interpret.q_o : ./Org/Org/Semantic/HScheme/Interpret/Evaluate.q_hi
 Org/Org/Semantic/HScheme/Interpret.p_o : ./Org/Org/Semantic/HScheme/Interpret/Evaluate.p_hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.o Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : Org/Org/Semantic/HScheme/MacroLib/Syntax.hs
-Org/Org/Semantic/HScheme/MacroLib/Syntax.o : ./Org/Org/Semantic/HScheme/Core.hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.o : ./Org/Org/Semantic/HScheme/Interpret.hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
-Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
 Org/Org/Semantic/HScheme/MacroLib/Macros.o Org/Org/Semantic/HScheme/MacroLib/Macros.q_o Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : Org/Org/Semantic/HScheme/MacroLib/Macros.hs
 Org/Org/Semantic/HScheme/MacroLib/Macros.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MacroLib/Macros.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
@@ -680,6 +675,16 @@ Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : ./Org/Org/Semantic/HScheme/Core.p
 Org/Org/Semantic/HScheme/MacroLib/Macros.o : ./Org/Org/Semantic/HScheme/Interpret.hi
 Org/Org/Semantic/HScheme/MacroLib/Macros.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
 Org/Org/Semantic/HScheme/MacroLib/Macros.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : Org/Org/Semantic/HScheme/MacroLib/Syntax.hs
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o : ./Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.q_o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.q_hi
+Org/Org/Semantic/HScheme/MacroLib/Syntax.p_o : ./Org/Org/Semantic/HScheme/MacroLib/Macros.p_hi
 Org/Org/Semantic/HScheme/MacroLib/Load.o Org/Org/Semantic/HScheme/MacroLib/Load.q_o Org/Org/Semantic/HScheme/MacroLib/Load.p_o : Org/Org/Semantic/HScheme/MacroLib/Load.hs
 Org/Org/Semantic/HScheme/MacroLib/Load.o : ./Org/Org/Semantic/HScheme/Core.hi
 Org/Org/Semantic/HScheme/MacroLib/Load.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi

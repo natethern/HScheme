@@ -27,7 +27,9 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	Macro(..),remonadMacro,
 	PatternError(..),Syntax(..),
 	AssembleError(..),
-	InterpretObject,assembleExpression,assembleSingleExpression
+	InterpretObject,
+	assembleExpression,assembleExpressionSingle,
+	assembleSymbolExpressionSingle,assembleSymbolExpression
 	) where
 	{
 	import Org.Org.Semantic.HScheme.Interpret.FuncSymbolExpression;
@@ -112,10 +114,30 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 	 obj -> [obj] -> cm (ListSchemeExpression r obj m);
 	assembleApplyExpression f arglist = do
 		{
-		fe <- assembleSingleExpression f;
-		ae <- for assembleSingleExpression arglist;
+		fe <- assembleExpressionSingle f;
+		ae <- for assembleExpressionSingle arglist;
 		return (makeApply fe ae);
 		};
+
+	assembleSymbolExpressionSingle ::
+		(
+		Build m r,
+		?objType :: Type obj
+		) =>
+	 Symbol -> ObjectSchemeExpression r obj m;
+	assembleSymbolExpressionSingle sym = fmap get (exprSymbol sym);
+
+	assembleSymbolExpression ::
+		(
+		Build m r,
+		?objType :: Type obj
+		) =>
+	 Symbol -> ListSchemeExpression r obj m;
+	assembleSymbolExpression sym = fmap (\loc -> do
+		{
+		obj <- get loc;
+		return [obj];
+		}) (exprSymbol sym);
 
 	assembleExpression ::
 		(
@@ -132,11 +154,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		msubj <- resultFromObject subjObj;
 		case msubj of
 			{
-			SuccessResult (Left sym) -> return (fmap (\loc -> do
-				{
-				obj <- get loc;
-				return [obj];
-				}) (exprSymbol sym));
+			SuccessResult (Left sym) -> return (assembleSymbolExpression sym);
 			SuccessResult (Right (h :: obj,t :: obj)) -> do
 				{
 				marglist <- resultFromObject t;
@@ -170,7 +188,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 			};
 		};
 
-	assembleSingleExpression ::
+	assembleExpressionSingle ::
 		(
 		AssembleError cm obj,
 		InterpretObject m r obj,
@@ -180,7 +198,7 @@ module Org.Org.Semantic.HScheme.Interpret.Assemble
 		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
 		) =>
 	 obj -> cm (ObjectSchemeExpression r obj m);
-	assembleSingleExpression obj = do
+	assembleExpressionSingle obj = do
 		{
 		listExp <- assembleExpression obj;
 		return (fmap (\mlist -> mlist >>= singleValue) listExp);

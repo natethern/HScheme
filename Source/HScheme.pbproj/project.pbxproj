@@ -148,6 +148,18 @@
 			path = "parse-num.scm.ref";
 			refType = 4;
 		};
+		AB7DB57105145B0800A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "let-syntax.scm";
+			refType = 4;
+		};
+		AB7DB57205145B8E00A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "let-syntax.scm.ref";
+			refType = 4;
+		};
 		AB8CD80204D8DDF100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -510,8 +522,8 @@
 		};
 		ABAD377004A403EE00A80103 = {
 			children = (
-				ABAD377304A403EE00A80103,
 				ABAD377204A403EE00A80103,
+				ABAD377304A403EE00A80103,
 				ABAD377104A403EE00A80103,
 				ABAD377404A403EE00A80103,
 			);
@@ -708,6 +720,8 @@
 				ABAD37B104A403EE00A80103,
 				ABAD37AE04A403EE00A80103,
 				ABAD37AF04A403EE00A80103,
+				AB7DB57105145B0800A80103,
+				AB7DB57205145B8E00A80103,
 				ABAD37A404A403EE00A80103,
 				ABAD37A504A403EE00A80103,
 				ABAD37A804A403EE00A80103,

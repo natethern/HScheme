@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 module Org.Org.Semantic.HScheme.Interpret.Abstract
 	(
 	schemeExprAbstractList,
+	schemeExprRefAbstractList,
 	schemeExprLet,
 	schemeExprLetSeparate,
 	schemeExprLetSequential,
@@ -69,6 +70,21 @@ module Org.Org.Semantic.HScheme.Interpret.Abstract
 	 [Symbol] -> SchemeExpression r obj (m a) ->
 	 SchemeExpression r obj ([obj] -> (m a));
 	schemeExprAbstractList = exprAbstractListGuardedMap substMap throwTooFewArgumentsError throwTooManyArgumentsError;
+
+	schemeExprRefAbstractList ::
+		(
+		InterpretObject m r obj,
+		?objType :: Type obj
+		) =>
+	 [Symbol] -> SchemeExpression r obj (m a) ->
+	 SchemeExpression r obj ([r obj] -> (m a));
+	schemeExprRefAbstractList = exprAbstractListGuarded
+	 throwTooFewArgumentsError
+	 (\refs -> do
+		{
+		objs <- for get refs;
+		throwTooManyArgumentsError objs;
+		});
 
 	schemeExprLet :: (InterpretObject m r obj) =>
 	 Symbol -> ObjectSchemeExpression r obj m ->

@@ -101,7 +101,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	 cm (ListSchemeExpression r obj m);
 	ifM (condObj,(thenObj,mElseObj)) = do
 		{
-		condExpr <- assembleSingleExpression condObj;
+		condExpr <- assembleExpressionSingle condObj;
 		thenExpr <- assembleExpression thenObj;
 		elseExpr <- case mElseObj of
 			{
@@ -133,7 +133,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	 (Symbol,(obj,())) -> cm (ListSchemeExpression r obj m);
 	setBangM (sym,(obj,())) = do
 		{
-		expr <- assembleSingleExpression obj;
+		expr <- assembleExpressionSingle obj;
 		return (liftF2 (\loc mval -> do
 			{
 			val <- mval;
@@ -159,7 +159,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	assembleBinds [] = return [];
 	assembleBinds ((sym,(obj,())):bs) = do
 		{
-		expr <- assembleSingleExpression obj;
+		expr <- assembleExpressionSingle obj;
 		bcs <- assembleBinds bs;
 		return ((sym,expr):bcs);
 		};
@@ -281,6 +281,88 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 
 	-- 4.2.4 Iteration
 
+	{-
+	(do
+		((<variable1> <init1> <step1>) ...)
+		(<test> <expression> ...)
+		<command> ...
+	)
+	-}
+	doM ::
+		(
+		IsA Bool obj,
+		AssembleError cm obj,
+		Build cm r,
+		InterpretObject m r obj,
+		?objType :: Type obj,
+		?binder :: TopLevelBinder r obj m,
+		?toplevelbindings :: Symbol -> Maybe (TopLevelMacro cm r obj m),
+		?syntacticbindings :: SymbolBindings (Syntax r obj),
+		?macrobindings :: Symbol -> Maybe (Macro cm r obj m)
+		) =>
+	 ([(Symbol,(obj,Maybe obj))],((obj,[obj]),[obj])) -> cm (ListSchemeExpression r obj m);
+	doM (varspecs,((isLastTestObj,lastObjs),loopObjs)) = do
+		{
+		let {varSyms = fmap fst varspecs};
+		let {absSyms = schemeExprRefAbstractList varSyms};
+		let {initObjs = fmap (fst . snd) varspecs};
+		initExprs <- for assembleExpressionSingle initObjs;
+		testExpr <- assembleExpressionSingle isLastTestObj;
+		lastExpr <- bodyM lastObjs;
+		loopExpr <- bodyM loopObjs;
+		stepExprs <- for (\(sym,(_,mstepObj)) -> case mstepObj of
+			{
+			Just stepObj -> assembleExpressionSingle stepObj;
+			Nothing -> return (assembleSymbolExpressionSingle sym);
+			}) varspecs;
+		return (liftF5 doCore
+		 (fExtract initExprs)
+		 (absSyms testExpr)
+		 (absSyms lastExpr)
+		 (absSyms loopExpr)
+		 (absSyms (fmap fExtract (fExtract stepExprs)))
+		 );
+		} where
+		{	
+		liftF5 :: (FunctorApply f) =>
+		 (a -> b -> c -> d -> e -> r) ->
+		 (f a -> f b -> f c -> f d -> f e -> f r);
+		liftF5 func fa fb fc fd fe = fApply (liftF4 func fa fb fc fd) fe;
+
+		doCore ::
+			(
+			Build m r,
+			IsA Bool obj,
+			?objType :: Type obj
+			) =>
+		 [m obj] ->
+		 ([r obj] -> m obj) ->
+		 ([r obj] -> m a) ->
+		 ([r obj] -> m b) ->
+		 ([r obj] -> m [obj]) ->
+		 m a;
+		doCore initProcs testProc lastProcs loopProcs stepProcs = do
+			{
+			vals <- fExtract initProcs;
+			loopCore vals;
+			} where
+			{
+			loopCore vals = do
+				{
+				refs <- for new vals;
+				isLastObj <- testProc refs;
+				if (convert isLastObj)
+				 then lastProcs refs
+				 else do
+					{
+					loopProcs refs;
+					newvals <- stepProcs refs;
+					loopCore newvals;
+					};
+				};
+			};
+		};
+
 	namedLetM ::
 		(
 		AssembleError cm obj,
@@ -298,7 +380,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	namedLetM (var,(bindlist,bodyObj)) = do
 		{
 		bodyExpr <- bodyM bodyObj;
-		bindvals <- fExtract (fmap (assembleSingleExpression . fst . snd) bindlist);
+		bindvals <- fExtract (fmap (assembleExpressionSingle . fst . snd) bindlist);
 		return
 		 (
 		 let
@@ -373,7 +455,7 @@ module Org.Org.Semantic.HScheme.MacroLib.Macros where
 	 Either (Symbol,(obj,())) ((Symbol,obj),[obj]) -> cm (TopLevelListCommand r obj m);
 	defineT define (Left (sym,(valObj,()))) = do
 		{
-		valExpr <- assembleSingleExpression valObj;
+		valExpr <- assembleExpressionSingle valObj;
 		return (define sym valExpr);
 		};
 	defineT define (Right ((sym,params),bodyObjs)) = do

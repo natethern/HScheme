@@ -15,12 +15,13 @@
 
 (define-syntax and (syntax-rules ()
 	((and) #t)
+	((and x) x)
 	((and first . rest) (if first (and . rest) #f))
 ))
 
 (define-syntax or (syntax-rules ()
 	((or) #f)
-	((or first . rest) (if first #t (or . rest)))
+	((or first . rest) (let ((f first)) (if f f (or . rest))))
 ))
 
 
