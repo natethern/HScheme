@@ -20,7 +20,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Ref where
 	{
-	class (Monad m) => MonadReference m r | r -> m where
+	
+
+	-- MonadReference
+	
+	class (Monad m) => MonadReference m r where
 		{
 		get :: forall a. r a -> m a;
 		set :: forall a. r a -> a -> m ();
@@ -33,6 +37,20 @@ module Ref where
 		a' <- map a;
 		set ref a;
 		};
+
+
+	-- SingleMonadReference
+	
+	class (MonadReference m r) => SingleMonadReference m r | r -> m;
+	
+	get1 :: (SingleMonadReference m r) => r a -> m a;
+	get1 = get;
+	
+	set1 :: (SingleMonadReference m r) => r a -> a -> m ();
+	set1 = set;
+	
+
+	-- Ref	
 	
 	data Ref m a = MkRef
 		{
@@ -45,6 +63,8 @@ module Ref where
 		get = getRef;
 		set = setRef;
 		};
+
+	instance (Monad m) => SingleMonadReference m (Ref m);
 
 	toRef :: (MonadReference m r) => r a -> Ref m a;
 	toRef r = MkRef (get r) (set r);
