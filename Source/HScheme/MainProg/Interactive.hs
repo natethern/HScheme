@@ -20,7 +20,8 @@ along with HScheme; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 --}
 
-module Org.Org.Semantic.HScheme.MainProg.Interactive where
+module Org.Org.Semantic.HScheme.MainProg.Interactive
+	(interact,interactWithExit) where
 	{
 	import Org.Org.Semantic.HScheme.Bind;
 	import Org.Org.Semantic.HScheme.RunLib;
@@ -28,34 +29,6 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
-
-{-
-	data TopLevelCommand r m a = MkTopLevelCommand
-		{
-		tleExpression :: SchemeExpression r m a,
-		tleInitialBindings :: [(Symbol,ObjectSchemeExpression r m)],
-		tleSyntaxes :: [(Symbol,Syntax r (Object r m))]
-		};
--}
-
-{-
-	newtype Context um r = Symbol -> ObjLocation r (InteractiveMonad um);
-
-	type InteractiveMonad um r = ContextMonad um (Context um r);
-
-	interpretInteractive ::
-		(
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m))
-		) =>
-	 Object r (InteractiveMonad um) -> InteractiveMonad um r ();
-	interpretInteractive obj = do
-		{
-		(MkTopLevelCommand exp newbinds syntaxes) <- assembleTopLevelObjectCommand obj;
-		runLambda bindings 
-		let {?syntacticbindings = newBindings syntaxes ?syntacticbindings} in
-		 runLambda 
-		};
--}
 
 	interpretInteractive ::
 		(
@@ -76,36 +49,60 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 		return (MkEnvironment (newBindings synbindings newsyntaxes) (newBindings runbindings allnewbinds),result);
 		};
 
-	reportError :: (Scheme m r,?objType :: Type (Object r m)) =>
-	 OutputPort Word8 m -> Object r m -> m ();
-	reportError errPort errObj = do
+	opWriteLnFlush :: (Monad m) =>
+	 OutputPort Word8 m -> String -> m ();
+	opWriteLnFlush port str = do
+		{
+		opWriteList port (encodeUTF8 (str ++ "\n"));
+		opFlush port;
+		};
+
+	printResult ::
+		(
+		Build cm r,
+		?objType :: Type (Object r m),
+		?system :: System cm
+		) =>
+	 Object r m -> cm ();
+	printResult obj = if (isNullObject obj)
+	 then (return ())
+	 else do
+		{
+		str <- toString obj;
+		opWriteLnFlush (fsiCurrentOutputPort ?system) str;
+		};
+
+	reportError ::
+		(
+		Build cm r,
+		?objType :: Type (Object r m),
+		?system :: System cm
+		) =>
+	 Object r m -> cm ();
+	reportError errObj = do
 		{
 		text <- toString errObj;
-		opWriteList errPort (encodeUTF8 ("error: "++text++"\n"));
-		opFlush errPort;
+		opWriteLnFlush (fsiCurrentErrorPort ?system) ("error: "++text);
 		};
 
 	interactiveLoop ::
 		(
-		Scheme m r,
+		FullScheme m r,
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro cm r m),
-		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?system :: System cm
+		?macrobindings :: SymbolBindings (Macro m r m),
+		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?system :: System m
 		) =>
-	  SymbolBindings (ObjLocation r m) -> m ();
-	interactiveLoop bindings = do
+	 Environment r (Object r m) -> m ();
+	interactiveLoop environment = do
 		{
-{--
 		let
 			{
-			input = let {?bindings=bindings} in
-			 trapEOT (parseUTF8Char (ipRead (fsiCurrentInputPort ?system)))
+			input = trapEOT (parseUTF8Char (ipRead (fsiCurrentInputPort ?system)))
 			};
-		mbindings' <- catch (catchBottom (do
+		menvironment' <- catch (catchBottom (do
 			{
 			opWriteList (fsiCurrentOutputPort ?system) (encodeUTF8 "hscheme> ");
 			opFlush (fsiCurrentOutputPort ?system);
@@ -115,71 +112,68 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 				Nothing -> return Nothing;
 				Just obj -> do
 					{
-					bindings' <- printeval (fsiCurrentOutputPort ?system) bindings obj;
-					return (Just bindings');
+					(environment',result) <- interpretInteractive environment obj;
+					printResult result;
+					return (Just environment');
 					};
 				};
 			}) (\ex -> do
 				{
 				runParser input restOfLineParse;
 				errObj <- getConvert (MkSymbol "failure",MkSList (show ex));
-				reportError (fsiCurrentErrorPort ?system) errObj;
-				return (Just bindings);
+				reportError errObj;
+				return (Just environment);
 				})
 			)
 			(\errObj -> do
 			{
 			runParser input restOfLineParse;
-			reportError (fsiCurrentErrorPort ?system) errObj;
-			return (Just bindings);
+			reportError errObj;
+			return (Just environment);
 			});
 
-		case mbindings' of
+		case menvironment' of
 			{
-			Just bindings' -> interactiveLoop bindings';
+			Just environment' -> interactiveLoop environment';
 			Nothing -> return ();
 			};
---} return ();
 		};
 
 	interact ::
 		(
-		Scheme m r,
+		FullScheme m r,
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: SymbolBindings (Macro m r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?system :: System cm
+		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
-	 String ->
-	 m ();
+	 String -> m ();
 	interact bindings filename =
-{--
 	 catch (do
 		{
-		bindings' <- psiLoadBindings (fsiPure ?system) bindings filename;
-		interactiveLoop bindings';
+--		bindings' <- psiLoadBindings (fsiPure ?system) bindings filename;
+		interactiveLoop (MkEnvironment ?syntacticbindings bindings);
 		})
-		(\errObj -> do
+	 (\errObj -> do
 		{
-		reportError (fsiCurrentErrorPort ?system) errObj;
+		reportError errObj;
 		});
---} return ();
 
 	interactWithExit ::
 		(
-		Scheme m r,
+		FullScheme m r,
 		MonadCont m,
 		MonadBottom m,
 		MonadException (Object r m) m,
 		?objType :: Type (Object r m),
-		?macrobindings :: SymbolBindings (Macro cm r m),
+		?macrobindings :: SymbolBindings (Macro m r m),
 		?syntacticbindings :: SymbolBindings (Syntax r (Object r m)),
-		?toplevelbindings :: SymbolBindings (TopLevelMacro cm r m),
-		?system :: System cm
+		?toplevelbindings :: SymbolBindings (TopLevelMacro m r m),
+		?system :: System m
 		) =>
 	 SymbolBindings (ObjLocation r m) ->
 	 String ->
@@ -191,14 +185,15 @@ module Org.Org.Semantic.HScheme.MainProg.Interactive where
 			addProcBinding "exit" (exitFuncProc exitFunc)
 			] rootBindings;
 		bindings' <-
-{--
-		 catch (psiLoadBindings (fsiPure ?system) bindings filename)
-			(\errObj -> do
+		 catch (
+		 return bindings
+--		 psiLoadBindings (fsiPure ?system) bindings filename
+		 )
+		 (\errObj -> do
 			{
-			reportError (fsiCurrentErrorPort ?system) errObj;
+			reportError errObj;
 			exitFunc ();
 			});
---} return bindings;
-		interactiveLoop bindings';
+		interactiveLoop (MkEnvironment ?syntacticbindings bindings');
 		});
 	}

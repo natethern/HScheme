@@ -26,20 +26,40 @@ module Main where
 	import Org.Org.Semantic.HScheme;
 	import Org.Org.Semantic.HBase;
 
-	type CPS r = SchemeCPS r (IO ());
-
+{-
 	cpsInteract :: (?refType :: Type (r ())) =>
 	 CPS r () -> IO ();
 	cpsInteract ma = runContinuationPass
 	 (\_ -> fail "error in catch code!") return ma;
 
-	defaultFlavour :: SchemeFlavour;
-	defaultFlavour = FullFlavour;
-
 	withRefType ::
 	 t -> ((?refType :: t) => a) -> a;
 	withRefType t a = let {?refType = t} in a;
+-}
+	type CPS r = SchemeCPS r (IO ());
+	type GCPS r = SchemeGCPS r (IO ());
 
+	type IdentityConst = Constant Identity;
+
+	optPrepend :: Bool -> a -> [a] -> [a];
+	optPrepend True a as = (a:as);
+	optPrepend _ _ as = as;
+
+	printResult ::
+		(
+		Build IO r,
+		?objType :: Type (Object r m),
+		?stdout :: FlushSink IO Word8
+		) =>
+	 Object r m -> IO ();
+	printResult obj = if (isNullObject obj)
+	 then (return ())
+	 else do
+		{
+		str <- toString obj;
+		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
+		};
+{-
 	boundInteraction ::
 		(
 		MonadBottom m,
@@ -77,45 +97,125 @@ module Main where
 		bindings <- symbolBinds emptyBindings;
 		interacter bindings filename;
 		};
-
+-}
 	main :: IO ();
 	main = ioRunProgram (do
 		{
 		args <- ?getArgs;
-		(mflavour,mwm,paths,files) <- parseArgs args;
+		(mflavour,mwm,paths,initfile,filenames,verbose) <- parseArgs args;
 		let
 			{
 			loadpaths = ["."] ++ paths ++ ["/usr/share/hscheme"];
-			flavour = unJust defaultFlavour mflavour;
-			whichmonad = unJust (case flavour of
+			whichmonad = unJust GCPSWhichMonad mwm;
+			flavour = unJust (case whichmonad of
 				{
-				FullFlavour -> CPSWhichMonad;
-				_ -> IOWhichMonad;
-				}) mwm;
+				IdentityWhichMonad -> PureStdBindings;
+				_ -> FullStdBindings;
+				}) mflavour;
+			allFileNames initFile = optPrepend initfile initFile filenames
 			};
-		case flavour of
+		if verbose then do
 			{
-			FullFlavour -> withRefType ioRefType (case whichmonad of
+			fsSinkList ?stderr (encodeUTF8 "HScheme 0.1\n");
+			fsSinkList ?stderr (encodeUTF8 "Copyright (C) 2003 Ashley Yakeley <ashley@semantic.org>\n");
+			fsSinkList ?stderr (encodeUTF8 ("monad: " ++ (show whichmonad) ++ "\n"));
+			fsSinkList ?stderr (encodeUTF8 ("bindings: " ++ (show flavour) ++ "\n\n"));
+			}
+		 else return ();
+		case whichmonad of
+			{
+{-
+			GCPSWhichMonad ->
+			 let {?objType = MkType::Type (Object IORef (GCPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead loadpaths} in
+			 case flavour of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 fullMacroBindings (monadContFullBindings ++ fullSystemBindings ?system) "init.full.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 fullMacroBindings (monadFixFullBindings ++ fullSystemBindings ?system) "init.full.scm";
-				});
-			PureFlavour -> withRefType ioConstType (case whichmonad of
+				FullStdBindings ->
+				 let {?system = ioSystem (lift . lift)} in
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContFullBindings ++ monadGuardBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.full.scm");
+					interactWithExit bindings "";
+					}));
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContPureBindings ++ monadGuardBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					interactWithExit bindings "";
+					}));
+				StrictPureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					interactWithExit bindings "";
+					}));
+				};
+			CPSWhichMonad ->
+			 let {?objType = MkType::Type (Object IORef (CPS IORef))} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead loadpaths} in
+			 case flavour of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 macroBindings monadContPureBindings "init.pure.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 macroBindings monadFixPureBindings "init.pure.scm";
-				});
-			StrictPureFlavour -> withRefType ioConstType (case whichmonad of
+				FullStdBindings ->
+				 let {?system = ioSystem lift} in
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContFullBindings ++ monadFixBindings ++ fullSystemBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.full.scm");
+					interactWithExit bindings "";
+--					runObjectsWithExit printResult objects bindings;
+					}));
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContPureBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					interactWithExit bindings "";
+					}));
+				StrictPureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadContStrictPureBindings ++ monadFixBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					runObjectsWithExit printResult objects bindings;
+					interactWithExit bindings "";
+					}));
+				};
+-}
+			IOWhichMonad ->
+			 let {?objType = MkType::Type (Object IORef IO)} in
+			 let {?binder = setBinder} in
+			 let {?read = ioRead loadpaths} in
+			 let {?system = ioSystem id} in
+			 case flavour of
 				{
-				CPSWhichMonad -> cpsInteract (boundInteraction interactWithExit loadpaths lift
-				 macroBindings monadContStrictPureBindings "init.pure.scm");
-				IOWhichMonad -> boundInteraction interact loadpaths id
-				 macroBindings monadFixStrictPureBindings "init.pure.scm";
-				});
+				FullStdBindings ->
+				 (mutualBind fullMacroBindings (fullTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadFixFullBindings ++ monadGuardBindings ++ fullSystemBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.full.scm");
+					interact bindings "";
+					}));
+				PureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- (monadFixPureBindings ++ monadGuardBindings) emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					interact bindings "";
+					}));
+				StrictPureStdBindings ->
+				 (mutualBind pureMacroBindings (pureTopLevelBindings ++ (loadTopLevelBindings readLoad)) (do
+					{
+					bindings <- monadFixStrictPureBindings emptyBindings;
+					objects <- readFiles (allFileNames "init.pure.scm");
+					interact bindings "";
+					}));
+				};
+			IdentityWhichMonad -> fail "can't use pure monad for interaction";
 			};
 		});
 

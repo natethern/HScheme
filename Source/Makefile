@@ -50,9 +50,14 @@ LIBFILE_PROF	= lib$(LIBNAME_PROF).a
 LIBFILE_QUICK	= lib$(LIBNAME_QUICK).a
 HROOT			= Org/Org/Semantic
 HIER			= $(HROOT)/HScheme
-COMMAND_REL		= hscheme
-COMMAND_PROF	= hscheme_p
-COMMAND_QUICK	= hscheme_q
+INTER_COMMAND		= hscheme
+INTER_COMMAND_REL	= $(INTER_COMMAND)
+INTER_COMMAND_PROF	= $(INTER_COMMAND)_p
+INTER_COMMAND_QUICK	= $(INTER_COMMAND)_q
+BATCH_COMMAND		= hschemerun
+BATCH_COMMAND_REL	= $(BATCH_COMMAND)
+BATCH_COMMAND_PROF	= $(BATCH_COMMAND)_p
+BATCH_COMMAND_QUICK	= $(BATCH_COMMAND)_q
 
 
 # Flags
@@ -153,7 +158,8 @@ install:	\
 	$(libdir)/$(LIBFILE_PROF)	\
 	$(patsubst %.hs,$(importdir)/%.hi,$(LIB_HC_SRCS))	\
 	$(patsubst %.hs,$(importdir)/%.p_hi,$(LIB_HC_SRCS))	\
-	$(bindir)/$(COMMAND_REL)	\
+	$(bindir)/$(INTER_COMMAND_REL)	\
+	$(bindir)/$(BATCH_COMMAND_REL)	\
 	$(datadir)/hscheme/init.pure.scm	\
 	$(datadir)/hscheme/init.full.scm
 
@@ -176,17 +182,17 @@ testrelease: test-pure test-full
 %.pure.diff: %.ref %.pure.out
 	diff -u $^
 
-test/%.scm.initfull.out: test/%.scm bin/$(COMMAND_REL) init.full.scm
-	time bin/$(COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
+test/%.scm.initfull.out: test/%.scm bin/$(INTER_COMMAND_REL) init.full.scm
+	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.initpure.out: test/%.scm bin/$(COMMAND_REL) init.pure.scm init.full.scm
-	time bin/$(COMMAND_REL) --mpure --noinit init.pure.scm $< > $@ || (rm $@; exit 1)
+test/%.scm.initpure.out: test/%.scm bin/$(INTER_COMMAND_REL) init.pure.scm init.full.scm
+	time bin/$(BATCH_COMMAND_REL) --mpure --noinit init.pure.scm $< > $@ || (rm $@; exit 1)
 
-test/%.scm.full.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
+test/%.scm.full.out: test/%.scm bin/$(INTER_COMMAND_REL)
+	time bin/$(BATCH_COMMAND_REL) --noinit $< > $@ || (rm $@; exit 1)
 
-test/%.scm.pure.out: test/%.scm bin/$(COMMAND_REL)
-	time bin/$(COMMAND_REL) --mpure --noinit $< > $@ || (rm $@; exit 1)
+test/%.scm.pure.out: test/%.scm bin/$(INTER_COMMAND_REL)
+	time bin/$(BATCH_COMMAND_REL) --mpure --noinit $< > $@ || (rm $@; exit 1)
 
 test-pure:	\
  test/constants.scm.pure.diff	\
@@ -229,11 +235,11 @@ test-full:	\
  test/helloworld.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
 
-testprof: $(COMMAND_PROF).prof
+testprof: $(BATCH_COMMAND_REL).prof
 
-$(COMMAND_PROF).prof: bin/$(COMMAND_PROF) init.full.scm test/helloworld.scm
+$(BATCH_COMMAND_REL).prof: bin/$(BATCH_COMMAND_REL) init.full.scm test/helloworld.scm
 	rm -f $@
-	time bin/$(COMMAND_PROF) --noinit init.full.scm test/helloworld.scm +RTS -p
+	time bin/$(BATCH_COMMAND_REL) --noinit init.full.scm test/helloworld.scm +RTS -p
 
 
 # Documentation
@@ -252,28 +258,43 @@ Doc/index.html: $(LIB_HC_SRCS)
 
 build: quick release prof $(PACKAGEFILE)
 
-quick: $(LIBFILE_QUICK) bin/$(COMMAND_QUICK)
+quick: $(LIBFILE_QUICK) bin/$(BATCH_COMMAND_QUICK) bin/$(INTER_COMMAND_QUICK)
 
-release: $(LIBFILE_REL) bin/$(COMMAND_REL) cgi
+release: $(LIBFILE_REL) bin/$(BATCH_COMMAND_REL) bin/$(INTER_COMMAND_REL) cgi
 
-prof: $(LIBFILE_PROF) bin/$(COMMAND_PROF)
+prof: $(LIBFILE_PROF) bin/$(BATCH_COMMAND_PROF) bin/$(INTER_COMMAND_PROF)
 
 cgi: interpret.cgi
 
 interpret.cgi: CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
 
-bin/$(COMMAND_REL): Arguments.o BatchMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+bin/$(BATCH_COMMAND_REL): Arguments.o BatchMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	mkdir -p bin
 	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
 	strip $@
 
-bin/$(COMMAND_PROF): Arguments.p_o BatchMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
+bin/$(BATCH_COMMAND_PROF): Arguments.p_o BatchMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
 	mkdir -p bin
 	$(LDH) $(HCPROFOPTS) $(filter %.p_o,$^) -L. -l$(LIBNAME_PROF) $(LDFLAGS) -o $@
 	strip $@
 
-bin/$(COMMAND_QUICK): Arguments.q_o BatchMain.q_o $(LIBFILE_QUICK) $(libdir)/libHBase.a
+bin/$(BATCH_COMMAND_QUICK): Arguments.q_o BatchMain.q_o $(LIBFILE_QUICK) $(libdir)/libHBase.a
+	mkdir -p bin
+	$(LDH) $(filter %.q_o,$^) -L. -l$(LIBNAME_QUICK) $(LDFLAGS) -o $@
+	strip $@
+
+bin/$(INTER_COMMAND_REL): Arguments.o InteractiveMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+	mkdir -p bin
+	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
+	strip $@
+
+bin/$(INTER_COMMAND_PROF): Arguments.p_o InteractiveMain.p_o $(LIBFILE_PROF) $(libdir)/libHBase_p.a
+	mkdir -p bin
+	$(LDH) $(HCPROFOPTS) $(filter %.p_o,$^) -L. -l$(LIBNAME_PROF) $(LDFLAGS) -o $@
+	strip $@
+
+bin/$(INTER_COMMAND_QUICK): Arguments.q_o InteractiveMain.q_o $(LIBFILE_QUICK) $(libdir)/libHBase.a
 	mkdir -p bin
 	$(LDH) $(filter %.q_o,$^) -L. -l$(LIBNAME_QUICK) $(LDFLAGS) -o $@
 	strip $@
@@ -857,6 +878,9 @@ Org/Org/Semantic/HScheme/MainProg/Batch.o : ./Org/Org/Semantic/HScheme/RunLib.hi
 Org/Org/Semantic/HScheme/MainProg/Batch.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
 Org/Org/Semantic/HScheme/MainProg/Batch.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
 Org/Org/Semantic/HScheme/MainProg.o Org/Org/Semantic/HScheme/MainProg.q_o Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg.hs
+Org/Org/Semantic/HScheme/MainProg.o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.hi
+Org/Org/Semantic/HScheme/MainProg.q_o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.q_hi
+Org/Org/Semantic/HScheme/MainProg.p_o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.p_hi
 Org/Org/Semantic/HScheme/MainProg.o : ./Org/Org/Semantic/HScheme/MainProg/Batch.hi
 Org/Org/Semantic/HScheme/MainProg.q_o : ./Org/Org/Semantic/HScheme/MainProg/Batch.q_hi
 Org/Org/Semantic/HScheme/MainProg.p_o : ./Org/Org/Semantic/HScheme/MainProg/Batch.p_hi
@@ -946,14 +970,21 @@ Org/Org/Semantic/HScheme.p_o : ./Org/Org/Semantic/HScheme/MainProg.p_hi
 Org/Org/Semantic/HScheme.o : ./Org/Org/Semantic/HScheme/Imperative.hi
 Org/Org/Semantic/HScheme.q_o : ./Org/Org/Semantic/HScheme/Imperative.q_hi
 Org/Org/Semantic/HScheme.p_o : ./Org/Org/Semantic/HScheme/Imperative.p_hi
+Arguments.o Arguments.q_o Arguments.p_o : Arguments.hs
 BatchMain.o BatchMain.q_o BatchMain.p_o : BatchMain.hs
 BatchMain.o : ./Org/Org/Semantic/HScheme.hi
 BatchMain.q_o : ./Org/Org/Semantic/HScheme.q_hi
 BatchMain.p_o : ./Org/Org/Semantic/HScheme.p_hi
+BatchMain.o : ./Arguments.hi
+BatchMain.q_o : ./Arguments.q_hi
+BatchMain.p_o : ./Arguments.p_hi
 InteractiveMain.o InteractiveMain.q_o InteractiveMain.p_o : InteractiveMain.hs
 InteractiveMain.o : ./Org/Org/Semantic/HScheme.hi
 InteractiveMain.q_o : ./Org/Org/Semantic/HScheme.q_hi
 InteractiveMain.p_o : ./Org/Org/Semantic/HScheme.p_hi
+InteractiveMain.o : ./Arguments.hi
+InteractiveMain.q_o : ./Arguments.q_hi
+InteractiveMain.p_o : ./Arguments.p_hi
 CGIMain.o CGIMain.q_o CGIMain.p_o : CGIMain.hs
 CGIMain.o : ./Org/Org/Semantic/HScheme.hi
 CGIMain.q_o : ./Org/Org/Semantic/HScheme.q_hi
