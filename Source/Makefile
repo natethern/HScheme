@@ -68,6 +68,7 @@ LDFLAGS			=
 LIB_HC_SRCS			= \
 	$(HIER)/Numerics.hs	\
 	$(HIER)/Port.hs	\
+	$(HIER)/FunctorLambda.hs	\
 	$(HIER)/SymbolExpression.hs	\
 	$(HIER)/InputPortParser.hs	\
 	\
@@ -289,7 +290,10 @@ $(HROOT):
 # DO NOT DELETE: Beginning of Haskell dependencies
 Org/Org/Semantic/HScheme/Numerics.o Org/Org/Semantic/HScheme/Numerics.p_o : Org/Org/Semantic/HScheme/Numerics.hs
 Org/Org/Semantic/HScheme/Port.o Org/Org/Semantic/HScheme/Port.p_o : Org/Org/Semantic/HScheme/Port.hs
+Org/Org/Semantic/HScheme/FunctorLambda.o Org/Org/Semantic/HScheme/FunctorLambda.p_o : Org/Org/Semantic/HScheme/FunctorLambda.hs
 Org/Org/Semantic/HScheme/SymbolExpression.o Org/Org/Semantic/HScheme/SymbolExpression.p_o : Org/Org/Semantic/HScheme/SymbolExpression.hs
+Org/Org/Semantic/HScheme/SymbolExpression.o : Org/Org/Semantic/HScheme/FunctorLambda.hi
+Org/Org/Semantic/HScheme/SymbolExpression.p_o : Org/Org/Semantic/HScheme/FunctorLambda.p_hi
 Org/Org/Semantic/HScheme/InputPortParser.o Org/Org/Semantic/HScheme/InputPortParser.p_o : Org/Org/Semantic/HScheme/InputPortParser.hs
 Org/Org/Semantic/HScheme/InputPortParser.o : Org/Org/Semantic/HScheme/Port.hi
 Org/Org/Semantic/HScheme/InputPortParser.p_o : Org/Org/Semantic/HScheme/Port.p_hi
@@ -581,8 +585,6 @@ Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/SchemeCPS.p_hi
 Org/Org/Semantic/HScheme.o : Org/Org/Semantic/HScheme/BatchRun.hi
 Org/Org/Semantic/HScheme.p_o : Org/Org/Semantic/HScheme/BatchRun.p_hi
 BatchMain.o BatchMain.p_o : BatchMain.hs
-BatchMain.o : Org/Org/Semantic/HScheme/SymbolExpression.hi
-BatchMain.p_o : Org/Org/Semantic/HScheme/SymbolExpression.p_hi
 BatchMain.o : Org/Org/Semantic/HScheme.hi
 BatchMain.p_o : Org/Org/Semantic/HScheme.p_hi
 InteractiveMain.o InteractiveMain.p_o : InteractiveMain.hs

@@ -25,6 +25,7 @@ module Org.Org.Semantic.HScheme.Compile where
 	import Org.Org.Semantic.HScheme.Conversions;
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HScheme.SymbolExpression;
+	import Org.Org.Semantic.HScheme.FunctorLambda;
 	import Org.Org.Semantic.HBase;
 
 	-- deep Haskell magic
