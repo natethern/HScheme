@@ -129,14 +129,24 @@ module Lambda where
 	bindArgList (PairObject (SymbolObject f1) fr) action (a1:ar) = inScope (f1,a1) (bindArgList fr ar action);
 	bindArgList (PairObject _ _) _ _ = fail "";
 	bindArgList _ _ _ = fail "";
-
-	lambda :: (Scheme x m r) => Object r m -> Object r m -> m (Procedure r m);
-	lambda argBindings fpre  = return (bindArgList argBindings (evaluate expr));
+--}
+	lambda :: (Scheme x m r) => Object r m -> [Object r m] -> m (Procedure r m);
+	lambda (SymbolObject argName) body = do
+		{
+		return (\bindings args -> do
+			{
+			argList <- getConvert args;
+			argListLoc <- newLocation argList;
+			begin (newBinding bindings argName argListLoc) body;
+			});
+		};
+	
+--	return (bindArgList argBindings (evaluate expr));
 
 	lambdaS :: (Scheme x m r) =>
-	 Type (r ()) -> (Object r m,[Object r m],Object r m) -> m (Procedure r m);
-	lambdaS Type (argBindings,fpre,flast) = lambda argBindings fpre flast;
---}
+	 Type (r ()) -> (Object r m,[Object r m]) -> m (Procedure r m);
+	lambdaS Type (argBindings,body) = lambda argBindings body;
+
 	isProcedure :: (Scheme x m r) =>
 	 Object r m -> m Bool;
 	isProcedure (ProcedureObject _) = return True;

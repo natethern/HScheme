@@ -45,7 +45,7 @@ module StandardBindings where
 		addProcBinding	"procedure?"	isProcedureS,
 		addMacroBinding	"begin"	beginS,
 		addMacroBinding	"let"	letS,
-		addMacroBinding	"let*"	letStarS
---		,addMacroBinding	"lambda"	lambdaS
+		addMacroBinding	"let*"	letStarS,
+		addMacroBinding	"lambda"	lambdaS
 		];
 	}
