@@ -58,6 +58,7 @@ BATCH_COMMAND		= hschemerun
 BATCH_COMMAND_REL	= $(BATCH_COMMAND)
 BATCH_COMMAND_PROF	= $(BATCH_COMMAND)_p
 BATCH_COMMAND_QUICK	= $(BATCH_COMMAND)_q
+CGI_COMMAND			= interpret.cgi
 
 
 # Flags
@@ -74,6 +75,7 @@ HCFLAGS_PROF	= $(HCOPTFLAGS) $(HCPROFOPTS) -auto-all +RTS -K32M -RTS
 HCFLAGS_QUICK	= -hisuf q_hi -osuf q_o
 LDH				= $(HC) $(HCFLAGS)
 LDFLAGS			=
+CGI_LDFLAGS		=
 
 
 # Sources
@@ -168,7 +170,7 @@ install:	\
 
 test: testrelease
 
-testrelease: test-pure test-full
+testrelease: test-pure test-full test-cgi
 
 %.initfull.diff: %.ref %.initfull.out
 	diff -u $^
@@ -235,6 +237,14 @@ test-full:	\
  test/helloworld.scm.initfull.diff	\
  test/report-examples.scm.initfull.diff
 
+test-cgi: test/cgi-get.diff
+
+test/cgi-get.diff: test/cgi-get.ref test/cgi-get.out
+	diff -u $^
+
+test/cgi-get.out: $(CGI_COMMAND)
+	env REQUEST_METHOD="GET" QUERY_STRING="input=(*+3+4)" ./$< > $@ || (rm $@; exit 1)
+
 testprof: $(BATCH_COMMAND_REL).prof
 
 $(BATCH_COMMAND_REL).prof: bin/$(BATCH_COMMAND_REL) init.full.scm test/helloworld.scm
@@ -264,10 +274,11 @@ release: $(LIBFILE_REL) bin/$(BATCH_COMMAND_REL) bin/$(INTER_COMMAND_REL) cgi
 
 prof: $(LIBFILE_PROF) bin/$(BATCH_COMMAND_PROF) bin/$(INTER_COMMAND_PROF)
 
-cgi: interpret.cgi
+cgi: $(CGI_COMMAND)
 
-interpret.cgi: CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
-	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) -o $@
+$(CGI_COMMAND): CGIMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
+	$(LDH) $(filter %.o,$^) -L. -l$(LIBNAME_REL) $(LDFLAGS) $(CGI_LDFLAGS) -o $@
+	strip $@
 
 bin/$(BATCH_COMMAND_REL): Arguments.o BatchMain.o $(LIBFILE_REL) $(libdir)/libHBase.a
 	mkdir -p bin
@@ -327,7 +338,7 @@ cleanquick: $(HROOT)
 	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.q_hi $${ff}.q_o; done
 
 cleanrelease: $(HROOT)
-	rm -f interpret.cgi
+	rm -f $(CGI_COMMAND)
 	rm -f $(LIBFILE_REL)
 	for ff in '*' '$(HIER)/*' '$(HIER)/*/*';do rm -f $${ff}.hi $${ff}.o; done
 

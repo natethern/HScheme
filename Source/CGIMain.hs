@@ -73,7 +73,7 @@ module Main where
 		?stderr :: FlushSink IO Word8
 		) =>
 	 MacroBindings IO r m ->
-	 TopLevelBindings IO r m ->
+	 ((?syntacticbindings :: Bindings Symbol (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
 	 LocationBindings IO r m ->
 	 String ->
 	 String ->
@@ -105,10 +105,14 @@ module Main where
 			 let {?read = ioRead ["."]} in
 			 if (isFull params)
 			 then runProg
-			  fullMacroBindings fullTopLevelBindings monadContFullBindings
+			  fullMacroBindings
+			  (fullTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
+			  monadContFullBindings
 			  "init.full.scm" source
 			 else runProg
-			  pureMacroBindings pureTopLevelBindings monadContPureBindings
+			  pureMacroBindings
+			  (pureTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
+			  monadContPureBindings
 			  "init.pure.scm" source;
 			_ -> 
 			 let {?objType = MkType::Type (Object IORef IO)} in
@@ -116,10 +120,14 @@ module Main where
 			 let {?read = ioRead ["."]} in
 			 if (isFull params)
 			 then runProg
-			  fullMacroBindings fullTopLevelBindings monadFixFullBindings
+			  fullMacroBindings
+			  (fullTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
+			  monadFixFullBindings
 			  "init.full.scm" source
 			 else runProg
-			  pureMacroBindings pureTopLevelBindings monadFixPureBindings
+			  pureMacroBindings
+			  (pureTopLevelBindings ++ (loadTopLevelBindings (matchSecureLoad readLoad ["init.pure.scm","init.full.scm"])))
+			  monadFixPureBindings
 			  "init.pure.scm" source;
 			};
 		})

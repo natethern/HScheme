@@ -5,6 +5,12 @@
 	};
 	objectVersion = 38;
 	objects = {
+		AB1F27A104CA87A800A80103 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			path = "cgi-get.ref";
+			refType = 4;
+		};
 		AB3D178A04C6704100A80103 = {
 			fileEncoding = 4;
 			isa = PBXFileReference;
@@ -633,6 +639,7 @@
 				ABB6927D04A4678C00A80103,
 				ABC9354304B3FD4A00A80103,
 				ABC9354404B4054F00A80103,
+				AB1F27A104CA87A800A80103,
 			);
 			isa = PBXGroup;
 			path = test;

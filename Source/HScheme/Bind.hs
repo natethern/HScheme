@@ -36,25 +36,16 @@ module Org.Org.Semantic.HScheme.Bind
 	import Org.Org.Semantic.HScheme.Bind.Macro;
 	import Org.Org.Semantic.HScheme.Bind.Add;
 
---	import Org.Org.Semantic.HScheme.Interpret;
+	import Org.Org.Semantic.HScheme.Interpret;
 	import Org.Org.Semantic.HScheme.Core;
 	import Org.Org.Semantic.HBase;
 
 	mutualBind ::
-	 ((
-	 	?toplevelbindings	:: Symbol -> Maybe tlmacro,
-	 	?macrobindings		:: Symbol -> Maybe macro,
-	 	?syntacticbindings	:: SymbolBindings syntax
-	 	) => SymbolBindings macro -> SymbolBindings macro) ->
-	 ((
-	 	?toplevelbindings	:: Symbol -> Maybe tlmacro,
-	 	?macrobindings		:: Symbol -> Maybe macro,
-	 	?syntacticbindings	:: SymbolBindings syntax
-	 	) => SymbolBindings tlmacro -> SymbolBindings tlmacro) ->
-	 ((?macrobindings		:: Symbol -> Maybe macro,
-	 	?syntacticbindings	:: SymbolBindings syntax,
-	 	?toplevelbindings	:: Symbol -> Maybe tlmacro
-	 	) => a) ->
+	 ((?syntacticbindings	:: SymbolBindings syntax) => MacroBindings cm r m) ->
+	 ((?syntacticbindings	:: SymbolBindings syntax) => TopLevelBindings cm r m) ->
+	 ((?syntacticbindings	:: SymbolBindings syntax,
+		?macrobindings		:: Symbol -> Maybe (Macro cm r m),
+	 	?toplevelbindings	:: Symbol -> Maybe (TopLevelMacro cm r m)) => a) ->
 	 a;
 	mutualBind macroBinds tlBinds a = 
 	 let
