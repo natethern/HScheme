@@ -135,6 +135,7 @@ LIB_HC_SRCS			= \
 	\
 	$(HIER)/MainProg/Batch.hs	\
 	$(HIER)/MainProg/Interactive.hs	\
+	$(HIER)/MainProg/CGI.hs	\
 	$(HIER)/MainProg.hs	\
 	\
 	$(HIER)/Imperative/IOSystem.hs	\
@@ -902,7 +903,32 @@ Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/R
 Org/Org/Semantic/HScheme/MainProg/Interactive.o : ./Org/Org/Semantic/HScheme/Bind.hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
 Org/Org/Semantic/HScheme/MainProg/Interactive.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o Org/Org/Semantic/HScheme/MainProg/CGI.q_o Org/Org/Semantic/HScheme/MainProg/CGI.p_o : Org/Org/Semantic/HScheme/MainProg/CGI.hs
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Core.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Core.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Core.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Interpret.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Interpret.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Interpret.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/MacroLib.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/MacroLib.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/MacroLib.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Parse.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Parse.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Parse.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/RunLib.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/RunLib.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/RunLib.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/Bind.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/Bind.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/Bind.p_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.o : ./Org/Org/Semantic/HScheme/MainProg/Batch.hi
+Org/Org/Semantic/HScheme/MainProg/CGI.q_o : ./Org/Org/Semantic/HScheme/MainProg/Batch.q_hi
+Org/Org/Semantic/HScheme/MainProg/CGI.p_o : ./Org/Org/Semantic/HScheme/MainProg/Batch.p_hi
 Org/Org/Semantic/HScheme/MainProg.o Org/Org/Semantic/HScheme/MainProg.q_o Org/Org/Semantic/HScheme/MainProg.p_o : Org/Org/Semantic/HScheme/MainProg.hs
+Org/Org/Semantic/HScheme/MainProg.o : ./Org/Org/Semantic/HScheme/MainProg/CGI.hi
+Org/Org/Semantic/HScheme/MainProg.q_o : ./Org/Org/Semantic/HScheme/MainProg/CGI.q_hi
+Org/Org/Semantic/HScheme/MainProg.p_o : ./Org/Org/Semantic/HScheme/MainProg/CGI.p_hi
 Org/Org/Semantic/HScheme/MainProg.o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.hi
 Org/Org/Semantic/HScheme/MainProg.q_o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.q_hi
 Org/Org/Semantic/HScheme/MainProg.p_o : ./Org/Org/Semantic/HScheme/MainProg/Interactive.p_hi

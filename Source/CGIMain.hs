@@ -33,31 +33,6 @@ module Main where
 
 	type IdentityConst = Constant Identity;
 
-	printResult ::
-		(
-		Build IO r,
-		?objType :: Type (Object r m),
-		?stdout :: FlushSink IO Word8
-		) =>
-	 Object r m -> IO ();
-	printResult obj = do
-		{
-		str <- toString obj;
-		fsSinkList ?stdout (encodeUTF8 (str ++ "\n"));
-		};
-
-	printError ::
-		(
-		Show a,
-		?stdout :: FlushSink IO Word8
-		) =>
-	 a -> IO ();
-	printError a = do
-		{
-		fsSinkList ?stdout (encodeUTF8 ("Error: "++(show a)++"\n"));
-		fsFlush ?stdout;
-		};
-
 	getStdBindings :: SchemeWhichMonad -> QueryParameters -> SchemeStdBindings;
 	getStdBindings whichmonad params = case findQueryParameter (encodeLatin1 "bindings") params of
 		{
@@ -77,32 +52,8 @@ module Main where
 		_ -> defaultWhichMonad;
 		};
 
-	runProg ::
-		(
-		RunnableScheme IO m r,
-		?objType :: Type (Object r m),
-		?read :: String -> IO [Object r m],
-		?binder :: TopLevelBinder r m,
-		?stdout :: FlushSink IO Word8,
-		?stderr :: FlushSink IO Word8
-		) =>
-	 MacroBindings IO r m ->
-	 ((?syntacticbindings :: Bindings Symbol (Syntax r (Object r m))) => TopLevelBindings IO r m) ->
-	 ((?macrobindings :: Symbol -> Maybe (Macro IO r m),?toplevelbindings :: Symbol -> Maybe (TopLevelMacro IO r m)) => LocationBindings IO r m) ->
-	 String ->
-	 String ->
-	 IO ();
-	runProg macroBindings tlBindings runBindings initfilename source =
-	 mutualBind macroBindings tlBindings (do
-		{
-		bindings <- runBindings emptyBindings;
-		initObjects <- readFiles [initfilename];
-		progObjects <- parseAllFromString source;
-		runObjects printResult (initObjects ++ progObjects) bindings;
-		});
-
 	main :: IO ();
-	main = ioRunProgram (catchBottom (catchSingle (do
+	main = cgiRunProgram (do
 		{
 		putStrLn "Content-Type: text/plain\n";
 		params <- cgiGetQueryParameters;
@@ -133,7 +84,7 @@ module Main where
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
 			 case stdbindings of
 				{
-				FullStdBindings -> runProg
+				FullStdBindings -> runSchemeProgram
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -147,7 +98,7 @@ module Main where
 					portBindings
 					])
 				 "init.full.scm" source;
-				PureStdBindings -> runProg
+				PureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -160,7 +111,7 @@ module Main where
 					portBindings
 					])
 				 "init.pure.scm" source;
-				StrictPureStdBindings -> runProg
+				StrictPureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -177,7 +128,7 @@ module Main where
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
 			 case stdbindings of
 				{
-				FullStdBindings -> runProg
+				FullStdBindings -> runSchemeProgram
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -190,7 +141,7 @@ module Main where
 					portBindings
 					])
 				 "init.full.scm" source;
-				PureStdBindings -> runProg
+				PureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -202,7 +153,7 @@ module Main where
 					portBindings
 					])
 				 "init.pure.scm" source;
-				StrictPureStdBindings -> runProg
+				StrictPureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -219,7 +170,7 @@ module Main where
 			 let {?read = matchSecureRead (ioRead ["."]) ["init.pure.scm","init.full.scm"]} in
 			 case stdbindings of
 				{
-				FullStdBindings -> runProg
+				FullStdBindings -> runSchemeProgram
 				 fullMacroBindings
 				 (fullTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -231,7 +182,7 @@ module Main where
 					portBindings
 					])
 				 "init.full.scm" source;
-				PureStdBindings -> runProg
+				PureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -242,7 +193,7 @@ module Main where
 					portBindings
 					])
 				 "init.pure.scm" source;
-				StrictPureStdBindings -> runProg
+				StrictPureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -259,7 +210,7 @@ module Main where
 			 case stdbindings of
 				{
 				FullStdBindings -> fail "can't use pure monad with full bindings";
-				PureStdBindings -> runProg
+				PureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -269,7 +220,7 @@ module Main where
 					portBindings
 					])
 				 "init.pure.scm" source;
-				StrictPureStdBindings -> runProg
+				StrictPureStdBindings -> runSchemeProgram
 				 pureMacroBindings
 				 (pureTopLevelBindings ++ (loadTopLevelBindings readLoad))
 				 (concatenateList
@@ -280,6 +231,5 @@ module Main where
 				 "init.pure.scm" source;
 				};
 			};
-		})
-		printError) printError);
+		});
 	}

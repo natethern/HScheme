@@ -22,10 +22,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 module Org.Org.Semantic.HScheme.MainProg
 	(
+	module Org.Org.Semantic.HScheme.MainProg.CGI,
 	module Org.Org.Semantic.HScheme.MainProg.Interactive,
 	module Org.Org.Semantic.HScheme.MainProg.Batch
 	) where
 	{
 	import Org.Org.Semantic.HScheme.MainProg.Batch;
 	import Org.Org.Semantic.HScheme.MainProg.Interactive;
+	import Org.Org.Semantic.HScheme.MainProg.CGI;
 	}
