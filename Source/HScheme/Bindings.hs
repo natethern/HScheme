@@ -43,7 +43,7 @@ module Org.Org.Semantic.HScheme.Bindings where
 		MonadIsA m (Object r m) ret
 		) =>
 	 String ->
-	 ((?bindings :: Bindings r m) => Type (r ()) -> args -> m ret) ->
+	 (Type (r ()) -> args -> m ret) ->
 	 Bindings r m ->
 	 m (Bindings r m);
 	addProcBinding name p b = do

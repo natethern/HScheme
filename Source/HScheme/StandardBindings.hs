@@ -138,8 +138,8 @@ module Org.Org.Semantic.HScheme.StandardBindings where
 		addProcBinding	"values->list"					valuesToListP,							-- nonstandard
 
 		-- 6.5 Eval
-		addProcBinding	"eval"							evaluateP,
-		addProcBinding	"current-environment"			currentEnvironmentP,					-- nonstandard
+		addProcBinding	"evaluate"						evaluateP,								-- nonstandard
+		addMacroBinding	"current-environment"			currentEnvironmentM,					-- nonstandard
 
 		-- Misc
 		addProcBinding	"to-string"						toStringP,								-- nonstandard

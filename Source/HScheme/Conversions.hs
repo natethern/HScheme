@@ -102,15 +102,15 @@ module Org.Org.Semantic.HScheme.Conversions where
 		ArgumentList m r args,
 		MonadIsA m (Object r m) ret
 		) =>
-	 ((?bindings :: Bindings r m) => args -> m ret) -> Procedure r m;
+	 (args -> m ret) -> Procedure r m;
 	
-	convertToProcedure foo bindings obj = do
+	convertToProcedure foo obj = do
 		{
 		args <- convertFromObjects obj;
-		r <- let {?bindings=bindings;} in foo args;
+		r <- foo args;
 		getConvert r;
 		};
-	
+
 	convertToMacro ::
 		(
 		Scheme m r,

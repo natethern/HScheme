@@ -233,8 +233,14 @@
 ))
 
 
+; 6.5 Eval
+(define eval (syntax-rules ()
+	((eval a env) (evaluate a env))
+	((eval a) (evaluate a (current-environment)))
+))
+
+
 ;
-(define _null-environment (current-environment))
-(define null-environment (lambda () _null-environment))
+(define null-environment (lambda () (current-environment)))
 
 "Prelude.pure.scm Loaded"

@@ -24,6 +24,9 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	{
 	import Org.Org.Semantic.HScheme.Object;
 	import Org.Org.Semantic.HBase;
+
+
+	-- 6.5 Eval
 	
 	isNil :: Object r m -> Bool;
 	isNil NilObject = True;
@@ -59,16 +62,11 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		VectorObject _ -> return a;
 		_ -> fail "unrecognised expression form";
 		};
-	
-	evaluateP ::
-		(
-		Scheme m r,
-		?bindings		:: Bindings r m
-		) =>
-	 Type (r ()) -> (Object r m,Maybe (Bindings r m)) -> m (Object r m);
-	evaluateP Type (obj,Just bindings) = let  {?bindings = bindings} in evaluate obj;
-	evaluateP Type (obj,Nothing) = evaluate obj;
-	
+
+	evaluateP :: (Scheme m r) =>
+	 Type (r ()) -> (Object r m,(Bindings r m,())) -> m (Object r m);
+	evaluateP Type (obj,(bindings,())) = let  {?bindings = bindings} in evaluate obj;
+
 	evalList ::
 		(
 		Scheme m r,
@@ -85,7 +83,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		return (ae:de);
 		};
 	evalList _ = fail "procedure args not a list";
-	
+
 	macroToList ::
 		(
 		Scheme m r,
@@ -108,7 +106,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		?bindings		:: Bindings r m
 		) =>
 	 Object r m -> Object r m -> m (Object r m);
-	applyEval (SyntaxObject f) arglist = do
+	applyEval (SyntaxObject (MkSyntax f)) arglist = do
 		{
 		args <- macroToList arglist;
 		res <- f args;
@@ -117,7 +115,7 @@ module Org.Org.Semantic.HScheme.Evaluate where
 	applyEval (ProcedureObject f) arglist = do
 		{
 		result <- evalList arglist;
-		f ?bindings result;
+		f result;
 		};
 	applyEval (MacroObject f) arglist = do
 		{
@@ -125,4 +123,12 @@ module Org.Org.Semantic.HScheme.Evaluate where
 		f ?bindings arglist;
 		};
 	applyEval _ _ = fail "wrong type to apply";
+
+	currentEnvironmentM ::
+		(
+		Scheme m r,
+		?bindings :: Bindings r m
+		) =>
+	 Type (r ()) -> () -> m (Bindings r m);
+	currentEnvironmentM Type () = return ?bindings;
 	}

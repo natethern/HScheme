@@ -173,7 +173,7 @@ module Org.Org.Semantic.HScheme.Lambda where
 	 Object r m -> [Object r m] -> m (Procedure r m);
 	lambda argNames body = do
 		{
-		return (\bindings args -> do
+		return (\args -> do
 			{
 			bindings' <- matchBindings ?bindings argNames args;
 			begin bindings' body;
@@ -201,12 +201,11 @@ module Org.Org.Semantic.HScheme.Lambda where
 	callCCP ::
 		(
 		Scheme m r,
-		MonadCont m,
-		?bindings :: Bindings r m
+		MonadCont m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	callCCP Type (proc,()) = callCC (\cont -> proc ?bindings
-	  [ProcedureObject (\_ args -> do
+	callCCP Type (proc,()) = callCC (\cont -> proc
+	  [ProcedureObject (\args -> do
 	  	{
 	  	(resultArg,()) <- convertFromObjects args;
 	  	cont resultArg;
@@ -215,9 +214,8 @@ module Org.Org.Semantic.HScheme.Lambda where
 	fixP ::
 		(
 		Scheme m r,
-		MonadFix m,
-		?bindings :: Bindings r m
+		MonadFix m
 		) =>
 	 Type (r ()) -> (Procedure r m,()) -> m (Object r m);
-	fixP Type (proc,()) = mfix (\a -> proc ?bindings [a]);
+	fixP Type (proc,()) = mfix (\a -> proc [a]);
 	}

@@ -196,9 +196,9 @@ module Org.Org.Semantic.HScheme.Procedures where
 
 
 	-- 6.4 Control Features
-	applyP :: (Scheme m r,?bindings :: Bindings r m) =>
+	applyP :: (Scheme m r) =>
 	 Type (r ()) -> (Procedure r m,([Object r m],())) -> m (Object r m);
-	applyP Type (proc,(args,())) = proc ?bindings args;
+	applyP Type (proc,(args,())) = proc args;
 	
 	valuesP :: (Scheme m r) =>
 	 Type (r ()) -> [Object r m] -> m (Object r m);
@@ -210,15 +210,7 @@ module Org.Org.Semantic.HScheme.Procedures where
 	valuesToListP Type (obj,()) = return [obj];
 
 
-	-- 6.5 Eval
-	currentEnvironmentP ::
-		(
-		Scheme m r,
-		?bindings :: Bindings r m
-		) =>
-	 Type (r ()) -> () -> m (Bindings r m);
-	currentEnvironmentP Type () = return ?bindings;
-	
+	-- Misc
 	printList :: (Scheme m r) =>
 	 ObjLocation r m -> ObjLocation r m -> m String;
 	printList hl tl = do
