@@ -61,11 +61,20 @@ module Org.Org.Semantic.HScheme.RunLib.Control where
 
 	fixPL ::
 		(
-		?objType :: Type obj,
+		Scheme m r,
+		?objType :: Type (Object r m),
 		MonadFix m
 		) =>
-	 (Procedure obj m,()) -> m [obj];
-	fixPL (proc,()) = mfix proc;
+	 (Procedure (Object r m) m,()) -> m [Object r m];
+	fixPL (proc,()) = do
+		{
+		obj <- mfix (\obj -> do
+			{
+			vals <- proc [obj];
+			singleValue vals;
+			});
+		return [obj];
+		};
 
 	valuesPL :: (Scheme m r,?objType :: Type (Object r m)) =>
 	 [Object r m] -> m [Object r m];
